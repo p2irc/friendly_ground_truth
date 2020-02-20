@@ -10,7 +10,9 @@ Description: Classes that represent the view for the application
 """
 
 import wx
+import logging
 
+module_logger = logging.getLogger('friendly_gt.view')
 
 class MainWindow(wx.Frame):
     """
@@ -24,5 +26,6 @@ class MainWindow(wx.Frame):
         :param parent: The parent frame for this frame  The default value is None.
         :returns: None
         """
-
+        self.logger = logging.getLogger('friendly_gt.view.MainWindow')
         wx.Frame.__init__(self, parent, -1, "Main Window")
+        self.logger.debug("Window created successfully")

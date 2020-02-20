@@ -9,9 +9,11 @@ Description: The main controller for the application
 
 """
 import wx
+import logging
 
 from view.view import MainWindow
 
+module_logger = logging.getLogger('friendly_gt.controller')
 
 class Controller:
     """
@@ -24,6 +26,9 @@ class Controller:
 
         :returns: None
         """
+        self.logger = logging.getLogger('friendly_gt.controller.Controller')
+        self.logger.debug("Creating controller instance")
+
         # TODO: initilize the model eg) self.model = Model()
 
         # Set up the main window
