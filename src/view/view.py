@@ -20,14 +20,17 @@ class MainWindow(wx.Frame):
     The main window for displaying image patches and such
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, controller, parent=None):
         """
         Initializes the main window
 
+        :param controller: The controller to communicate with
         :param parent: The parent frame for this frame
                        The default value is None.
         :returns: None
         """
+        self.controller = controller
+
         # Initialize the logger
         self.logger = logging.getLogger('friendly_gt.view.MainWindow')
 
@@ -81,4 +84,5 @@ class MainWindow(wx.Frame):
         # If load image was selected
         if id == wx.ID_OPEN:
             self.logger.debug("Load Image Selected")
-            # TODO: call controller to open filebrowser and get image path
+            self.controller.load_new_image()
+
