@@ -71,9 +71,12 @@ class MainWindow(wx.Frame):
         menubar.Append(file_menu, '&File')
 
         # ---- Image Panel ----
-        img_data = wx.Image(1000, 1000)
+        img_data = wx.Image(100, 100)
         self.image_ctrl = wx.StaticBitmap(self.panel, wx.ID_ANY,
                                           wx.Bitmap(img_data))
+
+        next_button = wx.Button(self.panel, label="Next")
+        next_button.Bind(wx.EVT_BUTTON, self.on_next_image)
 
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -82,6 +85,7 @@ class MainWindow(wx.Frame):
                             0, wx.CENTER)
 
         self.main_sizer.Add(self.image_ctrl, 0, wx.CENTER, 5)
+        self.sizer.Add(next_button, 0, wx.RIGHT, 5)
 
         self.main_sizer.Add(self.sizer, 0, wx.ALL, 5)
 
@@ -92,7 +96,7 @@ class MainWindow(wx.Frame):
 
         self.SetMenuBar(menubar)
         self.Bind(wx.EVT_MENU, self.menu_handler)
-        self.SetSize((800, 800))
+        self.SetSize((1200, 1200))
         self.Centre()
 
     def show_image(self, img):
@@ -123,3 +127,8 @@ class MainWindow(wx.Frame):
         if id == wx.ID_OPEN:
             self.logger.debug("Load Image Selected")
             self.controller.load_new_image()
+
+    def on_next_image(self, event):
+        self.logger.debug("NEXT IMAGE")
+
+        self.controller.next_patch()

@@ -62,7 +62,7 @@ class Controller:
 
             self.image = Image(pathname)
 
-            self.current_patch = 50
+            self.current_patch = 0
             self.display_current_patch()
 
     def display_current_patch(self):
@@ -75,4 +75,18 @@ class Controller:
         patch = self.image.patches[self.current_patch]
 
         self.main_window.show_image(patch.patch)
+
+    def next_patch(self):
+        """
+        Increment the current patch and display it
+
+        :returns: None
+        """
+
+        if self.current_patch <= len(self.image.patches):
+            self.current_patch += 1
+            self.display_current_patch()
+        else:
+            self.logger.error("No More Patches")
+            # TODO: Display some sort of dialogue and save the mask
 
