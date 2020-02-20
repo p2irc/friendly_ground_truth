@@ -12,6 +12,7 @@ import wx
 import logging
 
 from view.view import MainWindow
+from model.model import Image, Patch
 
 module_logger = logging.getLogger('friendly_gt.controller')
 
@@ -59,4 +60,4 @@ class Controller:
 
             self.logger.debug("File Path: %s", pathname)
 
-            # TODO: load image into model
+            self.image = Image(pathname)
