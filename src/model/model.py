@@ -11,8 +11,13 @@ Description: Contains the model elements for the application
 import logging
 import numpy as np
 
-from skimage import io
+from skimage import io, img_as_float, img_as_ubyte
 from skimage.util.shape import view_as_blocks
+from skimage.filters import threshold_otsu
+from skimage import color
+
+
+import matplotlib.pyplot as plt
 
 module_logger = logging.getLogger('friendly_gt.model')
 
@@ -48,6 +53,8 @@ class Image():
         self.logger.debug("Loading image")
         try:
             img = io.imread(path)
+            img = color.rgb2gray(img)
+            img = img_as_float(img)
         except exception as e:
             logger.error("That image had some issues.")
 
@@ -77,13 +84,12 @@ class Image():
 
         self.logger.debug("{}, {}".format(pad_x, pad_y))
 
-        image = np.pad(image, (pad_x, pad_y, (0, 0)), 'constant',
+        image = np.pad(image, (pad_x, pad_y), 'constant',
                        constant_values=(0, 0))
 
         # Get the size of each block
         block_size = (image.shape[0]//num_patches,
-                      image.shape[1]//num_patches,
-                      image.shape[2])
+                      image.shape[1]//num_patches)
 
         self.logger.debug(image.shape)
         self.logger.debug(block_size)
@@ -98,7 +104,7 @@ class Image():
         # Create a list of new patch objects for viewing
         for i in range(num_patches):
             for j in range(num_patches):
-                patch_data = blocks[i, j, 0]
+                patch_data = blocks[i, j]
                 patches.append(Patch(patch_data, (i, j)))
 
         return patches
@@ -121,5 +127,37 @@ class Patch():
         self.mask = np.zeros(self.patch.shape, dtype=bool)  # create empty mask
         self.patch_index = patch_index
 
-        self.logger.debug("Created patch witth index {} and shape{}"
+        thresh = threshold_otsu(self.patch)
+
+        self.apply_threshold(thresh)
+
+        self.overlay_image = self.overlay_mask()
+
+        self.logger.debug("Created patch with index {} and shape {}"
                           .format(patch_index, patch.shape))
+
+    def apply_threshold(self, value):
+
+        binary = self.patch > value
+        self.mask = binary
+
+    def overlay_mask(self):
+
+        alpha = 0.6
+
+        color_mask = np.zeros((self.patch.shape[0], self.patch.shape[1], 3),
+                dtype=np.float64)
+
+        color_mask[:, :, 0] = self.mask
+
+        img_color = np.dstack((self.patch, self.patch, self.patch))
+        img_hsv = color.rgb2hsv(img_color)
+        color_mask_hsv = color.rgb2hsv(color_mask)
+
+        img_hsv[:, :, 0] = color_mask_hsv[:, :, 0]
+        img_hsv[:, :, 1] = color_mask_hsv[:, :, 1] * alpha
+
+        img_masked = color.hsv2rgb(img_hsv)
+        img_masked = img_as_ubyte(img_masked)
+        return img_masked
+

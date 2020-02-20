@@ -76,7 +76,7 @@ class MainWindow(wx.Frame):
                                           wx.Bitmap(img_data))
 
         next_button = wx.Button(self.panel, label="Next")
-        next_button.Bind(wx.EVT_BUTTON, self.on_next_image)
+        next_button.Bind(wx.EVT_BUTTON, self.on_next_patch)
 
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -106,7 +106,7 @@ class MainWindow(wx.Frame):
         :param img: The image to display
         :returns: None
         """
-        self.logger.debug("Displaying new image")
+        self.logger.debug("Displaying new image- {}".format(img.shape))
 
         image = wx.Image(img.shape[1], img.shape[0])
         image.SetData(img.tostring())
@@ -128,7 +128,15 @@ class MainWindow(wx.Frame):
             self.logger.debug("Load Image Selected")
             self.controller.load_new_image()
 
-    def on_next_image(self, event):
+    def on_next_patch(self, event):
+        """
+        Called when the next patch button is pressed
+
+        :param event: The click event
+        :returns: None
+        """
         self.logger.debug("NEXT IMAGE")
 
         self.controller.next_patch()
+
+

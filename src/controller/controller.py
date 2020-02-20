@@ -74,7 +74,7 @@ class Controller:
 
         patch = self.image.patches[self.current_patch]
 
-        self.main_window.show_image(patch.patch)
+        self.main_window.show_image(patch.overlay_image)
 
     def next_patch(self):
         """
@@ -89,4 +89,5 @@ class Controller:
         else:
             self.logger.error("No More Patches")
             # TODO: Display some sort of dialogue and save the mask
+
 
