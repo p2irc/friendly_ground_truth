@@ -15,6 +15,7 @@ from view.view import MainWindow
 
 module_logger = logging.getLogger('friendly_gt.controller')
 
+
 class Controller:
     """
     The main controller object for the application
@@ -28,8 +29,6 @@ class Controller:
         """
         self.logger = logging.getLogger('friendly_gt.controller.Controller')
         self.logger.debug("Creating controller instance")
-
-        # TODO: initilize the model eg) self.model = Model()
 
         # Set up the main window
         self.main_window = MainWindow()
