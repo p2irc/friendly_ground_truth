@@ -11,6 +11,7 @@ Description: Classes that represent the view for the application
 
 import wx
 import logging
+import numpy as np
 
 module_logger = logging.getLogger('friendly_gt.view')
 
@@ -37,6 +38,9 @@ class MainWindow(wx.Frame):
         # Create the frame
         wx.Frame.__init__(self, parent, -1, "Main Window")
         self.logger.debug("Window created successfully")
+
+
+        self.panel = wx.Panel(self)
 
         # Set up the interface
         self.init_ui()
@@ -67,10 +71,45 @@ class MainWindow(wx.Frame):
 
         menubar.Append(file_menu, '&File')
 
+        # ---- Image Panel ----
+        img_data = wx.EmptyImage(1000, 1000)
+        self.image_ctrl = wx.StaticBitmap(self.panel, wx.ID_ANY,
+                wx.Bitmap(img_data))
+
+
+        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
+        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.mainSizer.Add(wx.StaticLine(self.panel, wx.ID_ANY),
+                           0, wx.ALL|wx.EXPAND, 5)
+
+        self.mainSizer.Add(self.image_ctrl, 0, wx.ALL, 5)
+        self.mainSizer.Add(self.sizer, 0, wx.ALL, 5)
+
+        self.panel.SetSizer(self.mainSizer)
+        self.mainSizer.Fit(self)
+        self.panel.Layout()
+        # ---- End Image Panel ----
+
         self.SetMenuBar(menubar)
         self.Bind(wx.EVT_MENU, self.menu_handler)
         self.SetSize((350, 250))
         self.Centre()
+
+    def show_image(self, img):
+        """
+        Display the given image in the main window
+
+        :param img: The image to display
+        :returns: None
+        """
+        self.logger.debug("Displaying new image")
+
+        image = wx.EmptyImage(img.shape[1], img.shape[0])
+        image.SetData(img.tostring())
+
+        self.image_ctrl.SetBitmap(wx.Bitmap(image))
+        self.panel.Refresh()
 
     def menu_handler(self, event):
         """
@@ -85,4 +124,7 @@ class MainWindow(wx.Frame):
         if id == wx.ID_OPEN:
             self.logger.debug("Load Image Selected")
             self.controller.load_new_image()
+
+
+
 

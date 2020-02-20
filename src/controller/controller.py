@@ -61,3 +61,18 @@ class Controller:
             self.logger.debug("File Path: %s", pathname)
 
             self.image = Image(pathname)
+
+            self.current_patch = 50
+            self.display_current_patch()
+
+    def display_current_patch(self):
+        """
+        Display the current patch to be displayed
+
+        :returns: None
+        """
+
+        patch = self.image.patches[self.current_patch]
+
+        self.main_window.show_image(patch.patch)
+
