@@ -39,7 +39,6 @@ class MainWindow(wx.Frame):
         wx.Frame.__init__(self, parent, -1, "Main Window")
         self.logger.debug("Window created successfully")
 
-
         self.panel = wx.Panel(self)
 
         # Set up the interface
@@ -72,28 +71,28 @@ class MainWindow(wx.Frame):
         menubar.Append(file_menu, '&File')
 
         # ---- Image Panel ----
-        img_data = wx.EmptyImage(1000, 1000)
+        img_data = wx.Image(1000, 1000)
         self.image_ctrl = wx.StaticBitmap(self.panel, wx.ID_ANY,
-                wx.Bitmap(img_data))
+                                          wx.Bitmap(img_data))
 
-
-        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
+        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.mainSizer.Add(wx.StaticLine(self.panel, wx.ID_ANY),
-                           0, wx.ALL|wx.EXPAND, 5)
+        self.main_sizer.Add(wx.StaticLine(self.panel, wx.ID_ANY),
+                            0, wx.CENTER)
 
-        self.mainSizer.Add(self.image_ctrl, 0, wx.ALL, 5)
-        self.mainSizer.Add(self.sizer, 0, wx.ALL, 5)
+        self.main_sizer.Add(self.image_ctrl, 0, wx.CENTER, 5)
 
-        self.panel.SetSizer(self.mainSizer)
-        self.mainSizer.Fit(self)
+        self.main_sizer.Add(self.sizer, 0, wx.ALL, 5)
+
+        self.panel.SetSizer(self.main_sizer)
+        self.main_sizer.Fit(self)
         self.panel.Layout()
         # ---- End Image Panel ----
 
         self.SetMenuBar(menubar)
         self.Bind(wx.EVT_MENU, self.menu_handler)
-        self.SetSize((350, 250))
+        self.SetSize((800, 800))
         self.Centre()
 
     def show_image(self, img):
@@ -105,7 +104,7 @@ class MainWindow(wx.Frame):
         """
         self.logger.debug("Displaying new image")
 
-        image = wx.EmptyImage(img.shape[1], img.shape[0])
+        image = wx.Image(img.shape[1], img.shape[0])
         image.SetData(img.tostring())
 
         self.image_ctrl.SetBitmap(wx.Bitmap(image))
@@ -124,7 +123,3 @@ class MainWindow(wx.Frame):
         if id == wx.ID_OPEN:
             self.logger.debug("Load Image Selected")
             self.controller.load_new_image()
-
-
-
-
