@@ -162,5 +162,9 @@ class Patch():
         img_masked = img_as_ubyte(img_masked)
 
         self.overlay_image = img_masked
-#        return img_masked
+
+    def clear_mask(self):
+
+        self.mask = np.zeros(self.patch.shape, dtype = bool)
+        self.thresh = 1
 

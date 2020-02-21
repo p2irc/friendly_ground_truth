@@ -40,6 +40,7 @@ class MainWindow(wx.Frame):
         self.ID_TOOL_THRESH = 101
         self.ID_TOOL_ADD = 102
         self.ID_TOOL_REMOVE = 103
+        self.ID_TOOL_NO_ROOT = 104
 
         # Create the frame
         wx.Frame.__init__(self, parent, -1, "Main Window")
@@ -92,6 +93,9 @@ class MainWindow(wx.Frame):
         remove_tool = tool_bar.AddRadioTool(self.ID_TOOL_REMOVE, "Remove\
                 Region",
                 wx.Bitmap("view/icons/1x/baseline_remove_circle_outline_black_18dp.png"))
+
+        no_roots_tool = tool_bar.AddTool(self.ID_TOOL_NO_ROOT, "No Roots",
+                wx.Bitmap("view/icons/1x/baseline_cancel_black_18dp.png"))
 
         tool_bar.Bind(wx.EVT_TOOL, self.on_tool_chosen)
         tool_bar.Realize()
@@ -205,6 +209,11 @@ class MainWindow(wx.Frame):
         elif event.GetId() == self.ID_TOOL_REMOVE:
             self.logger.debug("Remove Tool Selected")
             self.controller.change_mode(self.ID_TOOL_REMOVE)
+
+        # No Root Tool selected
+        elif event.GetId() == self.ID_TOOL_NO_ROOT:
+            self.logger.debug("No Root Tool Selected")
+            self.controller.change_mode(self.ID_TOOL_NO_ROOT)
 
         # Something went wrong
         else:

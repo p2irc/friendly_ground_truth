@@ -25,6 +25,7 @@ class Mode(Enum):
     THRESHOLD = 1
     ADD_REGION = 2
     REMOVE_REGION = 3
+    NO_ROOT = 4
 
 
 class Controller:
@@ -131,8 +132,24 @@ class Controller:
             self.current_mode = Mode.ADD_REGION
         elif new_mode_id == self.main_window.ID_TOOL_REMOVE:
             self.current_mode = Mode.REMOVE_REGION
+        elif new_mode_id == self.main_window.ID_TOOL_NO_ROOT:
+            self.no_root_activate()
         else:
             self.logger.error("Invalid mode change")
+
+    def no_root_activate(self):
+        """
+        Set the mask for the patch to zero, there is no root here
+
+        :returns: None
+        """
+
+        patch = self.image.patches[self.current_patch]
+        patch.clear_mask()
+        patch.overlay_mask()
+
+        self.display_current_patch()
+
 
     def handle_mouse_wheel(self, wheel_rotation):
         """
@@ -151,9 +168,8 @@ class Controller:
 
         elif self.current_mode == Mode.REMOVE_REGION:
             self.adjust_remove_region_brush(wheel_rotation)
-
         else:
-            logger.error("Invalid mouse wheel rotation")
+            self.logger.error("Invalid mouse wheel rotation")
 
     def adjust_threshold(self, wheel_rotation):
         """
@@ -170,10 +186,10 @@ class Controller:
         # Adjust the threshold.  Note that it is inverted, because it feels
         # more natural to scroll down to 'reduce' the region, rather than
         # reducing the threshold
-        if wheel_rotation > 0:
+        if wheel_rotation > 0 and patch.thresh >= 0:
            patch.thresh -= 0.01
 
-        else:
+        elif wheel_rotation < 0 and patch.thresh <= 1:
             patch.thresh += 0.01
 
         patch.apply_threshold(patch.thresh)
