@@ -127,9 +127,9 @@ class Patch():
         self.mask = np.zeros(self.patch.shape, dtype=bool)  # create empty mask
         self.patch_index = patch_index
 
-        thresh = threshold_otsu(self.patch)
+        self.thresh = threshold_otsu(self.patch)
 
-        self.apply_threshold(thresh)
+        self.apply_threshold(self.thresh)
 
         self.overlay_image = self.overlay_mask()
 

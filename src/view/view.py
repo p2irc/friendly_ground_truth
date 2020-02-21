@@ -75,8 +75,14 @@ class MainWindow(wx.Frame):
         self.image_ctrl = wx.StaticBitmap(self.panel, wx.ID_ANY,
                                           wx.Bitmap(img_data))
 
+
+        prev_button = wx.Button(self.panel, label="Prev")
+        prev_button.Bind(wx.EVT_BUTTON, self.on_prev_patch)
+
         next_button = wx.Button(self.panel, label="Next")
         next_button.Bind(wx.EVT_BUTTON, self.on_next_patch)
+
+
 
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -85,6 +91,7 @@ class MainWindow(wx.Frame):
                             0, wx.CENTER)
 
         self.main_sizer.Add(self.image_ctrl, 0, wx.CENTER, 5)
+        self.sizer.Add(prev_button, 0, wx.RIGHT, 5)
         self.sizer.Add(next_button, 0, wx.RIGHT, 5)
 
         self.main_sizer.Add(self.sizer, 0, wx.ALL, 5)
@@ -139,4 +146,12 @@ class MainWindow(wx.Frame):
 
         self.controller.next_patch()
 
+    def on_prev_patch(self, event):
+        """
+        Called when the previous patch button is pressed
 
+        :param event: The click event
+        :returns: None
+        """
+        self.logger.debug("PREV IMAGE")
+        self.controller.prev_patch()

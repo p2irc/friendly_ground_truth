@@ -90,4 +90,16 @@ class Controller:
             self.logger.error("No More Patches")
             # TODO: Display some sort of dialogue and save the mask
 
+    def prev_patch(self):
+        """
+        Decrement the current patch and display it
 
+        :returns: None
+        """
+
+        if self.current_patch > 0:
+            self.current_patch -= 1
+            self.display_current_patch()
+
+        else:
+            self.logger.error("No Previous patches")
