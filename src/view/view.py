@@ -13,6 +13,7 @@ import wx
 import logging
 import numpy as np
 
+
 module_logger = logging.getLogger('friendly_gt.view')
 
 
@@ -192,14 +193,16 @@ class MainWindow(wx.Frame):
         # Threshold tool selected
         if event.GetId() == self.ID_TOOL_THRESH:
             self.logger.debug("Threshold Tool Selected")
+            self.controller.change_mode(self.ID_TOOL_THRESH)
 
         # Add region tool selected
         elif event.GetId() == self.ID_TOOL_ADD:
             self.logger.debug("Add Tool Selected")
-
+            self.controller.change_mode(self.ID_TOOL_ADD)
         # Remove region tool selected
         elif event.GetId() == self.ID_TOOL_REMOVE:
             self.logger.debug("Remove Tool Selected")
+            self.controller.change_mode(self.ID_TOOL_REMOVE)
 
         # Something went wrong
         else:

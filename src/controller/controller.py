@@ -13,8 +13,18 @@ import logging
 
 from view.view import MainWindow
 from model.model import Image, Patch
+from enum import Enum
 
 module_logger = logging.getLogger('friendly_gt.controller')
+
+
+class Mode(Enum):
+    """
+    Class representing the possible modes for editing
+    """
+    THRESHOLD = 1
+    ADD_REGION = 2
+    REMOVE_REGION = 3
 
 
 class Controller:
@@ -36,6 +46,9 @@ class Controller:
 
         # Show the window
         self.main_window.Show()
+
+        # Set up the current mode
+        self.current_mode = Mode.THRESHOLD
 
     def load_new_image(self):
         """
@@ -103,3 +116,23 @@ class Controller:
 
         else:
             self.logger.error("No Previous patches")
+
+    def change_mode(self, new_mode_id):
+        """
+        Change the current editing mode
+
+        :param new_mode_id: The ID of the mode button in the Main Window
+        :returns: None
+        """
+
+        if new_mode_id == self.main_window.ID_TOOL_THRESH:
+            self.current_mode = Mode.THRESHOLD
+        elif new_mode_id == self.main_window.ID_TOOL_ADD:
+            self.current_mode = Mode.ADD_REGION
+        elif new_mode_id == self.main_window.ID_TOOL_REMOVE:
+            self.current_mode = Mode.REMOVE_REGION
+        else:
+            self.logger.error("Invalid mode change")
+
+
+
