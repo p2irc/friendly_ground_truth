@@ -35,6 +35,11 @@ class MainWindow(wx.Frame):
         # Initialize the logger
         self.logger = logging.getLogger('friendly_gt.view.MainWindow')
 
+        # Constant button IDs
+        self.ID_TOOL_THRESH = 101
+        self.ID_TOOL_ADD = 102
+        self.ID_TOOL_REMOVE = 103
+
         # Create the frame
         wx.Frame.__init__(self, parent, -1, "Main Window")
         self.logger.debug("Window created successfully")
@@ -70,6 +75,26 @@ class MainWindow(wx.Frame):
 
         menubar.Append(file_menu, '&File')
 
+        # ---- Tool Bar ----
+
+        tool_bar = self.CreateToolBar()
+
+        threshold_tool = tool_bar.AddRadioTool(self.ID_TOOL_THRESH,
+                "Threshold",
+                wx.Bitmap("view/icons/1x/baseline_tune_black_18dp.png"))
+
+        add_tool = tool_bar.AddRadioTool(self.ID_TOOL_ADD, "Add Region",
+                wx.Bitmap("view/icons/1x/baseline_add_circle_outline_black_18dp.png"))
+
+        remove_tool = tool_bar.AddRadioTool(self.ID_TOOL_REMOVE, "Remove\
+                Region",
+                wx.Bitmap("view/icons/1x/baseline_remove_circle_outline_black_18dp.png"))
+
+        tool_bar.Bind(wx.EVT_TOOL, self.on_tool_chosen)
+        tool_bar.Realize()
+
+        # ---- End Tool Bar ----
+
         # ---- Image Panel ----
         img_data = wx.Image(100, 100)
         self.image_ctrl = wx.StaticBitmap(self.panel, wx.ID_ANY,
@@ -103,7 +128,7 @@ class MainWindow(wx.Frame):
 
         self.SetMenuBar(menubar)
         self.Bind(wx.EVT_MENU, self.menu_handler)
-        self.SetSize((1200, 1200))
+        self.SetSize((1200, 800))
         self.Centre()
 
     def show_image(self, img):
@@ -155,3 +180,27 @@ class MainWindow(wx.Frame):
         """
         self.logger.debug("PREV IMAGE")
         self.controller.prev_patch()
+
+    def on_tool_chosen(self, event):
+        """
+        Called when a tool is selected from the tool bar
+
+        :param event: The event causing the tool bar click
+        :returns: {% A thing %}
+        """
+
+        # Threshold tool selected
+        if event.GetId() == self.ID_TOOL_THRESH:
+            self.logger.debug("Threshold Tool Selected")
+
+        # Add region tool selected
+        elif event.GetId() == self.ID_TOOL_ADD:
+            self.logger.debug("Add Tool Selected")
+
+        # Remove region tool selected
+        elif event.GetId() == self.ID_TOOL_REMOVE:
+            self.logger.debug("Remove Tool Selected")
+
+        # Something went wrong
+        else:
+            self.logger.error("Uh oh, something went wrong selecting a tool")
