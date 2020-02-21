@@ -221,5 +221,5 @@ class MainWindow(wx.Frame):
         self.logger.debug("mouse wheel scroll! {}"
                 .format(event.GetWheelRotation()))
 
-        self.controller.handle_mouse_wheel(event.GetWheelRotation)
+        self.controller.handle_mouse_wheel(event.GetWheelRotation())
 

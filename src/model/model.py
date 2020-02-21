@@ -131,7 +131,8 @@ class Patch():
 
         self.apply_threshold(self.thresh)
 
-        self.overlay_image = self.overlay_mask()
+        self.overlay_image = None
+        self.overlay_mask()
 
         self.logger.debug("Created patch with index {} and shape {}"
                           .format(patch_index, patch.shape))
@@ -159,5 +160,7 @@ class Patch():
 
         img_masked = color.hsv2rgb(img_hsv)
         img_masked = img_as_ubyte(img_masked)
-        return img_masked
+
+        self.overlay_image = img_masked
+#        return img_masked
 

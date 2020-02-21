@@ -165,6 +165,24 @@ class Controller:
 
         self.logger.debug("Adjusting patch threshold")
 
+        patch = self.image.patches[self.current_patch]
+
+        # Adjust the threshold.  Note that it is inverted, because it feels
+        # more natural to scroll down to 'reduce' the region, rather than
+        # reducing the threshold
+        if wheel_rotation > 0:
+           patch.thresh -= 0.01
+
+        else:
+            patch.thresh += 0.01
+
+        patch.apply_threshold(patch.thresh)
+        patch.overlay_mask()
+
+        self.logger.debug("Threshold value: {}".format(patch.thresh))
+        self.display_current_patch()
+
+
     def adjust_add_region_brush(self, wheel_rotation):
         """
         Adjust the size of the region brush
