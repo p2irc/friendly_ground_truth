@@ -134,5 +134,54 @@ class Controller:
         else:
             self.logger.error("Invalid mode change")
 
+    def handle_mouse_wheel(self, wheel_rotation):
+        """
+        Handle wheel rotation coming from the mouse
+
+        :param wheel_rotation: The wheel rotation
+        :returns: None
+        """
+
+        if self.current_mode == Mode.THRESHOLD:
+
+            self.adjust_threshold(wheel_rotation)
+
+        elif self.current_mode == Mode.ADD_REGION:
+            self.adjust_add_region_brush(wheel_rotation)
+
+        elif self.current_mode == Mode.REMOVE_REGION:
+            self.adjust_remove_region_brush(wheel_rotation)
+
+        else:
+            logger.error("Invalid mouse wheel rotation")
+
+    def adjust_threshold(self, wheel_rotation):
+        """
+        Adjust the current threshold of the patch mask
+
+        :param wheel_rotation: The rotation of the mouse wheel
+        :returns: None
+        """
+
+        self.logger.debug("Adjusting patch threshold")
+
+    def adjust_add_region_brush(self, wheel_rotation):
+        """
+        Adjust the size of the region brush
+
+        :param wheel_rotation: The rotation of the mouse wheel
+        :returns: None
+        """
+
+        self.logger.debug("Adjusting add region brush")
 
 
+    def adjust_remove_region_brush(self, wheel_rotation):
+        """
+        Adjust the size of the remove region brush
+
+        :param wheel_rotation: the rotation of the mouse wheel
+        :returns: None
+        """
+
+        self.logger.debug("Adjusting the remove region brush")

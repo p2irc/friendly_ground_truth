@@ -50,6 +50,8 @@ class MainWindow(wx.Frame):
         # Set up the interface
         self.init_ui()
 
+        wx.GetApp().Bind(wx.EVT_MOUSEWHEEL, self.on_mousewheel)
+
     def init_ui(self):
         """
         Initialize the user interface with menus
@@ -207,3 +209,17 @@ class MainWindow(wx.Frame):
         # Something went wrong
         else:
             self.logger.error("Uh oh, something went wrong selecting a tool")
+
+    def on_mousewheel(self, event):
+        """
+        Called when the mousewheel is used
+
+        :param event: The mouse wheel event
+        :returns: None
+        """
+
+        self.logger.debug("mouse wheel scroll! {}"
+                .format(event.GetWheelRotation()))
+
+        self.controller.handle_mouse_wheel(event.GetWheelRotation)
+
