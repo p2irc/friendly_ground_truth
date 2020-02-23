@@ -171,6 +171,42 @@ class Controller:
         else:
             self.logger.error("Invalid mouse wheel rotation")
 
+    def handle_left_click(self, click_location):
+
+        if self.current_mode == Mode.ADD_REGION:
+            self.logger.debug("Add region click")
+
+        elif self.current_mode == Mode.REMOVE_REGION:
+            self.logger.debug("Remove region click")
+
+        else:
+            return
+
+    def handle_left_release(self):
+
+        if self.current_mode == Mode.ADD_REGION:
+            self.logger.debug("Add region release")
+
+        elif self.current_mode == Mode.REMOVE_REGION:
+            self.logger.debug("Remove region release")
+
+        else:
+            return
+
+    def handle_motion(self, position):
+
+        if self.current_mode == Mode.ADD_REGION:
+            self.logger.debug("Adding region")
+
+        elif self.current_mode == Mode.REMOVE_REGION:
+            self.logger.debug("Removing Region")
+
+        else:
+            return
+
+
+
+
     def adjust_threshold(self, wheel_rotation):
         """
         Adjust the current threshold of the patch mask

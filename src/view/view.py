@@ -51,6 +51,7 @@ class MainWindow(wx.Frame):
         # Set up the interface
         self.init_ui()
 
+        # Set up mouse interactions
         wx.GetApp().Bind(wx.EVT_MOUSEWHEEL, self.on_mousewheel)
 
     def init_ui(self):
@@ -106,6 +107,11 @@ class MainWindow(wx.Frame):
         img_data = wx.Image(100, 100)
         self.image_ctrl = wx.StaticBitmap(self.panel, wx.ID_ANY,
                                           wx.Bitmap(img_data))
+
+        self.image_ctrl.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)    # Left click
+        self.image_ctrl.Bind(wx.EVT_LEFT_UP, self.on_left_up)    # left release
+        self.image_ctrl.Bind(wx.EVT_MOTION, self.on_motion)  # mouse movement
+        self.image_ctrl.Bind(wx.EVT_PAINT, self.on_paint)
 
 
         prev_button = wx.Button(self.panel, label="Prev")
@@ -232,3 +238,42 @@ class MainWindow(wx.Frame):
 
         self.controller.handle_mouse_wheel(event.GetWheelRotation())
 
+    def on_left_down(self, event):
+        """
+        Called when the left mouse button is clicked on the image
+
+        :param event: The mouse event
+        :returns: None
+        """
+        position = event.GetPositionTuple()
+        self.previous_position = position
+        self.CaptureMouse()
+        self.controller.handle_left_click(position)
+
+    def on_left_up(self, event):
+        """
+        Called when the left mouse button is released on the image
+
+        :param event: The mouse event
+        :returns: None
+        """
+        if self.HasCapture():
+            self.ReleaseMouse()
+            self.controller.handle_left_release()
+
+    def on_motion(self, event):
+        """
+        Called when the mouse is moved on the image
+
+        :param event: The mouse event
+        :returns: None
+        """
+
+        if event.Dragging() and event.LeftIsDown():
+            current_position = event.GetPositionTuple()
+            self.previous_position = current_position
+            self.controller.handle_motion(current_position)
+
+    def on_paint(self, event):
+
+        self.logger.debug("Paint")
