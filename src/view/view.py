@@ -245,9 +245,10 @@ class MainWindow(wx.Frame):
         :param event: The mouse event
         :returns: None
         """
-        position = event.GetPositionTuple()
+        position = self.convert_mouse_to_img_pos(event.GetPosition())
+
+        self.logger.debug("Position {}".format(position))
         self.previous_position = position
-        self.CaptureMouse()
         self.controller.handle_left_click(position)
 
     def on_left_up(self, event):
@@ -257,9 +258,8 @@ class MainWindow(wx.Frame):
         :param event: The mouse event
         :returns: None
         """
-        if self.HasCapture():
-            self.ReleaseMouse()
-            self.controller.handle_left_release()
+        self.logger.debug("left mouse up")
+        self.controller.handle_left_release()
 
     def on_motion(self, event):
         """
@@ -270,10 +270,30 @@ class MainWindow(wx.Frame):
         """
 
         if event.Dragging() and event.LeftIsDown():
-            current_position = event.GetPositionTuple()
+            current_position = self.convert_mouse_to_img_pos(
+                                                        event.GetPosition())
+
             self.previous_position = current_position
             self.controller.handle_motion(current_position)
 
     def on_paint(self, event):
 
         self.logger.debug("Paint")
+
+    def convert_mouse_to_img_pos(self, in_position):
+        """
+        Convert the mouse event position to an image coordinate
+
+        :param in_position: The position of the mouse event
+        :returns: A tuple, the (x,y) position in the image where the event
+                  occured
+        """
+
+        ctrl_position = self.image_ctrl.ScreenToClient(in_position)
+
+        screen_position = self.image_ctrl.GetScreenPosition()
+
+        position_x = ctrl_position[0] + screen_position[0]
+        position_y = ctrl_position[1] + screen_position[1]
+
+        return position_x, position_y
