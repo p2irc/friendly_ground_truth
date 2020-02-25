@@ -54,6 +54,8 @@ class MainWindow(wx.Frame):
         # Set up mouse interactions
         wx.GetApp().Bind(wx.EVT_MOUSEWHEEL, self.on_mousewheel)
 
+        #self.panel.Bind(wx.EVT_PAINT, self.on_paint)
+
     def init_ui(self):
         """
         Initialize the user interface with menus
@@ -104,9 +106,9 @@ class MainWindow(wx.Frame):
         # ---- End Tool Bar ----
 
         # ---- Image Panel ----
-        img_data = wx.Image(100, 100)
+        self.img_data = wx.Image(1, 1)
         self.image_ctrl = wx.StaticBitmap(self.panel, wx.ID_ANY,
-                                          wx.Bitmap(img_data))
+                                          wx.Bitmap(self.img_data))
 
         self.image_ctrl.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)    # Left click
         self.image_ctrl.Bind(wx.EVT_LEFT_UP, self.on_left_up)    # left release
@@ -119,6 +121,11 @@ class MainWindow(wx.Frame):
 
         next_button = wx.Button(self.panel, label="Next")
         next_button.Bind(wx.EVT_BUTTON, self.on_next_patch)
+
+        # ---- Overlay ----
+        self.overlay = wx.Overlay()
+
+        # ---- End Overlay ----
 
 
 
@@ -139,6 +146,7 @@ class MainWindow(wx.Frame):
         self.panel.Layout()
         # ---- End Image Panel ----
 
+
         self.SetMenuBar(menubar)
         self.Bind(wx.EVT_MENU, self.menu_handler)
         self.SetSize((1200, 800))
@@ -153,11 +161,13 @@ class MainWindow(wx.Frame):
         """
         self.logger.debug("Displaying new image- {}".format(img.shape))
 
+        self.current_image = img
+
         image = wx.Image(img.shape[1], img.shape[0])
         image.SetData(img.tostring())
 
         self.image_ctrl.SetBitmap(wx.Bitmap(image))
-        self.panel.Refresh()
+        self.image_ctrl.Refresh()
 
     def menu_handler(self, event):
         """
@@ -269,6 +279,32 @@ class MainWindow(wx.Frame):
         :returns: None
         """
 
+        pos = event.GetPosition()
+        screen_pos = self.image_ctrl.GetScreenPosition()
+        screen_pos = self.ScreenToClient(screen_pos)
+
+        pos = (pos[0] + screen_pos[0], pos[1] + screen_pos[1])
+        self.previous_mouse_position = pos
+        self.logger.debug("Position {}, screen_pos {}".format(pos, screen_pos))
+
+        dc = wx.ClientDC(self.image_ctrl)
+        odc = wx.DCOverlay(self.overlay, dc)
+        odc.Clear()
+
+        if 'wxMac' not in wx.PlatformInfo:
+            dc = wx.GCDC(dc)
+
+        dc.SetPen(wx.Pen("black"))
+        dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
+        dc.DrawCircle(pos[0], pos[1], 15)
+
+        self.image_ctrl.Refresh()
+        self.show_image(self.current_image)
+
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
+        self.timer.StartOnce(5)
+
         if event.Dragging() and event.LeftIsDown():
             current_position = self.convert_mouse_to_img_pos(
                                                         event.GetPosition())
@@ -276,9 +312,28 @@ class MainWindow(wx.Frame):
             self.previous_position = current_position
             self.controller.handle_motion(current_position)
 
+        del odc
+
     def on_paint(self, event):
 
         self.logger.debug("Paint")
+
+    def on_timer(self, event):
+        self.logger.debug("TIMER!")
+        pos = self.previous_mouse_position
+
+        self.show_image(self.current_image)
+
+        dc = wx.ClientDC(self.image_ctrl)
+        odc = wx.DCOverlay(self.overlay, dc)
+        odc.Clear()
+
+        if 'wxMac' not in wx.PlatformInfo:
+            dc = wx.GCDC(dc)
+
+        dc.SetPen(wx.Pen("black"))
+        dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
+        dc.DrawCircle(pos[0], pos[1], 15)
 
     def convert_mouse_to_img_pos(self, in_position):
         """
