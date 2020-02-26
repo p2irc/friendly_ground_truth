@@ -106,13 +106,17 @@ class MainWindow(wx.Frame):
         # ---- End Tool Bar ----
 
         # ---- Image Panel ----
+        # TODO: Re-design this to use a panel centered in the larger panel
+        # TODO: The inner panel is where the image is drawn from
+        # TODO: We no longer need the static bitmap
         self.img_data = wx.Image(1, 1)
+        self.bitmap = wx.Bitmap(self.img_data)
         self.image_ctrl = wx.StaticBitmap(self.panel, wx.ID_ANY,
                                           wx.Bitmap(self.img_data))
 
-        self.image_ctrl.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)    # Left click
-        self.image_ctrl.Bind(wx.EVT_LEFT_UP, self.on_left_up)    # left release
-        self.image_ctrl.Bind(wx.EVT_MOTION, self.on_motion)  # mouse movement
+        self.panel.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)    # Left click
+        self.panel.Bind(wx.EVT_LEFT_UP, self.on_left_up)    # left release
+        self.panel.Bind(wx.EVT_MOTION, self.on_motion)  # mouse movement
         self.image_ctrl.Bind(wx.EVT_PAINT, self.on_paint)
 
 
@@ -124,7 +128,6 @@ class MainWindow(wx.Frame):
 
         # ---- Overlay ----
         self.overlay = wx.Overlay()
-
         # ---- End Overlay ----
 
 
@@ -152,7 +155,7 @@ class MainWindow(wx.Frame):
         self.SetSize((1200, 800))
         self.Centre()
 
-    def show_image(self, img):
+    def show_image(self, img, dc=None):
         """
         Display the given image in the main window
 
@@ -160,13 +163,22 @@ class MainWindow(wx.Frame):
         :returns: None
         """
         self.logger.debug("Displaying new image- {}".format(img.shape))
-
         self.current_image = img
+
 
         image = wx.Image(img.shape[1], img.shape[0])
         image.SetData(img.tostring())
 
-        self.image_ctrl.SetBitmap(wx.Bitmap(image))
+        self.bitmap = wx.Bitmap(image)
+
+        if dc is None:
+            dc = wx.ClientDC(self.panel)
+            odc = wx.DCOverlay(self.overlay, dc)
+            odc.Clear()
+
+        dc.DrawBitmap(self.bitmap, 0, 0)
+
+        #self.image_ctrl.SetBitmap(wx.Bitmap(image))
         self.image_ctrl.Refresh()
 
     def menu_handler(self, event):
@@ -283,7 +295,7 @@ class MainWindow(wx.Frame):
         screen_pos = self.image_ctrl.GetScreenPosition()
         screen_pos = self.ScreenToClient(screen_pos)
 
-        pos = (pos[0] + screen_pos[0], pos[1] + screen_pos[1])
+        #pos = (pos[0] + screen_pos[0], pos[1] + screen_pos[1])
         self.previous_mouse_position = pos
         self.logger.debug("Position {}, screen_pos {}".format(pos, screen_pos))
 
@@ -298,8 +310,8 @@ class MainWindow(wx.Frame):
         dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
         dc.DrawCircle(pos[0], pos[1], 15)
 
-        self.image_ctrl.Refresh()
-        self.show_image(self.current_image)
+        #self.image_ctrl.Refresh()
+        self.show_image(self.current_image, dc)
 
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
@@ -322,7 +334,7 @@ class MainWindow(wx.Frame):
         self.logger.debug("TIMER!")
         pos = self.previous_mouse_position
 
-        self.show_image(self.current_image)
+        #self.show_image(self.current_image)
 
         dc = wx.ClientDC(self.image_ctrl)
         odc = wx.DCOverlay(self.overlay, dc)
@@ -330,6 +342,8 @@ class MainWindow(wx.Frame):
 
         if 'wxMac' not in wx.PlatformInfo:
             dc = wx.GCDC(dc)
+
+        self.show_image(self.current_image, dc)
 
         dc.SetPen(wx.Pen("black"))
         dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
@@ -344,6 +358,7 @@ class MainWindow(wx.Frame):
                   occured
         """
 
+        # TODO: This might change when we switch to drawing on the panels
         ctrl_position = self.image_ctrl.ScreenToClient(in_position)
 
         screen_position = self.image_ctrl.GetScreenPosition()
