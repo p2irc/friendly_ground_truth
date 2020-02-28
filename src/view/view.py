@@ -46,15 +46,11 @@ class MainWindow(wx.Frame):
         wx.Frame.__init__(self, parent, -1, "Main Window")
         self.logger.debug("Window created successfully")
 
-        self.panel = wx.Panel(self)
-
         # Set up the interface
         self.init_ui()
 
         # Set up mouse interactions
         wx.GetApp().Bind(wx.EVT_MOUSEWHEEL, self.on_mousewheel)
-
-        #self.panel.Bind(wx.EVT_PAINT, self.on_paint)
 
     def init_ui(self):
         """
@@ -87,18 +83,25 @@ class MainWindow(wx.Frame):
         tool_bar = self.CreateToolBar()
 
         threshold_tool = tool_bar.AddRadioTool(self.ID_TOOL_THRESH,
-                "Threshold",
-                wx.Bitmap("view/icons/1x/baseline_tune_black_18dp.png"))
+                                               "Threshold",
+                                               wx.Bitmap("view/icons/1x/"
+                                                         "baseline_tune_"
+                                                         "black_18dp.png"))
 
         add_tool = tool_bar.AddRadioTool(self.ID_TOOL_ADD, "Add Region",
-                wx.Bitmap("view/icons/1x/baseline_add_circle_outline_black_18dp.png"))
+                                         wx.Bitmap("view/icons/1x/baseline"
+                                                   "_add_circle_outline_black"
+                                                   "_18dp.png"))
 
-        remove_tool = tool_bar.AddRadioTool(self.ID_TOOL_REMOVE, "Remove\
-                Region",
-                wx.Bitmap("view/icons/1x/baseline_remove_circle_outline_black_18dp.png"))
+        remove_tool = tool_bar.AddRadioTool(self.ID_TOOL_REMOVE, "Remove"
+                                                                 "Region",
+                                            wx.Bitmap("view/icons/1x/baseline"
+                                                      "_remove_circle_outline"
+                                                      "_black_18dp.png"))
 
         no_roots_tool = tool_bar.AddTool(self.ID_TOOL_NO_ROOT, "No Roots",
-                wx.Bitmap("view/icons/1x/baseline_cancel_black_18dp.png"))
+                                         wx.Bitmap("view/icons/1x/baseline"
+                                                   "_cancel_black_18dp.png"))
 
         tool_bar.Bind(wx.EVT_TOOL, self.on_tool_chosen)
         tool_bar.Realize()
@@ -106,49 +109,37 @@ class MainWindow(wx.Frame):
         # ---- End Tool Bar ----
 
         # ---- Image Panel ----
-        # TODO: Re-design this to use a panel centered in the larger panel
-        # TODO: The inner panel is where the image is drawn from
-        # TODO: We no longer need the static bitmap
-        self.img_data = wx.Image(1, 1)
-        self.bitmap = wx.Bitmap(self.img_data)
-        self.image_ctrl = wx.StaticBitmap(self.panel, wx.ID_ANY,
-                                          wx.Bitmap(self.img_data))
+        self.control_panel = wx.Panel(self)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.panel.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)    # Left click
-        self.panel.Bind(wx.EVT_LEFT_UP, self.on_left_up)    # left release
-        self.panel.Bind(wx.EVT_MOTION, self.on_motion)  # mouse movement
-        self.image_ctrl.Bind(wx.EVT_PAINT, self.on_paint)
+        self.image_panel = wx.Panel(self.control_panel)
+        hbox.Add(self.image_panel, wx.ID_ANY, wx.EXPAND | wx.ALL, 20)
 
+        # Mouse Events for the image panel
+        self.image_panel.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
+        self.image_panel.Bind(wx.EVT_LEFT_UP, self.on_left_up)
+        self.image_panel.Bind(wx.EVT_MOTION, self.on_motion)
+        self.image_panel.Bind(wx.EVT_PAINT, self.on_paint)
 
-        prev_button = wx.Button(self.panel, label="Prev")
+        button_box = wx.BoxSizer(wx.HORIZONTAL)
+
+        prev_button = wx.Button(self.control_panel, label="Prev")
         prev_button.Bind(wx.EVT_BUTTON, self.on_prev_patch)
+        button_box.Add(prev_button, flag=wx.LEFT, border=10)
 
-        next_button = wx.Button(self.panel, label="Next")
+        next_button = wx.Button(self.control_panel, label="Next")
         next_button.Bind(wx.EVT_BUTTON, self.on_next_patch)
+        button_box.Add(next_button, flag=wx.RIGHT, border=10)
+
+        hbox.Add(button_box, flag=wx.RIGHT, border=10)
+
+        self.control_panel.SetSizer(hbox)
 
         # ---- Overlay ----
         self.overlay = wx.Overlay()
         # ---- End Overlay ----
 
-
-
-        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        self.main_sizer.Add(wx.StaticLine(self.panel, wx.ID_ANY),
-                            0, wx.CENTER)
-
-        self.main_sizer.Add(self.image_ctrl, 0, wx.CENTER, 5)
-        self.sizer.Add(prev_button, 0, wx.RIGHT, 5)
-        self.sizer.Add(next_button, 0, wx.RIGHT, 5)
-
-        self.main_sizer.Add(self.sizer, 0, wx.ALL, 5)
-
-        self.panel.SetSizer(self.main_sizer)
-        self.main_sizer.Fit(self)
-        self.panel.Layout()
         # ---- End Image Panel ----
-
 
         self.SetMenuBar(menubar)
         self.Bind(wx.EVT_MENU, self.menu_handler)
@@ -165,21 +156,17 @@ class MainWindow(wx.Frame):
         self.logger.debug("Displaying new image- {}".format(img.shape))
         self.current_image = img
 
-
         image = wx.Image(img.shape[1], img.shape[0])
         image.SetData(img.tostring())
 
         self.bitmap = wx.Bitmap(image)
 
         if dc is None:
-            dc = wx.ClientDC(self.panel)
+            dc = wx.ClientDC(self.image_panel)
             odc = wx.DCOverlay(self.overlay, dc)
             odc.Clear()
 
         dc.DrawBitmap(self.bitmap, 0, 0)
-
-        #self.image_ctrl.SetBitmap(wx.Bitmap(image))
-        self.image_ctrl.Refresh()
 
     def menu_handler(self, event):
         """
@@ -256,7 +243,7 @@ class MainWindow(wx.Frame):
         """
 
         self.logger.debug("mouse wheel scroll! {}"
-                .format(event.GetWheelRotation()))
+                          .format(event.GetWheelRotation()))
 
         self.controller.handle_mouse_wheel(event.GetWheelRotation())
 
@@ -290,18 +277,17 @@ class MainWindow(wx.Frame):
         :param event: The mouse event
         :returns: None
         """
-
         pos = event.GetPosition()
-        screen_pos = self.image_ctrl.GetScreenPosition()
+        screen_pos = self.image_panel.GetScreenPosition()
         screen_pos = self.ScreenToClient(screen_pos)
 
-        #pos = (pos[0] + screen_pos[0], pos[1] + screen_pos[1])
         self.previous_mouse_position = pos
         self.logger.debug("Position {}, screen_pos {}".format(pos, screen_pos))
 
-        dc = wx.ClientDC(self.image_ctrl)
+        dc = wx.ClientDC(self.image_panel)
         odc = wx.DCOverlay(self.overlay, dc)
-        odc.Clear()
+
+        self.show_image(self.current_image, dc)
 
         if 'wxMac' not in wx.PlatformInfo:
             dc = wx.GCDC(dc)
@@ -310,12 +296,9 @@ class MainWindow(wx.Frame):
         dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
         dc.DrawCircle(pos[0], pos[1], 15)
 
-        #self.image_ctrl.Refresh()
-        self.show_image(self.current_image, dc)
-
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
-        self.timer.StartOnce(5)
+        # self.timer.StartOnce(5)
 
         if event.Dragging() and event.LeftIsDown():
             current_position = self.convert_mouse_to_img_pos(
@@ -329,6 +312,8 @@ class MainWindow(wx.Frame):
     def on_paint(self, event):
 
         self.logger.debug("Paint")
+        dc = wx.ClientDC(self.image_panel)
+        odc = wx.DCOverlay(self.overlay, dc)
 
     def on_timer(self, event):
         self.logger.debug("TIMER!")
@@ -336,14 +321,14 @@ class MainWindow(wx.Frame):
 
         #self.show_image(self.current_image)
 
-        dc = wx.ClientDC(self.image_ctrl)
+        dc = wx.ClientDC(self.image_panel)
         odc = wx.DCOverlay(self.overlay, dc)
         odc.Clear()
 
         if 'wxMac' not in wx.PlatformInfo:
             dc = wx.GCDC(dc)
 
-        self.show_image(self.current_image, dc)
+        #self.show_image(self.current_image, dc)
 
         dc.SetPen(wx.Pen("black"))
         dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
@@ -358,10 +343,9 @@ class MainWindow(wx.Frame):
                   occured
         """
 
-        # TODO: This might change when we switch to drawing on the panels
-        ctrl_position = self.image_ctrl.ScreenToClient(in_position)
+        ctrl_position = self.image_panel.ScreenToClient(in_position)
 
-        screen_position = self.image_ctrl.GetScreenPosition()
+        screen_position = self.image_panel.GetScreenPosition()
 
         position_x = ctrl_position[0] + screen_position[0]
         position_y = ctrl_position[1] + screen_position[1]
