@@ -41,6 +41,8 @@ class MainWindow(wx.Frame):
         self.ID_TOOL_ADD = 102
         self.ID_TOOL_REMOVE = 103
         self.ID_TOOL_NO_ROOT = 104
+        self.ID_TOOL_PREV_IMAGE = 105
+        self.ID_TOOL_NEXT_IMAGE = 106
 
         # Create the frame
         wx.Frame.__init__(self, parent, -1, "Main Window")
@@ -103,6 +105,22 @@ class MainWindow(wx.Frame):
                                          wx.Bitmap("view/icons/1x/baseline"
                                                    "_cancel_black_18dp.png"))
 
+        tool_bar.AddSeparator()
+
+        prev_image_tool = tool_bar.AddTool(self.ID_TOOL_PREV_IMAGE,
+                                           "Prev Image",
+                                           wx.Bitmap("view/icons/1x/baseline"
+                                                     "_skip_previous_black_"
+                                                     "18dp.png"))
+
+        next_image_tool = tool_bar.AddTool(self.ID_TOOL_NEXT_IMAGE,
+                                           "Next Image",
+                                            wx.Bitmap("view/icons/1x/baseline"
+                                                      "_skip_next_black_"
+                                                      "18dp.png"))
+
+
+
         tool_bar.Bind(wx.EVT_TOOL, self.on_tool_chosen)
         tool_bar.Realize()
 
@@ -120,18 +138,9 @@ class MainWindow(wx.Frame):
         self.image_panel.Bind(wx.EVT_LEFT_UP, self.on_left_up)
         self.image_panel.Bind(wx.EVT_MOTION, self.on_motion)
         self.image_panel.Bind(wx.EVT_PAINT, self.on_paint)
+        self.image_panel.Bind(wx.EVT_ENTER_WINDOW, self.on_enter_panel)
+        self.image_panel.Bind(wx.EVT_LEAVE_WINDOW, self.on_leave_panel)
 
-        button_box = wx.BoxSizer(wx.HORIZONTAL)
-
-        prev_button = wx.Button(self.control_panel, label="Prev")
-        prev_button.Bind(wx.EVT_BUTTON, self.on_prev_patch)
-        button_box.Add(prev_button, flag=wx.LEFT, border=10)
-
-        next_button = wx.Button(self.control_panel, label="Next")
-        next_button.Bind(wx.EVT_BUTTON, self.on_next_patch)
-        button_box.Add(next_button, flag=wx.RIGHT, border=10)
-
-        hbox.Add(button_box, flag=wx.RIGHT, border=10)
 
         self.control_panel.SetSizer(hbox)
 
@@ -182,26 +191,6 @@ class MainWindow(wx.Frame):
             self.logger.debug("Load Image Selected")
             self.controller.load_new_image()
 
-    def on_next_patch(self, event):
-        """
-        Called when the next patch button is pressed
-
-        :param event: The click event
-        :returns: None
-        """
-        self.logger.debug("NEXT IMAGE")
-
-        self.controller.next_patch()
-
-    def on_prev_patch(self, event):
-        """
-        Called when the previous patch button is pressed
-
-        :param event: The click event
-        :returns: None
-        """
-        self.logger.debug("PREV IMAGE")
-        self.controller.prev_patch()
 
     def on_tool_chosen(self, event):
         """
@@ -229,6 +218,14 @@ class MainWindow(wx.Frame):
         elif event.GetId() == self.ID_TOOL_NO_ROOT:
             self.logger.debug("No Root Tool Selected")
             self.controller.change_mode(self.ID_TOOL_NO_ROOT)
+
+        # Next image
+        elif event.GetId() == self.ID_TOOL_NEXT_IMAGE:
+            self.controller.next_patch()
+
+        # Previous Image
+        elif event.GetId() == self.ID_TOOL_PREV_IMAGE:
+            self.controller.prev_patch()
 
         # Something went wrong
         else:
@@ -297,6 +294,15 @@ class MainWindow(wx.Frame):
 
             self.previous_position = current_position
             self.controller.handle_motion(current_position)
+
+    def on_enter_panel(self, event):
+        self.logger.debug("Entered Panel")
+        cursor = wx.StockCursor(wx.CURSOR_BLANK)
+        self.SetCursor(cursor)
+
+    def on_leave_panel(self, event):
+        self.logger.debug("Leaving Panel")
+        cursor = wx.Cursor(wx.CURSOR_DEFAULT)
 
     def draw_brush(self, pos=None):
 
