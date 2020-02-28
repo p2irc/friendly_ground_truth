@@ -15,7 +15,7 @@ from skimage import io, img_as_float, img_as_ubyte
 from skimage.util.shape import view_as_blocks
 from skimage.filters import threshold_otsu
 from skimage import color
-
+from skimage.draw import circle
 
 import matplotlib.pyplot as plt
 
@@ -167,4 +167,16 @@ class Patch():
 
         self.mask = np.zeros(self.patch.shape, dtype = bool)
         self.thresh = 1
+
+    def add_region(self, position, radius):
+
+        rr, cc = circle(position[1], position[0], radius)
+        self.mask[rr, cc] = 1
+        self.overlay_mask()
+
+    def remove_region(self, position, radius):
+
+        rr, cc = circle(position[1], position[0], radius)
+        self.mask[rr, cc] = 0
+        self.overlay_mask()
 

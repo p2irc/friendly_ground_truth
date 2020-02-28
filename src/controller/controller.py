@@ -184,9 +184,15 @@ class Controller:
 
         if self.current_mode == Mode.ADD_REGION:
             self.logger.debug("Add region click")
+            patch = self.image.patches[self.current_patch]
+            patch.add_region(click_location, self.add_region_radius)
+            self.display_current_patch()
 
         elif self.current_mode == Mode.REMOVE_REGION:
             self.logger.debug("Remove region click")
+            patch = self.image.patches[self.current_patch]
+            patch.remove_region(click_position, self.remove_region_radius)
+            self.display_current_patch()
 
         else:
             return
@@ -206,12 +212,21 @@ class Controller:
 
         if self.current_mode == Mode.ADD_REGION:
             self.logger.debug("Adding region")
+            patch = self.image.patches[self.current_patch]
+            patch.add_region(position, self.add_region_radius)
+            self.display_current_patch()
 
         elif self.current_mode == Mode.REMOVE_REGION:
             self.logger.debug("Removing Region")
 
+            patch = self.image.patches[self.current_patch]
+            patch.remove_region(position, self.remove_region_radius)
+            self.display_current_patch()
+
         else:
             return
+
+
 
     def adjust_threshold(self, wheel_rotation):
         """
