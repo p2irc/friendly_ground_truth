@@ -51,6 +51,10 @@ class Controller:
         # Set up the current mode
         self.current_mode = Mode.THRESHOLD
 
+        # Brush radii
+        self.add_region_radius = 15
+        self.remove_region_radius = 15
+
     def load_new_image(self):
         """
         Called when the user wants to load a new image to open a file
@@ -128,10 +132,16 @@ class Controller:
 
         if new_mode_id == self.main_window.ID_TOOL_THRESH:
             self.current_mode = Mode.THRESHOLD
+            self.main_window.set_brush_radius(0)
+
         elif new_mode_id == self.main_window.ID_TOOL_ADD:
             self.current_mode = Mode.ADD_REGION
+            self.main_window.set_brush_radius(self.add_region_radius)
+
         elif new_mode_id == self.main_window.ID_TOOL_REMOVE:
             self.current_mode = Mode.REMOVE_REGION
+            self.main_window.set_brush_radius(self.remove_region_radius)
+
         elif new_mode_id == self.main_window.ID_TOOL_NO_ROOT:
             self.no_root_activate()
         else:
@@ -149,7 +159,6 @@ class Controller:
         patch.overlay_mask()
 
         self.display_current_patch()
-
 
     def handle_mouse_wheel(self, wheel_rotation):
         """
@@ -204,9 +213,6 @@ class Controller:
         else:
             return
 
-
-
-
     def adjust_threshold(self, wheel_rotation):
         """
         Adjust the current threshold of the patch mask
@@ -223,7 +229,7 @@ class Controller:
         # more natural to scroll down to 'reduce' the region, rather than
         # reducing the threshold
         if wheel_rotation > 0 and patch.thresh >= 0:
-           patch.thresh -= 0.01
+            patch.thresh -= 0.01
 
         elif wheel_rotation < 0 and patch.thresh <= 1:
             patch.thresh += 0.01
@@ -234,7 +240,6 @@ class Controller:
         self.logger.debug("Threshold value: {}".format(patch.thresh))
         self.display_current_patch()
 
-
     def adjust_add_region_brush(self, wheel_rotation):
         """
         Adjust the size of the region brush
@@ -244,7 +249,13 @@ class Controller:
         """
 
         self.logger.debug("Adjusting add region brush")
+        if wheel_rotation > 0:
+            self.add_region_radius += 1
+        else:
+            self.add_region_radius -= 1
 
+        self.main_window.set_brush_radius(self.add_region_radius)
+        self.main_window.draw_brush()
 
     def adjust_remove_region_brush(self, wheel_rotation):
         """
@@ -255,3 +266,10 @@ class Controller:
         """
 
         self.logger.debug("Adjusting the remove region brush")
+        if wheel_rotation > 0:
+            self.remove_region_radius += 1
+        else:
+            self.remove_region_radius -= 1
+
+        self.main_window.set_brush_radius(self.remove_region_radius)
+        self.main_window.draw_brush()

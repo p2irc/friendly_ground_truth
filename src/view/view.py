@@ -247,6 +247,11 @@ class MainWindow(wx.Frame):
 
         self.controller.handle_mouse_wheel(event.GetWheelRotation())
 
+    def set_brush_radius(self, radius):
+
+        self.logger.debug("Setting brush radius to {}".format(radius))
+        self.brush_radius = radius
+
     def on_left_down(self, event):
         """
         Called when the left mouse button is clicked on the image
@@ -284,6 +289,20 @@ class MainWindow(wx.Frame):
         self.previous_mouse_position = pos
         self.logger.debug("Position {}, screen_pos {}".format(pos, screen_pos))
 
+        self.draw_brush(pos)
+
+        if event.Dragging() and event.LeftIsDown():
+            current_position = self.convert_mouse_to_img_pos(
+                                                        event.GetPosition())
+
+            self.previous_position = current_position
+            self.controller.handle_motion(current_position)
+
+    def draw_brush(self, pos=None):
+
+        if pos is None:
+            pos = self.previous_mouse_position
+
         dc = wx.ClientDC(self.image_panel)
         odc = wx.DCOverlay(self.overlay, dc)
 
@@ -294,18 +313,7 @@ class MainWindow(wx.Frame):
 
         dc.SetPen(wx.Pen("black"))
         dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
-        dc.DrawCircle(pos[0], pos[1], 15)
-
-        self.timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
-        # self.timer.StartOnce(5)
-
-        if event.Dragging() and event.LeftIsDown():
-            current_position = self.convert_mouse_to_img_pos(
-                                                        event.GetPosition())
-
-            self.previous_position = current_position
-            self.controller.handle_motion(current_position)
+        dc.DrawCircle(pos[0], pos[1], self.brush_radius)
 
         del odc
 
@@ -314,25 +322,6 @@ class MainWindow(wx.Frame):
         self.logger.debug("Paint")
         dc = wx.ClientDC(self.image_panel)
         odc = wx.DCOverlay(self.overlay, dc)
-
-    def on_timer(self, event):
-        self.logger.debug("TIMER!")
-        pos = self.previous_mouse_position
-
-        #self.show_image(self.current_image)
-
-        dc = wx.ClientDC(self.image_panel)
-        odc = wx.DCOverlay(self.overlay, dc)
-        odc.Clear()
-
-        if 'wxMac' not in wx.PlatformInfo:
-            dc = wx.GCDC(dc)
-
-        #self.show_image(self.current_image, dc)
-
-        dc.SetPen(wx.Pen("black"))
-        dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
-        dc.DrawCircle(pos[0], pos[1], 15)
 
     def convert_mouse_to_img_pos(self, in_position):
         """
