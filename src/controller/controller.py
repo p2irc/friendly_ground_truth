@@ -148,7 +148,18 @@ class Controller:
             self.display_current_patch()
         else:
             self.logger.error("No More Patches")
-            # TODO: Display some sort of dialogue and save the mask
+
+            dialog_message = "No More Patches - Would you like to save the" \
+                             " mask?"
+
+            dialog_title = "No More Patches"
+
+            dialog = wx.MessageDialog(None, dialog_message, dialog_title,
+                                      wx.YES_NO | wx.ICON_QUESTION |
+                                      wx.NO_DEFAULT)
+
+            if dialog.ShowModal() == wx.ID_YES:
+                self.save_mask()
 
     def prev_patch(self):
         """
