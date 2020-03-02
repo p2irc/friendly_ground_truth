@@ -103,6 +103,8 @@ class Controller:
 
         if self.current_patch < len(self.image.patches)-1:
             self.current_patch += 1
+            while self.image.patches[self.current_patch].display is False:
+                self.current_patch += 1
             self.display_current_patch()
         else:
             self.logger.error("No More Patches")
@@ -117,6 +119,9 @@ class Controller:
 
         if self.current_patch > 0:
             self.current_patch -= 1
+            while self.image.patches[self.current_patch].display is False:
+                self.current_patch -= 1
+
             self.display_current_patch()
 
         else:

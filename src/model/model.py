@@ -41,6 +41,7 @@ class Image():
         self.image = self.load_image(path)
         self.mask = np.zeros(self.image.shape, dtype=bool)  # create empty mask
         self.patches = self.create_patches(self.image, self.num_patches)
+        self.create_mask()
 
     def load_image(self, path):
         """
@@ -87,6 +88,7 @@ class Image():
         image = np.pad(image, (pad_x, pad_y), 'constant',
                        constant_values=(0, 0))
 
+        self.padded_shape = image.shape
         # Get the size of each block
         block_size = (image.shape[0]//num_patches,
                       image.shape[1]//num_patches)
@@ -109,6 +111,35 @@ class Image():
 
         return patches
 
+    def create_mask(self):
+        """
+        Take the masks from all the patches and combine them into the mask
+        for the whole image
+
+        :returns: None
+        """
+
+        mask = np.zeros(self.padded_shape, dtype=bool)
+
+        col_num = 0
+        row_num = 0
+
+        for patch in self.patches:
+
+            r, c = patch.patch_index
+            r = r * patch.patch.shape[0]
+            c = c * patch.patch.shape[1]
+            mask[r:r+patch.patch.shape[0],
+                 c:c+patch.patch.shape[1]] += patch.mask
+
+            col_num += 1
+
+            if col_num == self.num_patches:
+                col_num = 0
+                row_num += 1
+
+        self.mask = mask
+
 
 class Patch():
     """
@@ -122,6 +153,14 @@ class Patch():
         :param patch: The image patch to use
         :returns: None
         """
+
+        # The max number of components to consider before determining that
+        # this patch has no roots in it
+        self.MAX_COMPONENTS = 500
+
+        # Whether or not to display this patch to the user
+        self.display = True
+
         self.logger = logging.getLogger('friendly_gt.model.Patch')
         self.patch = patch
         self.mask = np.zeros(self.patch.shape, dtype=bool)  # create empty mask
@@ -130,6 +169,8 @@ class Patch():
         self.thresh = threshold_otsu(self.patch)
 
         self.apply_threshold(self.thresh)
+
+        self.check_displayable()
 
         self.overlay_image = None
         self.overlay_mask()
@@ -215,3 +256,20 @@ class Patch():
         rr, cc = circle(position[1], position[0], radius)
         self.mask[rr, cc] = 0
         self.overlay_mask()
+
+    def check_displayable(self):
+        """
+        Set patches as non-displayable if they are not likely to contain roots
+
+        :returns: None
+        """
+        from skimage import morphology
+
+        # Use the number of connected components in the patch to determine
+        # if it probably does not contain roots
+        unique = np.unique(morphology.label(self.mask))
+        num_components = len(unique) - 2
+
+        if num_components > self.MAX_COMPONENTS:
+            self.clear_mask()
+            self.display = False
