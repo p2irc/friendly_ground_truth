@@ -11,7 +11,7 @@ Description: Contains the model elements for the application
 import logging
 import numpy as np
 
-from skimage import io, img_as_float, img_as_ubyte
+from skimage import io, img_as_float, img_as_ubyte, img_as_uint
 from skimage.util.shape import view_as_blocks
 from skimage.filters import threshold_otsu
 from skimage import color
@@ -139,6 +139,17 @@ class Image():
                 row_num += 1
 
         self.mask = mask
+
+    def export_mask(self, pathname):
+        """
+        Export the patch masks as a whole image mask
+
+        :param pathname: The path to the mask image file
+        :returns: None
+        """
+        self.create_mask()
+
+        io.imsave(pathname, img_as_uint(self.mask))
 
 
 class Patch():

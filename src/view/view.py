@@ -74,7 +74,11 @@ class MainWindow(wx.Frame):
         # TODO: make an icon
         # load_item.SetBitmap(wx.Bitmap("load_item.bmp"))
 
+        export_mask = wx.MenuItem(file_menu, wx.ID_SAVE, text="Save Mask",
+                                  kind=wx.ITEM_NORMAL)
+
         file_menu.Append(load_item)
+        file_menu.Append(export_mask)
 
         file_menu.AppendSeparator()
 
@@ -188,6 +192,9 @@ class MainWindow(wx.Frame):
         if id == wx.ID_OPEN:
             self.logger.debug("Load Image Selected")
             self.controller.load_new_image()
+        elif id == wx.ID_SAVE:
+            self.logger.debug("Exporting Mask")
+            self.controller.save_mask()
 
     def on_tool_chosen(self, event):
         """

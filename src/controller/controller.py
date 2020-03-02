@@ -10,6 +10,7 @@ Description: The main controller for the application
 """
 import wx
 import logging
+import os
 
 from view.view import MainWindow
 from model.model import Image, Patch
@@ -77,11 +78,50 @@ class Controller:
             pathname = file_dialog.GetPath()
 
             self.logger.debug("File Path: %s", pathname)
+            self.image_path = pathname
 
             self.image = Image(pathname)
 
             self.current_patch = 0
             self.display_current_patch()
+
+    def get_image_name_from_path(self, path):
+        """
+        Get the filename from the image to use for saving the mask
+
+        :param path: The path to the original image
+        :returns: The new filename for the mask
+        """
+
+        basename = os.path.basename(path)
+        return os.path.splitext(basename)[0] + '_mask.png'
+
+    def save_mask(self):
+        """
+        Save the finished image mask
+
+        :returns: None
+        """
+
+        with wx.DirDialog(self.main_window, "Select Output Folder",
+                          style=wx.DD_DEFAULT_STYLE
+                          ) as file_dialog:
+
+            if file_dialog.ShowModal() == wx.ID_CANCEL:
+                return     # the user changed their mind
+
+            # save the current contents in the file
+            pathname = file_dialog.GetPath()
+            image_name = self.get_image_name_from_path(self.image_path)
+
+            pathname = os.path.join(pathname, image_name)
+
+            try:
+                self.logger.debug("Saving mask to {}".format(pathname))
+                self.image.export_mask(pathname)
+
+            except IOError:
+                wx.LogError("Cannot save file '%s'." % pathname)
 
     def display_current_patch(self):
         """
