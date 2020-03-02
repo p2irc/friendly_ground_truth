@@ -138,16 +138,30 @@ class Patch():
                           .format(patch_index, patch.shape))
 
     def apply_threshold(self, value):
+        """
+        Apply a threshold to the patch mask
+
+        :param value: The pixel value (floating point) to use as a threshold
+        :returns: None
+        :postcondition: The patch mask will be updated with the new threshold
+        """
 
         binary = self.patch > value
         self.mask = binary
 
     def overlay_mask(self):
+        """
+        Overlay the current patch mask on the patch image
+
+        :returns: None
+        :postcondition: The overlay property will contain the image with the
+                        binary mask on top.
+        """
 
         alpha = 0.6
 
         color_mask = np.zeros((self.patch.shape[0], self.patch.shape[1], 3),
-                dtype=np.float64)
+                              dtype=np.float64)
 
         color_mask[:, :, 0] = self.mask
 
@@ -164,19 +178,40 @@ class Patch():
         self.overlay_image = img_masked
 
     def clear_mask(self):
+        """
+        Set the mask for this patch to be empty (all 0's)
 
-        self.mask = np.zeros(self.patch.shape, dtype = bool)
+        :returns: None
+        :postcondition: The mask property will contain all 0's
+        """
+
+        self.mask = np.zeros(self.patch.shape, dtype=bool)
         self.thresh = 1
 
     def add_region(self, position, radius):
+        """
+        Add a circular region to the mask at the given position
+
+        :param position: The position in the mask to add the region
+        :param radius: The radius of the region to add
+        :returns: None
+        :postcondition: The circular region in the mask will be set to 1's
+        """
 
         rr, cc = circle(position[1], position[0], radius)
         self.mask[rr, cc] = 1
         self.overlay_mask()
 
     def remove_region(self, position, radius):
+        """
+        Remove a circular region from the mask at the given position
+
+        :param position: The position in the mask to remove the region
+        :param radius: The radius of the region to remove
+        :returns: None
+        :postcondition: The region in the mask will be set to 0's
+        """
 
         rr, cc = circle(position[1], position[0], radius)
         self.mask[rr, cc] = 0
         self.overlay_mask()
-

@@ -101,7 +101,7 @@ class Controller:
         :returns: None
         """
 
-        if self.current_patch <= len(self.image.patches):
+        if self.current_patch < len(self.image.patches)-1:
             self.current_patch += 1
             self.display_current_patch()
         else:
@@ -177,10 +177,17 @@ class Controller:
 
         elif self.current_mode == Mode.REMOVE_REGION:
             self.adjust_remove_region_brush(wheel_rotation)
+
         else:
             self.logger.error("Invalid mouse wheel rotation")
 
     def handle_left_click(self, click_location):
+        """
+        Handle a left mouse click at the given location
+
+        :param click_location: The location (x, y) of the click
+        :returns: None
+        """
 
         if self.current_mode == Mode.ADD_REGION:
             self.logger.debug("Add region click")
@@ -191,13 +198,18 @@ class Controller:
         elif self.current_mode == Mode.REMOVE_REGION:
             self.logger.debug("Remove region click")
             patch = self.image.patches[self.current_patch]
-            patch.remove_region(click_position, self.remove_region_radius)
+            patch.remove_region(click_location, self.remove_region_radius)
             self.display_current_patch()
 
         else:
             return
 
     def handle_left_release(self):
+        """
+        Handle the release of the left mouse button
+
+        :returns: None
+        """
 
         if self.current_mode == Mode.ADD_REGION:
             self.logger.debug("Add region release")
@@ -209,6 +221,12 @@ class Controller:
             return
 
     def handle_motion(self, position):
+        """
+        Handle motion events of the mouse at the given position
+
+        :param position: The position (x, y) of the mouse during the event
+        :returns: None
+        """
 
         if self.current_mode == Mode.ADD_REGION:
             self.logger.debug("Adding region")
@@ -225,8 +243,6 @@ class Controller:
 
         else:
             return
-
-
 
     def adjust_threshold(self, wheel_rotation):
         """

@@ -32,6 +32,8 @@ class MainWindow(wx.Frame):
         :returns: None
         """
         self.controller = controller
+        self.current_image = None
+        self.brush_radius = 0
 
         # Initialize the logger
         self.logger = logging.getLogger('friendly_gt.view.MainWindow')
@@ -115,11 +117,9 @@ class MainWindow(wx.Frame):
 
         next_image_tool = tool_bar.AddTool(self.ID_TOOL_NEXT_IMAGE,
                                            "Next Image",
-                                            wx.Bitmap("view/icons/1x/baseline"
-                                                      "_skip_next_black_"
-                                                      "18dp.png"))
-
-
+                                           wx.Bitmap("view/icons/1x/baseline"
+                                                     "_skip_next_black_"
+                                                     "18dp.png"))
 
         tool_bar.Bind(wx.EVT_TOOL, self.on_tool_chosen)
         tool_bar.Realize()
@@ -141,7 +141,6 @@ class MainWindow(wx.Frame):
         self.image_panel.Bind(wx.EVT_ENTER_WINDOW, self.on_enter_panel)
         self.image_panel.Bind(wx.EVT_LEAVE_WINDOW, self.on_leave_panel)
 
-
         self.control_panel.SetSizer(hbox)
 
         # ---- Overlay ----
@@ -162,7 +161,6 @@ class MainWindow(wx.Frame):
         :param img: The image to display
         :returns: None
         """
-        self.logger.debug("Displaying new image- {}".format(img.shape))
         self.current_image = img
 
         image = wx.Image(img.shape[1], img.shape[0])
@@ -190,7 +188,6 @@ class MainWindow(wx.Frame):
         if id == wx.ID_OPEN:
             self.logger.debug("Load Image Selected")
             self.controller.load_new_image()
-
 
     def on_tool_chosen(self, event):
         """
@@ -245,6 +242,12 @@ class MainWindow(wx.Frame):
         self.controller.handle_mouse_wheel(event.GetWheelRotation())
 
     def set_brush_radius(self, radius):
+        """
+        Set the radius of the cursor representing the current brush
+
+        :param radius: The radius to draw the brush at
+        :returns: None
+        """
 
         self.logger.debug("Setting brush radius to {}".format(radius))
         self.brush_radius = radius
@@ -284,7 +287,6 @@ class MainWindow(wx.Frame):
         screen_pos = self.ScreenToClient(screen_pos)
 
         self.previous_mouse_position = pos
-        self.logger.debug("Position {}, screen_pos {}".format(pos, screen_pos))
 
         self.draw_brush(pos)
 
@@ -296,15 +298,39 @@ class MainWindow(wx.Frame):
             self.controller.handle_motion(current_position)
 
     def on_enter_panel(self, event):
+        """
+        Called when the mouse enters the image panel
+
+        :param event: The mouse event
+        :returns: None
+        :postcondition: The mouse cursor is removed
+        """
         self.logger.debug("Entered Panel")
         cursor = wx.StockCursor(wx.CURSOR_BLANK)
         self.SetCursor(cursor)
 
     def on_leave_panel(self, event):
+        """
+        Called when the mouse leaves the image panel
+
+        :param event: The mouse event
+        :returns: None
+        :postcondition: The mouse cursor is restored to its default icon
+        """
         self.logger.debug("Leaving Panel")
         cursor = wx.Cursor(wx.CURSOR_DEFAULT)
 
     def draw_brush(self, pos=None):
+        """
+        Draw the brush circle over the image
+
+        :param pos: The position to draw the circle at.
+                    The default value is None.
+        :returns: None
+        """
+
+        if self.current_image is None:
+            return
 
         if pos is None:
             pos = self.previous_mouse_position
@@ -324,6 +350,12 @@ class MainWindow(wx.Frame):
         del odc
 
     def on_paint(self, event):
+        """
+        Called when paint events occur
+
+        :param event: The triggering paint event
+        :returns: None
+        """
 
         self.logger.debug("Paint")
         dc = wx.ClientDC(self.image_panel)
