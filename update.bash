@@ -10,5 +10,7 @@ if [ "$?" -eq "0" ]; then
 	new_dir_name=$(tar -tf $tar_name | sed -e 's@/.*@@' | uniq)
 	tar xvfz "friendly_gt-$newest_version.tar" -C ./
 	cp -r $new_dir_name/* .
+	rm -rf $new_dir_name
+	rm $tar_name
 	make install
 fi
