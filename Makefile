@@ -5,6 +5,7 @@ install: install_dir
 	cp friendly_gt ~/bin
 	-ln -s ${ROOT_DIR} ~/bin || true
 	chmod +x ~/bin/friendly_gt
+	bash append_path.bash
 
 uninstall:
 	conda remove --name friendly_gt --all
