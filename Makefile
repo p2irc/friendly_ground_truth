@@ -11,5 +11,8 @@ uninstall:
 	rm ~/bin/friendly_gt
 	rm -rf ~/bin/friendly_ground_truth
 
+update: uninstall
+	bash update.bash
+
 install_dir:
 	mkdir -p ~/bin
