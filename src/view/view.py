@@ -12,7 +12,8 @@ Description: Classes that represent the view for the application
 import wx
 import logging
 import numpy as np
-
+from view.icons import (add_region_icon, remove_region_icon, next_patch_icon,
+                        no_root_icon, prev_patch_icon, threshold_icon)
 
 module_logger = logging.getLogger('friendly_gt.view')
 
@@ -90,40 +91,59 @@ class MainWindow(wx.Frame):
 
         tool_bar = self.CreateToolBar()
 
+        # Create toolbar bitmaps
+        threshold_img = wx.Image(threshold_icon.get_threshold_icon.getImage())
+        threshold_bitmap = wx.Bitmap(threshold_img.ConvertToBitmap())
+
         threshold_tool = tool_bar.AddRadioTool(self.ID_TOOL_THRESH,
                                                "Threshold",
-                                               wx.Bitmap("view/icons/1x/"
-                                                         "baseline_tune_"
-                                                         "black_18dp.png"))
+                                               threshold_bitmap)
+
+        add_region_img = wx.Image(add_region_icon.get_add_region_icon.getImage())
+        add_region_bitmap = wx.Bitmap(add_region_img.ConvertToBitmap())
+
 
         add_tool = tool_bar.AddRadioTool(self.ID_TOOL_ADD, "Add Region",
-                                         wx.Bitmap("view/icons/1x/baseline"
-                                                   "_add_circle_outline_black"
-                                                   "_18dp.png"))
+                                         add_region_bitmap)
+
+        remove_region_img = wx.Image(remove_region_icon.get_remove_region_icon.getImage())
+        remove_region_bitmap = wx.Bitmap(remove_region_img.ConvertToBitmap())
+
+
 
         remove_tool = tool_bar.AddRadioTool(self.ID_TOOL_REMOVE, "Remove"
                                                                  "Region",
-                                            wx.Bitmap("view/icons/1x/baseline"
-                                                      "_remove_circle_outline"
-                                                      "_black_18dp.png"))
+                                            remove_region_bitmap)
+
+
+        no_roots_img = wx.Image(no_root_icon.get_no_root_icon.getImage())
+        no_roots_bitmap = wx.Bitmap(no_roots_img.ConvertToBitmap())
+
+
 
         no_roots_tool = tool_bar.AddTool(self.ID_TOOL_NO_ROOT, "No Roots",
-                                         wx.Bitmap("view/icons/1x/baseline"
-                                                   "_cancel_black_18dp.png"))
+                                         no_roots_bitmap)
 
         tool_bar.AddSeparator()
 
+
+        prev_patch_img = wx.Image(prev_patch_icon.get_prev_patch_icon.getImage())
+        prev_patch_bitmap = wx.Bitmap(prev_patch_img.ConvertToBitmap())
+
+
+
         prev_image_tool = tool_bar.AddTool(self.ID_TOOL_PREV_IMAGE,
                                            "Prev Image",
-                                           wx.Bitmap("view/icons/1x/baseline"
-                                                     "_skip_previous_black_"
-                                                     "18dp.png"))
+                                           prev_patch_bitmap)
+
+        next_patch_img = wx.Image(next_patch_icon.get_next_patch_icon.getImage())
+        next_patch_bitmap = wx.Bitmap(next_patch_img.ConvertToBitmap())
+
+
 
         next_image_tool = tool_bar.AddTool(self.ID_TOOL_NEXT_IMAGE,
                                            "Next Image",
-                                           wx.Bitmap("view/icons/1x/baseline"
-                                                     "_skip_next_black_"
-                                                     "18dp.png"))
+                                           next_patch_bitmap)
 
         tool_bar.Bind(wx.EVT_TOOL, self.on_tool_chosen)
         tool_bar.Realize()
