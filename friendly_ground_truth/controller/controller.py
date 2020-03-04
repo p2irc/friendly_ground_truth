@@ -13,7 +13,7 @@ import logging
 import os
 
 from view.view import MainWindow
-from model.model import Image, Patch
+from model.model import Image
 from enum import Enum
 
 module_logger = logging.getLogger('friendly_gt.controller')
