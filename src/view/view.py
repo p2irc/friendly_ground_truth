@@ -57,6 +57,8 @@ class MainWindow(wx.Frame):
         # Set up mouse interactions
         wx.GetApp().Bind(wx.EVT_MOUSEWHEEL, self.on_mousewheel)
 
+        # Set up arrow keys
+        self.Bind(wx.EVT_CHAR_HOOK, self.on_key)
 
     def init_ui(self):
         """
@@ -293,6 +295,24 @@ class MainWindow(wx.Frame):
             self.controller.change_mode(self.ID_TOOL_PREV_IMAGE)
             self.tool_bar.ToggleTool(self.ID_TOOL_PREV_IMAGE, True)
 
+    def on_key(self, event):
+        """
+        Called when a keyboard event is triggered
+
+        :param event: The keyboard event
+        :returns: None
+        """
+        keycode = event.GetKeyCode()
+
+        # Use left arrow and 'A' key to move left
+        if keycode == wx.WXK_LEFT or keycode == ord('A'):
+            self.controller.prev_patch()
+
+        # Use right arrow and 'D' key to move right
+        elif keycode == wx.WXK_RIGHT or keycode == ord('D'):
+            self.controller.next_patch()
+
+        event.Skip()
 
     def on_tool_chosen(self, event):
         """
