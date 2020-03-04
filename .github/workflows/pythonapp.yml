@@ -15,7 +15,9 @@ jobs:
     - name: setup-conda
       uses: s-weigand/setup-conda@v1.0.2
     - name: Install dependencies
-      run: conda env create -f environment.yml
+      run: |
+        conda env create -f environment.yml
+        conda activate friendly_gt
     - name: Lint with flake8
       run: |
         conda install flake8
