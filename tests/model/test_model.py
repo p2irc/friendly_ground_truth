@@ -12,6 +12,7 @@ Description: Unit Testing for Model
 import pytest
 from friendly_ground_truth.model.model import Image, Patch
 
+
 class TestImage:
     """
     Tests pertaining to the Image class

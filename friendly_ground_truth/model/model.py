@@ -17,7 +17,6 @@ from skimage.filters import threshold_otsu
 from skimage import color
 from skimage.draw import circle
 
-import matplotlib.pyplot as plt
 
 module_logger = logging.getLogger('friendly_gt.model')
 
@@ -56,8 +55,8 @@ class Image():
             img = io.imread(path)
             img = color.rgb2gray(img)
             img = img_as_float(img)
-        except exception as e:
-            logger.error("That image had some issues.")
+        except Exception:
+            self.logger.error("That image had some issues.")
 
         return img
 
@@ -77,10 +76,10 @@ class Image():
 
         self.logger.debug(image.shape)
 
-        if image.shape[0] % num_patches is not 0:
+        if image.shape[0] % num_patches != 0:
             pad_x = (0, (num_patches - (image.shape[0] % num_patches)))
 
-        if image.shape[1] % num_patches is not 0:
+        if image.shape[1] % num_patches != 0:
             pad_y = (0, (num_patches - (image.shape[1] % num_patches)))
 
         self.logger.debug("{}, {}".format(pad_x, pad_y))
