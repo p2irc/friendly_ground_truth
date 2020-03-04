@@ -1,3 +1,5 @@
+![CI Tests](https://github.com/KyleS22/friendly_ground_truth/workflows/CI%20Tests/badge.svg)
+
 # friendly_ground_truth
 A tool for manually creating ground truth masks from images where a significant amount of detail is required.
 
