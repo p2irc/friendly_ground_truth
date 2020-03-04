@@ -57,6 +57,9 @@ class MainWindow(wx.Frame):
         # Set up mouse interactions
         wx.GetApp().Bind(wx.EVT_MOUSEWHEEL, self.on_mousewheel)
 
+        # Set up arrow keys
+        self.Bind(wx.EVT_CHAR_HOOK, self.on_key)
+
     def init_ui(self):
         """
         Initialize the user interface with menus
@@ -85,17 +88,69 @@ class MainWindow(wx.Frame):
 
         # ---- End File Menu ----
 
+        # ---- Tool Menu ----
+        tool_menu = wx.Menu()
+
+
+        threshold_menu_item = wx.MenuItem(tool_menu, self.ID_TOOL_THRESH,
+                                          text="Threshold\tCTRL+T",
+                                          kind=wx.ITEM_NORMAL)
+
+        add_region_menu_item = wx.MenuItem(tool_menu, self.ID_TOOL_ADD,
+                                          text="Add Region\tCTRL+A",
+                                          kind=wx.ITEM_NORMAL)
+
+        remove_region_menu_item = wx.MenuItem(tool_menu,
+                                              self.ID_TOOL_REMOVE,
+                                              text="Remove Region\tCTRL+R",
+                                              kind=wx.ITEM_NORMAL)
+
+        no_root_menu_item = wx.MenuItem(tool_menu, self.ID_TOOL_NO_ROOT,
+                                          text="No Foreground\tCTRL+X",
+                                          kind=wx.ITEM_NORMAL)
+
+
+
+        tool_menu.Append(threshold_menu_item)
+        tool_menu.Append(add_region_menu_item)
+        tool_menu.Append(remove_region_menu_item)
+        tool_menu.Append(no_root_menu_item)
+
+        # ---- End Tool Menu ----
         menubar.Append(file_menu, '&File')
+        menubar.Append(tool_menu, '&Tools')
+
+        # ---- Keyboard Shortcuts ----
+        entries = [wx.AcceleratorEntry() for i in range(6)]
+
+        entries[0].Set(wx.ACCEL_CTRL, ord('T'), self.ID_TOOL_THRESH,
+                       threshold_menu_item)
+
+        entries[1].Set(wx.ACCEL_CTRL, ord('A'), self.ID_TOOL_ADD,
+                       add_region_menu_item)
+
+        entries[2].Set(wx.ACCEL_CTRL, ord('R'), self.ID_TOOL_REMOVE,
+                       remove_region_menu_item)
+
+        entries[3].Set(wx.ACCEL_CTRL, ord('X'), self.ID_TOOL_NO_ROOT,
+                       no_root_menu_item)
+
+
+
+        accel = wx.AcceleratorTable(entries)
+        self.SetAcceleratorTable(accel)
+
+        # ---- End Shortcuts ----
 
         # ---- Tool Bar ----
 
-        tool_bar = self.CreateToolBar()
+        self.tool_bar = self.CreateToolBar()
 
         # Create toolbar bitmaps
         threshold_img = wx.Image(threshold_icon.get_threshold_icon.getImage())
         threshold_bitmap = wx.Bitmap(threshold_img.ConvertToBitmap())
 
-        threshold_tool = tool_bar.AddRadioTool(self.ID_TOOL_THRESH,
+        threshold_tool = self.tool_bar.AddRadioTool(self.ID_TOOL_THRESH,
                                                "Threshold",
                                                threshold_bitmap)
 
@@ -103,7 +158,7 @@ class MainWindow(wx.Frame):
         add_region_bitmap = wx.Bitmap(add_region_img.ConvertToBitmap())
 
 
-        add_tool = tool_bar.AddRadioTool(self.ID_TOOL_ADD, "Add Region",
+        add_tool = self.tool_bar.AddRadioTool(self.ID_TOOL_ADD, "Add Region",
                                          add_region_bitmap)
 
         remove_region_img = wx.Image(remove_region_icon.get_remove_region_icon.getImage())
@@ -111,7 +166,7 @@ class MainWindow(wx.Frame):
 
 
 
-        remove_tool = tool_bar.AddRadioTool(self.ID_TOOL_REMOVE, "Remove"
+        remove_tool = self.tool_bar.AddRadioTool(self.ID_TOOL_REMOVE, "Remove"
                                                                  "Region",
                                             remove_region_bitmap)
 
@@ -121,10 +176,10 @@ class MainWindow(wx.Frame):
 
 
 
-        no_roots_tool = tool_bar.AddTool(self.ID_TOOL_NO_ROOT, "No Roots",
+        no_roots_tool = self.tool_bar.AddTool(self.ID_TOOL_NO_ROOT, "No Roots",
                                          no_roots_bitmap)
 
-        tool_bar.AddSeparator()
+        self.tool_bar.AddSeparator()
 
 
         prev_patch_img = wx.Image(prev_patch_icon.get_prev_patch_icon.getImage())
@@ -132,7 +187,7 @@ class MainWindow(wx.Frame):
 
 
 
-        prev_image_tool = tool_bar.AddTool(self.ID_TOOL_PREV_IMAGE,
+        prev_image_tool = self.tool_bar.AddTool(self.ID_TOOL_PREV_IMAGE,
                                            "Prev Image",
                                            prev_patch_bitmap)
 
@@ -141,12 +196,12 @@ class MainWindow(wx.Frame):
 
 
 
-        next_image_tool = tool_bar.AddTool(self.ID_TOOL_NEXT_IMAGE,
+        next_image_tool = self.tool_bar.AddTool(self.ID_TOOL_NEXT_IMAGE,
                                            "Next Image",
                                            next_patch_bitmap)
 
-        tool_bar.Bind(wx.EVT_TOOL, self.on_tool_chosen)
-        tool_bar.Realize()
+        self.tool_bar.Bind(wx.EVT_TOOL, self.on_tool_chosen)
+        self.tool_bar.Realize()
 
         # ---- End Tool Bar ----
 
@@ -215,6 +270,49 @@ class MainWindow(wx.Frame):
         elif id == wx.ID_SAVE:
             self.logger.debug("Exporting Mask")
             self.controller.save_mask()
+
+        elif id == self.ID_TOOL_THRESH:
+            self.controller.change_mode(self.ID_TOOL_THRESH)
+            self.tool_bar.ToggleTool(self.ID_TOOL_THRESH, True)
+
+        elif id == self.ID_TOOL_ADD:
+            self.controller.change_mode(self.ID_TOOL_ADD)
+            self.tool_bar.ToggleTool(self.ID_TOOL_ADD, True)
+
+        elif id == self.ID_TOOL_REMOVE:
+            self.controller.change_mode(self.ID_TOOL_REMOVE)
+            self.tool_bar.ToggleTool(self.ID_TOOL_REMOVE, True)
+
+        elif id == self.ID_TOOL_NO_ROOT:
+            self.controller.change_mode(self.ID_TOOL_NO_ROOT)
+            self.tool_bar.ToggleTool(self.ID_TOOL_NO_ROOT, True)
+
+        elif id == self.ID_TOOL_NEXT_IMAGE:
+            self.controller.change_mode(self.ID_TOOL_NEXT_IMAGE)
+            self.tool_bar.ToggleTool(self.ID_TOOL_NEXT_IMAGE, True)
+
+        elif id == self.ID_TOOL_PREV_IMAGE:
+            self.controller.change_mode(self.ID_TOOL_PREV_IMAGE)
+            self.tool_bar.ToggleTool(self.ID_TOOL_PREV_IMAGE, True)
+
+    def on_key(self, event):
+        """
+        Called when a keyboard event is triggered
+
+        :param event: The keyboard event
+        :returns: None
+        """
+        keycode = event.GetKeyCode()
+
+        # Use left arrow and 'A' key to move left
+        if keycode == wx.WXK_LEFT or keycode == ord('A'):
+            self.controller.prev_patch()
+
+        # Use right arrow and 'D' key to move right
+        elif keycode == wx.WXK_RIGHT or keycode == ord('D'):
+            self.controller.next_patch()
+
+        event.Skip()
 
     def on_tool_chosen(self, event):
         """
