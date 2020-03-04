@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
     version_string = version_string.strip("v")
 
-    version_pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
+    version_pattern = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+")
 
     if not version_pattern.match(version_string):
         print("Invalid version string.  Must be in format: x.x.x")
