@@ -19,6 +19,7 @@ jobs:
     - name: test conda
       run: |
         conda -V
+        conda init
         conda deactivate
         conda env list
         conda create -f environment.yml
