@@ -80,7 +80,11 @@ class Controller:
             self.logger.debug("File Path: %s", pathname)
             self.image_path = pathname
 
-            self.image = Image(pathname)
+            try:
+                self.image = Image(pathname)
+            except FileNotFoundError as e:
+                self.logger.debug("There was a problem loading the image")
+                # TODO: Display an error dialog
 
             self.current_patch = 0
             self.display_current_patch()
