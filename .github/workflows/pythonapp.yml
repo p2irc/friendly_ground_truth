@@ -13,11 +13,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: setup-conda
-      uses: s-weigand/setup-conda@v1.0.2  
-    - name: Install dependencies
-      run: |
-        conda env update -f environment.yml
-        conda list
+      uses: matthewrmshin/conda-action@v1
+      with:
+        args: conda env update -f ./environment.yml    
     - name: Lint with flake8
       run: |
         conda install flake8
