@@ -19,7 +19,7 @@ jobs:
     - name: test conda
       run: |
         conda -V
-        conda init
+        conda init bash
         source /home/runner/.bashrc
         conda deactivate
         conda env list
