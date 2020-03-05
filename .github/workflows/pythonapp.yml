@@ -20,6 +20,7 @@ jobs:
       run: |
         conda -V
         conda init
+        source /home/runner/.bashrc
         conda deactivate
         conda env list
         conda create -f environment.yml
