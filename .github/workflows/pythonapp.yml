@@ -13,9 +13,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: setup-conda
+      uses: s-weigand/setup-conda@v1.0.2
       with:
         activate-conda: false 
-      uses: s-weigand/setup-conda@v1.0.2
     - name: test conda
       run: |
         conda -V
