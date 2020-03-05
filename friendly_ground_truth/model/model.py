@@ -48,15 +48,13 @@ class Image():
 
         :param path: The path to the image to load
         :returns: An image in the form of a numpy array
+        :raises: FileNotFoundError if the image does not exist
         """
 
         self.logger.debug("Loading image")
-        try:
-            img = io.imread(path)
-            img = color.rgb2gray(img)
-            img = img_as_float(img)
-        except Exception:
-            self.logger.error("That image had some issues.")
+        img = io.imread(path)
+        img = color.rgb2gray(img)
+        img = img_as_float(img)
 
         return img
 
@@ -67,7 +65,12 @@ class Image():
         :param image: The image to create patches from
         :param num_patches: The number of patches to create ALONG ONE DIMENSION
         :returns: A list of patches made from the image
+        :raises: ValueError if the image is not an image
         """
+
+        if type(image) is not np.ndarray:
+            raise ValueError("image must be of type np.ndarray")
+
         self.logger.debug("Creating patches")
 
         # Determine padding so we can use non-overlapping patches
@@ -81,8 +84,6 @@ class Image():
 
         if image.shape[1] % num_patches != 0:
             pad_y = (0, (num_patches - (image.shape[1] % num_patches)))
-
-        self.logger.debug("{}, {}".format(pad_x, pad_y))
 
         image = np.pad(image, (pad_x, pad_y), 'constant',
                        constant_values=(0, 0))
