@@ -17,10 +17,10 @@ jobs:
     - name: test conda
       run: |
         conda -V
-        conda list
-        conda env update -f environment.yml
-        conda list
-    - name: test-conda-2
-      run: conda list
+        conda env list
+        conda create -f environment.yml
+        conda env list
+        conda activate friendly_gt
+        
       
     
