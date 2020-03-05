@@ -109,7 +109,7 @@ class TestImage:
         image = Image(valid_rgb_image_path)
 
         with pytest.raises(ValueError):
-            image.create_patches(image_data, 10)
+            image.create_patches(image_data)
 
     def test_create_patches_X_divisible_by_num_patches(self, test_image_data):
         """
@@ -123,7 +123,7 @@ class TestImage:
         :returns: None
         """
 
-        assert True
+        assert False
 
     def test_create_patches_X_not_divisible_by_num_patches(self,
                                                            test_image_data):
@@ -138,7 +138,7 @@ class TestImage:
         :returns: None
         """
 
-        assert True
+        assert False
 
     def test_create_patches_Y_divisible_by_num_patches(self, test_image_data):
         """
@@ -152,7 +152,7 @@ class TestImage:
         :returns: None
         """
 
-        assert True
+        assert False
 
     def test_create_patches_Y_not_divisible_by_num_patches(self,
                                                            test_image_data):
@@ -167,7 +167,7 @@ class TestImage:
         :returns: None
         """
 
-        assert True
+        assert False
 
     def test_create_mask_no_patches(self):
         """
@@ -179,7 +179,7 @@ class TestImage:
         :returns: None
         """
 
-        assert True
+        assert False
 
     def test_create_mask(self):
         """
@@ -191,7 +191,7 @@ class TestImage:
         :returns: None
         """
 
-        assert True
+        assert False
 
     def test_export_mask(self):
         """
@@ -202,4 +202,4 @@ class TestImage:
         :returns: None
         """
 
-        assert True
+        assert False
