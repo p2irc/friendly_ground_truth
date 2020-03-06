@@ -65,11 +65,18 @@ class Image():
         :param image: The image to create patches from
         :param num_patches: The number of patches to create ALONG ONE DIMENSION
         :returns: A list of patches made from the image
-        :raises: ValueError if the image is not an image
+        :raises: ValueError if the image is not a  single channel image
         """
+
+        if num_patches <= 0:
+            raise ValueError("num_patches must be a positive non-zero"
+                             " integer.")
 
         if type(image) is not np.ndarray:
             raise ValueError("image must be of type np.ndarray")
+
+        if len(image.shape) != 2:
+            raise ValueError("image must be a single channel image")
 
         self.logger.debug("Creating patches")
 
@@ -85,9 +92,11 @@ class Image():
         if image.shape[1] % num_patches != 0:
             pad_y = (0, (num_patches - (image.shape[1] % num_patches)))
 
+        print(image.shape, pad_x, pad_y)
         image = np.pad(image, (pad_x, pad_y), 'constant',
                        constant_values=(0, 0))
 
+        print(image.shape)
         self.padded_shape = image.shape
         # Get the size of each block
         block_size = (image.shape[0]//num_patches,
@@ -138,7 +147,7 @@ class Image():
                 col_num = 0
                 row_num += 1
 
-        self.mask = mask
+        self.mask = mask[:self.image.shape[0], :self.image.shape[1]]
 
     def export_mask(self, pathname):
         """
@@ -148,7 +157,7 @@ class Image():
         :returns: None
         """
         self.create_mask()
-
+        print(pathname)
         io.imsave(pathname, img_as_uint(self.mask))
 
 
