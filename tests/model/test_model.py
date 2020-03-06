@@ -360,7 +360,7 @@ class TestPatch:
     @pytest.fixture
     def patch_data_two_components(self):
         image_size = (500, 500)
-        img = np.zeros(image_sizei, dtype=np.uint8)
+        img = np.zeros(image_size, dtype=np.uint8)
         img[0:image_size[0]/2, image_size[1]:image_size[1]/2] = 1
 
         return img
@@ -396,7 +396,6 @@ class TestPatch:
 
         with pytest.raises(ValueError):
             patch.apply_threshold(-1)
-
 
     def test_apply_threshold_integer_value(self, patch_data_many_components,
                                            patch_index):
