@@ -7,7 +7,7 @@
 A tool for manually creating ground truth masks from images where a significant amount of detail is required.
 
 # Installation
-To install download the (latest release)[https://github.com/KyleS22/friendly_ground_truth/releases/latest], unpack it, and run `make install`.
+To install download the [latest release](https://github.com/KyleS22/friendly_ground_truth/releases/latest), unpack it, and run `make install`.
 
 If you like, here is a bash script that will handle all of that for you
 
