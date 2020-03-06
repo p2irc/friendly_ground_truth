@@ -15,7 +15,7 @@ import numpy as np
 
 from skimage import io
 from skimage.color import rgb2gray
-from friendly_ground_truth.model.model import Image  # , Patch
+from friendly_ground_truth.model.model import Image, Patch
 
 
 class TestImage:
@@ -338,3 +338,178 @@ class TestImage:
         image.export_mask(export_mask_path)
 
         assert os.path.exists(export_mask_path)
+
+
+class TestPatch:
+
+    @pytest.fixture
+    def patch_data_many_components(self):
+        image_size = (500, 500)
+        img = np.zeros(image_size, dtype=np.uint8)
+
+        # This should make an image of non-neighbouring white pixels
+        for i in range(image_size[0]):
+            for j in range(image_size[1]):
+                if i % 2 == 0:
+                    if j % 2 == 0:
+                        img[i, j] = 1
+                    else:
+                        pass
+        return img
+
+    @pytest.fixture
+    def patch_data_two_components(self):
+        image_size = (500, 500)
+        img = np.zeros(image_sizei, dtype=np.uint8)
+        img[0:image_size[0]/2, image_size[1]:image_size[1]/2] = 1
+
+        return img
+
+    @pytest.fixture
+    def patch_data_ones(self):
+        image_size = (500, 500)
+        img = np.ones(image_size, dtype=np.uint8)
+
+        return img
+
+    @pytest.fixture
+    def patch_data_zeros(self):
+        image_size = (500, 500)
+        img = np.zeros(image_size, dtype=np.uint8)
+
+        return img
+
+    @pytest.fixture
+    def patch_index(self):
+        return (1, 1)
+
+    def test_apply_threshold_negative_value(self, patch_data_many_components,
+                                            patch_index):
+        """
+        Try to apply a negative threshold value
+
+        :test_condition: Should raise a ValueError
+
+        :returns: None
+        """
+        patch = Patch(patch_data_many_components, patch_index)
+
+        with pytest.raises(ValueError):
+            patch.apply_threshold(-1)
+
+
+    def test_apply_threshold_integer_value(self, patch_data_many_components,
+                                           patch_index):
+        """
+        Try to apply a threshold greater than 1
+
+        :test_condition: Should raise a ValueError
+
+        :returns: None
+        """
+
+        patch = Patch(patch_data_many_components, patch_index)
+
+        with pytest.raises(ValueError):
+            patch.apply_threshold(2)
+
+    def test_overlay_mask(self, patch_data_many_components, patch_index):
+        """
+        Make sure that overlaying the mask works correctly
+
+        :test_condition: The overlay_mask property is an image with the same
+                         shape as the original image
+
+        :returns: None
+        """
+
+        patch = Patch(patch_data_many_components, patch_index)
+
+        patch.overlay_mask()
+
+        assert patch.overlay_image.shape[0:2] == patch.patch.shape
+
+    def test_clear_mask(self, patch_data_many_components,
+                        patch_data_ones, patch_index):
+        """
+        See what happens when we try to clear the mask
+
+        :test_condition: The mask will be all zeros
+
+        :returns: None
+        """
+        patch = Patch(patch_data_many_components, patch_index)
+
+        patch.mask = patch_data_ones
+
+        patch.clear_mask()
+
+        assert np.count_nonzero(patch.mask) == 0
+
+    def test_add_region(self, patch_data_zeros, patch_data_many_components,
+                        patch_index):
+        """
+        Check that the given region is added
+
+        :test_condition: The mask at the given position is 1
+
+
+        :returns: None
+        """
+        position = (patch_data_zeros.shape[0]//2,
+                    patch_data_zeros.shape[1]//2)
+
+        radius = 10
+
+        patch = Patch(patch_data_many_components, patch_index)
+        patch.mask = patch_data_zeros
+
+        patch.add_region(position, radius)
+
+        assert patch.mask[position[0], position[1]] == 1
+
+    def test_remove_region(self, patch_data_ones, patch_data_many_components,
+                           patch_index):
+        """
+        Check that a given region is removed
+
+        :test_condition: The mask at the given position is 0
+
+
+        :returns: None
+        """
+        position = (patch_data_ones.shape[0]//2,
+                    patch_data_ones.shape[1]//2)
+
+        radius = 10
+
+        patch = Patch(patch_data_many_components, patch_index)
+        patch.mask = patch_data_ones
+
+        patch.remove_region(position, radius)
+
+        assert patch.mask[position[0], position[1]] == 0
+
+    def test_check_displayable(self, patch_data_many_components, patch_index):
+        """
+        {% What it do %}
+
+        :param patch_data_many_components: {% A parameter %}
+        :param patch: {% A parameter %}
+        :returns: {% A thing %}
+        """
+        """
+        Check that a mask with more than MAX_COMPONENTS is set to not
+        displayable
+
+        :test_condition: A mask with > MAX_COMPINENTS has displayable == False
+
+        :returns: None
+        """
+        patch = Patch(patch_data_many_components, patch_index)
+
+        patch.mask = patch_data_many_components
+
+        patch.check_displayable()
+
+        assert patch.display is False
