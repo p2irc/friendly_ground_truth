@@ -12,8 +12,8 @@ import wx
 import logging
 import os
 
-from view.view import MainWindow
-from model.model import Image
+from friendly_ground_truth.view.view import MainWindow
+from friendly_ground_truth.model.model import Image
 from enum import Enum
 
 module_logger = logging.getLogger('friendly_gt.controller')
@@ -82,7 +82,7 @@ class Controller:
 
             try:
                 self.image = Image(pathname)
-            except FileNotFoundError as e:
+            except FileNotFoundError:
                 self.logger.debug("There was a problem loading the image")
                 # TODO: Display an error dialog
 
@@ -126,6 +126,7 @@ class Controller:
 
             except IOError:
                 wx.LogError("Cannot save file '%s'." % pathname)
+                # TODO: display dialog
 
     def display_current_patch(self):
         """
@@ -240,6 +241,7 @@ class Controller:
 
         else:
             self.logger.error("Invalid mouse wheel rotation")
+            return False
 
     def handle_left_click(self, click_location):
         """
@@ -262,7 +264,7 @@ class Controller:
             self.display_current_patch()
 
         else:
-            return
+            return False
 
     def handle_left_release(self):
         """

@@ -11,7 +11,7 @@ Description: Classes that represent the view for the application
 
 import wx
 import logging
-from view.icons import (add_region_icon, remove_region_icon, next_patch_icon,
+from friendly_ground_truth.view.icons import (add_region_icon, remove_region_icon, next_patch_icon,
                         no_root_icon, prev_patch_icon, threshold_icon)
 
 module_logger = logging.getLogger('friendly_gt.view')
