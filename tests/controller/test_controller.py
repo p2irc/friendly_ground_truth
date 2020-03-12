@@ -18,10 +18,11 @@ from mock import MagicMock, PropertyMock
 
 from friendly_ground_truth.controller.controller import Controller, Mode
 from friendly_ground_truth.view.view import MainWindow
-from friendly_ground_truth.model.model import Patch, Image
+from friendly_ground_truth.model.model import Patch
 
 from skimage import io
 from skimage.color import rgb2gray
+
 
 class TestController:
     """
@@ -47,7 +48,6 @@ class TestController:
     @pytest.fixture
     def test_image_data(self):
         return rgb2gray(io.imread(os.path.abspath('tests/data/KyleS22.jpg')))
-
 
     @pytest.fixture
     def setup(self, mocker):
@@ -263,7 +263,7 @@ class TestController:
 
         assert False
 
-    def test_handle_mouse_wheel_threshold(self, setup):
+    def test_handle_mouse_wheel_threshold(self, setup, mocker):
         """
         Test when the mouse wheel function is called and the current mode is
         Mode.THRESHOLD
@@ -274,9 +274,28 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_mode = Mode.THRESHOLD
 
-    def test_handle_mouse_wheel_add_region(self, setup):
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        spy = mocker.spy(controller, 'adjust_threshold')
+
+        controller.handle_mouse_wheel(-1)
+
+        spy.assert_called_once_with(-1)
+
+    def test_handle_mouse_wheel_add_region(self, setup, mocker):
         """
         Test when the mouse wheel function is called and the current mode is
         Mode.ADD_REGION
@@ -287,9 +306,16 @@ class TestController:
         :returns: None
         """
 
-        assert false
+        controller = Controller()
+        controller.current_mode = Mode.ADD_REGION
 
-    def test_handle_mouse_wheel_remove_region(self, setup):
+        spy = mocker.spy(controller, 'adjust_add_region_brush')
+
+        controller.handle_mouse_wheel(-1)
+
+        spy.assert_called_once_with(-1)
+
+    def test_handle_mouse_wheel_remove_region(self, setup, mocker):
         """
         Test when the mouse wheel function is called and the current mode is
         Mode.REMOVE_REGION
@@ -300,7 +326,14 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_mode = Mode.REMOVE_REGION
+
+        spy = mocker.spy(controller, 'adjust_remove_region_brush')
+
+        controller.handle_mouse_wheel(-1)
+
+        spy.assert_called_once_with(-1)
 
     def test_handle_mouse_wheel_invalid(self, setup):
         """
@@ -313,7 +346,12 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_mode = Mode.NO_ROOT
+
+        result = controller.handle_mouse_wheel(-1)
+
+        assert False is result
 
     def test_handle_left_click_add_region(self, setup):
         """
@@ -327,7 +365,24 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_mode = Mode.ADD_REGION
+
+        mock_patch = MagicMock()
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        position = (1, 2)
+        radius = controller.add_region_radius
+
+        controller.handle_left_click(position)
+
+        mock_patch.add_region.assert_called_with(position, radius)
 
     def test_handle_left_click_remove_region(self, setup):
         """
@@ -341,7 +396,24 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_mode = Mode.REMOVE_REGION
+
+        mock_patch = MagicMock()
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        position = (1, 2)
+        radius = controller.remove_region_radius
+
+        controller.handle_left_click(position)
+
+        mock_patch.remove_region.assert_called_with(position, radius)
 
     def test_handle_left_click_invalid_mode(self, setup):
         """
@@ -354,7 +426,11 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_mode = Mode.THRESHOLD
+
+        result = controller.handle_left_click((0, 0))
+        assert False is result
 
     def test_handle_left_release_add_region(self, setup):
         """
@@ -366,7 +442,12 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_mode = Mode.ADD_REGION
+
+        result = controller.handle_left_release()
+
+        assert True is result
 
     def test_handle_left_release_remove_region(self, setup):
         """
@@ -379,7 +460,12 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_mode = Mode.REMOVE_REGION
+
+        result = controller.handle_left_release()
+
+        assert True is result
 
     def test_handle_left_release_invalid_mode(self, setup):
         """
@@ -392,7 +478,11 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_mode = Mode.THRESHOLD
+
+        result = controller.handle_left_release()
+        assert False is result
 
     def test_handle_motion_add_region(self, setup):
         """
@@ -405,9 +495,26 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_mode = Mode.ADD_REGION
 
-    def test_handle_motion_remove_region(self, setup):
+        mock_patch = MagicMock()
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        position = (1, 2)
+        radius = controller.add_region_radius
+
+        controller.handle_motion(position)
+
+        mock_patch.add_region.assert_called_with(position, radius)
+
+    def test_handle_motion_remove_region(self, setup, mocker):
         """
         Test when the mouse is moved and the current mode is Mode.REMOVE_REGION
 
@@ -418,7 +525,24 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_mode = Mode.REMOVE_REGION
+
+        mock_patch = MagicMock()
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        position = (1, 2)
+        radius = controller.remove_region_radius
+
+        controller.handle_motion(position)
+
+        mock_patch.remove_region.assert_called_with(position, radius)
 
     def test_handle_motion_invalid_mode(self, setup):
         """
@@ -461,15 +585,13 @@ class TestController:
         controller.image = mock_image
 
         old_threshold = controller\
-                         .image.patches[controller.current_patch].thresh
-
+            .image.patches[controller.current_patch].thresh
 
         controller.adjust_threshold(1)
 
         new_patch = controller.image.patches[controller.current_patch]
 
         assert (old_threshold - 0.01) == new_patch.thresh
-
 
     def test_adjust_threshold_positive_rot_invalid_thresh(self, setup,
                                                           test_image_data):
@@ -495,8 +617,7 @@ class TestController:
         controller.image = mock_image
 
         old_threshold = controller\
-                         .image.patches[controller.current_patch].thresh
-
+            .image.patches[controller.current_patch].thresh
 
         controller.adjust_threshold(1)
 
@@ -504,8 +625,8 @@ class TestController:
 
         assert old_threshold == new_patch.thresh
 
-
-    def test_adjust_threshold_negative_rot_invalid_thresh(self, setup, test_image_data):
+    def test_adjust_threshold_negative_rot_invalid_thresh(self, setup,
+                                                          test_image_data):
         """
         Test when the mouse wheel has a negative rotation in Mode.THRESHOLD
         and the threshold is greater than or equal to one
@@ -528,8 +649,7 @@ class TestController:
         controller.image = mock_image
 
         old_threshold = controller\
-                         .image.patches[controller.current_patch].thresh
-
+            .image.patches[controller.current_patch].thresh
 
         controller.adjust_threshold(-1)
 
@@ -537,7 +657,8 @@ class TestController:
 
         assert old_threshold == new_patch.thresh
 
-    def test_adjust_threshold_negative_rot_valid_thresh(self, setup, test_image_data):
+    def test_adjust_threshold_negative_rot_valid_thresh(self, setup,
+                                                        test_image_data):
         """
         Test when the mouse wheel has a negative rotation in Mode.THRESHOLD
         and the threshold is less than one
@@ -560,8 +681,7 @@ class TestController:
         controller.image = mock_image
 
         old_threshold = controller\
-                         .image.patches[controller.current_patch].thresh
-
+            .image.patches[controller.current_patch].thresh
 
         controller.adjust_threshold(-1)
 

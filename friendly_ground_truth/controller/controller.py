@@ -45,18 +45,19 @@ class Controller:
 
         self.current_patch = 0
 
-        # Set up the main window
-        self.main_window = MainWindow(self)
-
-        # Show the window
-        self.main_window.Show()
-
         # Set up the current mode
         self.current_mode = Mode.THRESHOLD
 
         # Brush radii
         self.add_region_radius = 15
         self.remove_region_radius = 15
+
+        # Set up the main window
+        self.main_window = MainWindow(self)
+
+        # Show the window
+        self.main_window.Show()
+
 
     def load_new_image(self):
         """
