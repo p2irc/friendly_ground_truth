@@ -438,6 +438,19 @@ class TestController:
 
         spy.assert_called_once()
 
+    def change_mode_invalid(self, setup, mocker):
+        """
+        Test changing the mode to an invalid mode
+
+        :param setup: The setup fixture
+        :param mocker: Mocker
+        :returns: None
+        """
+        controller = Controller()
+
+        result = controller.change_mode(-1)
+        assert False is result
+
     def test_no_root_activate(self, setup):
         """
         Test calling no_root activate
