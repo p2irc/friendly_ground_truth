@@ -43,6 +43,8 @@ class Controller:
         self.logger = logging.getLogger('friendly_gt.controller.Controller')
         self.logger.debug("Creating controller instance")
 
+        self.current_patch = 0
+
         # Set up the main window
         self.main_window = MainWindow(self)
 
@@ -323,10 +325,10 @@ class Controller:
         # Adjust the threshold.  Note that it is inverted, because it feels
         # more natural to scroll down to 'reduce' the region, rather than
         # reducing the threshold
-        if wheel_rotation > 0 and patch.thresh >= 0:
+        if wheel_rotation > 0 and patch.thresh > 0:
             patch.thresh -= 0.01
 
-        elif wheel_rotation < 0 and patch.thresh <= 1:
+        elif wheel_rotation < 0 and patch.thresh < 1:
             patch.thresh += 0.01
 
         patch.apply_threshold(patch.thresh)

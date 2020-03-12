@@ -14,9 +14,14 @@ import os
 import wx
 import mock
 
-from friendly_ground_truth.controller.controller import Controller
-from friendly_ground_truth.view.view import MainWindow
+from mock import MagicMock, PropertyMock
 
+from friendly_ground_truth.controller.controller import Controller, Mode
+from friendly_ground_truth.view.view import MainWindow
+from friendly_ground_truth.model.model import Patch, Image
+
+from skimage import io
+from skimage.color import rgb2gray
 
 class TestController:
     """
@@ -40,6 +45,11 @@ class TestController:
         return os.path.abspath('tests/data/')
 
     @pytest.fixture
+    def test_image_data(self):
+        return rgb2gray(io.imread(os.path.abspath('tests/data/KyleS22.jpg')))
+
+
+    @pytest.fixture
     def setup(self, mocker):
 
         self.mock_MW_init = mocker.patch.object(MainWindow, '__init__',
@@ -52,7 +62,7 @@ class TestController:
         self.mock_MW_draw_brush = mocker.patch.object(MainWindow, 'draw_brush')
         self.mock_C_display_current_patch = mocker.\
             patch.\
-            object(Controller, 'display_current_patch', True)
+            object(Controller, 'display_current_patch')
 
     @pytest.fixture
     def dialog_mock(self):
@@ -421,23 +431,116 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_mode = Mode.THRESHOLD
 
-    def test_adjust_threshold_positive_rot(self, setup):
+        result = controller.handle_motion((0, 0))
+
+        assert False is result
+
+    def test_adjust_threshold_positive_rot_valid_thresh(self, setup,
+                                                        test_image_data):
         """
         Test when the mouse wheel has a positive rotation in Mode.THRESHOLD
-
+        and the threshold is greater than 0
         :test_condition: The patches thresh value should be decreased by 0.01
 
         :param setup: The setup fixture
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        patch = Patch(test_image_data, (0, 0))
+        patch.thresh = 0.5
 
-    def test_adjust_threshold_negative_rot(self, setup):
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        old_threshold = controller\
+                         .image.patches[controller.current_patch].thresh
+
+
+        controller.adjust_threshold(1)
+
+        new_patch = controller.image.patches[controller.current_patch]
+
+        assert (old_threshold - 0.01) == new_patch.thresh
+
+
+    def test_adjust_threshold_positive_rot_invalid_thresh(self, setup,
+                                                          test_image_data):
+        """
+        Test when the mouse wheel has a positive rotation in Mode.THRESHOLD
+        and the threshold is smaller than or equal to 0
+
+        :test_condition: The patches thresh value should not be changed
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller()
+        patch = Patch(test_image_data, (0, 0))
+        patch.thresh = 0.0
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        old_threshold = controller\
+                         .image.patches[controller.current_patch].thresh
+
+
+        controller.adjust_threshold(1)
+
+        new_patch = controller.image.patches[controller.current_patch]
+
+        assert old_threshold == new_patch.thresh
+
+
+    def test_adjust_threshold_negative_rot_invalid_thresh(self, setup, test_image_data):
         """
         Test when the mouse wheel has a negative rotation in Mode.THRESHOLD
+        and the threshold is greater than or equal to one
+
+        :test_condition: The patches thresh value should not be changed
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller()
+        patch = Patch(test_image_data, (0, 0))
+        patch.thresh = 1.0
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        old_threshold = controller\
+                         .image.patches[controller.current_patch].thresh
+
+
+        controller.adjust_threshold(-1)
+
+        new_patch = controller.image.patches[controller.current_patch]
+
+        assert old_threshold == new_patch.thresh
+
+    def test_adjust_threshold_negative_rot_valid_thresh(self, setup, test_image_data):
+        """
+        Test when the mouse wheel has a negative rotation in Mode.THRESHOLD
+        and the threshold is less than one
 
         :test_condition: The patches thresh value should be increased by 0.01
 
@@ -445,7 +548,27 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        patch = Patch(test_image_data, (0, 0))
+        patch.thresh = 0.5
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        old_threshold = controller\
+                         .image.patches[controller.current_patch].thresh
+
+
+        controller.adjust_threshold(-1)
+
+        new_patch = controller.image.patches[controller.current_patch]
+
+        assert old_threshold != new_patch.thresh
+        assert (old_threshold + 0.01) == new_patch.thresh
 
     def test_adjust_add_region_brush_positive_rot(self, setup):
         """
@@ -457,7 +580,14 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+
+        old_add_radius = controller.add_region_radius
+
+        controller.adjust_add_region_brush(1)
+
+        assert controller.add_region_radius != old_add_radius
+        assert (controller.add_region_radius - 1) == old_add_radius
 
     def test_adjust_add_region_brush_negative_rot(self, setup):
         """
@@ -469,7 +599,14 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+
+        old_add_radius = controller.add_region_radius
+
+        controller.adjust_add_region_brush(-1)
+
+        assert controller.add_region_radius != old_add_radius
+        assert (controller.add_region_radius + 1) == old_add_radius
 
     def test_adjust_remove_region_brush_positive_rot(self, setup):
         """
@@ -481,7 +618,14 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+
+        old_remove_radius = controller.remove_region_radius
+
+        controller.adjust_remove_region_brush(1)
+
+        assert controller.remove_region_radius != old_remove_radius
+        assert (controller.remove_region_radius - 1) == old_remove_radius
 
     def test_adjust_remove_region_brush_negative_rot(self, setup):
         """
