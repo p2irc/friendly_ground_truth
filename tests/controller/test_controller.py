@@ -82,7 +82,10 @@ class TestController:
         :returns: None
         """
         controller = Controller()
-        assert False
+
+        name = controller.get_image_name_from_path(valid_rgb_image_path)
+
+        assert 'KyleS22_mask.png' == name
 
     def test_get_image_name_from_non_file_path(self, setup,
                                                directory_path):
@@ -97,20 +100,9 @@ class TestController:
         """
 
         controller = Controller()
-        assert False
 
-    def test_get_image_name_from_invalid_path(self, setup,
-                                              invalid_image_path):
-        """
-        Test getting the name of an image from a non-existant path
-
-        :test_condition: Should raise an exception.
-
-        :param invalid_image_path: A non-existant image path
-        :returns: None
-        """
-
-        assert False
+        with pytest.raises(ValueError):
+            controller.get_image_name_from_path(directory_path)
 
     def test_next_patch_valid_index_displayable(self, setup):
         """
@@ -122,7 +114,25 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_patch = 0
+
+        mock_patch = MagicMock()
+        display_mock = PropertyMock(return_value=True)
+
+        type(mock_patch).display = display_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch,
+                                    mock_patch,  mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.next_patch()
+
+        assert controller.current_patch == 1
 
     def test_next_patch_valid_index_not_displayable(self, setup):
         """
@@ -135,9 +145,32 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_patch = 0
 
-    def test_next_patch_invalid_index(self, mocker, setup, dialog_mock):
+        mock_patch = MagicMock()
+        display_mock = PropertyMock(return_value=True)
+
+        type(mock_patch).display = display_mock
+
+        mock_no_display_patch = MagicMock()
+        false_display_mock = PropertyMock(return_value=False)
+
+        type(mock_no_display_patch).display = false_display_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch,
+                                    mock_no_display_patch,  mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.next_patch()
+
+        assert controller.current_patch == 2
+
+    def test_next_patch_invalid_index(self, mocker, setup):
         """
         Test moving to the next patch when the current patch is the last patch
         in the list of patches
@@ -147,13 +180,29 @@ class TestController:
 
         :returns: None
         """
-        spy = mocker.spy(wx.MessageDialog, '__init__')
-
-        spy.assert_called_once()
-
+        mock_dialog = mocker.patch('wx.MessageDialog')
         controller = Controller()
 
-        assert False
+        mock_patch = MagicMock()
+        display_mock = PropertyMock(return_value=True)
+
+        type(mock_patch).display = display_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch,
+                                    mock_patch,  mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.current_patch = 2
+
+        controller.next_patch()
+
+        mock_dialog.assert_called()
+
+        assert controller.current_patch == 2
 
     def test_prev_patch_valid_index_displayable(self, setup):
         """
@@ -166,7 +215,25 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_patch = 2
+
+        mock_patch = MagicMock()
+        display_mock = PropertyMock(return_value=True)
+
+        type(mock_patch).display = display_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch,
+                                    mock_patch,  mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.prev_patch()
+
+        assert controller.current_patch == 1
 
     def test_prev_patch_valid_index_not_displayable(self, setup):
         """
@@ -180,7 +247,30 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_patch = 2
+
+        mock_patch = MagicMock()
+        display_mock = PropertyMock(return_value=True)
+
+        type(mock_patch).display = display_mock
+
+        mock_no_display_patch = MagicMock()
+        false_display_mock = PropertyMock(return_value=False)
+
+        type(mock_no_display_patch).display = false_display_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch,
+                                    mock_no_display_patch,  mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.prev_patch()
+
+        assert controller.current_patch == 0
 
     def test_prev_patch_invalid_index(self, setup):
         """
@@ -192,9 +282,25 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
 
-    def test_change_mode_thresh(self, setup, mock_brush_radius):
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch, mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.prev_patch()
+
+        assert controller.current_patch == 0
+
+    def test_change_mode_thresh(self, setup, mocker):
         """
         Test changing the mode to Threshold
 
@@ -207,9 +313,30 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_mode = Mode.ADD_REGION
 
-    def test_change_mode_add_region(self, setup, mock_brush_radius):
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        spy = mocker.spy(MainWindow, 'set_brush_radius')
+
+        controller.change_mode(MainWindow.ID_TOOL_THRESH)
+
+        spy.assert_called_once()
+
+        assert controller.current_mode == Mode.THRESHOLD
+
+    def test_change_mode_add_region(self, setup, mocker):
         """
         Test changing the mode to add region
 
@@ -221,10 +348,30 @@ class TestController:
                                   MainWindow.set_brush_radius function
         :returns: None
         """
+        controller = Controller()
+        controller.current_mode = Mode.THRESHOLD
 
-        assert False
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
 
-    def test_change_mode_remove_region(self, setup, mock_brush_radius):
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        spy = mocker.spy(MainWindow, 'set_brush_radius')
+
+        controller.change_mode(MainWindow.ID_TOOL_ADD)
+
+        spy.assert_called_once()
+
+        assert controller.current_mode == Mode.ADD_REGION
+
+    def test_change_mode_remove_region(self, setup, mocker):
         """
         Test changing the mode to remove region
 
@@ -237,31 +384,89 @@ class TestController:
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_mode = Mode.THRESHOLD
 
-    def test_change_mode_no_root_activate(self, setup):
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        spy = mocker.spy(MainWindow, 'set_brush_radius')
+
+        controller.change_mode(MainWindow.ID_TOOL_REMOVE)
+
+        spy.assert_called_once()
+
+        assert controller.current_mode == Mode.REMOVE_REGION
+
+    def test_change_mode_no_root_activate(self, setup, mocker):
         """
         Test changing the mode to NO ROOT
 
-        :test_condition:  The mask of the current patch is all 0
+        :test_condition:  The no_root_activate function is called
 
         :param setup: The setup fixture
         :returns: None
         """
 
-        assert False
+        controller = Controller()
+        controller.current_mode = Mode.THRESHOLD
+
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        spy = mocker.spy(controller, 'no_root_activate')
+
+        controller.change_mode(MainWindow.ID_TOOL_NO_ROOT)
+
+        spy.assert_called_once()
 
     def test_no_root_activate(self, setup):
         """
         Test calling no_root activate
 
-        :test_condition: The mask of the current patch is all 0
+        :test_condition: The patch clear_mask and overlay mask functions are
+                         called
 
         :param setup: The setup fixture
         :returns: None
         """
+        controller = Controller()
+        controller.current_mode = Mode.THRESHOLD
 
-        assert False
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.no_root_activate()
+
+        mock_patch.clear_mask.assert_called()
+        mock_patch.overlay_mask.assert_called()
 
     def test_handle_mouse_wheel_threshold(self, setup, mocker):
         """

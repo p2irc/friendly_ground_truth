@@ -58,7 +58,6 @@ class Controller:
         # Show the window
         self.main_window.Show()
 
-
     def load_new_image(self):
         """
         Called when the user wants to load a new image to open a file
@@ -99,6 +98,9 @@ class Controller:
         :param path: The path to the original image
         :returns: The new filename for the mask
         """
+
+        if os.path.isdir(path):
+            raise ValueError("Cannot get image name from a directory.")
 
         basename = os.path.basename(path)
         return os.path.splitext(basename)[0] + '_mask.png'

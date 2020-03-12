@@ -11,8 +11,11 @@ Description: Classes that represent the view for the application
 
 import wx
 import logging
-from friendly_ground_truth.view.icons import (add_region_icon, remove_region_icon, next_patch_icon,
-                        no_root_icon, prev_patch_icon, threshold_icon)
+from friendly_ground_truth.view.icons import (add_region_icon,
+                                              remove_region_icon,
+                                              next_patch_icon,
+                                              no_root_icon,
+                                              prev_patch_icon, threshold_icon)
 
 module_logger = logging.getLogger('friendly_gt.view')
 
@@ -21,6 +24,13 @@ class MainWindow(wx.Frame):
     """
     The main window for displaying image patches and such
     """
+    # Constant button IDs
+    ID_TOOL_THRESH = 101
+    ID_TOOL_ADD = 102
+    ID_TOOL_REMOVE = 103
+    ID_TOOL_NO_ROOT = 104
+    ID_TOOL_PREV_IMAGE = 105
+    ID_TOOL_NEXT_IMAGE = 106
 
     def __init__(self, controller, parent=None):
         """
@@ -37,14 +47,6 @@ class MainWindow(wx.Frame):
 
         # Initialize the logger
         self.logger = logging.getLogger('friendly_gt.view.MainWindow')
-
-        # Constant button IDs
-        self.ID_TOOL_THRESH = 101
-        self.ID_TOOL_ADD = 102
-        self.ID_TOOL_REMOVE = 103
-        self.ID_TOOL_NO_ROOT = 104
-        self.ID_TOOL_PREV_IMAGE = 105
-        self.ID_TOOL_NEXT_IMAGE = 106
 
         # Create the frame
         wx.Frame.__init__(self, parent, -1, "Main Window")
