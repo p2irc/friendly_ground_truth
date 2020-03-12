@@ -42,14 +42,18 @@ class TestController:
     @pytest.fixture
     def setup(self, mocker):
 
-        self.mock_MW_init = mocker.patch.object(MainWindow, '__init__', lambda x, y: None)
+        self.mock_MW_init = mocker.patch.object(MainWindow, '__init__',
+                                                lambda x, y: None)
         self.mock_MW_Show = mocker.patch.object(MainWindow, 'Show')
-        self.mock_C_display_current_patch = mocker.\
-                                            patch.\
-                                            object(Controller,
-                                                   'display_current_patch',
 
-                                                   True)
+        self.mock_MW_set_brush_radius = mocker.patch.object(MainWindow,
+                                                            'set_brush_radius')
+
+        self.mock_MW_draw_brush = mocker.patch.object(MainWindow, 'draw_brush')
+        self.mock_C_display_current_patch = mocker.\
+            patch.\
+            object(Controller, 'display_current_patch', True)
+
     @pytest.fixture
     def dialog_mock(self):
         return mock.patch.object(wx.MessageDialog, "__init__")
@@ -122,7 +126,6 @@ class TestController:
         """
 
         assert False
-
 
     def test_next_patch_invalid_index(self, mocker, setup, dialog_mock):
         """
@@ -302,7 +305,6 @@ class TestController:
 
         assert False
 
-
     def test_handle_left_click_add_region(self, setup):
         """
         Test when the left mouse button is clicked and the current mode is
@@ -316,7 +318,6 @@ class TestController:
         """
 
         assert False
-
 
     def test_handle_left_click_remove_region(self, setup):
         """
@@ -345,4 +346,158 @@ class TestController:
 
         assert False
 
+    def test_handle_left_release_add_region(self, setup):
+        """
+        Test when the mouse is released and the current mode is Mode.ADD_REGION
 
+        :test_condition:  The function returns True
+
+        :param setup: The setup ficture
+        :returns: None
+        """
+
+        assert False
+
+    def test_handle_left_release_remove_region(self, setup):
+        """
+        Test when the mouse is released and the current mode is
+        Mode.REMOVE_REGION
+
+        :test_condition: The function returns True
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        assert False
+
+    def test_handle_left_release_invalid_mode(self, setup):
+        """
+        Test when the mouse is released and the current mode is not ADD or
+        REMOVE REGION
+
+        :test_condition: The function returns False
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        assert False
+
+    def test_handle_motion_add_region(self, setup):
+        """
+        Test when the mouse is moved and the current mode is Mode.ADD_REGION
+
+        :test_condition: The patch add_region function is called with the given
+                         position and the current add_region_radius
+
+        :param setup: The setip fixture
+        :returns: None
+        """
+
+        assert False
+
+    def test_handle_motion_remove_region(self, setup):
+        """
+        Test when the mouse is moved and the current mode is Mode.REMOVE_REGION
+
+        :test_condition: The patch remove_region function is called with the
+                         given position and the current remove_region_radius
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        assert False
+
+    def test_handle_motion_invalid_mode(self, setup):
+        """
+        Test when the mouse is moved and the current mode is not ADD or REMOVE
+        REGION
+
+        :test_condition: Should return False
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        assert False
+
+    def test_adjust_threshold_positive_rot(self, setup):
+        """
+        Test when the mouse wheel has a positive rotation in Mode.THRESHOLD
+
+        :test_condition: The patches thresh value should be decreased by 0.01
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        assert False
+
+    def test_adjust_threshold_negative_rot(self, setup):
+        """
+        Test when the mouse wheel has a negative rotation in Mode.THRESHOLD
+
+        :test_condition: The patches thresh value should be increased by 0.01
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        assert False
+
+    def test_adjust_add_region_brush_positive_rot(self, setup):
+        """
+        Test when the mouse wheel has a positive rotation in Mode.ADD_REGION
+
+        :test_condition: The add_region_radius is increased by 1
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        assert False
+
+    def test_adjust_add_region_brush_negative_rot(self, setup):
+        """
+        Test when the mouse wheel has a negative rotation in Mode.ADD_REGION
+
+        :test_condition: The add_region_radius is decreased by 1
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        assert False
+
+    def test_adjust_remove_region_brush_positive_rot(self, setup):
+        """
+        Test when the mouse wheel has a positive rotation in Mode.REMOVE_REGION
+
+        :test_condition: The remove_region_radius is increased by 1
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        assert False
+
+    def test_adjust_remove_region_brush_negative_rot(self, setup):
+        """
+        Test when the mouse wheel has a negative rotation in Mode.REMOVE_REGION
+
+        :test_condition: The remove_region_radius is decreased by 1
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller()
+
+        old_remove_radius = controller.remove_region_radius
+
+        controller.adjust_remove_region_brush(-1)
+
+        assert controller.remove_region_radius != old_remove_radius
+        assert (controller.remove_region_radius + 1) == old_remove_radius

@@ -275,12 +275,14 @@ class Controller:
 
         if self.current_mode == Mode.ADD_REGION:
             self.logger.debug("Add region release")
+            return True
 
         elif self.current_mode == Mode.REMOVE_REGION:
             self.logger.debug("Remove region release")
+            return True
 
         else:
-            return
+            return False
 
     def handle_motion(self, position):
         """
@@ -304,7 +306,7 @@ class Controller:
             self.display_current_patch()
 
         else:
-            return
+            return False
 
     def adjust_threshold(self, wheel_rotation):
         """
