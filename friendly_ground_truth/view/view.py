@@ -340,6 +340,7 @@ class MainWindow(wx.Frame):
         # Something went wrong
         else:
             self.logger.error("Uh oh, something went wrong selecting a tool")
+            return False
 
     def on_mousewheel(self, event):
         """
