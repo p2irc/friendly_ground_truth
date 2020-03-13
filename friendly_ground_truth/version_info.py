@@ -20,11 +20,12 @@ class VersionInfo():
         self.VERSION_PATCH = 2
 
     def get_version_string(self):
-        return "v" + str(self.VERSION_MAJOR) + str(self.VERSION_MINOR) +\
-                self.VERSION_PATCH
+        return "v" + str(self.VERSION_MAJOR) + '.' +\
+                str(self.VERSION_MINOR) + '.' +\
+                str(self.VERSION_PATCH)
 
     def check_newer_version(self, version_string):
-
+        version_string = version_string.strip('v')
         parts = version_string.split(".")
         print(parts)
         v_maj = int(parts[0])
@@ -34,31 +35,33 @@ class VersionInfo():
         if v_maj > self.VERSION_MAJOR:
             return True
 
-        if v_maj == self.VERSION_MAJOR:
+        elif v_maj == self.VERSION_MAJOR:
 
             if v_min > self.VERSION_MINOR:
                 return True
 
-            if v_min == self.VERSION_MINOR:
+            elif v_min == self.VERSION_MINOR:
 
                 if v_patch > self.VERSION_PATCH:
                     return True
 
+        return False
 
-if __name__ == "__main__":
 
-    if len(sys.argv) < 2:
-        print("Need to specify a version string: x.x.x")
+def main(args):
+
+    if len(args) < 2:
+        print("Need to specify a version string: x.y.z")
         sys.exit(1)
 
-    version_string = sys.argv[1]
+    version_string = args[1]
 
     version_string = version_string.strip("v")
 
     version_pattern = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+")
 
     if not version_pattern.match(version_string):
-        print("Invalid version string.  Must be in format: x.x.x")
+        print("Invalid version string.  Must be in format: x.y.z")
         sys.exit(1)
 
     version_info = VersionInfo()
@@ -69,3 +72,8 @@ if __name__ == "__main__":
     else:
         print("Already up to date")
         sys.exit(2)
+
+
+if __name__ == "__main__":
+
+    main(sys.argv)

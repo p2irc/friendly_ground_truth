@@ -181,10 +181,10 @@ class TestController:
                                       display_current_patch_mock):
         """
         Test moving to the next patch when the current patch is the last patch
-        in the list of patches
+        in the list of patches, and the dialog was not cancelled
 
         :test_condition: A dialog box is created and the current_patch is the
-                         same as it was before
+                         same as it was before, and save_mask was called
 
         :returns: None
         """
@@ -217,6 +217,47 @@ class TestController:
         mock_dialog.assert_called()
         assert controller.current_patch == 2
         save_mask_patch.assert_called()
+
+    def test_next_patch_invalid_index_dialog(self, mocker, setup,
+                                             display_current_patch_mock):
+        """
+        Test moving to the next patch when the current patch is the last patch
+        in the list of patches, and the dialog was cancelled
+
+        :test_condition: A dialog box is created and the current_patch is the
+                         same as it was before and save_mask was not called
+
+        :returns: None
+        """
+        mocker.patch('wx.MessageDialog.__init__', lambda x,
+                     y, z, a, b: None)
+        mock_dialog = mocker.patch('wx.MessageDialog.ShowModal',
+                                   return_value=0)
+
+        mocker.patch('wx.DirDialog')
+        save_mask_patch = mocker.patch.object(Controller, 'save_mask')
+
+        controller = Controller()
+
+        mock_patch = MagicMock()
+        display_mock = PropertyMock(return_value=True)
+
+        type(mock_patch).display = display_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch,
+                                    mock_patch,  mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+        controller.current_patch = 2
+
+        controller.next_patch()
+
+        mock_dialog.assert_called()
+        assert controller.current_patch == 2
+        save_mask_patch.assert_not_called()
 
     def test_prev_patch_valid_index_displayable(self, setup,
                                                 display_current_patch_mock):
