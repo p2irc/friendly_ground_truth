@@ -1071,13 +1071,13 @@ class TestController:
         controller.current_patch = 5
 
         mocker.patch('wx.App')
-        image_mock = mocker.patch('friendly_ground_truth.model.model.Image.__init__',
-                     return_value=None)
+        image_mock = mocker.patch('friendly_ground_truth.model' +
+                                  '.model.Image.__init__',
+                                  return_value=None)
 
         image_mock.side_effect = raise_FileNotFound
 
         file_dialog_patch = mocker.patch('wx.FileDialog', create=True)
-
 
         mocker.patch('wx.FileDialog.GetPath',
                      return_value='fake/path')
@@ -1088,3 +1088,108 @@ class TestController:
 
         spy.assert_not_called()
         assert controller.current_patch == 5
+
+    def test_save_mask_no_cancel(self, setup, mocker):
+        """
+        Test saving the mask
+
+        :test_condition: image.export_mask() is called
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.current_patch = 5
+
+        mocker.patch('wx.App')
+
+        file_dialog_patch = mocker.patch('wx.DirDialog', create=True)
+
+        mocker.patch('wx.DirDialog.ShowModal()',
+                     return_value=0)
+
+        fd = file_dialog_patch.return_value.__enter__.return_value
+
+        fd.GetPath.return_value = 'fake/path/test.png'
+
+        mock_image = MagicMock()
+
+        controller.image = mock_image
+        controller.image_path = '/this/is/a/path.png'
+        controller.save_mask()
+
+        mock_image.export_mask.assert_called()
+
+    def test_save_mask_cancel(self, setup, mocker):
+        """
+        Test exporting a mask when the user cancels
+
+        :test_condition: image.export_mask() is not called
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+        controller = Controller()
+        controller.current_patch = 5
+
+        mocker.patch('wx.App')
+        mocker.patch('friendly_ground_truth.model.model.Image.__init__',
+                     return_value=None)
+
+        file_dialog_patch = mocker.patch('wx.DirDialog', create=True)
+
+        file_dialog_patch.ShowModal.return_value = wx.ID_CANCEL
+
+        fd = file_dialog_patch.return_value.__enter__.return_value
+
+        fd.ShowModal.return_value = wx.ID_CANCEL
+
+        mocker.patch('wx.DirDialog.GetPath',
+                     return_value='fake/path')
+
+        mock_image = MagicMock()
+
+        controller.image = mock_image
+        controller.image_path = '/this/is/a/path.png'
+        controller.save_mask()
+
+        mock_image.export_mask.assert_not_called()
+
+    def test_save_mask_except(self, setup, mocker):
+        """
+        Test saving a mask when the image.export_mask() function raises an
+        IOError
+
+        :test_condition: wx.LogError is called
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        def raise_IOError(self):
+            raise IOError
+
+        controller = Controller()
+        controller.current_patch = 5
+
+        mocker.patch('wx.App')
+
+        file_dialog_patch = mocker.patch('wx.DirDialog', create=True)
+
+        fd = file_dialog_patch.return_value.__enter__.return_value
+
+        fd.GetPath.return_value = 'fake/path/test.png'
+
+        mock_image = MagicMock()
+        mock_image.export_mask.side_effect = raise_IOError
+
+        mock_LogError = mocker.patch('wx.LogError')
+
+        controller.image = mock_image
+
+        controller.image_path = '/this/is/a/path.png'
+
+        controller.save_mask()
+
+        mock_LogError.assert_called()

@@ -128,7 +128,6 @@ class Controller:
             try:
                 self.logger.debug("Saving mask to {}".format(pathname))
                 self.image.export_mask(pathname)
-
             except IOError:
                 wx.LogError("Cannot save file '%s'." % pathname)
                 # TODO: display dialog
