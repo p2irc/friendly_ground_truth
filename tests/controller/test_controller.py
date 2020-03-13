@@ -60,6 +60,9 @@ class TestController:
                                                             'set_brush_radius')
 
         self.mock_MW_draw_brush = mocker.patch.object(MainWindow, 'draw_brush')
+
+    @pytest.fixture
+    def display_current_patch_mock(self, mocker):
         self.mock_C_display_current_patch = mocker.\
             patch.\
             object(Controller, 'display_current_patch')
@@ -72,7 +75,8 @@ class TestController:
     def mock_brush_radius(self):
         return mock.patch.object(MainWindow, 'set_brush_radius', True)
 
-    def test_get_image_name_from_path(self, setup, valid_rgb_image_path):
+    def test_get_image_name_from_path(self, setup, display_current_patch_mock,
+                                      valid_rgb_image_path):
         """
         Test getting an image's name from its path
 
@@ -88,6 +92,7 @@ class TestController:
         assert 'KyleS22_mask.png' == name
 
     def test_get_image_name_from_non_file_path(self, setup,
+                                               display_current_patch_mock,
                                                directory_path):
         """
 
@@ -104,7 +109,8 @@ class TestController:
         with pytest.raises(ValueError):
             controller.get_image_name_from_path(directory_path)
 
-    def test_next_patch_valid_index_displayable(self, setup):
+    def test_next_patch_valid_index_displayable(self, setup,
+                                                display_current_patch_mock):
         """
         Test moving to the next patch when the current patch is not the last
         patch in the list of patches and the next patch is displayable
@@ -134,7 +140,8 @@ class TestController:
 
         assert controller.current_patch == 1
 
-    def test_next_patch_valid_index_not_displayable(self, setup):
+    def test_next_patch_valid_index_not_display(self, setup,
+                                                display_current_patch_mock):
         """
         Test moving to the next patch when the current patch is not the last
         patch in the list of patches and the next patch is not displayable
@@ -170,7 +177,8 @@ class TestController:
 
         assert controller.current_patch == 2
 
-    def test_next_patch_invalid_index(self, mocker, setup):
+    def test_next_patch_invalid_index(self, mocker, setup,
+                                      display_current_patch_mock):
         """
         Test moving to the next patch when the current patch is the last patch
         in the list of patches
@@ -180,7 +188,14 @@ class TestController:
 
         :returns: None
         """
-        mock_dialog = mocker.patch('wx.MessageDialog')
+        mocker.patch('wx.MessageDialog.__init__', lambda x,
+                     y, z, a, b: None)
+        mock_dialog = mocker.patch('wx.MessageDialog.ShowModal',
+                                   return_value=wx.ID_YES)
+
+        mocker.patch('wx.DirDialog')
+        save_mask_patch = mocker.patch.object(Controller, 'save_mask')
+
         controller = Controller()
 
         mock_patch = MagicMock()
@@ -195,16 +210,16 @@ class TestController:
         type(mock_image).patches = patches_mock
 
         controller.image = mock_image
-
         controller.current_patch = 2
 
         controller.next_patch()
 
         mock_dialog.assert_called()
-
         assert controller.current_patch == 2
+        save_mask_patch.assert_called()
 
-    def test_prev_patch_valid_index_displayable(self, setup):
+    def test_prev_patch_valid_index_displayable(self, setup,
+                                                display_current_patch_mock):
         """
         Test moving to the previous patch when the current patch is greater
         than 0 and the previous patch is displayable
@@ -235,7 +250,8 @@ class TestController:
 
         assert controller.current_patch == 1
 
-    def test_prev_patch_valid_index_not_displayable(self, setup):
+    def test_prev_patch_valid_index_not_display(self, setup,
+                                                display_current_patch_mock):
         """
         Test moving to the previous patch when the current patch is greater
         than 0 and the previous patch is not displayable
@@ -272,7 +288,8 @@ class TestController:
 
         assert controller.current_patch == 0
 
-    def test_prev_patch_invalid_index(self, setup):
+    def test_prev_patch_invalid_index(self, setup,
+                                      display_current_patch_mock):
         """
         Test moving to thre previous patch when the current patch is 0
 
@@ -300,7 +317,8 @@ class TestController:
 
         assert controller.current_patch == 0
 
-    def test_change_mode_thresh(self, setup, mocker):
+    def test_change_mode_thresh(self, setup, mocker,
+                                display_current_patch_mock):
         """
         Test changing the mode to Threshold
 
@@ -407,7 +425,8 @@ class TestController:
 
         assert controller.current_mode == Mode.REMOVE_REGION
 
-    def test_change_mode_no_root_activate(self, setup, mocker):
+    def test_change_mode_no_root_activate(self, setup, mocker,
+                                          display_current_patch_mock):
         """
         Test changing the mode to NO ROOT
 
@@ -438,7 +457,7 @@ class TestController:
 
         spy.assert_called_once()
 
-    def change_mode_invalid(self, setup, mocker):
+    def test_change_mode_invalid(self, setup, mocker):
         """
         Test changing the mode to an invalid mode
 
@@ -451,7 +470,7 @@ class TestController:
         result = controller.change_mode(-1)
         assert False is result
 
-    def test_no_root_activate(self, setup):
+    def test_no_root_activate(self, setup, display_current_patch_mock):
         """
         Test calling no_root activate
 
@@ -481,7 +500,8 @@ class TestController:
         mock_patch.clear_mask.assert_called()
         mock_patch.overlay_mask.assert_called()
 
-    def test_handle_mouse_wheel_threshold(self, setup, mocker):
+    def test_handle_mouse_wheel_threshold(self, setup, mocker,
+                                          display_current_patch_mock):
         """
         Test when the mouse wheel function is called and the current mode is
         Mode.THRESHOLD
@@ -513,7 +533,8 @@ class TestController:
 
         spy.assert_called_once_with(-1)
 
-    def test_handle_mouse_wheel_add_region(self, setup, mocker):
+    def test_handle_mouse_wheel_add_region(self, setup, mocker,
+                                           display_current_patch_mock):
         """
         Test when the mouse wheel function is called and the current mode is
         Mode.ADD_REGION
@@ -533,7 +554,8 @@ class TestController:
 
         spy.assert_called_once_with(-1)
 
-    def test_handle_mouse_wheel_remove_region(self, setup, mocker):
+    def test_handle_mouse_wheel_remove_region(self, setup, mocker,
+                                              display_current_patch_mock):
         """
         Test when the mouse wheel function is called and the current mode is
         Mode.REMOVE_REGION
@@ -553,7 +575,8 @@ class TestController:
 
         spy.assert_called_once_with(-1)
 
-    def test_handle_mouse_wheel_invalid(self, setup):
+    def test_handle_mouse_wheel_invalid(self, setup,
+                                        display_current_patch_mock):
         """
         Test when the mouse wheel function is called and the current mode is
         invalid
@@ -571,7 +594,8 @@ class TestController:
 
         assert False is result
 
-    def test_handle_left_click_add_region(self, setup):
+    def test_handle_left_click_add_region(self, setup,
+                                          display_current_patch_mock):
         """
         Test when the left mouse button is clicked and the current mode is
         Mode.ADD_REGION
@@ -602,7 +626,8 @@ class TestController:
 
         mock_patch.add_region.assert_called_with(position, radius)
 
-    def test_handle_left_click_remove_region(self, setup):
+    def test_handle_left_click_remove_region(self, setup,
+                                             display_current_patch_mock):
         """
         Test when the left mouse button is clicked and the current mode is
         Mode.REMOVE_REGION
@@ -633,7 +658,8 @@ class TestController:
 
         mock_patch.remove_region.assert_called_with(position, radius)
 
-    def test_handle_left_click_invalid_mode(self, setup):
+    def test_handle_left_click_invalid_mode(self, setup,
+                                            display_current_patch_mock):
         """
         Test when the left mouse button is clicked and the current mode is
         Mode.THRESHOLD
@@ -650,7 +676,8 @@ class TestController:
         result = controller.handle_left_click((0, 0))
         assert False is result
 
-    def test_handle_left_release_add_region(self, setup):
+    def test_handle_left_release_add_region(self, setup,
+                                            display_current_patch_mock):
         """
         Test when the mouse is released and the current mode is Mode.ADD_REGION
 
@@ -667,7 +694,8 @@ class TestController:
 
         assert True is result
 
-    def test_handle_left_release_remove_region(self, setup):
+    def test_handle_left_release_remove_region(self, setup,
+                                               display_current_patch_mock):
         """
         Test when the mouse is released and the current mode is
         Mode.REMOVE_REGION
@@ -685,7 +713,8 @@ class TestController:
 
         assert True is result
 
-    def test_handle_left_release_invalid_mode(self, setup):
+    def test_handle_left_release_invalid_mode(self, setup,
+                                              display_current_patch_mock):
         """
         Test when the mouse is released and the current mode is not ADD or
         REMOVE REGION
@@ -702,7 +731,7 @@ class TestController:
         result = controller.handle_left_release()
         assert False is result
 
-    def test_handle_motion_add_region(self, setup):
+    def test_handle_motion_add_region(self, setup, display_current_patch_mock):
         """
         Test when the mouse is moved and the current mode is Mode.ADD_REGION
 
@@ -732,7 +761,8 @@ class TestController:
 
         mock_patch.add_region.assert_called_with(position, radius)
 
-    def test_handle_motion_remove_region(self, setup, mocker):
+    def test_handle_motion_remove_region(self, setup, mocker,
+                                         display_current_patch_mock):
         """
         Test when the mouse is moved and the current mode is Mode.REMOVE_REGION
 
@@ -762,7 +792,8 @@ class TestController:
 
         mock_patch.remove_region.assert_called_with(position, radius)
 
-    def test_handle_motion_invalid_mode(self, setup):
+    def test_handle_motion_invalid_mode(self, setup,
+                                        display_current_patch_mock):
         """
         Test when the mouse is moved and the current mode is not ADD or REMOVE
         REGION
@@ -780,8 +811,9 @@ class TestController:
 
         assert False is result
 
-    def test_adjust_threshold_positive_rot_valid_thresh(self, setup,
-                                                        test_image_data):
+    def test_adjust_threshold_pos_rot_valid_thresh(self, setup,
+                                                   test_image_data,
+                                                   display_current_patch_mock):
         """
         Test when the mouse wheel has a positive rotation in Mode.THRESHOLD
         and the threshold is greater than 0
@@ -811,8 +843,9 @@ class TestController:
 
         assert (old_threshold - 0.01) == new_patch.thresh
 
-    def test_adjust_threshold_positive_rot_invalid_thresh(self, setup,
-                                                          test_image_data):
+    def test_adjust_thresh_pos_rot_invalid_thresh(self, setup,
+                                                  test_image_data,
+                                                  display_current_patch_mock):
         """
         Test when the mouse wheel has a positive rotation in Mode.THRESHOLD
         and the threshold is smaller than or equal to 0
@@ -843,8 +876,9 @@ class TestController:
 
         assert old_threshold == new_patch.thresh
 
-    def test_adjust_threshold_negative_rot_invalid_thresh(self, setup,
-                                                          test_image_data):
+    def test_adjust_thresh_neg_rot_invalid_thresh(self, setup,
+                                                  test_image_data,
+                                                  display_current_patch_mock):
         """
         Test when the mouse wheel has a negative rotation in Mode.THRESHOLD
         and the threshold is greater than or equal to one
@@ -875,8 +909,9 @@ class TestController:
 
         assert old_threshold == new_patch.thresh
 
-    def test_adjust_threshold_negative_rot_valid_thresh(self, setup,
-                                                        test_image_data):
+    def test_adjust_thresh_neg_rot_valid_thresh(self, setup,
+                                                test_image_data,
+                                                display_current_patch_mock):
         """
         Test when the mouse wheel has a negative rotation in Mode.THRESHOLD
         and the threshold is less than one
@@ -984,7 +1019,8 @@ class TestController:
         assert controller.remove_region_radius != old_remove_radius
         assert (controller.remove_region_radius + 1) == old_remove_radius
 
-    def test_load_new_image_no_cancel(self, setup, mocker):
+    def test_load_new_image_no_cancel(self, setup, mocker,
+                                      display_current_patch_mock):
         """
         Test loading a new image
 
@@ -1077,7 +1113,7 @@ class TestController:
 
         image_mock.side_effect = raise_FileNotFound
 
-        file_dialog_patch = mocker.patch('wx.FileDialog', create=True)
+        mocker.patch('wx.FileDialog', create=True)
 
         mocker.patch('wx.FileDialog.GetPath',
                      return_value='fake/path')
@@ -1193,3 +1229,35 @@ class TestController:
         controller.save_mask()
 
         mock_LogError.assert_called()
+
+    def test_display_current_patch(self, setup, mocker):
+        """
+        Test displaying the current patch
+
+        :test_condition: main_window.show_image is called with the current
+                         patch's overlay image
+
+        :param setup: A setup fixture
+        :param mocker: Mocker
+        :returns: None
+        """
+        controller = Controller()
+        controller.current_patch = 0
+
+        mock_image = MagicMock()
+        mock_patch = MagicMock()
+
+        mock_patch.overlay_image.return_value = 1
+        mock_image.patches.return_value = [mock_patch]
+
+        controller.image = mock_image
+
+        mock_window = MagicMock()
+
+        controller.main_window = mock_window
+
+        controller.display_current_patch()
+
+        mock_window.show_image.assert_called()
+        mock_window.show_image.assert_called_with(mock_image.
+                                                  patches[0].overlay_image)

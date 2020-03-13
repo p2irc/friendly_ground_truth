@@ -211,6 +211,7 @@ class Controller:
             self.no_root_activate()
         else:
             self.logger.error("Invalid mode change")
+            return False
 
     def no_root_activate(self):
         """
