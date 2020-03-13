@@ -24,6 +24,30 @@ class TestView():
     Test cases for the View
     """
 
+    @pytest.fixture
+    def setup(self, mocker):
+        self.mock_frame = mocker.patch('wx.Frame.__init__')
+        mocker.patch('wx.GetApp')
+        mocker.patch('wx.App.Bind')
+        mocker.patch('wx.Frame.Bind')
+
+        self.mock_controller = mocker.patch('friendly_ground_truth.' +
+                                            'controller.controller.Controller')
+
+    @pytest.fixture
+    def mock_init_ui(self, mocker):
+
+        mocker.patch('friendly_ground_truth.view.view.MainWindow.init_ui')
+
+    @pytest.fixture
+    def mock_painting(self, mocker):
+
+        mocker.patch('wx.DCOverlay')
+        mocker.patch('wx.Image')
+        mocker.patch('wx.Bitmap')
+        mocker.patch('wx.Pen')
+        mocker.patch('wx.Brush')
+
     def test_show_image_dc_none(self):
         """
         Test showing an image with a None dc
@@ -375,7 +399,8 @@ class TestView():
 
         assert False
 
-    def test_draw_brush_wxMac(self):
+    def test_draw_brush_wxMac(self, setup, mock_init_ui, mock_painting,
+                              mocker):
         """
         Test when draw_brush() is called and 'wxMac' is in wx.PlatformInfo
 
@@ -384,20 +409,44 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        mocker.patch('wx.PlatformInfo', return_value=['wxSteve'])
 
-    def test_on_paint(self):
+        mock_dc = mocker.patch.object(wx.ClientDC, '__init__',
+                return_value=None)
+        mocker.patch('friendly_ground_truth.view.view.MainWindow.show_image')
+        mock_gcdc = mocker.patch('wx.GCDC')
+
+        window = MainWindow(self.mock_controller)
+        window.current_image = MagicMock()
+        window.previous_mouse_position = (0, 0)
+        window.image_panel = MagicMock()
+        window.overlay = MagicMock()
+
+        window.draw_brush()
+
+        mock_gcdc.assert_called()
+
+    def test_on_paint(self, setup, mock_init_ui, mocker):
         """
         Test when the on_paint function is called
 
         :test_condition: wx.DCOverlay is called
 
-        :returns: none
+        :returns: None
         """
 
-        assert False
+        mocker.patch('wx.ClientDC')
+        mock_overlay = mocker.patch('wx.DCOverlay')
 
-    def test_convert_mouse_to_img_pos(self, mocker):
+        window = MainWindow(self.mock_controller)
+        window.image_panel = MagicMock()
+        window.overlay = MagicMock()
+
+        window.on_paint(None)
+
+        mock_overlay.assert_called()
+
+    def test_convert_mouse_to_img_pos(self, setup, mock_init_ui, mocker):
         """
         Test when convert_mouse_to_img_pos() is called
 
@@ -412,23 +461,12 @@ class TestView():
         def mock_screen_pos():
             return (0, 0)
 
-        mock_controller = mocker.patch('friendly_ground_truth.' +
-                                       'controller.controller.Controller')
-
         mocker.patch('wx.Panel.ScreenToClient',
                      side_effect=mock_screen_to_client)
 
         mocker.patch('wx.Panel.GetScreenPosition', side_effect=mock_screen_pos)
 
-        mocker.patch('wx.Frame.__init__')
-
-        mocker.patch('friendly_ground_truth.view.view.MainWindow.init_ui')
-
-        mocker.patch('wx.GetApp')
-        mocker.patch('wx.App.Bind')
-        mocker.patch('wx.Frame.Bind')
-
-        window = MainWindow(mock_controller)
+        window = MainWindow(self.mock_controller)
         image_panel = MagicMock()
         image_panel.ScreenToClient.side_effect = mock_screen_to_client
         image_panel.GetScreenPosition.side_effect = mock_screen_pos
