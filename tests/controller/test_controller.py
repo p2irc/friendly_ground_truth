@@ -1019,10 +1019,10 @@ class TestController:
 
     def test_load_new_image_cancel(self, setup, mocker):
         """
-        Test loading a new image
+        Test loading a new image when the user cancels
 
-        :test_condition: current_patch is set to 0,
-                         and display_current_patch is called
+        :test_condition: current_patch is not changed,
+                         and display_current_patch is not called
 
         :param setup: The setup fixture
         :returns: None
@@ -1042,6 +1042,42 @@ class TestController:
         fd = file_dialog_patch.return_value.__enter__.return_value
 
         fd.ShowModal.return_value = wx.ID_CANCEL
+
+        mocker.patch('wx.FileDialog.GetPath',
+                     return_value='fake/path')
+
+        spy = mocker.spy(controller, 'display_current_patch')
+
+        controller.load_new_image()
+
+        spy.assert_not_called()
+        assert controller.current_patch == 5
+
+    def test_load_new_image_except(self, setup, mocker):
+        """
+        Test loading a new image when the file cannot be loaded
+
+        :test_condition: current_patch is not changed,
+                         and display_current_patch is not called
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        def raise_FileNotFound(self):
+            raise FileNotFoundError
+
+        controller = Controller()
+        controller.current_patch = 5
+
+        mocker.patch('wx.App')
+        image_mock = mocker.patch('friendly_ground_truth.model.model.Image.__init__',
+                     return_value=None)
+
+        image_mock.side_effect = raise_FileNotFound
+
+        file_dialog_patch = mocker.patch('wx.FileDialog', create=True)
+
 
         mocker.patch('wx.FileDialog.GetPath',
                      return_value='fake/path')

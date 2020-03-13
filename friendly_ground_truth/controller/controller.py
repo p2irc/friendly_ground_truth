@@ -86,6 +86,7 @@ class Controller:
             except FileNotFoundError:
                 self.logger.debug("There was a problem loading the image")
                 # TODO: Display an error dialog
+                return
 
             self.current_patch = 0
             self.display_current_patch()
