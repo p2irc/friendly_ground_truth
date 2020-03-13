@@ -78,7 +78,6 @@ class Controller:
 
             # Proceed loading the file chosen by the user
             pathname = file_dialog.GetPath()
-
             self.logger.debug("File Path: %s", pathname)
             self.image_path = pathname
 

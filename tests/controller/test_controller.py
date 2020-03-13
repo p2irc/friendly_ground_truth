@@ -983,3 +983,72 @@ class TestController:
 
         assert controller.remove_region_radius != old_remove_radius
         assert (controller.remove_region_radius + 1) == old_remove_radius
+
+    def test_load_new_image_no_cancel(self, setup, mocker):
+        """
+        Test loading a new image
+
+        :test_condition: current_patch is set to 0,
+                         and display_current_patch is called
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.current_patch = 5
+
+        mocker.patch('wx.App')
+        mocker.patch('friendly_ground_truth.model.model.Image.__init__',
+                     return_value=None)
+
+        mocker.patch('wx.FileDialog')
+
+        mocker.patch('wx.FileDialog.ShowModal()',
+                     return_value=0)
+
+        mocker.patch('wx.FileDialog.GetPath',
+                     return_value='fake/path')
+
+        spy = mocker.spy(controller, 'display_current_patch')
+
+        controller.load_new_image()
+
+        spy.assert_called_once()
+        assert controller.current_patch == 0
+
+    def test_load_new_image_cancel(self, setup, mocker):
+        """
+        Test loading a new image
+
+        :test_condition: current_patch is set to 0,
+                         and display_current_patch is called
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.current_patch = 5
+
+        mocker.patch('wx.App')
+        mocker.patch('friendly_ground_truth.model.model.Image.__init__',
+                     return_value=None)
+
+        file_dialog_patch = mocker.patch('wx.FileDialog', create=True)
+
+        file_dialog_patch.ShowModal.return_value = wx.ID_CANCEL
+
+        fd = file_dialog_patch.return_value.__enter__.return_value
+
+        fd.ShowModal.return_value = wx.ID_CANCEL
+
+        mocker.patch('wx.FileDialog.GetPath',
+                     return_value='fake/path')
+
+        spy = mocker.spy(controller, 'display_current_patch')
+
+        controller.load_new_image()
+
+        spy.assert_not_called()
+        assert controller.current_patch == 5
