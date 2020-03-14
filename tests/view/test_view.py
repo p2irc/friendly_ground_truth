@@ -388,7 +388,8 @@ class TestView():
 
         assert False
 
-    def test_draw_brush_with_pos(self):
+    def test_draw_brush_with_pos(self, setup, mock_init_ui, mock_painting,
+                                 mocker):
         """
         Test when draw_brush() is called with a position
 
@@ -396,13 +397,33 @@ class TestView():
 
         :returns: None
         """
+        wx.PlatformInfo = ('wxMac')
 
-        assert False
+        mocker.patch.object(wx.ClientDC, '__init__', return_value=None)
+        mocker.patch.object(wx.ClientDC, 'SetPen')
+        mocker.patch.object(wx.ClientDC, 'SetBrush')
+
+        mock_dc = mocker.patch.object(wx.ClientDC, 'DrawCircle',  create=True)
+
+        mocker.patch('friendly_ground_truth.view.view.MainWindow.show_image')
+
+        window = MainWindow(self.mock_controller)
+        window.current_image = MagicMock()
+        window.previous_mouse_position = (0, 0)
+        window.image_panel = MagicMock()
+        window.overlay = MagicMock()
+
+        in_position = (1, 1)
+
+        window.draw_brush(in_position)
+
+        mock_dc.assert_called_with(in_position[0], in_position[1],
+                                   window.brush_radius)
 
     def test_draw_brush_wxMac(self, setup, mock_init_ui, mock_painting,
                               mocker):
         """
-        Test when draw_brush() is called and 'wxMac' is in wx.PlatformInfo
+        Test when draw_brush() is called and 'wxMac' is not in wx.PlatformInfo
 
         :test_condition: wx.GCDC is called
 
