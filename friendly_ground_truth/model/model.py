@@ -205,7 +205,12 @@ class Patch():
         :param value: The pixel value (floating point) to use as a threshold
         :returns: None
         :postcondition: The patch mask will be updated with the new threshold
+        :raises: ValueError if the value is not between 0 and 1
         """
+
+        if value > 1 or value < 0:
+            raise ValueError("Threshold values must be between 0 and 1")
+
 
         binary = self.patch > value
         self.mask = binary

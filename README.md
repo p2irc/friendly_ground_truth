@@ -1,6 +1,5 @@
-![CI Tests](https://github.com/KyleS22/friendly_ground_truth/workflows/CI%20Tests/badge.svg)
+![CI Tests](https://github.com/KyleS22/friendly_ground_truth/workflows/CI%20Tests/badge.svg) [![codecov](https://codecov.io/gh/KyleS22/friendly_ground_truth/branch/master/graph/badge.svg)](https://codecov.io/gh/KyleS22/friendly_ground_truth)
 
-[![codecov](https://codecov.io/gh/KyleS22/friendly_ground_truth/branch/master/graph/badge.svg)](https://codecov.io/gh/KyleS22/friendly_ground_truth)
 
 
 # friendly_ground_truth
