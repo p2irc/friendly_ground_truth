@@ -11,11 +11,13 @@ Description: Classes that represent the view for the application
 
 import wx
 import logging
+
 from friendly_ground_truth.view.icons import (add_region_icon,
                                               remove_region_icon,
                                               next_patch_icon,
                                               no_root_icon,
                                               prev_patch_icon, threshold_icon)
+
 
 module_logger = logging.getLogger('friendly_gt.view')
 
@@ -31,6 +33,7 @@ class MainWindow(wx.Frame):
     ID_TOOL_NO_ROOT = 104
     ID_TOOL_PREV_IMAGE = 105
     ID_TOOL_NEXT_IMAGE = 106
+
 
     def __init__(self, controller, parent=None):
         """
@@ -342,6 +345,7 @@ class MainWindow(wx.Frame):
             self.logger.error("Uh oh, something went wrong selecting a tool")
             return False
 
+
     def on_mousewheel(self, event):
         """
         Called when the mousewheel is used
@@ -396,7 +400,6 @@ class MainWindow(wx.Frame):
         :param event: The mouse event
         :returns: None
         """
-        print(event.Dragging())
         pos = event.GetPosition()
         screen_pos = self.image_panel.GetScreenPosition()
         screen_pos = self.ScreenToClient(screen_pos)

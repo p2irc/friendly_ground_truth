@@ -177,6 +177,7 @@ class Patch():
         # The max number of components to consider before determining that
         # this patch has no roots in it
         self.MAX_COMPONENTS = 500
+
         # Whether or not to display this patch to the user
         self.display = True
 
@@ -209,6 +210,7 @@ class Patch():
 
         if value > 1 or value < 0:
             raise ValueError("Threshold values must be between 0 and 1")
+
 
         binary = self.patch > value
         self.mask = binary

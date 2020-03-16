@@ -14,6 +14,7 @@ import os
 
 from friendly_ground_truth.view.view import MainWindow
 from friendly_ground_truth.model.model import Image
+
 from enum import Enum
 
 module_logger = logging.getLogger('friendly_gt.controller')
@@ -78,11 +79,13 @@ class Controller:
 
             # Proceed loading the file chosen by the user
             pathname = file_dialog.GetPath()
+
             self.logger.debug("File Path: %s", pathname)
             self.image_path = pathname
 
             try:
                 self.image = Image(pathname)
+
             except FileNotFoundError:
                 self.logger.debug("There was a problem loading the image")
                 # TODO: Display an error dialog
@@ -101,6 +104,7 @@ class Controller:
 
         if os.path.isdir(path):
             raise ValueError("Cannot get image name from a directory.")
+
 
         basename = os.path.basename(path)
         return os.path.splitext(basename)[0] + '_mask.png'
@@ -128,6 +132,7 @@ class Controller:
             try:
                 self.logger.debug("Saving mask to {}".format(pathname))
                 self.image.export_mask(pathname)
+
             except IOError:
                 wx.LogError("Cannot save file '%s'." % pathname)
                 # TODO: display dialog
@@ -211,6 +216,7 @@ class Controller:
             self.no_root_activate()
         else:
             self.logger.error("Invalid mode change")
+
             return False
 
     def no_root_activate(self):
@@ -248,6 +254,7 @@ class Controller:
             self.logger.error("Invalid mouse wheel rotation")
             return False
 
+
     def handle_left_click(self, click_location):
         """
         Handle a left mouse click at the given location
@@ -270,6 +277,7 @@ class Controller:
 
         else:
             return False
+
 
     def handle_left_release(self):
         """
@@ -332,6 +340,7 @@ class Controller:
             patch.thresh -= 0.01
 
         elif wheel_rotation < 0 and patch.thresh < 1:
+
             patch.thresh += 0.01
 
         patch.apply_threshold(patch.thresh)

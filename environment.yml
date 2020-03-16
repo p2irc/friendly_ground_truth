@@ -92,5 +92,6 @@ dependencies:
   - pytest-cov
   - pytest-mock
   - mock
+
 prefix: /home/kyle/anaconda3/envs/friendly_gt
 
