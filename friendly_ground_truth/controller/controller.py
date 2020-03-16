@@ -12,8 +12,8 @@ import wx
 import logging
 import os
 
-from view.view import MainWindow
-from model.model import Image, Patch
+from friendly_ground_truth.view.view import MainWindow
+from friendly_ground_truth.model.model import Image
 from enum import Enum
 
 module_logger = logging.getLogger('friendly_gt.controller')
@@ -43,11 +43,7 @@ class Controller:
         self.logger = logging.getLogger('friendly_gt.controller.Controller')
         self.logger.debug("Creating controller instance")
 
-        # Set up the main window
-        self.main_window = MainWindow(self)
-
-        # Show the window
-        self.main_window.Show()
+        self.current_patch = 0
 
         # Set up the current mode
         self.current_mode = Mode.THRESHOLD
@@ -55,6 +51,12 @@ class Controller:
         # Brush radii
         self.add_region_radius = 15
         self.remove_region_radius = 15
+
+        # Set up the main window
+        self.main_window = MainWindow(self)
+
+        # Show the window
+        self.main_window.Show()
 
     def load_new_image(self):
         """
@@ -76,11 +78,15 @@ class Controller:
 
             # Proceed loading the file chosen by the user
             pathname = file_dialog.GetPath()
-
             self.logger.debug("File Path: %s", pathname)
             self.image_path = pathname
 
-            self.image = Image(pathname)
+            try:
+                self.image = Image(pathname)
+            except FileNotFoundError:
+                self.logger.debug("There was a problem loading the image")
+                # TODO: Display an error dialog
+                return
 
             self.current_patch = 0
             self.display_current_patch()
@@ -92,6 +98,9 @@ class Controller:
         :param path: The path to the original image
         :returns: The new filename for the mask
         """
+
+        if os.path.isdir(path):
+            raise ValueError("Cannot get image name from a directory.")
 
         basename = os.path.basename(path)
         return os.path.splitext(basename)[0] + '_mask.png'
@@ -119,9 +128,9 @@ class Controller:
             try:
                 self.logger.debug("Saving mask to {}".format(pathname))
                 self.image.export_mask(pathname)
-
             except IOError:
                 wx.LogError("Cannot save file '%s'." % pathname)
+                # TODO: display dialog
 
     def display_current_patch(self):
         """
@@ -202,6 +211,7 @@ class Controller:
             self.no_root_activate()
         else:
             self.logger.error("Invalid mode change")
+            return False
 
     def no_root_activate(self):
         """
@@ -236,6 +246,7 @@ class Controller:
 
         else:
             self.logger.error("Invalid mouse wheel rotation")
+            return False
 
     def handle_left_click(self, click_location):
         """
@@ -258,7 +269,7 @@ class Controller:
             self.display_current_patch()
 
         else:
-            return
+            return False
 
     def handle_left_release(self):
         """
@@ -269,12 +280,14 @@ class Controller:
 
         if self.current_mode == Mode.ADD_REGION:
             self.logger.debug("Add region release")
+            return True
 
         elif self.current_mode == Mode.REMOVE_REGION:
             self.logger.debug("Remove region release")
+            return True
 
         else:
-            return
+            return False
 
     def handle_motion(self, position):
         """
@@ -298,7 +311,7 @@ class Controller:
             self.display_current_patch()
 
         else:
-            return
+            return False
 
     def adjust_threshold(self, wheel_rotation):
         """
@@ -315,10 +328,10 @@ class Controller:
         # Adjust the threshold.  Note that it is inverted, because it feels
         # more natural to scroll down to 'reduce' the region, rather than
         # reducing the threshold
-        if wheel_rotation > 0 and patch.thresh >= 0:
+        if wheel_rotation > 0 and patch.thresh > 0:
             patch.thresh -= 0.01
 
-        elif wheel_rotation < 0 and patch.thresh <= 1:
+        elif wheel_rotation < 0 and patch.thresh < 1:
             patch.thresh += 0.01
 
         patch.apply_threshold(patch.thresh)

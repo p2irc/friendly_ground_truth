@@ -17,7 +17,6 @@ from skimage.filters import threshold_otsu
 from skimage import color
 from skimage.draw import circle
 
-import matplotlib.pyplot as plt
 
 module_logger = logging.getLogger('friendly_gt.model')
 
@@ -49,15 +48,13 @@ class Image():
 
         :param path: The path to the image to load
         :returns: An image in the form of a numpy array
+        :raises: FileNotFoundError if the image does not exist
         """
 
         self.logger.debug("Loading image")
-        try:
-            img = io.imread(path)
-            img = color.rgb2gray(img)
-            img = img_as_float(img)
-        except exception as e:
-            logger.error("That image had some issues.")
+        img = io.imread(path)
+        img = color.rgb2gray(img)
+        img = img_as_float(img)
 
         return img
 
@@ -68,7 +65,19 @@ class Image():
         :param image: The image to create patches from
         :param num_patches: The number of patches to create ALONG ONE DIMENSION
         :returns: A list of patches made from the image
+        :raises: ValueError if the image is not a  single channel image
         """
+
+        if num_patches <= 0:
+            raise ValueError("num_patches must be a positive non-zero"
+                             " integer.")
+
+        if type(image) is not np.ndarray:
+            raise ValueError("image must be of type np.ndarray")
+
+        if len(image.shape) != 2:
+            raise ValueError("image must be a single channel image")
+
         self.logger.debug("Creating patches")
 
         # Determine padding so we can use non-overlapping patches
@@ -77,17 +86,17 @@ class Image():
 
         self.logger.debug(image.shape)
 
-        if image.shape[0] % num_patches is not 0:
+        if image.shape[0] % num_patches != 0:
             pad_x = (0, (num_patches - (image.shape[0] % num_patches)))
 
-        if image.shape[1] % num_patches is not 0:
+        if image.shape[1] % num_patches != 0:
             pad_y = (0, (num_patches - (image.shape[1] % num_patches)))
 
-        self.logger.debug("{}, {}".format(pad_x, pad_y))
-
+        print(image.shape, pad_x, pad_y)
         image = np.pad(image, (pad_x, pad_y), 'constant',
                        constant_values=(0, 0))
 
+        print(image.shape)
         self.padded_shape = image.shape
         # Get the size of each block
         block_size = (image.shape[0]//num_patches,
@@ -138,7 +147,7 @@ class Image():
                 col_num = 0
                 row_num += 1
 
-        self.mask = mask
+        self.mask = mask[:self.image.shape[0], :self.image.shape[1]]
 
     def export_mask(self, pathname):
         """
@@ -148,7 +157,7 @@ class Image():
         :returns: None
         """
         self.create_mask()
-
+        print(pathname)
         io.imsave(pathname, img_as_uint(self.mask))
 
 
@@ -168,7 +177,6 @@ class Patch():
         # The max number of components to consider before determining that
         # this patch has no roots in it
         self.MAX_COMPONENTS = 500
-
         # Whether or not to display this patch to the user
         self.display = True
 
@@ -196,7 +204,11 @@ class Patch():
         :param value: The pixel value (floating point) to use as a threshold
         :returns: None
         :postcondition: The patch mask will be updated with the new threshold
+        :raises: ValueError if the value is not between 0 and 1
         """
+
+        if value > 1 or value < 0:
+            raise ValueError("Threshold values must be between 0 and 1")
 
         binary = self.patch > value
         self.mask = binary

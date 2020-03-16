@@ -11,9 +11,11 @@ Description: Classes that represent the view for the application
 
 import wx
 import logging
-import numpy as np
-from view.icons import (add_region_icon, remove_region_icon, next_patch_icon,
-                        no_root_icon, prev_patch_icon, threshold_icon)
+from friendly_ground_truth.view.icons import (add_region_icon,
+                                              remove_region_icon,
+                                              next_patch_icon,
+                                              no_root_icon,
+                                              prev_patch_icon, threshold_icon)
 
 module_logger = logging.getLogger('friendly_gt.view')
 
@@ -22,6 +24,13 @@ class MainWindow(wx.Frame):
     """
     The main window for displaying image patches and such
     """
+    # Constant button IDs
+    ID_TOOL_THRESH = 101
+    ID_TOOL_ADD = 102
+    ID_TOOL_REMOVE = 103
+    ID_TOOL_NO_ROOT = 104
+    ID_TOOL_PREV_IMAGE = 105
+    ID_TOOL_NEXT_IMAGE = 106
 
     def __init__(self, controller, parent=None):
         """
@@ -38,14 +47,6 @@ class MainWindow(wx.Frame):
 
         # Initialize the logger
         self.logger = logging.getLogger('friendly_gt.view.MainWindow')
-
-        # Constant button IDs
-        self.ID_TOOL_THRESH = 101
-        self.ID_TOOL_ADD = 102
-        self.ID_TOOL_REMOVE = 103
-        self.ID_TOOL_NO_ROOT = 104
-        self.ID_TOOL_PREV_IMAGE = 105
-        self.ID_TOOL_NEXT_IMAGE = 106
 
         # Create the frame
         wx.Frame.__init__(self, parent, -1, "Main Window")
@@ -91,14 +92,13 @@ class MainWindow(wx.Frame):
         # ---- Tool Menu ----
         tool_menu = wx.Menu()
 
-
         threshold_menu_item = wx.MenuItem(tool_menu, self.ID_TOOL_THRESH,
                                           text="Threshold\tCTRL+T",
                                           kind=wx.ITEM_NORMAL)
 
         add_region_menu_item = wx.MenuItem(tool_menu, self.ID_TOOL_ADD,
-                                          text="Add Region\tCTRL+A",
-                                          kind=wx.ITEM_NORMAL)
+                                           text="Add Region\tCTRL+A",
+                                           kind=wx.ITEM_NORMAL)
 
         remove_region_menu_item = wx.MenuItem(tool_menu,
                                               self.ID_TOOL_REMOVE,
@@ -106,10 +106,8 @@ class MainWindow(wx.Frame):
                                               kind=wx.ITEM_NORMAL)
 
         no_root_menu_item = wx.MenuItem(tool_menu, self.ID_TOOL_NO_ROOT,
-                                          text="No Foreground\tCTRL+X",
-                                          kind=wx.ITEM_NORMAL)
-
-
+                                        text="No Foreground\tCTRL+X",
+                                        kind=wx.ITEM_NORMAL)
 
         tool_menu.Append(threshold_menu_item)
         tool_menu.Append(add_region_menu_item)
@@ -135,8 +133,6 @@ class MainWindow(wx.Frame):
         entries[3].Set(wx.ACCEL_CTRL, ord('X'), self.ID_TOOL_NO_ROOT,
                        no_root_menu_item)
 
-
-
         accel = wx.AcceleratorTable(entries)
         self.SetAcceleratorTable(accel)
 
@@ -150,55 +146,47 @@ class MainWindow(wx.Frame):
         threshold_img = wx.Image(threshold_icon.get_threshold_icon.getImage())
         threshold_bitmap = wx.Bitmap(threshold_img.ConvertToBitmap())
 
-        threshold_tool = self.tool_bar.AddRadioTool(self.ID_TOOL_THRESH,
-                                               "Threshold",
-                                               threshold_bitmap)
+        self.tool_bar.AddRadioTool(self.ID_TOOL_THRESH,
+                                   "Threshold",
+                                   threshold_bitmap)
 
-        add_region_img = wx.Image(add_region_icon.get_add_region_icon.getImage())
+        add_region_img = wx.Image(add_region_icon.
+                                  get_add_region_icon.getImage())
         add_region_bitmap = wx.Bitmap(add_region_img.ConvertToBitmap())
 
+        self.tool_bar.AddRadioTool(self.ID_TOOL_ADD, "Add Region",
+                                   add_region_bitmap)
 
-        add_tool = self.tool_bar.AddRadioTool(self.ID_TOOL_ADD, "Add Region",
-                                         add_region_bitmap)
-
-        remove_region_img = wx.Image(remove_region_icon.get_remove_region_icon.getImage())
+        remove_region_img = wx.Image(remove_region_icon.
+                                     get_remove_region_icon.getImage())
         remove_region_bitmap = wx.Bitmap(remove_region_img.ConvertToBitmap())
 
-
-
-        remove_tool = self.tool_bar.AddRadioTool(self.ID_TOOL_REMOVE, "Remove"
-                                                                 "Region",
-                                            remove_region_bitmap)
-
+        self.tool_bar.AddRadioTool(self.ID_TOOL_REMOVE, "Remove"
+                                   "Region", remove_region_bitmap)
 
         no_roots_img = wx.Image(no_root_icon.get_no_root_icon.getImage())
         no_roots_bitmap = wx.Bitmap(no_roots_img.ConvertToBitmap())
 
-
-
-        no_roots_tool = self.tool_bar.AddTool(self.ID_TOOL_NO_ROOT, "No Roots",
-                                         no_roots_bitmap)
+        self.tool_bar.AddTool(self.ID_TOOL_NO_ROOT, "No Roots",
+                              no_roots_bitmap)
 
         self.tool_bar.AddSeparator()
 
-
-        prev_patch_img = wx.Image(prev_patch_icon.get_prev_patch_icon.getImage())
+        prev_patch_img = wx.Image(prev_patch_icon.get_prev_patch_icon.
+                                  getImage())
         prev_patch_bitmap = wx.Bitmap(prev_patch_img.ConvertToBitmap())
 
+        self.tool_bar.AddTool(self.ID_TOOL_PREV_IMAGE,
+                              "Prev Image",
+                              prev_patch_bitmap)
 
-
-        prev_image_tool = self.tool_bar.AddTool(self.ID_TOOL_PREV_IMAGE,
-                                           "Prev Image",
-                                           prev_patch_bitmap)
-
-        next_patch_img = wx.Image(next_patch_icon.get_next_patch_icon.getImage())
+        next_patch_img = wx.Image(next_patch_icon.get_next_patch_icon.
+                                  getImage())
         next_patch_bitmap = wx.Bitmap(next_patch_img.ConvertToBitmap())
 
-
-
-        next_image_tool = self.tool_bar.AddTool(self.ID_TOOL_NEXT_IMAGE,
-                                           "Next Image",
-                                           next_patch_bitmap)
+        self.tool_bar.AddTool(self.ID_TOOL_NEXT_IMAGE,
+                              "Next Image",
+                              next_patch_bitmap)
 
         self.tool_bar.Bind(wx.EVT_TOOL, self.on_tool_chosen)
         self.tool_bar.Realize()
@@ -352,6 +340,7 @@ class MainWindow(wx.Frame):
         # Something went wrong
         else:
             self.logger.error("Uh oh, something went wrong selecting a tool")
+            return False
 
     def on_mousewheel(self, event):
         """
@@ -407,6 +396,7 @@ class MainWindow(wx.Frame):
         :param event: The mouse event
         :returns: None
         """
+        print(event.Dragging())
         pos = event.GetPosition()
         screen_pos = self.image_panel.GetScreenPosition()
         screen_pos = self.ScreenToClient(screen_pos)
@@ -443,7 +433,7 @@ class MainWindow(wx.Frame):
         :postcondition: The mouse cursor is restored to its default icon
         """
         self.logger.debug("Leaving Panel")
-        cursor = wx.Cursor(wx.CURSOR_DEFAULT)
+        wx.Cursor(wx.CURSOR_DEFAULT)
 
     def draw_brush(self, pos=None):
         """
@@ -484,7 +474,7 @@ class MainWindow(wx.Frame):
 
         self.logger.debug("Paint")
         dc = wx.ClientDC(self.image_panel)
-        odc = wx.DCOverlay(self.overlay, dc)
+        wx.DCOverlay(self.overlay, dc)
 
     def convert_mouse_to_img_pos(self, in_position):
         """

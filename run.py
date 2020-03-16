@@ -11,7 +11,7 @@ Description: The entry point for the application
 
 import wx
 import logging
-from controller.controller import Controller
+from friendly_ground_truth.controller.controller import Controller
 
 logger = logging.getLogger('friendly_gt')
 logger.setLevel(logging.DEBUG)
