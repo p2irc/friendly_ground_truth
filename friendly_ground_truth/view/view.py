@@ -396,6 +396,7 @@ class MainWindow(wx.Frame):
         :param event: The mouse event
         :returns: None
         """
+        print(event.Dragging())
         pos = event.GetPosition()
         screen_pos = self.image_panel.GetScreenPosition()
         screen_pos = self.ScreenToClient(screen_pos)
