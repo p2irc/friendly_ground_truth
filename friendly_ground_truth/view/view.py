@@ -282,6 +282,8 @@ class MainWindow(wx.Frame):
         elif id == self.ID_TOOL_PREV_IMAGE:
             self.controller.change_mode(self.ID_TOOL_PREV_IMAGE)
             self.tool_bar.ToggleTool(self.ID_TOOL_PREV_IMAGE, True)
+        else:
+            return
 
     def on_key(self, event):
         """
@@ -299,6 +301,8 @@ class MainWindow(wx.Frame):
         # Use right arrow and 'D' key to move right
         elif keycode == wx.WXK_RIGHT or keycode == ord('D'):
             self.controller.next_patch()
+        else:
+            pass
 
         event.Skip()
 

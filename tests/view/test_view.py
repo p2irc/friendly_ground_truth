@@ -285,6 +285,26 @@ class TestView():
         self.mock_controller.change_mode.assert_called_with(window.
                                                             ID_TOOL_PREV_IMAGE)
 
+    def test_menu_handler_invalid(self, setup, mock_init_ui, mocker):
+        """
+        Test when the menu handler is called and the event_id is
+        None
+
+        :test_condition: Returns None
+
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller)
+        window.tool_bar = MagicMock()
+
+        event = MagicMock()
+        event.GetId.return_value = None
+
+        result = window.menu_handler(event)
+
+        assert None is result
+
     def test_on_key_A(self, setup, mock_init_ui, mocker):
         """
         Test when the on_key handler is called and the keycode was ord('A') or
@@ -334,6 +354,24 @@ class TestView():
         window.on_key(event)
 
         self.mock_controller.next_patch.assert_called()
+
+    def test_on_key_None(self, setup, mock_init_ui, mocker):
+        """
+        Test when the on_key handler is called and the keycode was None
+
+        :test_condition: event.Skip() was called
+
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller)
+
+        event = MagicMock()
+        event.GetKeyCode.return_value = None
+
+        window.on_key(event)
+
+        event.Skip.assert_called()
 
     def test_on_tool_chosen_thresh(self, setup, mock_init_ui, mocker):
         """
