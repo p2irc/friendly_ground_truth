@@ -62,6 +62,7 @@ def main(args):
 
     if not version_pattern.match(version_string):
         print("Invalid version string.  Must be in format: x.y.z")
+
         sys.exit(1)
 
     version_info = VersionInfo()

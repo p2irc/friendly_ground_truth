@@ -11,6 +11,7 @@ Description: Classes that represent the view for the application
 
 import wx
 import logging
+
 from friendly_ground_truth.view.icons import (add_region_icon,
                                               remove_region_icon,
                                               next_patch_icon,

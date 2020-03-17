@@ -213,6 +213,8 @@ class Controller:
             self.logger.error("Invalid mode change")
             return False
 
+            return False
+
     def no_root_activate(self):
         """
         Set the mask for the patch to zero, there is no root here
