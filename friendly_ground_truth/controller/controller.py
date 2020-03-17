@@ -27,6 +27,7 @@ class Mode(Enum):
     ADD_REGION = 2
     REMOVE_REGION = 3
     NO_ROOT = 4
+    ZOOM = 5
 
 
 class Controller:
@@ -198,21 +199,27 @@ class Controller:
         if new_mode_id == self.main_window.ID_TOOL_THRESH:
             self.current_mode = Mode.THRESHOLD
             self.main_window.set_brush_radius(0)
+            self.main_window.zoom_cursor = False
 
         elif new_mode_id == self.main_window.ID_TOOL_ADD:
             self.current_mode = Mode.ADD_REGION
             self.main_window.set_brush_radius(self.add_region_radius)
+            self.main_window.zoom_cursor = False
 
         elif new_mode_id == self.main_window.ID_TOOL_REMOVE:
             self.current_mode = Mode.REMOVE_REGION
             self.main_window.set_brush_radius(self.remove_region_radius)
+            self.main_window.zoom_cursor = False
 
         elif new_mode_id == self.main_window.ID_TOOL_NO_ROOT:
             self.no_root_activate()
+
+        elif new_mode_id == self.main_window.ID_TOOL_ZOOM:
+            self.current_mode = Mode.ZOOM
+            self.main_window.zoom_cursor = True
+
         else:
             self.logger.error("Invalid mode change")
-            return False
-
             return False
 
     def no_root_activate(self):
@@ -246,9 +253,32 @@ class Controller:
         elif self.current_mode == Mode.REMOVE_REGION:
             self.adjust_remove_region_brush(wheel_rotation)
 
+        elif self.current_mode == Mode.ZOOM:
+            self.handle_zoom(wheel_rotation)
+
         else:
             self.logger.error("Invalid mouse wheel rotation")
             return False
+
+    def handle_zoom(self, wheel_rotation):
+        """
+        Handle zooming with the mouse wheel
+
+        :param wheel_rotation: The roation of the mouse wheel
+        :returns: None
+        """
+
+        if wheel_rotation > 1:
+            self.main_window.image_scale *= 2.0
+
+        elif wheel_rotation < 1:
+            self.main_window.image_scale /= 2.0
+
+        else:
+            return False
+
+        patch = self.image.patches[self.current_patch]
+        self.main_window.show_image(patch.overlay_image)
 
     def handle_left_click(self, click_location):
         """

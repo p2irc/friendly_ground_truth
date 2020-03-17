@@ -89,7 +89,7 @@ class TestView():
         mocker.patch('wx.DCOverlay')
 
         mocker.patch.object(wx.ClientDC, '__init__', return_value=None)
-
+        mocker.patch.object(wx.ClientDC, 'SetUserScale')
         mock_dc = mocker.patch.object(wx.ClientDC, 'DrawBitmap',  create=True)
 
         window = MainWindow(self.mock_controller)
