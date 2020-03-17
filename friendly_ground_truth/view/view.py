@@ -16,7 +16,8 @@ from friendly_ground_truth.view.icons import (add_region_icon,
                                               remove_region_icon,
                                               next_patch_icon,
                                               no_root_icon,
-                                              prev_patch_icon, threshold_icon)
+                                              prev_patch_icon, threshold_icon,
+                                              zoom_in_tool_icon)
 
 module_logger = logging.getLogger('friendly_gt.view')
 
@@ -32,6 +33,7 @@ class MainWindow(wx.Frame):
     ID_TOOL_NO_ROOT = 104
     ID_TOOL_PREV_IMAGE = 105
     ID_TOOL_NEXT_IMAGE = 106
+    ID_TOOL_ZOOM = 107
 
     def __init__(self, controller, parent=None):
         """
@@ -45,6 +47,8 @@ class MainWindow(wx.Frame):
         self.controller = controller
         self.current_image = None
         self.brush_radius = 0
+        self.zoom_cursor = False
+        self.image_scale = 1.0
 
         # Initialize the logger
         self.logger = logging.getLogger('friendly_gt.view.MainWindow')
@@ -110,10 +114,15 @@ class MainWindow(wx.Frame):
                                         text="No Foreground\tCTRL+X",
                                         kind=wx.ITEM_NORMAL)
 
+        zoom_menu_item = wx.MenuItem(tool_menu, self.ID_TOOL_ZOOM,
+                                     text="Zoom\tCTRL++",
+                                     kind=wx.ITEM_NORMAL)
+
         tool_menu.Append(threshold_menu_item)
         tool_menu.Append(add_region_menu_item)
         tool_menu.Append(remove_region_menu_item)
         tool_menu.Append(no_root_menu_item)
+        tool_menu.Append(zoom_menu_item)
 
         # ---- End Tool Menu ----
         menubar.Append(file_menu, '&File')
@@ -164,6 +173,13 @@ class MainWindow(wx.Frame):
 
         self.tool_bar.AddRadioTool(self.ID_TOOL_REMOVE, "Remove"
                                    "Region", remove_region_bitmap)
+
+        zoom_in_tool_img = wx.Image(zoom_in_tool_icon.
+                                    get_zoom_in_tool_icon.getImage())
+        zoom_in_tool_bitmap = wx.Bitmap(zoom_in_tool_img.ConvertToBitmap())
+
+        self.tool_bar.AddRadioTool(self.ID_TOOL_ZOOM, "Zoom",
+                                   zoom_in_tool_bitmap)
 
         no_roots_img = wx.Image(no_root_icon.get_no_root_icon.getImage())
         no_roots_bitmap = wx.Bitmap(no_roots_img.ConvertToBitmap())
@@ -241,6 +257,7 @@ class MainWindow(wx.Frame):
             odc = wx.DCOverlay(self.overlay, dc)
             odc.Clear()
 
+        dc.SetUserScale(self.image_scale, self.image_scale)
         dc.DrawBitmap(self.bitmap, 0, 0)
 
     def menu_handler(self, event):
@@ -283,6 +300,11 @@ class MainWindow(wx.Frame):
         elif id == self.ID_TOOL_PREV_IMAGE:
             self.controller.change_mode(self.ID_TOOL_PREV_IMAGE)
             self.tool_bar.ToggleTool(self.ID_TOOL_PREV_IMAGE, True)
+
+        elif id == self.ID_TOOL_ZOOM:
+            self.controller.change_mode(self.ID_TOOL_ZOOM)
+            self.tool_bar.ToggleTool(self.ID_TOOL_ZOOM)
+
         else:
             return
 
@@ -341,6 +363,9 @@ class MainWindow(wx.Frame):
         # Previous Image
         elif event.GetId() == self.ID_TOOL_PREV_IMAGE:
             self.controller.prev_patch()
+
+        elif event.GetId() == self.ID_TOOL_ZOOM:
+            self.controller.change_mode(self.ID_TOOL_ZOOM)
 
         # Something went wrong
         else:
@@ -401,7 +426,6 @@ class MainWindow(wx.Frame):
         :param event: The mouse event
         :returns: None
         """
-        print(event.Dragging())
         pos = event.GetPosition()
         screen_pos = self.image_panel.GetScreenPosition()
         screen_pos = self.ScreenToClient(screen_pos)
@@ -426,7 +450,12 @@ class MainWindow(wx.Frame):
         :postcondition: The mouse cursor is removed
         """
         self.logger.debug("Entered Panel")
-        cursor = wx.StockCursor(wx.CURSOR_BLANK)
+
+        if self.zoom_cursor:
+            cursor = wx.StockCursor(wx.CURSOR_MAGNIFIER)
+        else:
+            cursor = wx.StockCursor(wx.CURSOR_BLANK)
+
         self.SetCursor(cursor)
 
     def on_leave_panel(self, event):
