@@ -216,6 +216,7 @@ class Controller:
 
         elif new_mode_id == self.main_window.ID_TOOL_ZOOM:
             self.current_mode = Mode.ZOOM
+            self.main_window.set_brush_radius(0)
             self.main_window.zoom_cursor = True
 
         else:
@@ -277,8 +278,7 @@ class Controller:
         else:
             return False
 
-        patch = self.image.patches[self.current_patch]
-        self.main_window.show_image(patch.overlay_image)
+        self.display_current_patch()
 
     def handle_left_click(self, click_location):
         """
@@ -287,17 +287,28 @@ class Controller:
         :param click_location: The location (x, y) of the click
         :returns: None
         """
+        click_location = (click_location[0] / self.main_window.image_scale,
+                          click_location[1] / self.main_window.image_scale)
+
+        click_location = (click_location[0] - self.main_window.image_x,
+                          click_location[1] - self.main_window.image_y)
 
         if self.current_mode == Mode.ADD_REGION:
             self.logger.debug("Add region click")
+
+            draw_radius = self.add_region_radius / self.main_window.image_scale
+
             patch = self.image.patches[self.current_patch]
-            patch.add_region(click_location, self.add_region_radius)
+            patch.add_region(click_location, draw_radius)
             self.display_current_patch()
 
         elif self.current_mode == Mode.REMOVE_REGION:
             self.logger.debug("Remove region click")
+
+            draw_radius = self.remove_region_radius / self.main_window.image_scale
+
             patch = self.image.patches[self.current_patch]
-            patch.remove_region(click_location, self.remove_region_radius)
+            patch.remove_region(click_location, draw_radius)
             self.display_current_patch()
 
         else:
@@ -318,6 +329,9 @@ class Controller:
             self.logger.debug("Remove region release")
             return True
 
+        elif self.current_mode == Mode.ZOOM:
+            self.display_current_patch()
+
         else:
             return False
 
@@ -329,18 +343,40 @@ class Controller:
         :returns: None
         """
 
+        if self.current_mode is not Mode.ZOOM:
+
+            position = (position[0] / self.main_window.image_scale,
+                        position[1] / self.main_window.image_scale)
+
+            position = (position[0] - self.main_window.image_x,
+                        position[1] - self.main_window.image_y)
+
         if self.current_mode == Mode.ADD_REGION:
             self.logger.debug("Adding region")
+
+            draw_radius = self.add_region_radius / self.main_window.image_scale
+
             patch = self.image.patches[self.current_patch]
-            patch.add_region(position, self.add_region_radius)
+            patch.add_region(position, draw_radius)
             self.display_current_patch()
 
         elif self.current_mode == Mode.REMOVE_REGION:
             self.logger.debug("Removing Region")
 
+            draw_radius = self.remove_region_radius / self.main_window.image_scale
+
             patch = self.image.patches[self.current_patch]
-            patch.remove_region(position, self.remove_region_radius)
+            patch.remove_region(position, draw_radius)
             self.display_current_patch()
+
+        elif self.current_mode == Mode.ZOOM:
+            self.main_window.image_x += (position[0] -
+                                         self.main_window.previous_position[0])
+            self.main_window.image_y += (position[1] -
+                                         self.main_window.previous_position[1])
+
+            # I'm not sure why this works, but I really need to move on
+            self.main_window.draw_brush()
 
         else:
             return False

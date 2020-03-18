@@ -49,6 +49,8 @@ class MainWindow(wx.Frame):
         self.brush_radius = 0
         self.zoom_cursor = False
         self.image_scale = 1.0
+        self.image_x = 0
+        self.image_y = 0
 
         # Initialize the logger
         self.logger = logging.getLogger('friendly_gt.view.MainWindow')
@@ -258,7 +260,8 @@ class MainWindow(wx.Frame):
             odc.Clear()
 
         dc.SetUserScale(self.image_scale, self.image_scale)
-        dc.DrawBitmap(self.bitmap, 0, 0)
+        dc.DrawBitmap(self.bitmap, self.image_x, self.image_y)
+
 
     def menu_handler(self, event):
         """
@@ -432,14 +435,15 @@ class MainWindow(wx.Frame):
 
         self.previous_mouse_position = pos
 
-        self.draw_brush(pos)
+        if not self.zoom_cursor:
+            self.draw_brush(pos)
 
         if event.Dragging() and event.LeftIsDown():
             current_position = self.convert_mouse_to_img_pos(
                                                         event.GetPosition())
 
-            self.previous_position = current_position
             self.controller.handle_motion(current_position)
+            self.previous_position = current_position
 
     def on_enter_panel(self, event):
         """
@@ -495,7 +499,7 @@ class MainWindow(wx.Frame):
         dc.SetPen(wx.Pen("black"))
         dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
         dc.DrawCircle(pos[0], pos[1], self.brush_radius)
-
+        self.logger.debug("Drawing Brush")
         del odc
 
     def on_paint(self, event):
