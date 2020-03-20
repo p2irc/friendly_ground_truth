@@ -498,6 +498,43 @@ class TestController:
 
         spy.assert_called_once()
 
+    def test_change_mode_zoom(self, setup, mocker,
+                              display_current_patch_mock):
+        """
+        Test changing the mode to zoom
+
+        :test_condition: The current mode is set to Mode.ZOOM and
+                         MainWindow.set_brush_radius is called once
+
+        :param setup: The setup fixture
+        :param mock_brush_radius: A fixture mocking the
+                                  MainWindow.set_brush_radius function
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.current_mode = Mode.ADD_REGION
+
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        spy = mocker.spy(MainWindow, 'set_brush_radius')
+
+        controller.change_mode(MainWindow.ID_TOOL_ZOOM)
+
+        spy.assert_called_once()
+
+        assert controller.current_mode == Mode.ZOOM
+
     def test_change_mode_invalid(self, setup, mocker):
         """
         Test changing the mode to an invalid mode
@@ -616,6 +653,41 @@ class TestController:
 
         spy.assert_called_once_with(-1)
 
+    def test_handle_mouse_wheel_zoom(self, setup, mocker,
+                                     display_current_patch_mock):
+        """
+        Test when the mouse wheel function is called and the current mode is
+        Mode.ZOOM
+
+        :test_condition: The adjust handle_zoom function is called
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.current_mode = Mode.ZOOM
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        spy = mocker.spy(controller, 'handle_zoom')
+
+        controller.handle_mouse_wheel(-1)
+
+        spy.assert_called_once_with(-1)
+
     def test_handle_mouse_wheel_invalid(self, setup,
                                         display_current_patch_mock):
         """
@@ -650,6 +722,10 @@ class TestController:
 
         controller = Controller()
         controller.current_mode = Mode.ADD_REGION
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
 
         mock_patch = MagicMock()
 
@@ -682,6 +758,10 @@ class TestController:
 
         controller = Controller()
         controller.current_mode = Mode.REMOVE_REGION
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
 
         mock_patch = MagicMock()
 
@@ -713,6 +793,8 @@ class TestController:
 
         controller = Controller()
         controller.current_mode = Mode.THRESHOLD
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
 
         result = controller.handle_left_click((0, 0))
         assert False is result
@@ -785,6 +867,10 @@ class TestController:
 
         controller = Controller()
         controller.current_mode = Mode.ADD_REGION
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
 
         mock_patch = MagicMock()
 
@@ -796,7 +882,8 @@ class TestController:
         controller.image = mock_image
 
         position = (1, 2)
-        radius = controller.add_region_radius
+        radius = (controller.add_region_radius /
+                  controller.main_window.image_scale)
 
         controller.handle_motion(position)
 
@@ -816,6 +903,10 @@ class TestController:
 
         controller = Controller()
         controller.current_mode = Mode.REMOVE_REGION
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
 
         mock_patch = MagicMock()
 
@@ -827,7 +918,8 @@ class TestController:
         controller.image = mock_image
 
         position = (1, 2)
-        radius = controller.remove_region_radius
+        radius = (controller.remove_region_radius /
+                  controller.main_window.image_scale)
 
         controller.handle_motion(position)
 
@@ -847,6 +939,8 @@ class TestController:
 
         controller = Controller()
         controller.current_mode = Mode.THRESHOLD
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
 
         result = controller.handle_motion((0, 0))
 
@@ -1302,3 +1396,66 @@ class TestController:
         mock_window.show_image.assert_called()
         mock_window.show_image.assert_called_with(mock_image.
                                                   patches[0].overlay_image)
+
+    def test_handle_zoom_positive(self, setup, mocker):
+        """
+        Test when the zoom function is called and the wheel rotaion is positive
+
+        :test_condition:  main_window.image_scale is multiplied by 2
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.image = MagicMock()
+
+        old_scale = controller.main_window.image_scale
+
+        controller.handle_zoom(1)
+
+        assert controller.main_window.image_scale != old_scale
+        assert (controller.main_window.image_scale / 2) == old_scale
+
+    def test_handle_zoom_negative(self, setup, mocker):
+        """
+        Test when the zoom function is called and the wheel rotaion is negative
+
+        :test_condition:  main_window.image_scale is divided by 2
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 2
+        controller.image = MagicMock()
+
+        old_scale = controller.main_window.image_scale
+
+        controller.handle_zoom(-1)
+
+        assert controller.main_window.image_scale != old_scale
+        assert (controller.main_window.image_scale * 2) == old_scale
+
+    def test_handle_zoom_invalid(self, setup, mocker):
+        """
+        Test when the zoom function is called and the wheel rotation is 0
+        :test_condition:  returns False
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 2
+        controller.image = MagicMock()
+
+        assert controller.handle_zoom(0) is False

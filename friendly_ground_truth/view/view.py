@@ -239,6 +239,7 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.menu_handler)
         self.SetSize((1200, 800))
         self.Centre()
+        self.image_panel.Bind(wx.EVT_ERASE_BACKGROUND, lambda x: 0)
 
     def show_image(self, img, dc=None):
         """
@@ -261,7 +262,6 @@ class MainWindow(wx.Frame):
 
         dc.SetUserScale(self.image_scale, self.image_scale)
         dc.DrawBitmap(self.bitmap, self.image_x, self.image_y)
-
 
     def menu_handler(self, event):
         """

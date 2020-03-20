@@ -269,10 +269,10 @@ class Controller:
         :returns: None
         """
 
-        if wheel_rotation > 1:
+        if wheel_rotation > 0:
             self.main_window.image_scale *= 2.0
 
-        elif wheel_rotation < 1:
+        elif wheel_rotation < 0:
             self.main_window.image_scale /= 2.0
 
         else:
@@ -305,7 +305,8 @@ class Controller:
         elif self.current_mode == Mode.REMOVE_REGION:
             self.logger.debug("Remove region click")
 
-            draw_radius = self.remove_region_radius / self.main_window.image_scale
+            draw_radius = (self.remove_region_radius /
+                           self.main_window.image_scale)
 
             patch = self.image.patches[self.current_patch]
             patch.remove_region(click_location, draw_radius)
@@ -363,7 +364,8 @@ class Controller:
         elif self.current_mode == Mode.REMOVE_REGION:
             self.logger.debug("Removing Region")
 
-            draw_radius = self.remove_region_radius / self.main_window.image_scale
+            draw_radius = (self.remove_region_radius /
+                           self.main_window.image_scale)
 
             patch = self.image.patches[self.current_patch]
             patch.remove_region(position, draw_radius)
