@@ -226,6 +226,7 @@ class MainWindow(wx.Frame):
         self.image_panel.Bind(wx.EVT_PAINT, self.on_paint)
         self.image_panel.Bind(wx.EVT_ENTER_WINDOW, self.on_enter_panel)
         self.image_panel.Bind(wx.EVT_LEAVE_WINDOW, self.on_leave_panel)
+        self.image_panel.Bind(wx.EVT_ERASE_BACKGROUND, lambda x: 0)
 
         self.control_panel.SetSizer(hbox)
 
@@ -239,7 +240,6 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.menu_handler)
         self.SetSize((1200, 800))
         self.Centre()
-        self.image_panel.Bind(wx.EVT_ERASE_BACKGROUND, lambda x: 0)
 
     def show_image(self, img, dc=None):
         """
@@ -337,7 +337,7 @@ class MainWindow(wx.Frame):
         Called when a tool is selected from the tool bar
 
         :param event: The event causing the tool bar click
-        :returns: {% A thing %}
+        :returns: True on success, False otherwise
         """
 
         # Threshold tool selected
@@ -374,6 +374,8 @@ class MainWindow(wx.Frame):
         else:
             self.logger.error("Uh oh, something went wrong selecting a tool")
             return False
+
+        return True
 
     def on_mousewheel(self, event):
         """

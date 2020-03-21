@@ -585,7 +585,7 @@ class TestController:
         Mode.THRESHOLD
 
         :test_condition: The adjust threshold function is called
-
+                         and the function returns True
         :param setup: The setup fixture
         :returns: None
         """
@@ -607,9 +607,10 @@ class TestController:
 
         spy = mocker.spy(controller, 'adjust_threshold')
 
-        controller.handle_mouse_wheel(-1)
+        result = controller.handle_mouse_wheel(-1)
 
         spy.assert_called_once_with(-1)
+        assert True is result
 
     def test_handle_mouse_wheel_add_region(self, setup, mocker,
                                            display_current_patch_mock):
@@ -618,7 +619,7 @@ class TestController:
         Mode.ADD_REGION
 
         :test_condition: The adjust_add_region_brush function is called
-
+                         and the function returns True
         :param setup: The setup fixture
         :returns: None
         """
@@ -628,9 +629,10 @@ class TestController:
 
         spy = mocker.spy(controller, 'adjust_add_region_brush')
 
-        controller.handle_mouse_wheel(-1)
+        result = controller.handle_mouse_wheel(-1)
 
         spy.assert_called_once_with(-1)
+        assert True is result
 
     def test_handle_mouse_wheel_remove_region(self, setup, mocker,
                                               display_current_patch_mock):
@@ -639,7 +641,7 @@ class TestController:
         Mode.REMOVE_REGION
 
         :test_condition: The adjust_remove_region_brush funtion is called
-
+                         and the function returns True
         :param setup: The setup fixture
         :returns: None
         """
@@ -649,9 +651,10 @@ class TestController:
 
         spy = mocker.spy(controller, 'adjust_remove_region_brush')
 
-        controller.handle_mouse_wheel(-1)
+        result = controller.handle_mouse_wheel(-1)
 
         spy.assert_called_once_with(-1)
+        assert True is result
 
     def test_handle_mouse_wheel_zoom(self, setup, mocker,
                                      display_current_patch_mock):
@@ -660,7 +663,7 @@ class TestController:
         Mode.ZOOM
 
         :test_condition: The adjust handle_zoom function is called
-
+                         and the function returns True
         :param setup: The setup fixture
         :returns: None
         """
@@ -684,9 +687,10 @@ class TestController:
 
         spy = mocker.spy(controller, 'handle_zoom')
 
-        controller.handle_mouse_wheel(-1)
+        result = controller.handle_mouse_wheel(-1)
 
         spy.assert_called_once_with(-1)
+        assert True is result
 
     def test_handle_mouse_wheel_invalid(self, setup,
                                         display_current_patch_mock):
@@ -714,7 +718,8 @@ class TestController:
         Mode.ADD_REGION
 
         :test_condition: The patch.add_region_function is called with the given
-                         position and the current add_region_radius
+                         position and the current add_region_radius, and
+                         returns True
 
         :param setup: The setup fixture
         :returns: None
@@ -739,9 +744,10 @@ class TestController:
         position = (1, 2)
         radius = controller.add_region_radius
 
-        controller.handle_left_click(position)
+        result = controller.handle_left_click(position)
 
         mock_patch.add_region.assert_called_with(position, radius)
+        assert True is result
 
     def test_handle_left_click_remove_region(self, setup,
                                              display_current_patch_mock):
@@ -751,6 +757,7 @@ class TestController:
 
         :test_condition: The patch.remove_region functin is called with the
                          given position and the current remove_region_radius
+                         and returns True
 
         :param setup: The setup fixture
         :returns: None
@@ -775,9 +782,10 @@ class TestController:
         position = (1, 2)
         radius = controller.remove_region_radius
 
-        controller.handle_left_click(position)
+        result = controller.handle_left_click(position)
 
         mock_patch.remove_region.assert_called_with(position, radius)
+        assert True is result
 
     def test_handle_left_click_invalid_mode(self, setup,
                                             display_current_patch_mock):
@@ -836,6 +844,26 @@ class TestController:
 
         assert True is result
 
+    def test_handle_left_release_zoom(self, setup, mocker,
+                                      display_current_patch_mock):
+        """
+        Test when the mouse is released and the current mode is Mode.ZOOM
+
+        :test_condition:  display_current_patch() is called and the function
+                          returns True
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.current_mode = Mode.ZOOM
+
+        result = controller.handle_left_release()
+
+        assert True is result
+        self.mock_C_display_current_patch.assert_called_once()
+
     def test_handle_left_release_invalid_mode(self, setup,
                                               display_current_patch_mock):
         """
@@ -860,6 +888,7 @@ class TestController:
 
         :test_condition: The patch add_region function is called with the given
                          position and the current add_region_radius
+                         and returns True
 
         :param setup: The setip fixture
         :returns: None
@@ -885,9 +914,10 @@ class TestController:
         radius = (controller.add_region_radius /
                   controller.main_window.image_scale)
 
-        controller.handle_motion(position)
+        result = controller.handle_motion(position)
 
         mock_patch.add_region.assert_called_with(position, radius)
+        assert True is result
 
     def test_handle_motion_remove_region(self, setup, mocker,
                                          display_current_patch_mock):
@@ -896,7 +926,7 @@ class TestController:
 
         :test_condition: The patch remove_region function is called with the
                          given position and the current remove_region_radius
-
+                         and returns True
         :param setup: The setup fixture
         :returns: None
         """
@@ -921,9 +951,42 @@ class TestController:
         radius = (controller.remove_region_radius /
                   controller.main_window.image_scale)
 
-        controller.handle_motion(position)
+        result = controller.handle_motion(position)
 
         mock_patch.remove_region.assert_called_with(position, radius)
+        assert True is result
+
+    def test_handle_motion_zoom(self, setup, display_current_patch_mock):
+        """
+        Test when the mouse is moved and the current mode is Mode.ZOOM
+
+        :test_condition: Returns True
+
+        :param setup: The setip fixture
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.current_mode = Mode.ZOOM
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
+
+        mock_patch = MagicMock()
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        position = (1, 2)
+
+        result = controller.handle_motion(position)
+
+        assert True is result
 
     def test_handle_motion_invalid_mode(self, setup,
                                         display_current_patch_mock):
@@ -1415,10 +1478,11 @@ class TestController:
 
         old_scale = controller.main_window.image_scale
 
-        controller.handle_zoom(1)
+        result = controller.handle_zoom(1)
 
         assert controller.main_window.image_scale != old_scale
         assert (controller.main_window.image_scale / 2) == old_scale
+        assert True is result
 
     def test_handle_zoom_negative(self, setup, mocker):
         """
@@ -1438,10 +1502,11 @@ class TestController:
 
         old_scale = controller.main_window.image_scale
 
-        controller.handle_zoom(-1)
+        result = controller.handle_zoom(-1)
 
         assert controller.main_window.image_scale != old_scale
         assert (controller.main_window.image_scale * 2) == old_scale
+        assert True is result
 
     def test_handle_zoom_invalid(self, setup, mocker):
         """

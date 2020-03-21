@@ -241,7 +241,7 @@ class Controller:
         Handle wheel rotation coming from the mouse
 
         :param wheel_rotation: The wheel rotation
-        :returns: None
+        :returns: True on success, False otherwise
         """
 
         if self.current_mode == Mode.THRESHOLD:
@@ -261,12 +261,14 @@ class Controller:
             self.logger.error("Invalid mouse wheel rotation")
             return False
 
+        return True
+
     def handle_zoom(self, wheel_rotation):
         """
         Handle zooming with the mouse wheel
 
         :param wheel_rotation: The roation of the mouse wheel
-        :returns: None
+        :returns: True on success, False otherwise
         """
 
         if wheel_rotation > 0:
@@ -279,13 +281,14 @@ class Controller:
             return False
 
         self.display_current_patch()
+        return True
 
     def handle_left_click(self, click_location):
         """
         Handle a left mouse click at the given location
 
         :param click_location: The location (x, y) of the click
-        :returns: None
+        :returns: True on success, False otherwise
         """
         click_location = (click_location[0] / self.main_window.image_scale,
                           click_location[1] / self.main_window.image_scale)
@@ -315,11 +318,13 @@ class Controller:
         else:
             return False
 
+        return True
+
     def handle_left_release(self):
         """
         Handle the release of the left mouse button
 
-        :returns: None
+        :returns: True on success, False otherwise
         """
 
         if self.current_mode == Mode.ADD_REGION:
@@ -332,7 +337,7 @@ class Controller:
 
         elif self.current_mode == Mode.ZOOM:
             self.display_current_patch()
-
+            return True
         else:
             return False
 
@@ -341,7 +346,7 @@ class Controller:
         Handle motion events of the mouse at the given position
 
         :param position: The position (x, y) of the mouse during the event
-        :returns: None
+        :returns: True on success, False otherwise
         """
 
         if self.current_mode is not Mode.ZOOM:
@@ -382,6 +387,8 @@ class Controller:
 
         else:
             return False
+
+        return True
 
     def adjust_threshold(self, wheel_rotation):
         """
