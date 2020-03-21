@@ -586,6 +586,7 @@ class TestController:
 
         :test_condition: The adjust threshold function is called
                          and the function returns True
+
         :param setup: The setup fixture
         :returns: None
         """
@@ -620,6 +621,7 @@ class TestController:
 
         :test_condition: The adjust_add_region_brush function is called
                          and the function returns True
+
         :param setup: The setup fixture
         :returns: None
         """
@@ -642,6 +644,7 @@ class TestController:
 
         :test_condition: The adjust_remove_region_brush funtion is called
                          and the function returns True
+
         :param setup: The setup fixture
         :returns: None
         """
@@ -731,7 +734,7 @@ class TestController:
         controller.main_window.image_scale = 1
         controller.main_window.image_x = 0
         controller.main_window.image_y = 0
-
+        
         mock_patch = MagicMock()
 
         mock_image = MagicMock()
@@ -758,6 +761,7 @@ class TestController:
         :test_condition: The patch.remove_region functin is called with the
                          given position and the current remove_region_radius
                          and returns True
+
 
         :param setup: The setup fixture
         :returns: None
@@ -803,6 +807,7 @@ class TestController:
         controller.current_mode = Mode.THRESHOLD
         controller.main_window = MagicMock()
         controller.main_window.image_scale = 1
+
 
         result = controller.handle_left_click((0, 0))
         assert False is result
@@ -927,6 +932,7 @@ class TestController:
         :test_condition: The patch remove_region function is called with the
                          given position and the current remove_region_radius
                          and returns True
+
         :param setup: The setup fixture
         :returns: None
         """
@@ -948,6 +954,7 @@ class TestController:
         controller.image = mock_image
 
         position = (1, 2)
+
         radius = (controller.remove_region_radius /
                   controller.main_window.image_scale)
 
@@ -1004,6 +1011,7 @@ class TestController:
         controller.current_mode = Mode.THRESHOLD
         controller.main_window = MagicMock()
         controller.main_window.image_scale = 1
+
 
         result = controller.handle_motion((0, 0))
 

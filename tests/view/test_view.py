@@ -90,6 +90,7 @@ class TestView():
 
         mocker.patch.object(wx.ClientDC, '__init__', return_value=None)
         mocker.patch.object(wx.ClientDC, 'SetUserScale')
+
         mock_dc = mocker.patch.object(wx.ClientDC, 'DrawBitmap',  create=True)
 
         window = MainWindow(self.mock_controller)
@@ -400,6 +401,7 @@ class TestView():
 
         :test_condition: controller.change_mode() is called with ID_TOOL_THRESH
                          and the function returns True
+
         :returns: None
         """
 

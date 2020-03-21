@@ -19,6 +19,7 @@ from friendly_ground_truth.view.icons import (add_region_icon,
                                               prev_patch_icon, threshold_icon,
                                               zoom_in_tool_icon)
 
+
 module_logger = logging.getLogger('friendly_gt.view')
 
 
@@ -34,6 +35,7 @@ class MainWindow(wx.Frame):
     ID_TOOL_PREV_IMAGE = 105
     ID_TOOL_NEXT_IMAGE = 106
     ID_TOOL_ZOOM = 107
+
 
     def __init__(self, controller, parent=None):
         """
@@ -124,6 +126,7 @@ class MainWindow(wx.Frame):
         tool_menu.Append(add_region_menu_item)
         tool_menu.Append(remove_region_menu_item)
         tool_menu.Append(no_root_menu_item)
+
         tool_menu.Append(zoom_menu_item)
 
         # ---- End Tool Menu ----
@@ -228,6 +231,7 @@ class MainWindow(wx.Frame):
         self.image_panel.Bind(wx.EVT_LEAVE_WINDOW, self.on_leave_panel)
         self.image_panel.Bind(wx.EVT_ERASE_BACKGROUND, lambda x: 0)
 
+
         self.control_panel.SetSizer(hbox)
 
         # ---- Overlay ----
@@ -310,7 +314,7 @@ class MainWindow(wx.Frame):
 
         else:
             return
-
+          
     def on_key(self, event):
         """
         Called when a keyboard event is triggered
@@ -330,6 +334,7 @@ class MainWindow(wx.Frame):
         else:
             pass
 
+
         event.Skip()
 
     def on_tool_chosen(self, event):
@@ -337,6 +342,7 @@ class MainWindow(wx.Frame):
         Called when a tool is selected from the tool bar
 
         :param event: The event causing the tool bar click
+
         :returns: True on success, False otherwise
         """
 
@@ -366,7 +372,7 @@ class MainWindow(wx.Frame):
         # Previous Image
         elif event.GetId() == self.ID_TOOL_PREV_IMAGE:
             self.controller.prev_patch()
-
+            
         elif event.GetId() == self.ID_TOOL_ZOOM:
             self.controller.change_mode(self.ID_TOOL_ZOOM)
 
@@ -374,8 +380,9 @@ class MainWindow(wx.Frame):
         else:
             self.logger.error("Uh oh, something went wrong selecting a tool")
             return False
-
+          
         return True
+
 
     def on_mousewheel(self, event):
         """
@@ -501,7 +508,9 @@ class MainWindow(wx.Frame):
         dc.SetPen(wx.Pen("black"))
         dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
         dc.DrawCircle(pos[0], pos[1], self.brush_radius)
+
         self.logger.debug("Drawing Brush")
+
         del odc
 
     def on_paint(self, event):

@@ -15,6 +15,7 @@ import numpy as np
 
 from skimage import io
 from skimage.color import rgb2gray
+
 from friendly_ground_truth.model.model import Image, Patch
 
 
