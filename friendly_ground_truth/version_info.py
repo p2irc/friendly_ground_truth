@@ -26,7 +26,6 @@ class VersionInfo():
 
     def check_newer_version(self, version_string):
         version_string = version_string.strip('v')
-
         parts = version_string.split(".")
         print(parts)
         v_maj = int(parts[0])
@@ -38,12 +37,10 @@ class VersionInfo():
 
         elif v_maj == self.VERSION_MAJOR:
 
-
             if v_min > self.VERSION_MINOR:
                 return True
 
             elif v_min == self.VERSION_MINOR:
-
 
                 if v_patch > self.VERSION_PATCH:
                     return True
@@ -64,7 +61,6 @@ def main(args):
     version_pattern = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+")
 
     if not version_pattern.match(version_string):
-
         print("Invalid version string.  Must be in format: x.y.z")
 
         sys.exit(1)
@@ -80,5 +76,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-
     main(sys.argv)

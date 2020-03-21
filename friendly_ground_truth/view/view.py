@@ -16,7 +16,8 @@ from friendly_ground_truth.view.icons import (add_region_icon,
                                               remove_region_icon,
                                               next_patch_icon,
                                               no_root_icon,
-                                              prev_patch_icon, threshold_icon)
+                                              prev_patch_icon, threshold_icon,
+                                              zoom_in_tool_icon)
 
 
 module_logger = logging.getLogger('friendly_gt.view')
@@ -33,6 +34,7 @@ class MainWindow(wx.Frame):
     ID_TOOL_NO_ROOT = 104
     ID_TOOL_PREV_IMAGE = 105
     ID_TOOL_NEXT_IMAGE = 106
+    ID_TOOL_ZOOM = 107
 
 
     def __init__(self, controller, parent=None):
@@ -47,6 +49,10 @@ class MainWindow(wx.Frame):
         self.controller = controller
         self.current_image = None
         self.brush_radius = 0
+        self.zoom_cursor = False
+        self.image_scale = 1.0
+        self.image_x = 0
+        self.image_y = 0
 
         # Initialize the logger
         self.logger = logging.getLogger('friendly_gt.view.MainWindow')
@@ -112,10 +118,16 @@ class MainWindow(wx.Frame):
                                         text="No Foreground\tCTRL+X",
                                         kind=wx.ITEM_NORMAL)
 
+        zoom_menu_item = wx.MenuItem(tool_menu, self.ID_TOOL_ZOOM,
+                                     text="Zoom\tCTRL++",
+                                     kind=wx.ITEM_NORMAL)
+
         tool_menu.Append(threshold_menu_item)
         tool_menu.Append(add_region_menu_item)
         tool_menu.Append(remove_region_menu_item)
         tool_menu.Append(no_root_menu_item)
+
+        tool_menu.Append(zoom_menu_item)
 
         # ---- End Tool Menu ----
         menubar.Append(file_menu, '&File')
@@ -167,6 +179,13 @@ class MainWindow(wx.Frame):
         self.tool_bar.AddRadioTool(self.ID_TOOL_REMOVE, "Remove"
                                    "Region", remove_region_bitmap)
 
+        zoom_in_tool_img = wx.Image(zoom_in_tool_icon.
+                                    get_zoom_in_tool_icon.getImage())
+        zoom_in_tool_bitmap = wx.Bitmap(zoom_in_tool_img.ConvertToBitmap())
+
+        self.tool_bar.AddRadioTool(self.ID_TOOL_ZOOM, "Zoom",
+                                   zoom_in_tool_bitmap)
+
         no_roots_img = wx.Image(no_root_icon.get_no_root_icon.getImage())
         no_roots_bitmap = wx.Bitmap(no_roots_img.ConvertToBitmap())
 
@@ -210,6 +229,8 @@ class MainWindow(wx.Frame):
         self.image_panel.Bind(wx.EVT_PAINT, self.on_paint)
         self.image_panel.Bind(wx.EVT_ENTER_WINDOW, self.on_enter_panel)
         self.image_panel.Bind(wx.EVT_LEAVE_WINDOW, self.on_leave_panel)
+        self.image_panel.Bind(wx.EVT_ERASE_BACKGROUND, lambda x: 0)
+
 
         self.control_panel.SetSizer(hbox)
 
@@ -243,7 +264,8 @@ class MainWindow(wx.Frame):
             odc = wx.DCOverlay(self.overlay, dc)
             odc.Clear()
 
-        dc.DrawBitmap(self.bitmap, 0, 0)
+        dc.SetUserScale(self.image_scale, self.image_scale)
+        dc.DrawBitmap(self.bitmap, self.image_x, self.image_y)
 
     def menu_handler(self, event):
         """
@@ -286,6 +308,13 @@ class MainWindow(wx.Frame):
             self.controller.change_mode(self.ID_TOOL_PREV_IMAGE)
             self.tool_bar.ToggleTool(self.ID_TOOL_PREV_IMAGE, True)
 
+        elif id == self.ID_TOOL_ZOOM:
+            self.controller.change_mode(self.ID_TOOL_ZOOM)
+            self.tool_bar.ToggleTool(self.ID_TOOL_ZOOM)
+
+        else:
+            return
+          
     def on_key(self, event):
         """
         Called when a keyboard event is triggered
@@ -302,6 +331,9 @@ class MainWindow(wx.Frame):
         # Use right arrow and 'D' key to move right
         elif keycode == wx.WXK_RIGHT or keycode == ord('D'):
             self.controller.next_patch()
+        else:
+            pass
+
 
         event.Skip()
 
@@ -310,7 +342,8 @@ class MainWindow(wx.Frame):
         Called when a tool is selected from the tool bar
 
         :param event: The event causing the tool bar click
-        :returns: {% A thing %}
+
+        :returns: True on success, False otherwise
         """
 
         # Threshold tool selected
@@ -339,11 +372,16 @@ class MainWindow(wx.Frame):
         # Previous Image
         elif event.GetId() == self.ID_TOOL_PREV_IMAGE:
             self.controller.prev_patch()
+            
+        elif event.GetId() == self.ID_TOOL_ZOOM:
+            self.controller.change_mode(self.ID_TOOL_ZOOM)
 
         # Something went wrong
         else:
             self.logger.error("Uh oh, something went wrong selecting a tool")
             return False
+          
+        return True
 
 
     def on_mousewheel(self, event):
@@ -406,14 +444,15 @@ class MainWindow(wx.Frame):
 
         self.previous_mouse_position = pos
 
-        self.draw_brush(pos)
+        if not self.zoom_cursor:
+            self.draw_brush(pos)
 
         if event.Dragging() and event.LeftIsDown():
             current_position = self.convert_mouse_to_img_pos(
                                                         event.GetPosition())
 
-            self.previous_position = current_position
             self.controller.handle_motion(current_position)
+            self.previous_position = current_position
 
     def on_enter_panel(self, event):
         """
@@ -424,7 +463,12 @@ class MainWindow(wx.Frame):
         :postcondition: The mouse cursor is removed
         """
         self.logger.debug("Entered Panel")
-        cursor = wx.StockCursor(wx.CURSOR_BLANK)
+
+        if self.zoom_cursor:
+            cursor = wx.StockCursor(wx.CURSOR_MAGNIFIER)
+        else:
+            cursor = wx.StockCursor(wx.CURSOR_BLANK)
+
         self.SetCursor(cursor)
 
     def on_leave_panel(self, event):
@@ -464,6 +508,8 @@ class MainWindow(wx.Frame):
         dc.SetPen(wx.Pen("black"))
         dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
         dc.DrawCircle(pos[0], pos[1], self.brush_radius)
+
+        self.logger.debug("Drawing Brush")
 
         del odc
 

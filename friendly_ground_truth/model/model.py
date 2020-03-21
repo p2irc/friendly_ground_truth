@@ -211,7 +211,6 @@ class Patch():
         if value > 1 or value < 0:
             raise ValueError("Threshold values must be between 0 and 1")
 
-
         binary = self.patch > value
         self.mask = binary
 

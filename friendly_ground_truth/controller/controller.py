@@ -28,6 +28,7 @@ class Mode(Enum):
     ADD_REGION = 2
     REMOVE_REGION = 3
     NO_ROOT = 4
+    ZOOM = 5
 
 
 class Controller:
@@ -105,7 +106,6 @@ class Controller:
         if os.path.isdir(path):
             raise ValueError("Cannot get image name from a directory.")
 
-
         basename = os.path.basename(path)
         return os.path.splitext(basename)[0] + '_mask.png'
 
@@ -132,7 +132,7 @@ class Controller:
             try:
                 self.logger.debug("Saving mask to {}".format(pathname))
                 self.image.export_mask(pathname)
-
+                
             except IOError:
                 wx.LogError("Cannot save file '%s'." % pathname)
                 # TODO: display dialog
@@ -203,17 +203,26 @@ class Controller:
         if new_mode_id == self.main_window.ID_TOOL_THRESH:
             self.current_mode = Mode.THRESHOLD
             self.main_window.set_brush_radius(0)
+            self.main_window.zoom_cursor = False
 
         elif new_mode_id == self.main_window.ID_TOOL_ADD:
             self.current_mode = Mode.ADD_REGION
             self.main_window.set_brush_radius(self.add_region_radius)
+            self.main_window.zoom_cursor = False
 
         elif new_mode_id == self.main_window.ID_TOOL_REMOVE:
             self.current_mode = Mode.REMOVE_REGION
             self.main_window.set_brush_radius(self.remove_region_radius)
+            self.main_window.zoom_cursor = False
 
         elif new_mode_id == self.main_window.ID_TOOL_NO_ROOT:
             self.no_root_activate()
+
+        elif new_mode_id == self.main_window.ID_TOOL_ZOOM:
+            self.current_mode = Mode.ZOOM
+            self.main_window.set_brush_radius(0)
+            self.main_window.zoom_cursor = True
+
         else:
             self.logger.error("Invalid mode change")
 
@@ -237,7 +246,7 @@ class Controller:
         Handle wheel rotation coming from the mouse
 
         :param wheel_rotation: The wheel rotation
-        :returns: None
+        :returns: True on success, False otherwise
         """
 
         if self.current_mode == Mode.THRESHOLD:
@@ -249,41 +258,79 @@ class Controller:
 
         elif self.current_mode == Mode.REMOVE_REGION:
             self.adjust_remove_region_brush(wheel_rotation)
-
+            
+        elif self.current_mode == Mode.ZOOM:
+            self.handle_zoom(wheel_rotation)
+            
         else:
             self.logger.error("Invalid mouse wheel rotation")
             return False
 
+        return True
+
+    def handle_zoom(self, wheel_rotation):
+        """
+        Handle zooming with the mouse wheel
+
+        :param wheel_rotation: The roation of the mouse wheel
+        :returns: True on success, False otherwise
+        """
+
+        if wheel_rotation > 0:
+            self.main_window.image_scale *= 2.0
+
+        elif wheel_rotation < 0:
+            self.main_window.image_scale /= 2.0
+
+        else:
+            return False
+
+        self.display_current_patch()
+        return True
 
     def handle_left_click(self, click_location):
         """
         Handle a left mouse click at the given location
 
         :param click_location: The location (x, y) of the click
-        :returns: None
+        :returns: True on success, False otherwise
         """
+        click_location = (click_location[0] / self.main_window.image_scale,
+                          click_location[1] / self.main_window.image_scale)
+
+        click_location = (click_location[0] - self.main_window.image_x,
+                          click_location[1] - self.main_window.image_y)
 
         if self.current_mode == Mode.ADD_REGION:
             self.logger.debug("Add region click")
+
+            draw_radius = self.add_region_radius / self.main_window.image_scale
+
             patch = self.image.patches[self.current_patch]
-            patch.add_region(click_location, self.add_region_radius)
+            patch.add_region(click_location, draw_radius)
+
             self.display_current_patch()
 
         elif self.current_mode == Mode.REMOVE_REGION:
             self.logger.debug("Remove region click")
+
+            draw_radius = (self.remove_region_radius /
+                           self.main_window.image_scale)
+
             patch = self.image.patches[self.current_patch]
-            patch.remove_region(click_location, self.remove_region_radius)
+            patch.remove_region(click_location, draw_radius)
             self.display_current_patch()
 
         else:
             return False
-
+          
+        return True
 
     def handle_left_release(self):
         """
         Handle the release of the left mouse button
-
-        :returns: None
+        
+        :returns: True on success, False otherwise
         """
 
         if self.current_mode == Mode.ADD_REGION:
@@ -294,6 +341,10 @@ class Controller:
             self.logger.debug("Remove region release")
             return True
 
+        elif self.current_mode == Mode.ZOOM:
+            self.display_current_patch()
+            return True
+
         else:
             return False
 
@@ -302,24 +353,50 @@ class Controller:
         Handle motion events of the mouse at the given position
 
         :param position: The position (x, y) of the mouse during the event
-        :returns: None
+        :returns: True on success, False otherwise
         """
+
+        if self.current_mode is not Mode.ZOOM:
+
+            position = (position[0] / self.main_window.image_scale,
+                        position[1] / self.main_window.image_scale)
+
+            position = (position[0] - self.main_window.image_x,
+                        position[1] - self.main_window.image_y)
 
         if self.current_mode == Mode.ADD_REGION:
             self.logger.debug("Adding region")
+
+            draw_radius = self.add_region_radius / self.main_window.image_scale
+
             patch = self.image.patches[self.current_patch]
-            patch.add_region(position, self.add_region_radius)
+            patch.add_region(position, draw_radius)
+
             self.display_current_patch()
 
         elif self.current_mode == Mode.REMOVE_REGION:
             self.logger.debug("Removing Region")
 
+            draw_radius = (self.remove_region_radius /
+                           self.main_window.image_scale)
+
             patch = self.image.patches[self.current_patch]
-            patch.remove_region(position, self.remove_region_radius)
+            patch.remove_region(position, draw_radius)
             self.display_current_patch()
+
+        elif self.current_mode == Mode.ZOOM:
+            self.main_window.image_x += (position[0] -
+                                         self.main_window.previous_position[0])
+            self.main_window.image_y += (position[1] -
+                                         self.main_window.previous_position[1])
+
+            # I'm not sure why this works, but I really need to move on
+            self.main_window.draw_brush()
 
         else:
             return False
+
+        return True
 
     def adjust_threshold(self, wheel_rotation):
         """
