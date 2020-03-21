@@ -285,6 +285,26 @@ class TestView():
         self.mock_controller.change_mode.assert_called_with(window.
                                                             ID_TOOL_PREV_IMAGE)
 
+    def test_menu_handler_zoom(self, setup, mock_init_ui, mocker):
+        """
+        Test when the menu handler is called and the events id is ID_TOOL_ZOOM
+
+        :test_condition: controller.change_mode() is called with ID_TOOL_ZOOM
+
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller)
+        window.tool_bar = MagicMock()
+
+        event = MagicMock()
+        event.GetId.return_value = window.ID_TOOL_ZOOM
+
+        window.menu_handler(event)
+
+        self.mock_controller.change_mode.assert_called_with(window.
+                                                            ID_TOOL_ZOOM)
+
     def test_menu_handler_invalid(self, setup, mock_init_ui, mocker):
         """
         Test when the menu handler is called and the event_id is
@@ -379,7 +399,7 @@ class TestView():
         ID_TOOL_THRESH
 
         :test_condition: controller.change_mode() is called with ID_TOOL_THRESH
-
+                         and the function returns True
         :returns: None
         """
 
@@ -388,10 +408,11 @@ class TestView():
         event = MagicMock()
         event.GetId.return_value = window.ID_TOOL_THRESH
 
-        window.on_tool_chosen(event)
+        result = window.on_tool_chosen(event)
 
         self.mock_controller.change_mode.assert_called_with(window.
                                                             ID_TOOL_THRESH)
+        assert True is result
 
     def test_on_tool_chosen_add(self, setup, mock_init_ui, mocker):
         """
@@ -399,7 +420,7 @@ class TestView():
         ID_TOOL_ADD
 
         :test_condition: controller.change_mode() is called with ID_TOOL_ADD
-
+                         and the function returns True
         :returns: None
         """
 
@@ -408,10 +429,11 @@ class TestView():
         event = MagicMock()
         event.GetId.return_value = window.ID_TOOL_ADD
 
-        window.on_tool_chosen(event)
+        result = window.on_tool_chosen(event)
 
         self.mock_controller.change_mode.assert_called_with(window.
                                                             ID_TOOL_ADD)
+        assert True is result
 
     def test_on_tool_chosen_remove(self, setup, mock_init_ui, mocker):
         """
@@ -419,7 +441,7 @@ class TestView():
         ID_TOOL_REMOVE
 
         :test_condition: controller.change_mode() is called with ID_TOOL_REMOVE
-
+                         and the function returns True
         :returns: None
         """
 
@@ -428,10 +450,11 @@ class TestView():
         event = MagicMock()
         event.GetId.return_value = window.ID_TOOL_REMOVE
 
-        window.on_tool_chosen(event)
+        result = window.on_tool_chosen(event)
 
         self.mock_controller.change_mode.assert_called_with(window.
                                                             ID_TOOL_REMOVE)
+        assert True is result
 
     def test_on_tool_chosen_no_root(self, setup, mock_init_ui, mocker):
         """
@@ -440,7 +463,7 @@ class TestView():
 
         :test_condition: controller.change_mode() is called with
                          ID_TOOL_NO_ROOT
-
+                         and the function returns True
         :returns: None
         """
 
@@ -449,10 +472,11 @@ class TestView():
         event = MagicMock()
         event.GetId.return_value = window.ID_TOOL_NO_ROOT
 
-        window.on_tool_chosen(event)
+        result = window.on_tool_chosen(event)
 
         self.mock_controller.change_mode.assert_called_with(window.
                                                             ID_TOOL_NO_ROOT)
+        assert True is result
 
     def test_on_tool_chosen_next(self, setup, mock_init_ui, mocker):
         """
@@ -460,7 +484,7 @@ class TestView():
         ID_TOOL_NEXT_IMAGE
 
         :test_condition: controller.next_patch() is called
-
+                         and the function returns True
         :returns: None
         """
 
@@ -469,9 +493,10 @@ class TestView():
         event = MagicMock()
         event.GetId.return_value = window.ID_TOOL_NEXT_IMAGE
 
-        window.on_tool_chosen(event)
+        result = window.on_tool_chosen(event)
 
         self.mock_controller.next_patch.assert_called()
+        assert True is result
 
     def test_on_tool_chosen_prev(self, setup, mock_init_ui, mocker):
         """
@@ -479,7 +504,7 @@ class TestView():
         ID_TOOL_PREV_IMAGE
 
         :test_condition: controller.prev_patch() is called
-
+                         and the function returns True
         :returns: None
         """
 
@@ -488,9 +513,31 @@ class TestView():
         event = MagicMock()
         event.GetId.return_value = window.ID_TOOL_PREV_IMAGE
 
-        window.on_tool_chosen(event)
+        result = window.on_tool_chosen(event)
 
         self.mock_controller.prev_patch.assert_called()
+        assert True is result
+
+    def test_on_tool_chosen_zoom(self, setup, mock_init_ui, mocker):
+        """
+        Test when the on_tool_chosen hanlder is called and the event_id is
+        ID_TOOL_ZOOM
+
+        :test_condition: controller.change_mode() is called with ID_TOOL_ZOOM
+                         and the function returns True
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller)
+
+        event = MagicMock()
+        event.GetId.return_value = window.ID_TOOL_ZOOM
+
+        result = window.on_tool_chosen(event)
+
+        self.mock_controller.change_mode.assert_called_with(window.
+                                                            ID_TOOL_ZOOM)
+        assert True is result
 
     def test_on_tool_chosen_invalid(self, setup, mock_init_ui, mocker):
         """
@@ -643,9 +690,37 @@ class TestView():
 
         self.mock_controller.handle_motion.assert_called()
 
-    def test_on_enter_panel(self, setup, mock_init_ui, mocker, mock_painting):
+    def test_on_motion_zoom_cursor(self, setup, mock_init_ui, mocker):
         """
-        Test when the mouse enters the panel
+        Test when the mouse is moved and zoom cursor is True
+
+        :test_condition: controller.draw_brush() is not called
+
+        :returns: None
+        """
+
+        event = MagicMock()
+        event.Dragging = PropertyMock(return_value=False)
+        event.LeftIsDown = PropertyMock(return_value=False)
+
+        mocker.patch('wx.Panel.GetScreenPosition')
+        mocker.patch('wx.Window.ScreenToClient')
+
+        window = MainWindow(self.mock_controller)
+        window.image_panel = MagicMock()
+
+        window.zoom_cursor = True
+
+        spy = mocker.spy(MainWindow, 'draw_brush')
+
+        window.on_motion(event)
+
+        spy.assert_not_called()
+
+    def test_on_enter_panel_not_zoom(self, setup, mock_init_ui, mocker,
+                                     mock_painting):
+        """
+        Test when the mouse enters the panel and zoom cursor is False
 
         :test_condition: self.SetCursor() is called with
         wx.StockCursor(wx.CURSOR_BLANK)
@@ -657,6 +732,29 @@ class TestView():
         mocker.patch('wx.StockCursor')
 
         window = MainWindow(self.mock_controller)
+        window.zoom_cursor = False
+
+        window.on_enter_panel(None)
+
+        mock_cursor.assert_called_with(wx.StockCursor(wx.CURSOR_BLANK))
+
+    def test_on_enter_panel_zoom(self, setup, mock_init_ui, mocker,
+                                 mock_painting):
+        """
+        Test when the mouse enters the panel and zoom cursor is True
+
+        :test_condition: self.SetCursor() is called with
+                         wx.StockCursor(wx.CURSOR_MAGNIFIER)
+
+        :returns: None
+        """
+
+        mock_cursor = mocker.patch.object(MainWindow, "SetCursor")
+        mocker.patch('wx.StockCursor')
+
+        window = MainWindow(self.mock_controller)
+        window.zoom_cursor = True
+
         window.on_enter_panel(None)
 
         mock_cursor.assert_called_with(wx.StockCursor(wx.CURSOR_BLANK))
