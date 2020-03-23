@@ -158,8 +158,20 @@ class Image():
         """
         self.create_mask()
         print(pathname)
+        self.remove_small_components()
         io.imsave(pathname, img_as_uint(self.mask))
 
+    def remove_small_components(self):
+        """
+        Remove components that are not connected to the main root
+
+        :returns: None
+        """
+        from skimage.measure import label
+
+        labels = label(self.mask)
+        largestCC = labels == np.argmax(np.bincount(labels.flat)[1:])+1
+        self.mask = largestCC
 
 class Patch():
     """

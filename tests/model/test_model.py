@@ -12,9 +12,12 @@ Description: Unit Testing for Model
 import pytest
 import os
 import numpy as np
+import matplotlib.pyplot as plt
 
 from skimage import io
 from skimage.color import rgb2gray
+from skimage import morphology
+from skimage.draw import circle
 
 from friendly_ground_truth.model.model import Image, Patch
 
@@ -72,6 +75,27 @@ class TestImage:
             os.remove(export_mask_path)
         except FileNotFoundError:
             pass
+
+    @pytest.fixture
+    def patch_data_many_components(self):
+        image_size = (500, 500)
+        img = np.zeros(image_size, dtype=np.uint8)
+
+        # This should make an image of non-neighbouring white pixels
+        for i in range(image_size[0]):
+            for j in range(image_size[1]):
+                if i % 2 == 0 and i > 40:
+                    if j % 2 == 0 and j > 40:
+                        img[i, j] = 1
+                    else:
+                        pass
+
+        rr, cc = circle(10, 10, 5)
+
+        img[rr, cc] = 1
+
+        return img
+
 
     def test_load_image_valid_rgb(self, valid_rgb_image_path):
         """
@@ -339,6 +363,28 @@ class TestImage:
         image.export_mask(export_mask_path)
 
         assert os.path.exists(export_mask_path)
+
+    def test_remove_small_components(self, valid_rgb_image_path,
+                                     patch_data_many_components):
+        """
+        {% What it do %}
+
+        :param self: {% A parameter %}
+        :param valid_rgb_image_path: {% A parameter %}
+        :param many: {% A parameter %}
+        :returns: {% A thing %}
+        """
+
+        image = Image(valid_rgb_image_path)
+        image.mask = patch_data_many_components
+
+        image.remove_small_components()
+
+        unique = np.unique(morphology.label(image.mask))
+
+        num_components = len(unique)
+
+        assert num_components == 2
 
 
 class TestPatch:
