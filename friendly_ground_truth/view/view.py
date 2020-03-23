@@ -36,7 +36,6 @@ class MainWindow(wx.Frame):
     ID_TOOL_NEXT_IMAGE = 106
     ID_TOOL_ZOOM = 107
 
-
     def __init__(self, controller, parent=None):
         """
         Initializes the main window
@@ -231,7 +230,6 @@ class MainWindow(wx.Frame):
         self.image_panel.Bind(wx.EVT_LEAVE_WINDOW, self.on_leave_panel)
         self.image_panel.Bind(wx.EVT_ERASE_BACKGROUND, lambda x: 0)
 
-
         self.control_panel.SetSizer(hbox)
 
         # ---- Overlay ----
@@ -314,7 +312,7 @@ class MainWindow(wx.Frame):
 
         else:
             return
-          
+
     def on_key(self, event):
         """
         Called when a keyboard event is triggered
@@ -333,7 +331,6 @@ class MainWindow(wx.Frame):
             self.controller.next_patch()
         else:
             pass
-
 
         event.Skip()
 
@@ -372,7 +369,7 @@ class MainWindow(wx.Frame):
         # Previous Image
         elif event.GetId() == self.ID_TOOL_PREV_IMAGE:
             self.controller.prev_patch()
-            
+
         elif event.GetId() == self.ID_TOOL_ZOOM:
             self.controller.change_mode(self.ID_TOOL_ZOOM)
 
@@ -380,9 +377,8 @@ class MainWindow(wx.Frame):
         else:
             self.logger.error("Uh oh, something went wrong selecting a tool")
             return False
-          
-        return True
 
+        return True
 
     def on_mousewheel(self, event):
         """

@@ -140,6 +140,45 @@ class TestController:
 
         assert controller.current_patch == 1
 
+    def test_next_patch_saved(self, mocker, setup,
+                              display_current_patch_mock):
+        """
+        Test moving to the next patch when the current patch is the last patch
+        in the list of patches, and the dialog was not cancelled, and the mask
+        has been saved
+
+        :test_condition: Return None
+        :returns: None
+        """
+        mocker.patch('wx.MessageDialog.__init__', lambda x,
+                     y, z, a, b: None)
+        mocker.patch('wx.MessageDialog.ShowModal',
+                     return_value=wx.ID_YES)
+
+        mocker.patch('wx.DirDialog')
+        mocker.patch.object(Controller, 'save_mask')
+
+        controller = Controller()
+
+        mock_patch = MagicMock()
+        display_mock = PropertyMock(return_value=True)
+
+        type(mock_patch).display = display_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch,
+                                    mock_patch,  mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+        controller.current_patch = 2
+        controller.mask_saved = True
+
+        result = controller.next_patch()
+
+        assert result is None
+
     def test_next_patch_valid_index_not_display(self, setup,
                                                 display_current_patch_mock):
         """
@@ -734,7 +773,7 @@ class TestController:
         controller.main_window.image_scale = 1
         controller.main_window.image_x = 0
         controller.main_window.image_y = 0
-        
+
         mock_patch = MagicMock()
 
         mock_image = MagicMock()
@@ -807,7 +846,6 @@ class TestController:
         controller.current_mode = Mode.THRESHOLD
         controller.main_window = MagicMock()
         controller.main_window.image_scale = 1
-
 
         result = controller.handle_left_click((0, 0))
         assert False is result
@@ -1011,7 +1049,6 @@ class TestController:
         controller.current_mode = Mode.THRESHOLD
         controller.main_window = MagicMock()
         controller.main_window.image_scale = 1
-
 
         result = controller.handle_motion((0, 0))
 

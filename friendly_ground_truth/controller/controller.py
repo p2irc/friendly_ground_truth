@@ -46,6 +46,7 @@ class Controller:
         self.logger.debug("Creating controller instance")
 
         self.current_patch = 0
+        self.mask_saved = False
 
         # Set up the current mode
         self.current_mode = Mode.THRESHOLD
@@ -167,6 +168,10 @@ class Controller:
 
             self.display_current_patch()
         else:
+
+            if self.mask_saved:
+                return
+
             self.logger.error("No More Patches")
 
             dialog_message = "No More Patches - Would you like to save the" \
@@ -180,6 +185,11 @@ class Controller:
 
             if dialog.ShowModal() == wx.ID_YES:
                 self.save_mask()
+                self.mask_saved = True
+
+                dialog = wx.MessageDialog(None, "Image Mask Saved!",
+                                          "Success!", wx.OK)
+                dialog.ShowModal()
 
     def prev_patch(self):
         """
