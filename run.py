@@ -11,10 +11,24 @@ Description: The entry point for the application
 
 import wx
 import logging
+import sys
+
 from friendly_ground_truth.controller.controller import Controller
 
+debug = False
+
+if len(sys.argv) > 1:
+
+    arg = sys.argv[1]
+
+    if arg == '-debug':
+        debug = True
+
+
 logger = logging.getLogger('friendly_gt')
-logger.setLevel(logging.DEBUG)
+
+if debug:
+    logger.setLevel(logging.DEBUG)
 
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
