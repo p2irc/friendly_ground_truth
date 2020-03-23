@@ -132,7 +132,7 @@ class Controller:
             try:
                 self.logger.debug("Saving mask to {}".format(pathname))
                 self.image.export_mask(pathname)
-                
+
             except IOError:
                 wx.LogError("Cannot save file '%s'." % pathname)
                 # TODO: display dialog
@@ -159,6 +159,11 @@ class Controller:
             self.current_patch += 1
             while self.image.patches[self.current_patch].display is False:
                 self.current_patch += 1
+
+            self.main_window.image_scale = 1
+            self.main_window.image_x = 0
+            self.main_window.image_y = 0
+
             self.display_current_patch()
         else:
             self.logger.error("No More Patches")
@@ -186,6 +191,10 @@ class Controller:
             self.current_patch -= 1
             while self.image.patches[self.current_patch].display is False:
                 self.current_patch -= 1
+
+            self.main_window.image_scale = 1
+            self.main_window.image_x = 0
+            self.main_window.image_y = 0
 
             self.display_current_patch()
 
@@ -258,10 +267,10 @@ class Controller:
 
         elif self.current_mode == Mode.REMOVE_REGION:
             self.adjust_remove_region_brush(wheel_rotation)
-            
+
         elif self.current_mode == Mode.ZOOM:
             self.handle_zoom(wheel_rotation)
-            
+
         else:
             self.logger.error("Invalid mouse wheel rotation")
             return False
@@ -323,13 +332,13 @@ class Controller:
 
         else:
             return False
-          
+
         return True
 
     def handle_left_release(self):
         """
         Handle the release of the left mouse button
-        
+
         :returns: True on success, False otherwise
         """
 
