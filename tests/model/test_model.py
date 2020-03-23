@@ -12,7 +12,6 @@ Description: Unit Testing for Model
 import pytest
 import os
 import numpy as np
-import matplotlib.pyplot as plt
 
 from skimage import io
 from skimage.color import rgb2gray
@@ -95,7 +94,6 @@ class TestImage:
         img[rr, cc] = 1
 
         return img
-
 
     def test_load_image_valid_rgb(self, valid_rgb_image_path):
         """

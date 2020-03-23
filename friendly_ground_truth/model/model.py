@@ -173,6 +173,7 @@ class Image():
         largestCC = labels == np.argmax(np.bincount(labels.flat)[1:])+1
         self.mask = largestCC
 
+
 class Patch():
     """
     Represents an image patch

@@ -143,7 +143,6 @@ class TestVersionInfo:
 
         assert info.check_newer_version(version_string) is False
 
-
     def test_check_newer_version_false(self):
         """
         Test checking a newer version when the v_maj <  the current
