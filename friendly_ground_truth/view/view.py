@@ -243,6 +243,9 @@ class MainWindow(wx.Frame):
         self.SetSize((1200, 800))
         self.Centre()
 
+        Size = self.image_panel.ClientSize
+        self._Buffer = wx.EmptyBitmap(*Size)
+
     def show_image(self, img, dc=None):
         """
         Display the given image in the main window
@@ -258,12 +261,16 @@ class MainWindow(wx.Frame):
         self.bitmap = wx.Bitmap(image)
 
         if dc is None:
-            dc = wx.ClientDC(self.image_panel)
+            dc = wx.MemoryDC()
+            dc.SelectObject(self._Buffer)
             odc = wx.DCOverlay(self.overlay, dc)
             odc.Clear()
 
         dc.SetUserScale(self.image_scale, self.image_scale)
         dc.DrawBitmap(self.bitmap, self.image_x, self.image_y)
+
+        del dc
+        self.Refresh()
 
     def menu_handler(self, event):
         """
@@ -478,12 +485,14 @@ class MainWindow(wx.Frame):
         self.logger.debug("Leaving Panel")
         wx.Cursor(wx.CURSOR_DEFAULT)
 
-    def draw_brush(self, pos=None):
+    def draw_brush(self, pos=None, with_image=True):
         """
         Draw the brush circle over the image
 
         :param pos: The position to draw the circle at.
                     The default value is None.
+        :param with_image: Whether to redraw the image too.
+                           The default value is True.
         :returns: None
         """
 
@@ -496,7 +505,8 @@ class MainWindow(wx.Frame):
         dc = wx.ClientDC(self.image_panel)
         odc = wx.DCOverlay(self.overlay, dc)
 
-        self.show_image(self.current_image, dc)
+        if with_image:
+            self.show_image(self.current_image, dc)
 
         if 'wxMac' not in wx.PlatformInfo:
             dc = wx.GCDC(dc)
@@ -508,6 +518,9 @@ class MainWindow(wx.Frame):
         self.logger.debug("Drawing Brush")
 
         del odc
+        del dc
+
+        self.Refresh()
 
     def on_paint(self, event):
         """
@@ -516,10 +529,21 @@ class MainWindow(wx.Frame):
         :param event: The triggering paint event
         :returns: None
         """
+        dc = wx.BufferedPaintDC(self.image_panel, self._Buffer)
 
-        self.logger.debug("Paint")
-        dc = wx.ClientDC(self.image_panel)
         wx.DCOverlay(self.overlay, dc)
+
+        # This is a big ugly band-aid for the issue where the brush disappears,
+        # and I'm not sure how to fix it at the moment
+        # TODO: Tear-off band-aid
+        pos = self.previous_mouse_position
+        dc = wx.ClientDC(self.image_panel)
+        odc = wx.DCOverlay(self.overlay, dc)
+        dc.SetPen(wx.Pen("black"))
+        dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
+        dc.DrawCircle(pos[0], pos[1], self.brush_radius)
+
+        del odc
 
     def convert_mouse_to_img_pos(self, in_position):
         """
