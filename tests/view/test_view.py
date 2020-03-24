@@ -27,6 +27,7 @@ class TestView():
         mocker.patch('wx.GetApp')
         mocker.patch('wx.App.Bind')
         mocker.patch('wx.Frame.Bind')
+        mocker.patch('wx.Frame.Refresh')
 
         self.mock_controller = mocker.patch('friendly_ground_truth.' +
                                             'controller.controller.Controller')
@@ -44,6 +45,8 @@ class TestView():
         mocker.patch('wx.Bitmap')
         mocker.patch('wx.Pen')
         mocker.patch('wx.Brush')
+        mocker.patch('wx.BufferedPaintDC')
+        mocker.patch('wx.MemoryDC')
 
     def test_init_ui(self, setup, mock_painting,  mocker):
         """
@@ -66,6 +69,7 @@ class TestView():
         mocker.patch('wx.Frame.SetMenuBar')
         mocker.patch('wx.Frame.SetSize')
         mocker.patch('wx.Frame.Centre')
+        mocker.patch('wx.EmptyBitmap')
 
         window = MainWindow(self.mock_controller)
 
@@ -79,7 +83,7 @@ class TestView():
         """
         Test showing an image with a None dc
 
-        :test_condition: dc.DrawBitmap() is called
+        :test_condition: Refresh() is called
 
         :returns: None
         """
@@ -91,17 +95,18 @@ class TestView():
         mocker.patch.object(wx.ClientDC, '__init__', return_value=None)
         mocker.patch.object(wx.ClientDC, 'SetUserScale')
 
-        mock_dc = mocker.patch.object(wx.ClientDC, 'DrawBitmap',  create=True)
+        mock_refresh = mocker.patch('wx.Frame.Refresh')
 
         window = MainWindow(self.mock_controller)
         window.image_panel = MagicMock()
         window.overlay = MagicMock()
+        window._Buffer = MagicMock()
 
         img = MagicMock()
 
         window.show_image(img, None)
 
-        mock_dc.assert_called()
+        mock_refresh.assert_called()
 
     def test_show_image_dc(self, setup, mock_init_ui, mocker):
         """
@@ -861,6 +866,41 @@ class TestView():
         mock_dc.assert_called_with(in_position[0], in_position[1],
                                    window.brush_radius)
 
+    def test_draw_brush_without_image(self, setup, mock_init_ui, mock_painting,
+                                      mocker):
+        """
+        Test when draw_brush() is called and with_image is False
+
+        :test_condition: dc.DrawCircle() is called with position
+        :param setup: setup
+        :param mock_init_ui: UI Fixture
+        :param mock_painting: Painting Fixture
+        :param mocker: Mocker
+        :returns: None
+        """
+        wx.PlatformInfo = ('wxMac')
+
+        mocker.patch.object(wx.ClientDC, '__init__', return_value=None)
+        mocker.patch.object(wx.ClientDC, 'SetPen')
+        mocker.patch.object(wx.ClientDC, 'SetBrush')
+
+        mock_dc = mocker.patch.object(wx.ClientDC, 'DrawCircle',  create=True)
+
+        mocker.patch('friendly_ground_truth.view.view.MainWindow.show_image')
+
+        window = MainWindow(self.mock_controller)
+        window.current_image = MagicMock()
+        window.previous_mouse_position = (0, 0)
+        window.image_panel = MagicMock()
+        window.overlay = MagicMock()
+
+        in_position = (1, 1)
+
+        window.draw_brush(in_position, with_image=False)
+
+        mock_dc.assert_called_with(in_position[0], in_position[1],
+                                   window.brush_radius)
+
     def test_draw_brush_wxMac(self, setup, mock_init_ui, mock_painting,
                               mocker):
         """
@@ -888,7 +928,7 @@ class TestView():
 
         mock_gcdc.assert_called()
 
-    def test_on_paint(self, setup, mock_init_ui, mocker):
+    def test_on_paint(self, setup, mock_init_ui, mock_painting, mocker):
         """
         Test when the on_paint function is called
 
@@ -903,7 +943,8 @@ class TestView():
         window = MainWindow(self.mock_controller)
         window.image_panel = MagicMock()
         window.overlay = MagicMock()
-
+        window._Buffer = MagicMock()
+        window.previous_mouse_position = (0, 0)
         window.on_paint(None)
 
         mock_overlay.assert_called()
