@@ -121,6 +121,28 @@ class TestVersionInfo:
 
         assert info.check_newer_version(version_string) is True
 
+    def test_check_newer_version_no_new_patch(self):
+        """
+        Test checking a newer version when the input strings v_maj == the
+        current VERSION_MAJOR and the input v_min == the current VERSION_MINOR
+        and the input v_patch < the current VERSION_PATCH
+
+        :test_condition: Returns False
+
+        :returns: None
+        """
+
+        info = VersionInfo()
+
+        v_maj = info.VERSION_MAJOR
+        v_min = info.VERSION_MINOR
+        v_patch = 0
+
+        version_string = 'v' + str(v_maj) + '.' + str(v_min) + '.' +\
+                         str(v_patch)
+
+        assert info.check_newer_version(version_string) is False
+
     def test_check_newer_version_false(self):
         """
         Test checking a newer version when the v_maj <  the current
