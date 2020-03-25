@@ -311,6 +311,50 @@ class TestView():
         self.mock_controller.change_mode.assert_called_with(window.
                                                             ID_TOOL_ZOOM)
 
+    def test_menu_handler_flood_add(self, setup, mock_init_ui, mocker):
+        """
+        Test when the menu handler is called and the event_id is
+        ID_TOOL_FLOOD_ADD
+
+        :test_condition: controller.change_mode() is called with
+        ID_TOOL_FLOOD_ADD
+
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller)
+        window.tool_bar = MagicMock()
+
+        event = MagicMock()
+        event.GetId.return_value = window.ID_TOOL_FLOOD_ADD
+
+        window.menu_handler(event)
+
+        self.mock_controller.change_mode.assert_called_with(window.
+                                                            ID_TOOL_FLOOD_ADD)
+
+    def test_menu_handler_flood_remove(self, setup, mock_init_ui, mocker):
+        """
+        Test when the menu handler is called and the event_id is
+        ID_TOOL_FLOOD_REMOVE
+
+        :test_condition: controller.change_mode() is called with
+        ID_TOOL_FLOOD_REMOVE
+
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller)
+        window.tool_bar = MagicMock()
+
+        event = MagicMock()
+        event.GetId.return_value = window.ID_TOOL_FLOOD_REMOVE
+
+        window.menu_handler(event)
+
+        self.mock_controller.change_mode.\
+            assert_called_with(window.ID_TOOL_FLOOD_REMOVE)
+
     def test_menu_handler_invalid(self, setup, mock_init_ui, mocker):
         """
         Test when the menu handler is called and the event_id is
@@ -546,6 +590,50 @@ class TestView():
                                                             ID_TOOL_ZOOM)
         assert True is result
 
+    def test_on_tool_chosen_flood_add(self, setup, mock_init_ui, mocker):
+        """
+        Test when the on_tool_chosen handler is called and the event_id is
+        ID_TOOL_FLOOD_ADD
+
+        :test_condition: controller.change_mode() is called with
+                         ID_TOOL_FLOOD_ADD
+                         and the function returns True
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller)
+
+        event = MagicMock()
+        event.GetId.return_value = window.ID_TOOL_FLOOD_ADD
+
+        result = window.on_tool_chosen(event)
+
+        self.mock_controller.change_mode.assert_called_with(window.
+                                                            ID_TOOL_FLOOD_ADD)
+        assert True is result
+
+    def test_on_tool_chosen_flood_remove(self, setup, mock_init_ui, mocker):
+        """
+        Test when the on_tool_chosen handler is called and the event_id is
+        ID_TOOL_FLOOD_REMOVE
+
+        :test_condition: controller.change_mode() is called with
+                         ID_TOOL_FLOOD_REMOVE
+                         and the function returns True
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller)
+
+        event = MagicMock()
+        event.GetId.return_value = window.ID_TOOL_FLOOD_REMOVE
+
+        result = window.on_tool_chosen(event)
+
+        self.mock_controller.change_mode.\
+            assert_called_with(window.ID_TOOL_FLOOD_REMOVE)
+        assert True is result
+
     def test_on_tool_chosen_invalid(self, setup, mock_init_ui, mocker):
         """
         Test when the on_tool_chosen handler is called and the event_id is a
@@ -744,6 +832,28 @@ class TestView():
         window.on_enter_panel(None)
 
         mock_cursor.assert_called_with(wx.StockCursor(wx.CURSOR_BLANK))
+
+    def test_on_enter_panel_flood(self, setup, mock_init_ui, mocker,
+                                  mock_painting):
+        """
+        Test when the mouse enters the panel and flood cursor is True
+
+        :test_condition: self.SetCursor() is called with
+        wx.StockCursor(wx.CURSOR_BULLSEYE)
+
+        :returns: None
+        """
+
+        mock_cursor = mocker.patch.object(MainWindow, "SetCursor")
+        mocker.patch('wx.StockCursor')
+
+        window = MainWindow(self.mock_controller)
+        window.zoom_cursor = False
+        window.flood_cursor = True
+
+        window.on_enter_panel(None)
+
+        mock_cursor.assert_called_with(wx.StockCursor(wx.CURSOR_BULLSEYE))
 
     def test_on_enter_panel_zoom(self, setup, mock_init_ui, mocker,
                                  mock_painting):

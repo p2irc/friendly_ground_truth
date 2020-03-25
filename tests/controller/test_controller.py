@@ -574,6 +574,70 @@ class TestController:
 
         assert controller.current_mode == Mode.ZOOM
 
+    def test_change_mode_flood_add(self, setup, mocker,
+                                   display_current_patch_mock):
+        """
+        Test changing the mode to Flood Add
+
+        :test_condition: The current mode is set to Mode.FLOOD_ADD
+
+        :param setup: The setup fixture
+        :param mock_brush_radius: A fixture mocking the
+                                  MainWindow.set_brush_radius function
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.current_mode = Mode.ADD_REGION
+
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.change_mode(MainWindow.ID_TOOL_FLOOD_ADD)
+
+        assert controller.current_mode == Mode.FLOOD_ADD
+
+    def test_change_mode_flood_remove(self, setup, mocker,
+                                      display_current_patch_mock):
+        """
+        Test changing the mode to Flood Remove
+
+        :test_condition: The current mode is set to Mode.FLOOD_REMOVE
+
+        :param setup: The setup fixture
+        :param mock_brush_radius: A fixture mocking the
+                                  MainWindow.set_brush_radius function
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.current_mode = Mode.ADD_REGION
+
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.change_mode(MainWindow.ID_TOOL_FLOOD_REMOVE)
+
+        assert controller.current_mode == Mode.FLOOD_REMOVE
+
     def test_change_mode_invalid(self, setup, mocker):
         """
         Test changing the mode to an invalid mode
@@ -734,6 +798,74 @@ class TestController:
         spy.assert_called_once_with(-1)
         assert True is result
 
+    def test_handle_mouse_wheel_flood_add(self, setup, mocker,
+                                          display_current_patch_mock):
+        """
+        Test when the mouse wheel function is called and the current mode is
+        Mode.FLOOD_ADD
+
+        :test_condition: The handle_flood_add_tolerance function is called
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.current_mode = Mode.FLOOD_ADD
+        controller.flood_add_position = (0, 0)
+
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        spy = mocker.spy(controller, 'handle_flood_add_tolerance')
+
+        controller.handle_mouse_wheel(-1)
+
+        spy.assert_called_once_with(-1)
+
+    def test_handle_mouse_wheel_flood_remove(self, setup, mocker,
+                                             display_current_patch_mock):
+        """
+        Test when the mouse wheel function is called and the current mode is
+        Mode.FLOOD_REMOVE
+
+        :test_condition: The handle_flood_remove_tolerance function is called
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.current_mode = Mode.FLOOD_REMOVE
+        controller.flood_remove_position = (0, 0)
+
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        spy = mocker.spy(controller, 'handle_flood_remove_tolerance')
+
+        controller.handle_mouse_wheel(-1)
+
+        spy.assert_called_once_with(-1)
+
     def test_handle_mouse_wheel_invalid(self, setup,
                                         display_current_patch_mock):
         """
@@ -752,6 +884,198 @@ class TestController:
         result = controller.handle_mouse_wheel(-1)
 
         assert False is result
+
+    def test_handle_flood_add_tolerance_none_pos(self, setup,
+                                                 display_current_patch_mock):
+        """
+        Test when the handle flood add tolerance function is called and the
+        current flood_add_position is None
+
+        :test_condition: Return None and flood_add_tolerance does not change
+
+        :param self: Self
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.flood_add_position = None
+        controller.image = MagicMock()
+
+        old_tol = controller.flood_add_tolerance
+
+        controller.handle_flood_add_tolerance(-1)
+
+        assert controller.flood_add_tolerance == old_tol
+
+    def test_handle_flood_add_tolerance_pos_rot(self, setup,
+                                                display_current_patch_mock):
+        """
+        Test when the handle flood add tolerance function is called and the
+        rotation is positive
+
+        :test_condition: Return None and flood_add_tolerance is increased
+
+        :param self: Self
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.flood_add_position = (0, 0)
+        controller.image = MagicMock()
+
+        old_tol = controller.flood_add_tolerance
+
+        controller.handle_flood_add_tolerance(1)
+
+        assert controller.flood_add_tolerance > old_tol
+
+    def test_handle_flood_remove_tolerance_no_pos(self, setup,
+                                                  display_current_patch_mock):
+        """
+        Test when the handle flood remove tolerance function is called and the
+        current flood_remove_position is None
+
+        :test_condition: Return None and flood_remove_tolerance does not change
+
+        :param self: Self
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.flood_remove_position = None
+        controller.image = MagicMock()
+
+        old_tol = controller.flood_remove_tolerance
+
+        controller.handle_flood_remove_tolerance(-1)
+
+        assert controller.flood_remove_tolerance == old_tol
+
+    def test_handle_flood_remove_tolerance_pos_rot(self, setup,
+                                                   display_current_patch_mock):
+        """
+        Test when the handle flood remove tolerance function is called and the
+        rotation is positive
+
+        :test_condition: Return None and flood_remove_tolerance is increased
+
+        :param self: Self
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.flood_remove_position = (0, 0)
+        controller.image = MagicMock()
+
+        old_tol = controller.flood_remove_tolerance
+
+        controller.handle_flood_remove_tolerance(1)
+
+        assert controller.flood_remove_tolerance > old_tol
+
+    def test_handle_flood_remove_tolerance_neg_rot(self, setup,
+                                                   display_current_patch_mock):
+        """
+        Test when the handle flood remove tolerance function is called and the
+        rotation is negative
+
+        :test_condition: flood_remove_tolerance is decreased
+
+        :param self: Self
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.flood_remove_position = (0, 0)
+        controller.image = MagicMock()
+
+        old_tol = controller.flood_remove_tolerance
+
+        controller.handle_flood_remove_tolerance(-1)
+
+        assert controller.flood_remove_tolerance < old_tol
+
+    def test_handle_flood_add_tolerance_neg_rot(self, setup,
+                                                display_current_patch_mock):
+        """
+        Test when the handle flood add tolerance function is called and the
+        rotation is negative
+
+        :test_condition: Return None and flood_add_tolerance is decreased
+
+        :param self: Self
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.flood_add_position = (0, 0)
+        controller.image = MagicMock()
+
+        old_tol = controller.flood_add_tolerance
+
+        controller.handle_flood_add_tolerance(-1)
+
+        assert controller.flood_add_tolerance < old_tol
+
+    def test_handle_flood_add_tolerance_zero_rot(self, setup,
+                                                 display_current_patch_mock):
+        """
+        Test when the handle flood add tolerance function is called and the
+        rotation is zero
+
+        :test_condition: Return None and flood_add_tolerance is not changed
+
+        :param self: Self
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.flood_add_position = (0, 0)
+        controller.image = MagicMock()
+
+        old_tol = controller.flood_add_tolerance
+
+        controller.handle_flood_add_tolerance(0)
+
+        assert controller.flood_add_tolerance == old_tol
+
+    def test_handle_flood_remove_tol_zero_rot(self, setup,
+                                              display_current_patch_mock):
+        """
+        Test when the handle flood remove tolerance function is called and the
+        rotation is zero
+
+        :test_condition: Return None and flood_remove_tolerance is not changed
+
+        :param self: Self
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.flood_remove_position = (0, 0)
+        controller.image = MagicMock()
+
+        old_tol = controller.flood_remove_tolerance
+
+        controller.handle_flood_remove_tolerance(0)
+
+        assert controller.flood_remove_tolerance == old_tol
 
     def test_handle_left_click_add_region(self, setup,
                                           display_current_patch_mock):
@@ -829,6 +1153,78 @@ class TestController:
 
         mock_patch.remove_region.assert_called_with(position, radius)
         assert True is result
+
+    def test_handle_left_click_flood_add(self, setup,
+                                         display_current_patch_mock):
+        """
+        Test when the left mouse button is clicked and the current mode is
+        Mode.FLOOD_ADD
+
+        :test_condition: The patch.flood_add_region is called with the given
+                         position and the current flood_add_tolerance
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.current_mode = Mode.FLOOD_ADD
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
+
+        mock_patch = MagicMock()
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        position = (1, 2)
+        tolerance = controller.flood_add_tolerance
+
+        controller.handle_left_click(position)
+
+        mock_patch.flood_add_region.assert_called_with(position, tolerance)
+
+    def test_handle_left_click_flood_remove(self, setup,
+                                            display_current_patch_mock):
+        """
+        Test when the left mouse button is clicked and the current mode is
+        Mode.FLOOD_REMOVE
+
+        :test_condition: The patch.flood_remove_region is called with the given
+                         position and the current flood_remove_tolerance
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller()
+        controller.current_mode = Mode.FLOOD_REMOVE
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
+
+        mock_patch = MagicMock()
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        position = (1, 2)
+        tolerance = controller.flood_remove_tolerance
+
+        controller.handle_left_click(position)
+
+        mock_patch.flood_remove_region.assert_called_with(position, tolerance)
 
     def test_handle_left_click_invalid_mode(self, setup,
                                             display_current_patch_mock):
