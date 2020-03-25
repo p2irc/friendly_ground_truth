@@ -214,6 +214,9 @@ class Patch():
         self.old_flood_add_tolerance = 100
         self.old_flood_add_position = None
 
+        self.old_flood_remove_position = None
+        self.old_flood_remove_tolerance = 100
+
     def apply_threshold(self, value):
         """
         Apply a threshold to the patch mask
