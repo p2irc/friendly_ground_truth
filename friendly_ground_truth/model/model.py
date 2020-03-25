@@ -349,7 +349,7 @@ class Patch():
 
         # If we are still editing the tolerance, we need to go back to the old
         # mask
-        if position == self.old_flood_add_position:
+        if position == self.old_flood_remove_position:
             self.logger.debug("Reverting mask ")
             self.mask = np.copy(self.old_mask)
             self.overlay_mask()
