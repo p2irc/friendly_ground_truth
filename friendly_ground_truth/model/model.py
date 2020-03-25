@@ -211,6 +211,9 @@ class Patch():
         self.logger.debug("Created patch with index {} and shape {}"
                           .format(patch_index, patch.shape))
 
+        self.old_flood_add_tolerance = 100
+        self.old_flood_add_position = None
+
     def apply_threshold(self, value):
         """
         Apply a threshold to the patch mask
@@ -275,7 +278,7 @@ class Patch():
         :returns: None
         :postcondition: The circular region in the mask will be set to 1's
         """
-
+        self.logger.debug("Add Region Position {}".format(position))
         rr, cc = circle(position[1], position[0], radius)
         self.mask[rr, cc] = 1
         self.overlay_mask()
@@ -293,6 +296,73 @@ class Patch():
         rr, cc = circle(position[1], position[0], radius)
         self.mask[rr, cc] = 0
         self.overlay_mask()
+
+    def flood_add_region(self, position, tolerance):
+        """
+        Add to the current mask a flood region at the given position with the
+        given tolerance
+
+        :param position: The position to start the flood fill
+        :param tolerance: The tolerance for pixels to be included
+        :returns: None
+        """
+        self.logger.debug("Flood Position: {}".format(position))
+        self.logger.debug("Flood Tolerance: {}".format(tolerance))
+
+        self.logger.debug("Mask Shape {}".format(self.mask.shape))
+        self.logger.debug("Patch Shape {}".format(self.patch.shape))
+
+        from skimage.segmentation import flood
+
+        position = int(position[1]), int(position[0])
+
+        # If we are still editing the tolerance, we need to go back to the old
+        # mask
+        if position == self.old_flood_add_position:
+            self.logger.debug("Reverting mask ")
+            self.mask = np.copy(self.old_mask)
+            self.overlay_mask()
+        else:
+            self.logger.debug("Storing old mask")
+            self.old_mask = np.copy(self.mask)
+
+        add_mask = flood(self.patch, position, tolerance=tolerance)
+
+        self.mask += add_mask
+
+        self.old_flood_add_tolerance = tolerance
+        self.old_flood_add_position = position
+
+    def flood_remove_region(self, position, tolerance):
+        """
+        Remove from the current mask a flood region at the given position with
+        the given tolerance
+
+        :param position: The position to start the flood fill
+        :param tolerance: The tolerance for pixels to be included
+        :returns: None
+        """
+
+        from skimage.segmentation import flood
+
+        position = int(position[1]), int(position[0])
+
+        # If we are still editing the tolerance, we need to go back to the old
+        # mask
+        if position == self.old_flood_add_position:
+            self.logger.debug("Reverting mask ")
+            self.mask = np.copy(self.old_mask)
+            self.overlay_mask()
+        else:
+            self.logger.debug("Storing old mask")
+            self.old_mask = np.copy(self.mask)
+
+        remove_mask = flood(self.patch, position, tolerance=tolerance)
+
+        self.mask[remove_mask] = 0
+
+        self.old_flood_add_tolerance = tolerance
+        self.old_flood_add_position = position
 
     def check_displayable(self):
         """

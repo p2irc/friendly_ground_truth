@@ -17,7 +17,9 @@ from friendly_ground_truth.view.icons import (add_region_icon,
                                               next_patch_icon,
                                               no_root_icon,
                                               prev_patch_icon, threshold_icon,
-                                              zoom_in_tool_icon)
+                                              zoom_in_tool_icon,
+                                              flood_add_icon,
+                                              flood_remove_icon)
 
 
 module_logger = logging.getLogger('friendly_gt.view')
@@ -35,6 +37,8 @@ class MainWindow(wx.Frame):
     ID_TOOL_PREV_IMAGE = 105
     ID_TOOL_NEXT_IMAGE = 106
     ID_TOOL_ZOOM = 107
+    ID_TOOL_FLOOD_ADD = 108
+    ID_TOOL_FLOOD_REMOVE = 109
 
     def __init__(self, controller, parent=None):
         """
@@ -49,6 +53,7 @@ class MainWindow(wx.Frame):
         self.current_image = None
         self.brush_radius = 0
         self.zoom_cursor = False
+        self.flood_cursor = False
         self.image_scale = 1.0
         self.image_x = 0
         self.image_y = 0
@@ -121,12 +126,20 @@ class MainWindow(wx.Frame):
                                      text="Zoom\tCTRL++",
                                      kind=wx.ITEM_NORMAL)
 
+        flood_add_item = wx.MenuItem(tool_menu, self.ID_TOOL_FLOOD_ADD,
+                                     text="Flood Add\tCTRL+P")
+
+        flood_remove_item = wx.MenuItem(tool_menu, self.ID_TOOL_FLOOD_REMOVE,
+                                        text="Flood Remove\tCTRL+L")
+
         tool_menu.Append(threshold_menu_item)
         tool_menu.Append(add_region_menu_item)
         tool_menu.Append(remove_region_menu_item)
         tool_menu.Append(no_root_menu_item)
 
         tool_menu.Append(zoom_menu_item)
+        tool_menu.Append(flood_add_item)
+        tool_menu.Append(flood_remove_item)
 
         # ---- End Tool Menu ----
         menubar.Append(file_menu, '&File')
@@ -184,6 +197,21 @@ class MainWindow(wx.Frame):
 
         self.tool_bar.AddRadioTool(self.ID_TOOL_ZOOM, "Zoom",
                                    zoom_in_tool_bitmap)
+
+        flood_add_tool_img = wx.Image(flood_add_icon.
+                                      get_flood_add_icon.getImage())
+        flood_add_tool_bitmap = wx.Bitmap(flood_add_tool_img.ConvertToBitmap())
+
+        self.tool_bar.AddRadioTool(self.ID_TOOL_FLOOD_ADD, "Flood Add",
+                                   flood_add_tool_bitmap)
+
+        flood_remove_tool_img = wx.Image(flood_remove_icon.
+                                         get_flood_remove_icon.getImage())
+        flood_remove_tool_bitmap = wx.Bitmap(flood_remove_tool_img.
+                                             ConvertToBitmap())
+
+        self.tool_bar.AddRadioTool(self.ID_TOOL_FLOOD_REMOVE, "Flood Remove",
+                                   flood_remove_tool_bitmap)
 
         no_roots_img = wx.Image(no_root_icon.get_no_root_icon.getImage())
         no_roots_bitmap = wx.Bitmap(no_roots_img.ConvertToBitmap())
@@ -317,6 +345,14 @@ class MainWindow(wx.Frame):
             self.controller.change_mode(self.ID_TOOL_ZOOM)
             self.tool_bar.ToggleTool(self.ID_TOOL_ZOOM)
 
+        elif id == self.ID_TOOL_FLOOD_ADD:
+            self.controller.change_mode(self.ID_TOOL_FLOOD_ADD)
+            self.tool_bar.ToggleTool(self.ID_TOOL_FLOOD_ADD)
+
+        elif id == self.ID_TOOL_FLOOD_REMOVE:
+            self.controller.change_mode(self.ID_TOOL_FLOOD_REMOVE)
+            self.tool_bar.ToggleTool(self.ID_TOOL_FLOOD_REMOVE)
+
         else:
             return
 
@@ -380,6 +416,12 @@ class MainWindow(wx.Frame):
         elif event.GetId() == self.ID_TOOL_ZOOM:
             self.controller.change_mode(self.ID_TOOL_ZOOM)
 
+        elif event.GetId() == self.ID_TOOL_FLOOD_ADD:
+            self.controller.change_mode(self.ID_TOOL_FLOOD_ADD)
+
+        elif event.GetId() == self.ID_TOOL_FLOOD_REMOVE:
+            self.controller.change_mode(self.ID_TOOL_FLOOD_REMOVE)
+
         # Something went wrong
         else:
             self.logger.error("Uh oh, something went wrong selecting a tool")
@@ -394,9 +436,6 @@ class MainWindow(wx.Frame):
         :param event: The mouse wheel event
         :returns: None
         """
-
-        self.logger.debug("mouse wheel scroll! {}"
-                          .format(event.GetWheelRotation()))
 
         self.controller.handle_mouse_wheel(event.GetWheelRotation())
 
@@ -447,7 +486,7 @@ class MainWindow(wx.Frame):
 
         self.previous_mouse_position = pos
 
-        if not self.zoom_cursor:
+        if not self.zoom_cursor and not self.flood_cursor:
             self.draw_brush(pos)
 
         if event.Dragging() and event.LeftIsDown():
@@ -465,10 +504,13 @@ class MainWindow(wx.Frame):
         :returns: None
         :postcondition: The mouse cursor is removed
         """
-        self.logger.debug("Entered Panel")
 
         if self.zoom_cursor:
             cursor = wx.StockCursor(wx.CURSOR_MAGNIFIER)
+
+        elif self.flood_cursor:
+            cursor = wx.StockCursor(wx.CURSOR_BULLSEYE)
+
         else:
             cursor = wx.StockCursor(wx.CURSOR_BLANK)
 
@@ -482,7 +524,6 @@ class MainWindow(wx.Frame):
         :returns: None
         :postcondition: The mouse cursor is restored to its default icon
         """
-        self.logger.debug("Leaving Panel")
         wx.Cursor(wx.CURSOR_DEFAULT)
 
     def draw_brush(self, pos=None, with_image=True):
@@ -514,8 +555,6 @@ class MainWindow(wx.Frame):
         dc.SetPen(wx.Pen("black"))
         dc.SetBrush(wx.Brush("blue", wx.TRANSPARENT))
         dc.DrawCircle(pos[0], pos[1], self.brush_radius)
-
-        self.logger.debug("Drawing Brush")
 
         del odc
         del dc

@@ -29,6 +29,8 @@ class Mode(Enum):
     REMOVE_REGION = 3
     NO_ROOT = 4
     ZOOM = 5
+    FLOOD_ADD = 6
+    FLOOD_REMOVE = 7
 
 
 class Controller:
@@ -54,6 +56,10 @@ class Controller:
         # Brush radii
         self.add_region_radius = 15
         self.remove_region_radius = 15
+
+        # Flood Tolerances
+        self.flood_add_tolerance = 0.05
+        self.flood_remove_tolerance = 0.05
 
         # Set up the main window
         self.main_window = MainWindow(self)
@@ -220,21 +226,21 @@ class Controller:
         :param new_mode_id: The ID of the mode button in the Main Window
         :returns: None
         """
+        if new_mode_id != self.main_window.ID_TOOL_NO_ROOT:
+            self.main_window.zoom_cursor = False
+            self.main_window.flood_cursor = False
 
         if new_mode_id == self.main_window.ID_TOOL_THRESH:
             self.current_mode = Mode.THRESHOLD
             self.main_window.set_brush_radius(0)
-            self.main_window.zoom_cursor = False
 
         elif new_mode_id == self.main_window.ID_TOOL_ADD:
             self.current_mode = Mode.ADD_REGION
             self.main_window.set_brush_radius(self.add_region_radius)
-            self.main_window.zoom_cursor = False
 
         elif new_mode_id == self.main_window.ID_TOOL_REMOVE:
             self.current_mode = Mode.REMOVE_REGION
             self.main_window.set_brush_radius(self.remove_region_radius)
-            self.main_window.zoom_cursor = False
 
         elif new_mode_id == self.main_window.ID_TOOL_NO_ROOT:
             self.no_root_activate()
@@ -243,6 +249,16 @@ class Controller:
             self.current_mode = Mode.ZOOM
             self.main_window.set_brush_radius(0)
             self.main_window.zoom_cursor = True
+
+        elif new_mode_id == self.main_window.ID_TOOL_FLOOD_ADD:
+            self.current_mode = Mode.FLOOD_ADD
+            self.main_window.flood_cursor = True
+            self.flood_add_position = None
+
+        elif new_mode_id == self.main_window.ID_TOOL_FLOOD_REMOVE:
+            self.current_mode = Mode.FLOOD_REMOVE
+            self.main_window.flood_cursor = True
+            self.flood_remove_position = None
 
         else:
             self.logger.error("Invalid mode change")
@@ -283,11 +299,63 @@ class Controller:
         elif self.current_mode == Mode.ZOOM:
             self.handle_zoom(wheel_rotation)
 
+        elif self.current_mode == Mode.FLOOD_ADD:
+            self.handle_flood_add_tolerance(wheel_rotation)
+
+        elif self.current_mode == Mode.FLOOD_REMOVE:
+            self.handle_flood_remove_tolerance(wheel_rotation)
+
         else:
             self.logger.error("Invalid mouse wheel rotation")
             return False
 
         return True
+
+    def handle_flood_add_tolerance(self, wheel_rotation):
+        """
+        Adjust the current tolerance of the flood_add tool
+
+        :param wheel_rotation: The rotation of the mouse wheel
+        :returns: None
+        """
+
+        if self.flood_add_position is None:
+            return
+
+        if wheel_rotation > 0:
+            self.flood_add_tolerance += 0.01
+        elif wheel_rotation < 0:
+            self.flood_add_tolerance -= 0.01
+
+        patch = self.image.patches[self.current_patch]
+        patch.flood_add_region(self.flood_add_position,
+                               self.flood_add_tolerance)
+
+        patch.overlay_mask()
+        self.display_current_patch()
+
+    def handle_flood_remove_tolerance(self, wheel_rotation):
+        """
+        Adjust the current tolerance of the flood_remove tool
+
+        :param wheel_rotation: The rotation of the mouse wheel
+        :returns: None
+        """
+
+        if self.flood_remove_position is None:
+            return
+
+        if wheel_rotation > 0:
+            self.flood_remove_tolerance += 0.01
+        elif wheel_rotation < 0:
+            self.flood_remove_tolerance -= 0.01
+
+        patch = self.image.patches[self.current_patch]
+        patch.flood_remove_region(self.flood_remove_position,
+                                  self.flood_remove_tolerance)
+
+        patch.overlay_mask()
+        self.display_current_patch()
 
     def handle_zoom(self, wheel_rotation):
         """
@@ -340,6 +408,25 @@ class Controller:
 
             patch = self.image.patches[self.current_patch]
             patch.remove_region(click_location, draw_radius)
+            self.display_current_patch()
+        elif self.current_mode == Mode.FLOOD_ADD:
+
+            patch = self.image.patches[self.current_patch]
+
+            patch.flood_add_region(click_location, self.flood_add_tolerance)
+
+            self.flood_add_position = click_location
+
+            self.display_current_patch()
+
+        elif self.current_mode == Mode.FLOOD_REMOVE:
+            patch = self.image.patches[self.current_patch]
+
+            patch.flood_remove_region(click_location,
+                                      self.flood_remove_tolerance)
+
+            self.flood_remove_position = click_location
+
             self.display_current_patch()
 
         else:

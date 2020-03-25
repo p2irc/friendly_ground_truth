@@ -365,12 +365,10 @@ class TestImage:
     def test_remove_small_components(self, valid_rgb_image_path,
                                      patch_data_many_components):
         """
-        {% What it do %}
+        Test removing small components
 
-        :param self: {% A parameter %}
-        :param valid_rgb_image_path: {% A parameter %}
-        :param many: {% A parameter %}
-        :returns: {% A thing %}
+        :param valid_rgb_image_path: The valid rgb image path
+        :returns: None
         """
 
         image = Image(valid_rgb_image_path)
@@ -536,13 +534,6 @@ class TestPatch:
 
     def test_check_displayable(self, patch_data_many_components, patch_index):
         """
-        {% What it do %}
-
-        :param patch_data_many_components: {% A parameter %}
-        :param patch: {% A parameter %}
-        :returns: {% A thing %}
-        """
-        """
         Check that a mask with more than MAX_COMPONENTS is set to not
         displayable
 
@@ -557,3 +548,105 @@ class TestPatch:
         patch.check_displayable()
 
         assert patch.display is False
+
+    def test_flood_add_region_new_pos(self, patch_data_zeros, patch_index,
+                                      patch_data_many_components):
+        """
+        Test flood add region with a new input position
+
+        test_condition: The mask at the given position is 1
+
+        :returns: None
+        """
+
+        position = (patch_data_zeros.shape[0]//2,
+                    patch_data_zeros.shape[1]//2)
+
+        tolerance = 0.0001
+
+        patch = Patch(patch_data_many_components, patch_index)
+        patch.mask = patch_data_zeros
+        patch.old_flood_add_position = (0, 0)
+
+        patch.flood_add_region(position, tolerance)
+
+        assert patch.mask[position[0], position[1]] == 1
+
+    def test_flood_add_region_old_pos(self, patch_data_zeros, patch_index,
+                                      patch_data_many_components):
+        """
+        Test flood add region with an old input position
+
+        :test_condition: The mask at the given position is 1
+
+        :param patch_data_zeros: A numpy array of zeros
+        :param patch_index: The patch index
+        :param patch_data_many_components: A numpy array with many connected
+                                           components
+        :returns: None
+        """
+
+        position = (patch_data_zeros.shape[0]//2,
+                    patch_data_zeros.shape[1]//2)
+
+        tolerance = 0.0001
+
+        patch = Patch(patch_data_many_components, patch_index)
+        patch.mask = patch_data_zeros
+        patch.old_flood_add_position = position
+        patch.old_mask = patch_data_zeros
+
+        patch.flood_add_region(position, tolerance)
+
+        assert patch.mask[position[0], position[1]] == 1
+
+    def test_flood_remove_region_new_pos(self, patch_data_ones, patch_index,
+                                         patch_data_many_components):
+        """
+        Test flood remove region with a new input position
+
+        test_condition: The mask at the given position is 0
+
+        :returns: None
+        """
+
+        position = (patch_data_ones.shape[0]//2,
+                    patch_data_ones.shape[1]//2)
+
+        tolerance = 0.0001
+
+        patch = Patch(patch_data_many_components, patch_index)
+        patch.mask = patch_data_ones
+        patch.old_flood_remove_position = (0, 0)
+
+        patch.flood_remove_region(position, tolerance)
+
+        assert patch.mask[position[0], position[1]] == 0
+
+    def test_flood_remove_region_old_pos(self, patch_data_ones, patch_index,
+                                         patch_data_many_components):
+        """
+        Test flood remove region with an old input position
+
+        :test_condition: The mask at the given position is 0
+
+        :param patch_data_zeros: A numpy array of zeros
+        :param patch_index: The patch index
+        :param patch_data_many_components: A numpy array with many connected
+                                           components
+        :returns: None
+        """
+
+        position = (patch_data_ones.shape[0]//2,
+                    patch_data_ones.shape[1]//2)
+
+        tolerance = 0.0001
+
+        patch = Patch(patch_data_many_components, patch_index)
+        patch.mask = patch_data_ones
+        patch.old_flood_remove_position = position
+        patch.old_mask = patch_data_ones
+
+        patch.flood_remove_region(position, tolerance)
+
+        assert patch.mask[position[0], position[1]] == 0
