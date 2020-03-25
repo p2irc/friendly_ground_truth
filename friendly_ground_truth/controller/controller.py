@@ -254,12 +254,13 @@ class Controller:
             self.current_mode = Mode.FLOOD_ADD
             self.main_window.flood_cursor = True
             self.flood_add_position = None
+            self.flood_add_tolerance = 0.05
 
         elif new_mode_id == self.main_window.ID_TOOL_FLOOD_REMOVE:
             self.current_mode = Mode.FLOOD_REMOVE
             self.main_window.flood_cursor = True
             self.flood_remove_position = None
-
+            self.flood_remove_tolerance = 0.05
         else:
             self.logger.error("Invalid mode change")
 
