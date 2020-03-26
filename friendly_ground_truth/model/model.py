@@ -364,8 +364,8 @@ class Patch():
 
         self.mask[remove_mask] = 0
 
-        self.old_flood_add_tolerance = tolerance
-        self.old_flood_add_position = position
+        self.old_flood_remove_tolerance = tolerance
+        self.old_flood_remove_position = position
 
     def check_displayable(self):
         """
