@@ -373,13 +373,7 @@ class Patch():
 
         :returns: None
         """
-        from skimage import morphology
 
-        # Use the number of connected components in the patch to determine
-        # if it probably does not contain roots
-        unique = np.unique(morphology.label(self.mask))
-        num_components = len(unique) - 2
+        # Turns out this is causing more trouble than it is worth right now
 
-        if num_components > self.MAX_COMPONENTS:
-            self.clear_mask()
-            self.display = False
+        self.display = True
