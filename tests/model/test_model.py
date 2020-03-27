@@ -547,7 +547,7 @@ class TestPatch:
 
         patch.check_displayable()
 
-        assert patch.display is False
+        assert patch.display is True
 
     def test_flood_add_region_new_pos(self, patch_data_zeros, patch_index,
                                       patch_data_many_components):

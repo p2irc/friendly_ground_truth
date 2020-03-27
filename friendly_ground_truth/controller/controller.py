@@ -77,8 +77,8 @@ class Controller:
         self.logger.debug("Opening load file dialog")
 
         with wx.FileDialog(self.main_window, "Open an image",
-                           wildcard="PNG and TIFF files (*.png; *.tiff)\
-                                    |*.png;*.tiff|TIF files (*.tif)|*.tif",
+                           wildcard="PNG and TIFF and TIF files (*.png;\
+                           *.tiff;*.tif)|*.png;*.tiff;*.tif",
                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
                            ) as file_dialog:
 
