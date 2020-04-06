@@ -28,5 +28,5 @@ jobs:
     - name: Test with pytest
       run: |
         C:\Miniconda/condabin/conda.bat install pytest
-        C:\Miniconda/condabin/pytest.bat
+        C:\Miniconda/condabin/pytest.bat -v
     
