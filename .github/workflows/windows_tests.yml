@@ -23,6 +23,8 @@ jobs:
         C:\Miniconda/condabin/conda.bat init powershell
     - name: Install dependencies
       run: |
+        C:\Miniconda/condabin/conda.bat config --add channels defaults
+        C:\Miniconda/condabin/conda.bat config --add channels conda-forge
         C:\Miniconda/condabin/conda.bat env update --file environment.yml --name base
         C:\Miniconda/condabin/conda.bat activate base
     - name: Lint with flake8
