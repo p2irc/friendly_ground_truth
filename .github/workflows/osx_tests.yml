@@ -1,14 +1,14 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: CI Tests - Windows
+name: CI Tests - Mac
 
 on: [push, pull_request]
 
 jobs:
   build:
 
-    runs-on: windows-latest
+    runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -16,23 +16,19 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Initialize Conda for Powershell
-      run: |
-        (Get-Command python).Path
-        C:\Miniconda/condabin/conda.bat update -n base -c defaults conda
-        C:\Miniconda/condabin/conda.bat init powershell
     - name: Install dependencies
       run: |
-        C:\Miniconda/condabin/conda.bat env update --file environment.yml --name base
+        # $CONDA is an environment variable pointing to the root of the miniconda directory
+        $CONDA/bin/conda env update --file environment.yml --name base
     - name: Lint with flake8
       run: |
-        C:\Miniconda/condabin/conda.bat install flake8
+        $CONDA/bin/conda install flake8
         # stop the build if there are Python syntax errors or undefined names
-        C:\Miniconda/condabin/conda.bat . --count --select=E9,F63,F7,F82 --show-source --statistics
+        $CONDA/bin/flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        C:\Miniconda/condabin/conda.bat . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        $CONDA/bin/flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        C:\Miniconda/condabin/conda.bat install pytest
-        C:\Miniconda/condabin/pytest.bat
+        conda install pytest
+        $CONDA/bin/pytest
     
