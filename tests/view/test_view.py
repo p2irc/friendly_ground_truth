@@ -9,13 +9,13 @@ Description: Test cases for the view
 
 """
 import pytest
-import wx
+#import #wx
 
 from mock import MagicMock, PropertyMock
 
-from friendly_ground_truth.view.view import MainWindow
+#from friendly_ground_truth.view.view import MainWindow
 
-
+@pytest.mark.skip(reason="Deprecated")
 class TestView():
     """
     Test cases for the View

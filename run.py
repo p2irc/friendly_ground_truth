@@ -9,7 +9,7 @@ Description: The entry point for the application
 
 """
 
-import wx
+from tkinter import Tk
 import logging
 import sys
 
@@ -43,9 +43,8 @@ logger.addHandler(ch)
 
 
 if __name__ == '__main__':
-    app = wx.App(False)
-
-    controller = Controller()
+    root = Tk()
+    controller = Controller(root)
 
     logger.debug('Main application window is running')
-    app.MainLoop()
+    root.mainloop()

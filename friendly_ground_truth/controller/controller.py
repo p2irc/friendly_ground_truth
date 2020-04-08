@@ -8,11 +8,13 @@ Date: 20-02-2020
 Description: The main controller for the application
 
 """
-import wx
+
+import tkinter.filedialog
+import tkinter.messagebox
 import logging
 import os
 
-from friendly_ground_truth.view.view import MainWindow
+from friendly_ground_truth.view.tk_view import MainWindow
 from friendly_ground_truth.model.model import Image
 
 from enum import Enum
@@ -38,7 +40,7 @@ class Controller:
     The main controller object for the application
     """
 
-    def __init__(self):
+    def __init__(self, master):
         """
         Initialize the controller module
 
@@ -62,10 +64,7 @@ class Controller:
         self.flood_remove_tolerance = 0.05
 
         # Set up the main window
-        self.main_window = MainWindow(self)
-
-        # Show the window
-        self.main_window.Show()
+        self.main_window = MainWindow(self, master)
 
     def load_new_image(self):
         """
@@ -75,32 +74,48 @@ class Controller:
         :returns: None
         """
         self.logger.debug("Opening load file dialog")
+        file_name = tkinter.filedialog.askopenfilename(
+                filetypes = [("TIF Files", "*.tif"), ("TIFF Files", "*.tiff"),
+                    ("PNG Files", "*.png")])
 
-        with wx.FileDialog(self.main_window, "Open an image",
-                           wildcard="PNG and TIFF and TIF files (*.png;\
-                           *.tiff;*.tif)|*.png;*.tiff;*.tif",
-                           style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
-                           ) as file_dialog:
+        self.image_path = file_name
+        self.logger.debug("File: {}".format(self.image_path))
+        try:
+            self.image = Image(file_name)
 
-            if file_dialog.ShowModal() == wx.ID_CANCEL:
-                return     # the user changed their mind
+        except FileNotFoundError:
+            self.logger.debug("There was a problem loading the image")
+            return
 
-            # Proceed loading the file chosen by the user
-            pathname = file_dialog.GetPath()
+        self.current_patch = 0
+        self.display_current_patch()
 
-            self.logger.debug("File Path: %s", pathname)
-            self.image_path = pathname
+        # TODO: Replace with tkinter versions
+        # with wx.FileDialog(self.main_window, "Open an image",
+        #                   wildcard="PNG and TIFF and TIF files (*.png;\
+        #                   *.tiff;*.tif)|*.png;*.tiff;*.tif",
+        #                   style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
+        #                   ) as file_dialog:
 
-            try:
-                self.image = Image(pathname)
+        #    if file_dialog.ShowModal() == wx.ID_CANCEL:
+        #        return     # the user changed their mind
 
-            except FileNotFoundError:
-                self.logger.debug("There was a problem loading the image")
-                # TODO: Display an error dialog
-                return
+        #    # Proceed loading the file chosen by the user
+        #    pathname = file_dialog.GetPath()
 
-            self.current_patch = 0
-            self.display_current_patch()
+        #    self.logger.debug("File Path: %s", pathname)
+        #    self.image_path = pathname
+
+        #    try:
+        #        self.image = Image(pathname)
+
+        #    except FileNotFoundError:
+        #        self.logger.debug("There was a problem loading the image")
+        #        # TODO: Display an error dialog
+        #        return
+
+        #    self.current_patch = 0
+        #    self.display_current_patch()
 
     def get_image_name_from_path(self, path):
         """
@@ -122,27 +137,45 @@ class Controller:
 
         :returns: None
         """
+        dir_path = tkinter.filedialog.askdirectory()
+        self.logger.debug(dir_path)
 
-        with wx.DirDialog(self.main_window, "Select Output Folder",
-                          style=wx.DD_DEFAULT_STYLE
-                          ) as file_dialog:
+        if dir_path is None:
+            return
 
-            if file_dialog.ShowModal() == wx.ID_CANCEL:
-                return     # the user changed their mind
+        image_name = self.get_image_name_from_path(self.image_path)
 
-            # save the current contents in the file
-            pathname = file_dialog.GetPath()
-            image_name = self.get_image_name_from_path(self.image_path)
+        pathname = os.path.join(dir_path, image_name)
 
-            pathname = os.path.join(pathname, image_name)
+        try:
+            self.logger.debug("Saving mask to {}".format(pathname))
+            self.image.export_mask(pathname)
 
-            try:
-                self.logger.debug("Saving mask to {}".format(pathname))
-                self.image.export_mask(pathname)
+        except IOError:
+            self.logger.ERROR("Could not save file!")
+            # TODO: display dialog
 
-            except IOError:
-                wx.LogError("Cannot save file '%s'." % pathname)
-                # TODO: display dialog
+        # TODO: Replace with tkinter versions
+        # with wx.DirDialog(self.main_window, "Select Output Folder",
+        #                  style=wx.DD_DEFAULT_STYLE
+        #                  ) as file_dialog:
+
+        #    if file_dialog.ShowModal() == wx.ID_CANCEL:
+        #        return     # the user changed their mind
+
+        #    # save the current contents in the file
+        #    pathname = file_dialog.GetPath()
+        #    image_name = self.get_image_name_from_path(self.image_path)
+
+        #    pathname = os.path.join(pathname, image_name)
+
+        #    try:
+        #        self.logger.debug("Saving mask to {}".format(pathname))
+        #        self.image.export_mask(pathname)
+
+        #    except IOError:
+        #        wx.LogError("Cannot save file '%s'." % pathname)
+        #        # TODO: display dialog
 
     def display_current_patch(self):
         """
@@ -185,17 +218,26 @@ class Controller:
 
             dialog_title = "No More Patches"
 
-            dialog = wx.MessageDialog(None, dialog_message, dialog_title,
-                                      wx.YES_NO | wx.ICON_QUESTION |
-                                      wx.NO_DEFAULT)
-
-            if dialog.ShowModal() == wx.ID_YES:
+            result = tkinter.messagebox.askyesno(title=dialog_title,
+                                                 message=dialog_message)
+            self.logger.debug(result)
+            if result:
                 self.save_mask()
                 self.mask_saved = True
 
-                dialog = wx.MessageDialog(None, "Image Mask Saved!",
-                                          "Success!", wx.OK)
-                dialog.ShowModal()
+                tkinter.messagebox.showinfo("Image Mask Saved!")
+
+            # dialog = wx.MessageDialog(None, dialog_message, dialog_title,
+            #                          wx.YES_NO | wx.ICON_QUESTION |
+            #                         wx.NO_DEFAULT)
+
+            # if dialog.ShowModal() == wx.ID_YES:
+            #    self.save_mask()
+            #    self.mask_saved = True
+
+            #    dialog = wx.MessageDialog(None, "Image Mask Saved!",
+            #                              "Success!", wx.OK)
+            #    dialog.ShowModal()
 
     def prev_patch(self):
         """
@@ -515,7 +557,7 @@ class Controller:
         :returns: None
         """
 
-        self.logger.debug("Adjusting patch threshold")
+        self.logger.debug("Adjusting patch threshold. {}".format(wheel_rotation))
 
         patch = self.image.patches[self.current_patch]
 

@@ -11,7 +11,6 @@ Description: Test cases for the controller moduel
 
 import pytest
 import os
-import wx
 import mock
 
 from mock import MagicMock, PropertyMock
