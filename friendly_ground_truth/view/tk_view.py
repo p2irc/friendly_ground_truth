@@ -8,11 +8,10 @@ Date: 06-04-2020
 Description: Tkinter Version of the GUI
 
 """
-
 import tkinter as tk
 import os
 
-from tkinter import LEFT, TOP, X, FLAT, RAISED, SUNKEN
+from tkinter import LEFT, TOP, X, FLAT, RAISED, SUNKEN, ALL
 from tkinter import Frame
 
 from PIL import Image, ImageTk
@@ -37,6 +36,9 @@ class MainWindow(Frame):
     ID_TOOL_FLOOD_ADD = 108
     ID_TOOL_FLOOD_REMOVE = 109
 
+    MAX_SCALE = 16
+    MIN_SCALE = 0.25
+
     def __init__(self, controller, master):
 
         super().__init__()
@@ -44,6 +46,18 @@ class MainWindow(Frame):
 
         self.master = master
         self.controller = controller
+
+        self.image_scale = 1
+        self.image_x = 0
+        self.image_y = 0
+        self.image_id = None
+
+        self.brush_radius = 0
+        self.zoom_cursor = False
+        self.flood_cursor = False
+        self.brush_cursor = None
+
+        self.previous_position = (0, 0)
 
         master.geometry("250x150+300+300")
         master.title("Friendly Ground Truth")
@@ -74,6 +88,13 @@ class MainWindow(Frame):
         elif platform == "win32":
             self.bind_all("<MouseWheel>", self.on_mousewheel)
 
+        self.bind_all("<B1-Motion>", self.on_drag)
+        self.bind_all("<Button-1>", self.on_click)
+        self.bind_all("<KeyPress>", self.on_keypress)
+        self.bind_all("<Left>", self.on_left)
+        self.bind_all("<Right>", self.on_right)
+
+
     def create_canvas(self):
         """
         Set up a canvas for displaying images
@@ -81,7 +102,10 @@ class MainWindow(Frame):
         :returns: None
         """
 
-        self.canvas = tk.Canvas(self, cursor="cross", width=1000, height=1000)
+        self.canvas = tk.Canvas(self, cursor='none', width=1000, height=1000)
+        self.canvas.bind_all("<Enter>", self.on_enter_canvas)
+        self.canvas.bind_all("<Leave>", self.on_leave_canvas)
+        self.canvas.bind_all("<Motion>", self.on_motion)
 
     def create_menubar(self):
         """
@@ -246,6 +270,59 @@ class MainWindow(Frame):
 
         self.pack()
 
+    def on_left(self, event):
+        """
+        Called when the left arrow key is pressed
+
+        :param event: The event
+        :returns: None
+        """
+
+        self.on_prev_tool()
+
+    def on_right(self, event):
+        """
+        Called when the right arrow key is pressed
+
+        :param event: Ethe event
+        :returns: None
+        """
+
+        self.on_next_tool()
+
+    def on_keypress(self, event):
+        """
+        Called when a key on the keyboard is pressed
+
+        :param event: The event
+        :returns: None
+        """
+
+        key = event.char
+
+        if key == 'x':
+            self.on_no_root_tool()
+
+        elif key == "t":
+            self.on_threshold_tool()
+
+        elif key == "z":
+            self.on_zoom_tool()
+
+        elif key == "a":
+            self.on_add_reg_tool()
+
+        elif key == "r":
+            self.on_remove_reg_tool()
+
+        elif key == "f":
+            self.on_flood_add_tool()
+
+        elif key == "l":
+            self.on_flood_remove_tool()
+
+        else:
+            self.logger.debug("Keypress: {}".format(key))
     def on_load_image(self):
         """
         Called when the load image button is chosen
@@ -253,6 +330,7 @@ class MainWindow(Frame):
         :returns: None
         """
         self.controller.load_new_image()
+        self.old_img = None
 
     def show_image(self, img):
         """
@@ -262,12 +340,27 @@ class MainWindow(Frame):
         :returns: None
         """
 
+        if self.image_id:
+            self.canvas.delete(self.image_id)
+
         self.current_image = img
 
-        self.display_img = ImageTk.PhotoImage(image=Image.fromarray(img),
-                                              master=self.master)
+        image = Image.fromarray(img)
 
-        self.canvas.create_image(0, 0, anchor="nw", image=self.display_img)
+        self.display_img = ImageTk.PhotoImage(image=image,
+                                              master=self.master)
+        iw, ih = image.size
+
+        size = int(iw * self.image_scale), int(ih * self.image_scale)
+
+        self.display_img = ImageTk.PhotoImage(image=image.resize(size))
+
+        x, y = self.image_x, self.image_y
+
+        self.image_id = self.canvas.create_image(x, y, anchor="nw",
+                                                 image=self.display_img)
+        self.canvas.scale(ALL, x, y, self.image_scale, self.image_scale)
+
         self.canvas.pack()
         self.logger.debug("Image displayed")
 
@@ -277,9 +370,7 @@ class MainWindow(Frame):
 
         :returns: None
         """
-
-        # TODO: Save the mask from the controller
-        pass
+        self.controller.save_mask()
 
     def change_toolbar_state(self, new_tool_id):
         """
@@ -389,12 +480,108 @@ class MainWindow(Frame):
 
         # Linux events are weird
         if event.num == 4:
-            rotation = -120
-        elif event.num == 5:
             rotation = 120
+        elif event.num == 5:
+            rotation = -120
 
         # Capture windows and mac events
         if event.delta != 0:
             rotation = event.delta
 
         self.controller.handle_mouse_wheel(rotation)
+
+    def on_drag(self, event):
+        """
+        called when the mouse is dragged while the left button is clicked
+
+        :param event: the mouse event
+        :returns: none
+        """
+
+        self.controller.handle_motion((event.x, event.y))
+        self.previous_position = (event.x, event.y)
+
+    def on_motion(self, event):
+        """
+        Called when the mouse is moved on the canvas
+
+        :param event: The event
+        :returns: None
+        """
+
+        pos = event.x, event.y
+
+        if not self.zoom_cursor and not self.flood_cursor:
+            self.draw_brush(pos)
+
+    def draw_brush(self, pos=None):
+        """
+        Draw the paintbrush curost
+
+        :param pos: The position to draw at
+        :returns: None
+        """
+
+        if self.brush_cursor is not None:
+            self.canvas.delete(self.brush_cursor)
+
+        if pos is None:
+            pos = self.previous_position
+
+        x_max = pos[0] + self.brush_radius
+        x_min = pos[0] - self.brush_radius
+        y_max = pos[1] + self.brush_radius
+        y_min = pos[1] - self.brush_radius
+
+        self.brush_cursor = self.canvas.create_oval(x_max, y_max, x_min, y_min,
+                                                    outline='black')
+
+    def on_click(self, event):
+        """
+        Called when the left mouse button is clicked
+
+        :param event: The mouse event
+        :returns: None
+        """
+        self.previous_position = (event.x, event.y)
+        self.controller.handle_left_click((event.x, event.y))
+
+    def set_brush_radius(self, radius):
+        """
+        Set the radius of the brush cursor representing the current brush
+
+        :param radius: The radius to draw the brush
+        :returns: None
+        """
+
+        self.brush_radius = radius
+
+    def on_enter_canvas(self, event):
+        """
+        Called when the cursor enters the canvas
+
+        :param event: The event
+        :returns: None
+        """
+
+        if self.zoom_cursor:
+            self.canvas.config(cursor='sizing')
+
+        elif self.flood_cursor:
+            self.canvas.config(cursor='cross')
+
+        else:
+            self.canvas.config(cursor='none')
+
+    def on_leave_canvas(self, event):
+        """
+        Called when the mouse cursor leaves the canvas
+
+        :param event: The event
+        :returns: none
+        """
+
+        pass
+
+
+

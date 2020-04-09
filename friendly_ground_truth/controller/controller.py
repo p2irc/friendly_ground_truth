@@ -90,33 +90,6 @@ class Controller:
         self.current_patch = 0
         self.display_current_patch()
 
-        # TODO: Replace with tkinter versions
-        # with wx.FileDialog(self.main_window, "Open an image",
-        #                   wildcard="PNG and TIFF and TIF files (*.png;\
-        #                   *.tiff;*.tif)|*.png;*.tiff;*.tif",
-        #                   style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
-        #                   ) as file_dialog:
-
-        #    if file_dialog.ShowModal() == wx.ID_CANCEL:
-        #        return     # the user changed their mind
-
-        #    # Proceed loading the file chosen by the user
-        #    pathname = file_dialog.GetPath()
-
-        #    self.logger.debug("File Path: %s", pathname)
-        #    self.image_path = pathname
-
-        #    try:
-        #        self.image = Image(pathname)
-
-        #    except FileNotFoundError:
-        #        self.logger.debug("There was a problem loading the image")
-        #        # TODO: Display an error dialog
-        #        return
-
-        #    self.current_patch = 0
-        #    self.display_current_patch()
-
     def get_image_name_from_path(self, path):
         """
         Get the filename from the image to use for saving the mask
@@ -154,28 +127,6 @@ class Controller:
         except IOError:
             self.logger.ERROR("Could not save file!")
             # TODO: display dialog
-
-        # TODO: Replace with tkinter versions
-        # with wx.DirDialog(self.main_window, "Select Output Folder",
-        #                  style=wx.DD_DEFAULT_STYLE
-        #                  ) as file_dialog:
-
-        #    if file_dialog.ShowModal() == wx.ID_CANCEL:
-        #        return     # the user changed their mind
-
-        #    # save the current contents in the file
-        #    pathname = file_dialog.GetPath()
-        #    image_name = self.get_image_name_from_path(self.image_path)
-
-        #    pathname = os.path.join(pathname, image_name)
-
-        #    try:
-        #        self.logger.debug("Saving mask to {}".format(pathname))
-        #        self.image.export_mask(pathname)
-
-        #    except IOError:
-        #        wx.LogError("Cannot save file '%s'." % pathname)
-        #        # TODO: display dialog
 
     def display_current_patch(self):
         """
@@ -226,18 +177,6 @@ class Controller:
                 self.mask_saved = True
 
                 tkinter.messagebox.showinfo("Image Mask Saved!")
-
-            # dialog = wx.MessageDialog(None, dialog_message, dialog_title,
-            #                          wx.YES_NO | wx.ICON_QUESTION |
-            #                         wx.NO_DEFAULT)
-
-            # if dialog.ShowModal() == wx.ID_YES:
-            #    self.save_mask()
-            #    self.mask_saved = True
-
-            #    dialog = wx.MessageDialog(None, "Image Mask Saved!",
-            #                              "Success!", wx.OK)
-            #    dialog.ShowModal()
 
     def prev_patch(self):
         """
@@ -408,15 +347,19 @@ class Controller:
         :returns: True on success, False otherwise
         """
 
-        if wheel_rotation > 0:
+        old_scale = self.main_window.image_scale
+
+        if wheel_rotation > 0 and old_scale < self.main_window.MAX_SCALE:
             self.main_window.image_scale *= 2.0
 
-        elif wheel_rotation < 0:
+        elif wheel_rotation < 0 and old_scale > self.main_window.MIN_SCALE:
             self.main_window.image_scale /= 2.0
 
         else:
             return False
 
+        self.logger.debug("Image Scale: {}".
+                          format(self.main_window.image_scale))
         self.display_current_patch()
         return True
 
@@ -427,11 +370,13 @@ class Controller:
         :param click_location: The location (x, y) of the click
         :returns: True on success, False otherwise
         """
-        click_location = (click_location[0] / self.main_window.image_scale,
-                          click_location[1] / self.main_window.image_scale)
 
         click_location = (click_location[0] - self.main_window.image_x,
                           click_location[1] - self.main_window.image_y)
+
+
+        click_location = (click_location[0] / self.main_window.image_scale,
+                          click_location[1] / self.main_window.image_scale)
 
         if self.current_mode == Mode.ADD_REGION:
             self.logger.debug("Add region click")
@@ -509,11 +454,12 @@ class Controller:
 
         if self.current_mode is not Mode.ZOOM:
 
-            position = (position[0] / self.main_window.image_scale,
-                        position[1] / self.main_window.image_scale)
-
             position = (position[0] - self.main_window.image_x,
                         position[1] - self.main_window.image_y)
+
+
+            position = (position[0] / self.main_window.image_scale,
+                        position[1] / self.main_window.image_scale)
 
         if self.current_mode == Mode.ADD_REGION:
             self.logger.debug("Adding region")
@@ -536,14 +482,31 @@ class Controller:
             self.display_current_patch()
 
         elif self.current_mode == Mode.ZOOM:
+            self.logger.debug("image_pos: {}, position: {}, prev: {}".format((self.main_window.image_x,
+                        self.main_window.image_y), position,
+                        self.main_window.previous_position))
+
             self.main_window.image_x += (position[0] -
-                                         self.main_window.previous_position[0])
+                    self.main_window.previous_position[0])
+
             self.main_window.image_y += (position[1] -
-                                         self.main_window.previous_position[1])
+                    self.main_window.previous_position[1])
 
-            # I'm not sure why this works, but I really need to move on
-            self.main_window.draw_brush()
+            self.logger.debug("image_pos: {}, position: {}, prev: {}".format((self.main_window.image_x,
+                        self.main_window.image_y), position,
+                        self.main_window.previous_position))
 
+
+            self.display_current_patch()
+#        elif self.current_mode == Mode.ZOOM:
+#            self.main_window.image_x += (position[0] -
+#                                         self.main_window.previous_position[0])
+#            self.main_window.image_y += (position[1] -
+#                                         self.main_window.previous_position[1])
+#
+#            # I'm not sure why this works, but I really need to move on
+#            self.main_window.draw_brush()
+#
         else:
             return False
 
