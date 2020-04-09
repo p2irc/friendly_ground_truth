@@ -323,6 +323,7 @@ class MainWindow(Frame):
 
         else:
             self.logger.debug("Keypress: {}".format(key))
+
     def on_load_image(self):
         """
         Called when the load image button is chosen
@@ -581,6 +582,7 @@ class MainWindow(Frame):
         :returns: none
         """
 
+        # Toto, I don't think we're in canvas anymore...
         pass
 
 

@@ -74,9 +74,12 @@ class Controller:
         :returns: None
         """
         self.logger.debug("Opening load file dialog")
-        file_name = tkinter.filedialog.askopenfilename(
-                filetypes = [("TIF Files", "*.tif"), ("TIFF Files", "*.tiff"),
-                    ("PNG Files", "*.png")])
+        filetypes = [("TIF Files", "*.tif"), ("TIFF Files", "*.tiff"),
+                     ("PNG Files", "*.png")]
+        file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes)
+
+        if file_name is None:
+            return
 
         self.image_path = file_name
         self.logger.debug("File: {}".format(self.image_path))
@@ -125,7 +128,7 @@ class Controller:
             self.image.export_mask(pathname)
 
         except IOError:
-            self.logger.ERROR("Could not save file!")
+            self.logger.error("Could not save file!")
             # TODO: display dialog
 
     def display_current_patch(self):
@@ -374,7 +377,6 @@ class Controller:
         click_location = (click_location[0] - self.main_window.image_x,
                           click_location[1] - self.main_window.image_y)
 
-
         click_location = (click_location[0] / self.main_window.image_scale,
                           click_location[1] / self.main_window.image_scale)
 
@@ -457,7 +459,6 @@ class Controller:
             position = (position[0] - self.main_window.image_x,
                         position[1] - self.main_window.image_y)
 
-
             position = (position[0] / self.main_window.image_scale,
                         position[1] / self.main_window.image_scale)
 
@@ -482,31 +483,14 @@ class Controller:
             self.display_current_patch()
 
         elif self.current_mode == Mode.ZOOM:
-            self.logger.debug("image_pos: {}, position: {}, prev: {}".format((self.main_window.image_x,
-                        self.main_window.image_y), position,
-                        self.main_window.previous_position))
-
             self.main_window.image_x += (position[0] -
-                    self.main_window.previous_position[0])
+                                         self.main_window.previous_position[0])
 
             self.main_window.image_y += (position[1] -
-                    self.main_window.previous_position[1])
-
-            self.logger.debug("image_pos: {}, position: {}, prev: {}".format((self.main_window.image_x,
-                        self.main_window.image_y), position,
-                        self.main_window.previous_position))
-
+                                         self.main_window.previous_position[1])
 
             self.display_current_patch()
-#        elif self.current_mode == Mode.ZOOM:
-#            self.main_window.image_x += (position[0] -
-#                                         self.main_window.previous_position[0])
-#            self.main_window.image_y += (position[1] -
-#                                         self.main_window.previous_position[1])
-#
-#            # I'm not sure why this works, but I really need to move on
-#            self.main_window.draw_brush()
-#
+
         else:
             return False
 
@@ -519,8 +503,6 @@ class Controller:
         :param wheel_rotation: The rotation of the mouse wheel
         :returns: None
         """
-
-        self.logger.debug("Adjusting patch threshold. {}".format(wheel_rotation))
 
         patch = self.image.patches[self.current_patch]
 

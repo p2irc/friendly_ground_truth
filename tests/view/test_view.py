@@ -9,13 +9,12 @@ Description: Test cases for the view
 
 """
 import pytest
-#import #wx
 
 from mock import MagicMock, PropertyMock
 
-#from friendly_ground_truth.view.view import MainWindow
+from friendly_ground_truth.view.tk_view import MainWindow
 
-@pytest.mark.skip(reason="Deprecated")
+
 class TestView():
     """
     Test cases for the View
@@ -23,1069 +22,747 @@ class TestView():
 
     @pytest.fixture
     def setup(self, mocker):
-        self.mock_frame = mocker.patch('wx.Frame.__init__')
-        mocker.patch('wx.GetApp')
-        mocker.patch('wx.App.Bind')
-        mocker.patch('wx.Frame.Bind')
-        mocker.patch('wx.Frame.Refresh')
-
         self.mock_controller = mocker.patch('friendly_ground_truth.' +
                                             'controller.controller.Controller')
 
-    @pytest.fixture
-    def mock_init_ui(self, mocker):
-
-        mocker.patch('friendly_ground_truth.view.view.MainWindow.init_ui')
-
-    @pytest.fixture
-    def mock_painting(self, mocker):
-
-        mocker.patch('wx.DCOverlay')
-        mocker.patch('wx.Image')
-        mocker.patch('wx.Bitmap')
-        mocker.patch('wx.Pen')
-        mocker.patch('wx.Brush')
-        mocker.patch('wx.BufferedPaintDC')
-        mocker.patch('wx.MemoryDC')
-
-    def test_init_ui(self, setup, mock_painting,  mocker):
+    def test_set_up_interactions_linux(self, setup, mocker):
         """
-        Test that the ui is initialized
+        Test setting up interactions on linux
 
-        :test_condition: the window's tool_bar and image_panel are not None
+        :test condition: bind_all is called with <Button-4> and <Button-5>
 
         :param setup: The setup fixture
         :param mocker: Mocker
         :returns: None
         """
-        mocker.patch('wx.MenuBar')
-        mocker.patch('wx.Menu')
-        mocker.patch('wx.MenuItem')
-        mocker.patch('wx.AcceleratorEntry')
-        mocker.patch('wx.AcceleratorTable')
-        mocker.patch('wx.Window.SetAcceleratorTable')
-        mocker.patch('wx.Frame.CreateToolBar')
-        mocker.patch('wx.Panel')
-        mocker.patch('wx.Frame.SetMenuBar')
-        mocker.patch('wx.Frame.SetSize')
-        mocker.patch('wx.Frame.Centre')
-        mocker.patch('wx.EmptyBitmap')
 
-        window = MainWindow(self.mock_controller)
+        assert False
 
-        window.init_ui()
-
-        assert window.image_panel is not None
-        assert window.tool_bar is not None
-
-    def test_show_image_dc_none(self, setup, mock_init_ui, mock_painting,
-                                mocker):
-        """
-        Test showing an image with a None dc
-
-        :test_condition: Refresh() is called
-
-        :returns: None
-        """
-
-        mocker.patch('wx.Image')
-        mocker.patch('wx.Bitmap')
-        mocker.patch('wx.DCOverlay')
-
-        mocker.patch.object(wx.ClientDC, '__init__', return_value=None)
-        mocker.patch.object(wx.ClientDC, 'SetUserScale')
-
-        mock_refresh = mocker.patch('wx.Frame.Refresh')
-
-        window = MainWindow(self.mock_controller)
-        window.image_panel = MagicMock()
-        window.overlay = MagicMock()
-        window._Buffer = MagicMock()
-
-        img = MagicMock()
-
-        window.show_image(img, None)
-
-        mock_refresh.assert_called()
-
-    def test_show_image_dc(self, setup, mock_init_ui, mocker):
-        """
-        Test showing an image with a not-None dc
-
-        :test_condition: dc.DrawBitmap() is called
-
-        :returns: none
-        """
-        mocker.patch('wx.Image')
-        mocker.patch('wx.Bitmap')
-
-        window = MainWindow(self.mock_controller)
-        img = MagicMock()
-        dc = MagicMock()
-
-        window.show_image(img, dc)
-
-        dc.DrawBitmap.assert_called()
-
-    def test_menu_handler_open(self, setup, mock_init_ui, mocker):
-        """
-        Test when the menu handler is called and the events id is wx.ID_OPEN
-
-        :test_condition: controller.load_new_image() is called
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-        window.tool_bar = MagicMock()
-
-        event = MagicMock()
-        event.GetId.return_value = wx.ID_OPEN
-
-        window.menu_handler(event)
-
-        self.mock_controller.load_new_image.assert_called()
-
-    def test_menu_handler_save(self, setup, mock_init_ui, mocker):
-        """
-        Test when the menu handler is called and the event id is wx.ID_SAVE
-
-        :test_condition: controller.save_mask() is called
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-        window.tool_bar = MagicMock()
-
-        event = MagicMock()
-        event.GetId.return_value = wx.ID_SAVE
-
-        window.menu_handler(event)
-
-        self.mock_controller.save_mask.assert_called()
-
-    def test_menu_handler_thresh(self, setup, mock_init_ui, mocker):
-        """
-        Test when the menu handler is called and the event id is ID_TOOL_THRESH
-
-        :test_condition: controller.change_mode() is called with ID_TOOL THRESH
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-        window.tool_bar = MagicMock()
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_THRESH
-
-        window.menu_handler(event)
-
-        self.mock_controller.change_mode.assert_called_with(window.
-                                                            ID_TOOL_THRESH)
-
-    def test_menu_handler_add(self, setup, mock_init_ui, mocker):
-        """
-        Test when the menu handler is called and the event_id is ID_TOOL_ADD
-
-        :test_condition: controller.change_mode() is called with ID_TOOL_ADD
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-        window.tool_bar = MagicMock()
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_ADD
-
-        window.menu_handler(event)
-
-        self.mock_controller.change_mode.assert_called_with(window.
-                                                            ID_TOOL_ADD)
-
-    def test_menu_handler_remove(self, setup, mock_init_ui, mocker):
-        """
-        Test when the menu handler is called and the event_id is ID_TOOL_REMOVE
-
-        :test_condition: controller.change_mode() is called with ID_TOOL_REMOVE
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-        window.tool_bar = MagicMock()
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_REMOVE
-
-        window.menu_handler(event)
-
-        self.mock_controller.change_mode.assert_called_with(window.
-                                                            ID_TOOL_REMOVE)
-
-    def test_menu_handler_no_root(self, setup, mock_init_ui, mocker):
-        """
-        Test when the menu handler is called and the event_id is
-        ID_TOOL_NO_ROOT
-
-        :test_condition: controller.change_mode() is called with
-                         ID_TOOL_NO_ROOT
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-        window.tool_bar = MagicMock()
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_NO_ROOT
-
-        window.menu_handler(event)
-
-        self.mock_controller.change_mode.assert_called_with(window.
-                                                            ID_TOOL_NO_ROOT)
-
-    def test_menu_handler_next_image(self, setup, mock_init_ui, mocker):
-        """
-        Test when the menu handler is called and the event_id is
-        ID_TOOL_NEXT_IMAGE
-
-        :test_condition: controller.change_mode() is called with
-                         ID_TOOL_NEXT_IMAGE
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-        window.tool_bar = MagicMock()
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_NEXT_IMAGE
-
-        window.menu_handler(event)
-
-        self.mock_controller.change_mode.assert_called_with(window.
-                                                            ID_TOOL_NEXT_IMAGE)
-
-    def test_menu_handler_prev_image(self, setup, mock_init_ui, mocker):
-        """
-        Test when the menu handler is called and the event_id is
-        ID_TOOL_PREV_IMAGE
-
-        :test_condition: controller.change_mode() is called with
-                         ID_TOOL_PREV_IMAGE
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-        window.tool_bar = MagicMock()
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_PREV_IMAGE
-
-        window.menu_handler(event)
-
-        self.mock_controller.change_mode.assert_called_with(window.
-                                                            ID_TOOL_PREV_IMAGE)
-
-    def test_menu_handler_zoom(self, setup, mock_init_ui, mocker):
-        """
-        Test when the menu handler is called and the events id is ID_TOOL_ZOOM
-
-        :test_condition: controller.change_mode() is called with ID_TOOL_ZOOM
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-        window.tool_bar = MagicMock()
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_ZOOM
-
-        window.menu_handler(event)
-
-        self.mock_controller.change_mode.assert_called_with(window.
-                                                            ID_TOOL_ZOOM)
-
-    def test_menu_handler_flood_add(self, setup, mock_init_ui, mocker):
-        """
-        Test when the menu handler is called and the event_id is
-        ID_TOOL_FLOOD_ADD
-
-        :test_condition: controller.change_mode() is called with
-        ID_TOOL_FLOOD_ADD
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-        window.tool_bar = MagicMock()
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_FLOOD_ADD
-
-        window.menu_handler(event)
-
-        self.mock_controller.change_mode.assert_called_with(window.
-                                                            ID_TOOL_FLOOD_ADD)
-
-    def test_menu_handler_flood_remove(self, setup, mock_init_ui, mocker):
-        """
-        Test when the menu handler is called and the event_id is
-        ID_TOOL_FLOOD_REMOVE
-
-        :test_condition: controller.change_mode() is called with
-        ID_TOOL_FLOOD_REMOVE
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-        window.tool_bar = MagicMock()
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_FLOOD_REMOVE
-
-        window.menu_handler(event)
-
-        self.mock_controller.change_mode.\
-            assert_called_with(window.ID_TOOL_FLOOD_REMOVE)
-
-    def test_menu_handler_invalid(self, setup, mock_init_ui, mocker):
-        """
-        Test when the menu handler is called and the event_id is
-        None
-
-        :test_condition: Returns None
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-        window.tool_bar = MagicMock()
-
-        event = MagicMock()
-        event.GetId.return_value = None
-
-        result = window.menu_handler(event)
-
-        assert None is result
-
-    def test_on_key_A(self, setup, mock_init_ui, mocker):
-        """
-        Test when the on_key handler is called and the keycode was ord('A') or
-        wx.WXK_LEFT
-
-        :test_condition: controller.prev_patch() is called
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        event = MagicMock()
-        event.GetKeyCode.return_value = wx.WXK_LEFT
-
-        window.on_key(event)
-
-        self.mock_controller.prev_patch.assert_called()
-
-        event.GetKeyCode.return_Value = ord('A')
-
-        window.on_key(event)
-
-        self.mock_controller.prev_patch.assert_called()
-
-    def test_on_key_D(self, setup, mock_init_ui, mocker):
-        """
-        Test when the on_key handler is called and the keycode was ord('D') or
-        wx.WXK_RIGHT
-
-        :test_condition: controller.next_patch() is called
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        event = MagicMock()
-        event.GetKeyCode.return_value = wx.WXK_RIGHT
-
-        window.on_key(event)
-
-        self.mock_controller.next_patch.assert_called()
-
-        event.GetKeyCode.return_Value = ord('D')
-
-        window.on_key(event)
-
-        self.mock_controller.next_patch.assert_called()
-
-    def test_on_key_None(self, setup, mock_init_ui, mocker):
-        """
-        Test when the on_key handler is called and the keycode was None
-
-        :test_condition: event.Skip() was called
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        event = MagicMock()
-        event.GetKeyCode.return_value = None
-
-        window.on_key(event)
-
-        event.Skip.assert_called()
-
-    def test_on_tool_chosen_thresh(self, setup, mock_init_ui, mocker):
-        """
-        Test when the on_tool_chosen hanlder is called and the event_id is
-        ID_TOOL_THRESH
-
-        :test_condition: controller.change_mode() is called with ID_TOOL_THRESH
-                         and the function returns True
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_THRESH
-
-        result = window.on_tool_chosen(event)
-
-        self.mock_controller.change_mode.assert_called_with(window.
-                                                            ID_TOOL_THRESH)
-        assert True is result
-
-    def test_on_tool_chosen_add(self, setup, mock_init_ui, mocker):
-        """
-        Test when the on_tool_chosen handler is called and the event_id is
-        ID_TOOL_ADD
-
-        :test_condition: controller.change_mode() is called with ID_TOOL_ADD
-                         and the function returns True
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_ADD
-
-        result = window.on_tool_chosen(event)
-
-        self.mock_controller.change_mode.assert_called_with(window.
-                                                            ID_TOOL_ADD)
-        assert True is result
-
-    def test_on_tool_chosen_remove(self, setup, mock_init_ui, mocker):
-        """
-        Test when the on_tool_chosen handler is called and the event_id is
-        ID_TOOL_REMOVE
-
-        :test_condition: controller.change_mode() is called with ID_TOOL_REMOVE
-                         and the function returns True
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_REMOVE
-
-        result = window.on_tool_chosen(event)
-
-        self.mock_controller.change_mode.assert_called_with(window.
-                                                            ID_TOOL_REMOVE)
-        assert True is result
-
-    def test_on_tool_chosen_no_root(self, setup, mock_init_ui, mocker):
-        """
-        Test when the on_tool_chosen handler is called and the event_id is
-        ID_TOOL_NO_ROOT
-
-        :test_condition: controller.change_mode() is called with
-                         ID_TOOL_NO_ROOT
-                         and the function returns True
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_NO_ROOT
-
-        result = window.on_tool_chosen(event)
-
-        self.mock_controller.change_mode.assert_called_with(window.
-                                                            ID_TOOL_NO_ROOT)
-        assert True is result
-
-    def test_on_tool_chosen_next(self, setup, mock_init_ui, mocker):
-        """
-        Test when the on_tool_chosen handler is called and the event_id is
-        ID_TOOL_NEXT_IMAGE
-
-        :test_condition: controller.next_patch() is called
-                         and the function returns True
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_NEXT_IMAGE
-
-        result = window.on_tool_chosen(event)
-
-        self.mock_controller.next_patch.assert_called()
-        assert True is result
-
-    def test_on_tool_chosen_prev(self, setup, mock_init_ui, mocker):
-        """
-        Test when the on_tool_chosen handler is called and the event_id is
-        ID_TOOL_PREV_IMAGE
-
-        :test_condition: controller.prev_patch() is called
-                         and the function returns True
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_PREV_IMAGE
-
-        result = window.on_tool_chosen(event)
-
-        self.mock_controller.prev_patch.assert_called()
-        assert True is result
-
-    def test_on_tool_chosen_zoom(self, setup, mock_init_ui, mocker):
-        """
-        Test when the on_tool_chosen hanlder is called and the event_id is
-        ID_TOOL_ZOOM
-
-        :test_condition: controller.change_mode() is called with ID_TOOL_ZOOM
-                         and the function returns True
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_ZOOM
-
-        result = window.on_tool_chosen(event)
-
-        self.mock_controller.change_mode.assert_called_with(window.
-                                                            ID_TOOL_ZOOM)
-        assert True is result
-
-    def test_on_tool_chosen_flood_add(self, setup, mock_init_ui, mocker):
-        """
-        Test when the on_tool_chosen handler is called and the event_id is
-        ID_TOOL_FLOOD_ADD
-
-        :test_condition: controller.change_mode() is called with
-                         ID_TOOL_FLOOD_ADD
-                         and the function returns True
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_FLOOD_ADD
-
-        result = window.on_tool_chosen(event)
-
-        self.mock_controller.change_mode.assert_called_with(window.
-                                                            ID_TOOL_FLOOD_ADD)
-        assert True is result
-
-    def test_on_tool_chosen_flood_remove(self, setup, mock_init_ui, mocker):
-        """
-        Test when the on_tool_chosen handler is called and the event_id is
-        ID_TOOL_FLOOD_REMOVE
-
-        :test_condition: controller.change_mode() is called with
-                         ID_TOOL_FLOOD_REMOVE
-                         and the function returns True
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        event = MagicMock()
-        event.GetId.return_value = window.ID_TOOL_FLOOD_REMOVE
-
-        result = window.on_tool_chosen(event)
-
-        self.mock_controller.change_mode.\
-            assert_called_with(window.ID_TOOL_FLOOD_REMOVE)
-        assert True is result
-
-    def test_on_tool_chosen_invalid(self, setup, mock_init_ui, mocker):
-        """
-        Test when the on_tool_chosen handler is called and the event_id is a
-        garbage value (like -1)
-
-        :test_condition: returns False
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        event = MagicMock()
-        event.GetId.return_value = -1
-
-        result = window.on_tool_chosen(event)
-
-        assert False is result
-
-    def test_on_mousewheel(self, setup, mock_init_ui, mocker):
-        """
-        Test when the mousewheel handler is called
-
-        :test_condition: controller.handle_mouse_wheel() is called
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        event = MagicMock()
-
-        window.on_mousewheel(event)
-
-        self.mock_controller.handle_mouse_wheel.assert_called()
-
-    def test_set_brush_radius(self, setup, mock_init_ui, mocker):
-        """
-        Test when the set_brush_radius handler is called
-
-        :test_condition: the brush_radius is updated
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        window.set_brush_radius(21)
-
-        assert 21 == window.brush_radius
-
-        window.set_brush_radius(2)
-
-        assert 2 == window.brush_radius
-
-    def test_on_left_down(self, setup, mock_init_ui, mocker):
-        """
-        Test when the left mouse button is pressed
-
-        :test_condition: controller.handle_left_click() is called
-                         with the proper mouse position, converted to image
-                         coordinates
-        :returns: None
-        """
-
-        def mock_screen_to_client(in_position):
-            return in_position[0] + 1, in_position[1] + 1
-
-        def mock_screen_pos():
-            return (0, 0)
-
-        mocker.patch('wx.Panel.ScreenToClient',
-                     side_effect=mock_screen_to_client)
-
-        mocker.patch('wx.Panel.GetScreenPosition', side_effect=mock_screen_pos)
-
-        window = MainWindow(self.mock_controller)
-        window.image_panel = MagicMock()
-
-        event = MagicMock()
-        event.GetPosition.return_value = (1, 1)
-
-        expected = window.convert_mouse_to_img_pos(event.GetPosition())
-
-        window.on_left_down(event)
-
-        self.mock_controller.handle_left_click.assert_called_with(expected)
-
-    def test_on_left_up(self, setup, mock_init_ui, mocker):
-        """
-        Test when the left mouse button is released
-
-        :test_condition: controller.handle_left_release() is called
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-
-        window.on_left_up(None)
-
-        self.mock_controller.handle_left_release.assert_called()
-
-    def test_on_motion_not_dragging(self, setup, mock_init_ui, mocker):
-        """
-        Test when the mouse is moved and event.Dragging() and
-        event.LeftIsDown() are both false
-
-        :test_condition: controller.handle_motion() is NOT called
-
-        :returns: None
+    def test_set_up_interactions_darwin(self, setup, mocker):
         """
+        Test setting up interactions on mac
 
-        event = MagicMock()
-        event.Dragging = PropertyMock(return_value=False)
-        event.LeftIsDown = PropertyMock(return_value=False)
-
-        mocker.patch('wx.Panel.GetScreenPosition')
-        mocker.patch('wx.Window.ScreenToClient')
-
-        window = MainWindow(self.mock_controller)
-        window.image_panel = MagicMock()
-
-        window.on_motion(event)
-
-        self.mock_controller.handle_motion.assert_not_called()
-
-    def test_on_motion_dragging(self, setup, mock_init_ui, mocker):
-        """
-        Test when the mouse is moved and event.Dragging() and
-        event.LeftIsDown() are both true
-
-        :test_condition: controller.handle_motion() is called
-
-        :returns: None
-        """
-
-        event = MagicMock()
-        event.Dragging = PropertyMock(return_value=True)
-        event.LeftIsDown = PropertyMock(return_value=True)
-
-        mocker.patch('wx.Panel.GetScreenPosition')
-        mocker.patch('wx.Window.ScreenToClient')
-
-        window = MainWindow(self.mock_controller)
-        window.image_panel = MagicMock()
-
-        window.on_motion(event)
-
-        self.mock_controller.handle_motion.assert_called()
-
-    def test_on_motion_zoom_cursor(self, setup, mock_init_ui, mocker):
-        """
-        Test when the mouse is moved and zoom cursor is True
-
-        :test_condition: controller.draw_brush() is not called
-
-        :returns: None
-        """
-
-        event = MagicMock()
-        event.Dragging = PropertyMock(return_value=False)
-        event.LeftIsDown = PropertyMock(return_value=False)
-
-        mocker.patch('wx.Panel.GetScreenPosition')
-        mocker.patch('wx.Window.ScreenToClient')
-
-        window = MainWindow(self.mock_controller)
-        window.image_panel = MagicMock()
-
-        window.zoom_cursor = True
-
-        spy = mocker.spy(MainWindow, 'draw_brush')
-
-        window.on_motion(event)
-
-        spy.assert_not_called()
-
-    def test_on_enter_panel_not_zoom(self, setup, mock_init_ui, mocker,
-                                     mock_painting):
-        """
-        Test when the mouse enters the panel and zoom cursor is False
-
-        :test_condition: self.SetCursor() is called with
-        wx.StockCursor(wx.CURSOR_BLANK)
-
-        :returns: None
-        """
-
-        mock_cursor = mocker.patch.object(MainWindow, "SetCursor")
-        mocker.patch('wx.StockCursor')
-
-        window = MainWindow(self.mock_controller)
-        window.zoom_cursor = False
-
-        window.on_enter_panel(None)
-
-        mock_cursor.assert_called_with(wx.StockCursor(wx.CURSOR_BLANK))
-
-    def test_on_enter_panel_flood(self, setup, mock_init_ui, mocker,
-                                  mock_painting):
-        """
-        Test when the mouse enters the panel and flood cursor is True
-
-        :test_condition: self.SetCursor() is called with
-        wx.StockCursor(wx.CURSOR_BULLSEYE)
-
-        :returns: None
-        """
-
-        mock_cursor = mocker.patch.object(MainWindow, "SetCursor")
-        mocker.patch('wx.StockCursor')
-
-        window = MainWindow(self.mock_controller)
-        window.zoom_cursor = False
-        window.flood_cursor = True
-
-        window.on_enter_panel(None)
-
-        mock_cursor.assert_called_with(wx.StockCursor(wx.CURSOR_BULLSEYE))
-
-    def test_on_enter_panel_zoom(self, setup, mock_init_ui, mocker,
-                                 mock_painting):
-        """
-        Test when the mouse enters the panel and zoom cursor is True
-
-        :test_condition: self.SetCursor() is called with
-                         wx.StockCursor(wx.CURSOR_MAGNIFIER)
-
-        :returns: None
-        """
-
-        mock_cursor = mocker.patch.object(MainWindow, "SetCursor")
-        mocker.patch('wx.StockCursor')
-
-        window = MainWindow(self.mock_controller)
-        window.zoom_cursor = True
-
-        window.on_enter_panel(None)
-
-        mock_cursor.assert_called_with(wx.StockCursor(wx.CURSOR_BLANK))
-
-    def test_on_leave_panel(self, setup, mock_init_ui, mocker):
-        """
-        Test when the mouse leaves the panel
-
-        :test_condition: wx.Cursor() is called with wx.CURSOR_DEFAULT
-
-        :returns: None
-        """
-
-        mock_cursor = mocker.patch('wx.Cursor')
-
-        window = MainWindow(self.mock_controller)
-        window.on_leave_panel(None)
-
-        mock_cursor.assert_called_with(wx.CURSOR_DEFAULT)
-
-    def test_draw_brush_no_image(self, setup, mock_init_ui, mock_painting):
-        """
-        Test when the draw brush function is called and current_image is None
-
-        :test_condition: Return None
-
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller)
-        window.current_image = None
-
-        result = window.draw_brush()
-
-        assert result is None
-
-    def test_draw_brush_no_pos(self, setup, mock_init_ui, mock_painting,
-                               mocker):
-        """
-        Test when draw_brush() is called with no position
-
-        :test_condition: dc.DrawCircle() is called with previous_mouse_position
-
-        :returns: None
-        """
-
-        wx.PlatformInfo = ('wxMac')
-
-        mocker.patch.object(wx.ClientDC, '__init__', return_value=None)
-        mocker.patch.object(wx.ClientDC, 'SetPen')
-        mocker.patch.object(wx.ClientDC, 'SetBrush')
-
-        mock_dc = mocker.patch.object(wx.ClientDC, 'DrawCircle',  create=True)
-
-        mocker.patch('friendly_ground_truth.view.view.MainWindow.show_image')
-
-        previous_mouse_position = (1, 2)
-
-        window = MainWindow(self.mock_controller)
-        window.current_image = MagicMock()
-        window.previous_mouse_position = previous_mouse_position
-        window.image_panel = MagicMock()
-        window.overlay = MagicMock()
-
-        in_position = None
-
-        window.draw_brush(in_position)
-
-        mock_dc.assert_called_with(previous_mouse_position[0],
-                                   previous_mouse_position[1],
-                                   window.brush_radius)
-
-    def test_draw_brush_with_pos(self, setup, mock_init_ui, mock_painting,
-                                 mocker):
-        """
-        Test when draw_brush() is called with a position
-
-        :test_condition: dc.DrawCircle() is called with position
-
-        :returns: None
-        """
-        wx.PlatformInfo = ('wxMac')
-
-        mocker.patch.object(wx.ClientDC, '__init__', return_value=None)
-        mocker.patch.object(wx.ClientDC, 'SetPen')
-        mocker.patch.object(wx.ClientDC, 'SetBrush')
-
-        mock_dc = mocker.patch.object(wx.ClientDC, 'DrawCircle',  create=True)
-
-        mocker.patch('friendly_ground_truth.view.view.MainWindow.show_image')
-
-        window = MainWindow(self.mock_controller)
-        window.current_image = MagicMock()
-        window.previous_mouse_position = (0, 0)
-        window.image_panel = MagicMock()
-        window.overlay = MagicMock()
-
-        in_position = (1, 1)
-
-        window.draw_brush(in_position)
-
-        mock_dc.assert_called_with(in_position[0], in_position[1],
-                                   window.brush_radius)
-
-    def test_draw_brush_without_image(self, setup, mock_init_ui, mock_painting,
-                                      mocker):
-        """
-        Test when draw_brush() is called and with_image is False
+        :test condition: bind_all is called with <Mousewheel>
 
-        :test_condition: dc.DrawCircle() is called with position
-        :param setup: setup
-        :param mock_init_ui: UI Fixture
-        :param mock_painting: Painting Fixture
+        :param setup: The setup fixture
         :param mocker: Mocker
         :returns: None
         """
-        wx.PlatformInfo = ('wxMac')
 
-        mocker.patch.object(wx.ClientDC, '__init__', return_value=None)
-        mocker.patch.object(wx.ClientDC, 'SetPen')
-        mocker.patch.object(wx.ClientDC, 'SetBrush')
+        assert False
 
-        mock_dc = mocker.patch.object(wx.ClientDC, 'DrawCircle',  create=True)
-
-        mocker.patch('friendly_ground_truth.view.view.MainWindow.show_image')
-
-        window = MainWindow(self.mock_controller)
-        window.current_image = MagicMock()
-        window.previous_mouse_position = (0, 0)
-        window.image_panel = MagicMock()
-        window.overlay = MagicMock()
-
-        in_position = (1, 1)
-
-        window.draw_brush(in_position, with_image=False)
-
-        mock_dc.assert_called_with(in_position[0], in_position[1],
-                                   window.brush_radius)
-
-    def test_draw_brush_wxMac(self, setup, mock_init_ui, mock_painting,
-                              mocker):
+    def test_set_up_interactions_windows(self, setup, mocker):
         """
-        Test when draw_brush() is called and 'wxMac' is not in wx.PlatformInfo
+        Test setting up interactions on windows
 
-        :test_condition: wx.GCDC is called
+        :test condition: bind_all is called with <Mousewheel>
 
+        :param setup: The setup fixture
+        :param mocker: Mocker
         :returns: None
         """
 
-        mocker.patch('wx.PlatformInfo', return_value=['wxSteve'])
+        assert False
 
-        mocker.patch.object(wx.ClientDC, '__init__',
-                            return_value=None)
-        mocker.patch('friendly_ground_truth.view.view.MainWindow.show_image')
-        mock_gcdc = mocker.patch('wx.GCDC')
-
-        window = MainWindow(self.mock_controller)
-        window.current_image = MagicMock()
-        window.previous_mouse_position = (0, 0)
-        window.image_panel = MagicMock()
-        window.overlay = MagicMock()
-
-        window.draw_brush()
-
-        mock_gcdc.assert_called()
-
-    def test_on_paint(self, setup, mock_init_ui, mock_painting, mocker):
+    def test_create_canvas(self, setup, mocker):
         """
-        Test when the on_paint function is called
+        Test creation of canvas
 
-        :test_condition: wx.DCOverlay is called
+        :test_condition: tk.Canvas is called
 
+        :param setup: Setup fixture
+        :param mocker: Mocker
         :returns: None
         """
 
-        mocker.patch('wx.ClientDC')
-        mock_overlay = mocker.patch('wx.DCOverlay')
+        assert False
 
-        window = MainWindow(self.mock_controller)
-        window.image_panel = MagicMock()
-        window.overlay = MagicMock()
-        window._Buffer = MagicMock()
-        window.previous_mouse_position = (0, 0)
-        window.on_paint(None)
-
-        mock_overlay.assert_called()
-
-    def test_convert_mouse_to_img_pos(self, setup, mock_init_ui, mocker):
+    def test_create_menubar(self, setup, mocker):
         """
-        Test when convert_mouse_to_img_pos() is called
+        Test creation of menubar
 
-        :test_condition: the correct coordinates are output
+        :test_condition: tk.Menu is called
 
+        :param setup: Setup fixture
+        :param mocker: mocker
         :returns: None
         """
 
-        def mock_screen_to_client(in_position):
-            return in_position[0] + 1, in_position[1] + 1
+        assert False
 
-        def mock_screen_pos():
-            return (0, 0)
+    def test_create_file_menu(self, setup, mocker):
+        """
+        Test creating the file menu
 
-        mocker.patch('wx.Panel.ScreenToClient',
-                     side_effect=mock_screen_to_client)
+        :test_condition: tk.Menu is called
 
-        mocker.patch('wx.Panel.GetScreenPosition', side_effect=mock_screen_pos)
+        :param setup: setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
 
-        window = MainWindow(self.mock_controller)
-        image_panel = MagicMock()
-        image_panel.ScreenToClient.side_effect = mock_screen_to_client
-        image_panel.GetScreenPosition.side_effect = mock_screen_pos
+        assert False
 
-        window.image_panel = image_panel
+    def test_create_toolbar(self, setup, mocker):
+        """
+        Test creating the toolbar
 
-        pos = window.convert_mouse_to_img_pos((0, 0))
+        :test_condition: tk.Frame is called
 
-        assert pos == (1, 1)
+        :param setup: Setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        assert False
+
+    def test_on_left(self, setup, mocker):
+        """
+        Test when the left key is pressed
+
+        :test_condition: on_prev_tool() is called
+
+        :param setup: setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        assert False
+
+    def test_on_right(self, setup, mocker):
+        """
+        Test when the right key is pressed
+
+        :test_condition: on_next_tool() is called
+
+        :param setup: Setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        assert False
+
+    def test_on_keypress_x(self, setup, mocker):
+        """
+        Test when the x key is pressed
+
+        :test_condition: on_no_root_tool() is called
+
+        :param setup: Setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        assert False
+
+    def test_on_keypress_t(self, setup, mocker):
+        """
+        Test when the t key is pressed
+
+        :test_condition: on_threshold_tool() is called
+
+        :param setup: Setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        assert False
+
+    def test_on_keypress_z(self, setup, mocker):
+        """
+        Test when the z key is pressed
+
+        :test_condition: on_zoom_tool() is called
+
+        :param setup: Setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        assert False
+
+    def test_on_keypress_a(self, setup, mocker):
+        """
+        Test when the a key is pressed
+
+        :test_condition: on_add_reg_tool() is called
+
+        :param setup: Setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        assert False
+
+
+    def test_on_keypress_r(self, setup, mocker):
+        """
+        Test when the r key is pressed
+
+        :test_condition: on_remove_reg_tool() is called
+
+        :param setup: Setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        assert False
+
+    def test_on_keypress_f(self, setup, mocker):
+        """
+        Test when the f key is pressed
+
+        :test_condition: on_flood_add_tool() is called
+
+        :param setup: Setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        assert False
+
+    def test_on_keypress_l(self, setup, mocker):
+        """
+        Test when the l key is pressed
+
+        :test_condition: on_flood_remove_tool() is called
+
+        :param setup: Setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        assert False
+
+    def test_on_keypress_invalid(self, setup, mocker):
+        """
+        Test when an invalid key is pressed
+
+        :test_condition: returns none
+
+        :param setup: Setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        assert False
+
+    def test_on_load_image(self, setup, mocker):
+        """
+        Test the load image button
+
+        :test_condition: controller.load_new_image() called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        assert False
+
+    def test_show_image_no_id(self, setup, mocker):
+        """
+        Test the show image function when no image id exists
+
+        :test_condition: canvas.delete() is not called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+        assert False
+
+    def test_show_image_id(self, setup, mocker):
+        """
+        Test the show image function when an image id exists
+
+        :test_condition: canvas.delete() is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.image_id = 5
+        window.canvas = MagicMock()
+
+        window.show_image(MagicMock())
+
+        window.canvas.delete.assert_called()
+
+    def test_on_save_mask(self, setup, mocker):
+        """
+        Test when the save mask button is pressed
+
+        :test_Condition: controller.save_mask() is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.on_save_mask()
+
+        self.mock_controller.save_mask.assert_called()
+
+    def test_change_toolbar_state(self, setup, mocker):
+        """
+        Test changing the toolbar state
+
+        :test_condition: button.config is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.toolbar_buttons = {window.ID_TOOL_THRESH: MagicMock(), 7:
+                                  MagicMock()}
+
+        window.change_toolbar_state(window.ID_TOOL_THRESH)
+        window.toolbar_buttons[window.ID_TOOL_THRESH]\
+            .config.assert_called_once()
+
+    def test_on_threshold_tool(self, setup, mocker):
+        """
+        Test when the threshold tool is chosen
+
+        :test_condition: controller.change_mode is called with ID_TOOL_THRESH
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.on_threshold_tool()
+
+        self.mock_controller.change_mode\
+                            .assert_called_with(window.ID_TOOL_THRESH)
+
+    def test_on_add_reg_tool(self, setup, mocker):
+        """
+        Test when the add region tool is chosen
+
+        :test_condition: controller.change_mode is called with ID_TOOL_ADD
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.on_add_reg_tool()
+
+        self.mock_controller.change_mode\
+                            .assert_called_with(window.ID_TOOL_ADD)
+
+    def test_on_remove_reg_tool(self, setup, mocker):
+        """
+        Test when the remove region tool is chosen
+
+        :test_condition: controller.change_mode is called with ID_TOOL_REMOVE
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.on_remove_reg_tool()
+
+        self.mock_controller.change_mode\
+                            .assert_called_with(window.ID_TOOL_REMOVE)
+
+    def test_on_no_root_tool(self, setup, mocker):
+        """
+        Test when the no root tool is chosen
+
+        :test_condition: controller.change_mode is called with ID_TOOL_NO_ROOT
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.on_no_root_tool()
+
+        self.mock_controller.change_mode\
+                            .assert_called_with(window.ID_TOOL_NO_ROOT)
+
+    def test_on_zoom_tool(self, setup, mocker):
+        """
+        Test when the zoom tool is chosen
+
+        :test_condition: controller.change_mode is called with ID_TOOL_ZOOM
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.on_zoom_tool()
+
+        self.mock_controller.change_mode\
+                            .assert_called_with(window.ID_TOOL_ZOOM)
+
+    def test_on_flood_add_tool(self, setup, mocker):
+        """
+        Test when the flood add region tool is chosen
+
+        :test_condition: controller.change_mode is called with
+                         ID_TOOL_FLOOD_ADD
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.on_flood_add_tool()
+
+        self.mock_controller.change_mode\
+                            .assert_called_with(window.ID_TOOL_FLOOD_ADD)
+
+    def test_on_flood_remove_tool(self, setup, mocker):
+        """
+        Test when the flood remove region tool is chosen
+
+        :test_condition: controller.change_mode is called with
+                         ID_TOOL_FLOOD_REMOVE
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.on_flood_remove_tool()
+
+        self.mock_controller.change_mode\
+                            .assert_called_with(window.ID_TOOL_FLOOD_REMOVE)
+
+    def test_on_prev_tool(self, setup, mocker):
+        """
+        Test when the prev tool is chosen
+
+        :test_condition: controller.prev_patch() is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.on_prev_tool()
+
+        self.mock_controller.prev_patch.assert_called()
+
+    def test_on_next_tool(self, setup, mocker):
+        """
+        Test when the next tool is chosen
+
+        :test_condition: controller.next_patch()
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.on_next_tool()
+
+        self.mock_controller.next_patch.assert_called()
+
+    def test_on_mousewheel_4(self, setup, mocker):
+        """
+        Test when the mousewheel is used and event.num is 4 and event.delta is
+        0
+
+        :test_condition: controller.handle_mouse_wheel is called with 120
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.num = 4
+        event.delta = 0
+
+        window.on_mousewheel(event)
+
+        self.mock_controller.handle_mouse_wheel.assert_called_with(120)
+
+    def test_on_mousewheel_5(self, setup, mocker):
+        """
+        Test when the mousewheel is used and event.num is 5 and event.delta is
+        0
+        :test_condition: controller.handle_mouse_wheel is called with -120
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.num = 5
+        event.delta = 0
+
+        window.on_mousewheel(event)
+
+        self.mock_controller.handle_mouse_wheel.assert_called_with(-120)
+
+    def test_on_mousewheel_not_0(self, setup, mocker):
+        """
+        Test when the mousewheel is used and event.num is 0 and event.delta is
+        not 0
+
+        :test_condition: controller.handle_mouse_wheel is called with
+        event.delta
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.num = 0
+        event.delta = 120
+
+        window.on_mousewheel(event)
+
+        self.mock_controller.handle_mouse_wheel.assert_called_with(120)
+
+    def test_on_drag(self, setup, mocker):
+        """
+        Test when the mouse is dragged
+
+        :test_condition: controller.handle_motion() is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.on_drag(MagicMock())
+
+        self.mock_controller.handle_motion.assert_called()
+
+    def test_on_motion_not_zoom(self, setup, mocker):
+        """
+        Test when the mouse is moved and zoom and flood cursor are false
+
+        :test_condition: draw_brush() is called
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.zoom_cursor = False
+        window.flood_cursor = False
+        event = MagicMock()
+        event.x = 5
+        event.y = 3
+
+        spy = mocker.spy(window, 'draw_brush')
+
+        window.on_motion(event)
+
+        spy.assert_called()
+
+    def test_on_motion_zoom(self, setup, mocker):
+        """
+        Test when the mouse is moved and zoom_cursor is true
+
+        :test_condition: draw_brush() is not called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.zoom_cursor = True
+
+        spy = mocker.spy(window, 'draw_brush')
+
+        window.on_motion(MagicMock())
+
+        spy.assert_not_called()
+
+    def test_draw_brush_not_none(self, setup, mocker):
+        """
+        Test drawing the brush
+
+        :test_condition: canvas.draw_oval is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.canvas = MagicMock()
+
+        window.brush_cursor = None
+        window.draw_brush((10, 10))
+
+        window.canvas.create_oval.assert_called_once()
+
+    def test_draw_brush_none_pos(self, setup, mocker):
+        """
+        Test drawing brush when position is none
+
+        :test_condition: canvas.create_oval is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.canvas = MagicMock()
+
+        window.draw_brush(None)
+
+        window.canvas.create_oval.assert_called_once()
+
+    def test_draw_brush_pos(self, setup, mocker):
+        """
+        Test drawing the brush with a position
+
+        :test_condition: canvas.create_oval is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.canvas = MagicMock()
+
+        window.draw_brush((10, 10))
+
+        window.canvas.create_oval.assert_called_once()
+
+    def test_on_click(self, setup, mocker):
+        """
+        Test on click
+
+        :test_condition: controller.handle_left_click() is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.x = 21
+        event.y = 42
+
+        window.on_click(event)
+
+        self.mock_controller.handle_left_click.called_with((21, 42))
+
+    def test_set_brush_radius(self, setup, mocker):
+        """
+        Test changing the brush radius
+
+        :test_condition: brush_radius is changed
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.set_brush_radius(19)
+
+        assert window.brush_radius == 19
+
+    def test_on_enter_canvas_zoom(self, setup, mocker):
+        """
+        Test when the mouse enters the canvas and zoom_cursor is true
+
+        :test_condition: self.canvas.config() is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        event = MagicMock()
+
+        window.zoom_cursor = True
+        window.canvas = MagicMock()
+
+        window.on_enter_canvas(event)
+        window.canvas.config.assert_called_once()
+
+    def test_on_enter_canvas_flood(self, setup, mocker):
+        """
+        Test when the mouse enters the canvas and flood_cursor is true
+
+        :test_condition: self.canvas.config() is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        event = MagicMock()
+
+        window.flood_cursor = True
+        window.canvas = MagicMock()
+
+        window.on_enter_canvas(event)
+        window.canvas.config.assert_called_once()
+
+    def test_on_enter_canvas_other(self, setup, mocker):
+        """
+        Test when the mouse enters the canvas and zoom_cursor and food_cursor
+        are both false
+
+        :test_condition: self.canvas.config() is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        event = MagicMock()
+
+        window.canvas = MagicMock()
+
+        window.on_enter_canvas(event)
+        window.canvas.config.assert_called_once()
+
+    def test_on_leave_canvas(self, setup, mocker):
+        """
+        Test when the mouse leaves the canvas
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.on_leave_canvas(MagicMock())
