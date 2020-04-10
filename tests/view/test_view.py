@@ -25,6 +25,8 @@ class TestView():
         self.mock_controller = mocker.patch('friendly_ground_truth.' +
                                             'controller.controller.Controller')
 
+        mocker.patch('tkinter.Frame')
+
     def test_set_up_interactions_other(self, setup, mocker):
         """
         Test setting up interactions on som other platforms
