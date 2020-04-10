@@ -25,6 +25,29 @@ class TestView():
         self.mock_controller = mocker.patch('friendly_ground_truth.' +
                                             'controller.controller.Controller')
 
+    def test_set_up_interactions_other(self, setup, mocker):
+        """
+        Test setting up interactions on som other platforms
+
+        :test condition: bind_all is called
+
+        :param setup: The setup fixture
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        from friendly_ground_truth.view import tk_view
+
+        tk_view.platform = ''
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        patch_bind = mocker.patch.object(window, 'bind_all')
+
+        window.set_up_interactions()
+
+        patch_bind.assert_called()
+
     def test_set_up_interactions_linux(self, setup, mocker):
         """
         Test setting up interactions on linux
@@ -36,7 +59,17 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        from friendly_ground_truth.view import tk_view
+
+        tk_view.platform = 'linux'
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        patch_bind = mocker.patch.object(window, 'bind_all')
+
+        window.set_up_interactions()
+
+        patch_bind.assert_called()
 
     def test_set_up_interactions_darwin(self, setup, mocker):
         """
@@ -49,7 +82,17 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        from friendly_ground_truth.view import tk_view
+
+        tk_view.platform = 'darwin'
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        patch_bind = mocker.patch.object(window, 'bind_all')
+
+        window.set_up_interactions()
+
+        patch_bind.assert_called()
 
     def test_set_up_interactions_windows(self, setup, mocker):
         """
@@ -62,7 +105,17 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        from friendly_ground_truth.view import tk_view
+
+        tk_view.platform = 'win32'
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        patch_bind = mocker.patch.object(window, 'bind_all')
+
+        window.set_up_interactions()
+
+        patch_bind.assert_called()
 
     def test_create_canvas(self, setup, mocker):
         """
@@ -75,7 +128,13 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        tk_patch = mocker.patch('tkinter.Canvas')
+
+        window.create_canvas()
+
+        tk_patch.assert_called()
 
     def test_create_menubar(self, setup, mocker):
         """
@@ -88,7 +147,13 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        tk_patch = mocker.patch('tkinter.Menu')
+
+        window.create_menubar()
+
+        tk_patch.assert_called()
 
     def test_create_file_menu(self, setup, mocker):
         """
@@ -100,8 +165,13 @@ class TestView():
         :param mocker: mocker
         :returns: None
         """
+        window = MainWindow(self.mock_controller, MagicMock())
 
-        assert False
+        tk_patch = mocker.patch('tkinter.Menu')
+
+        window.create_file_menu()
+
+        tk_patch.assert_called()
 
     def test_create_toolbar(self, setup, mocker):
         """
@@ -114,7 +184,13 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        tk_patch = mocker.patch('tkinter.Frame')
+
+        window.create_toolbar()
+
+        tk_patch.assert_called()
 
     def test_on_left(self, setup, mocker):
         """
@@ -127,7 +203,15 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+
+        spy = mocker.spy(window, 'on_prev_tool')
+
+        window.on_left(event)
+
+        spy.assert_called()
 
     def test_on_right(self, setup, mocker):
         """
@@ -140,7 +224,15 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+
+        spy = mocker.spy(window, 'on_next_tool')
+
+        window.on_right(event)
+
+        spy.assert_called()
 
     def test_on_keypress_x(self, setup, mocker):
         """
@@ -153,7 +245,16 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.char = 'x'
+
+        spy = mocker.spy(window, 'on_no_root_tool')
+
+        window.on_keypress(event)
+
+        spy.assert_called()
 
     def test_on_keypress_t(self, setup, mocker):
         """
@@ -166,7 +267,16 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.char = 't'
+
+        spy = mocker.spy(window, 'on_threshold_tool')
+
+        window.on_keypress(event)
+
+        spy.assert_called()
 
     def test_on_keypress_z(self, setup, mocker):
         """
@@ -178,8 +288,16 @@ class TestView():
         :param mocker: mocker
         :returns: None
         """
+        window = MainWindow(self.mock_controller, MagicMock())
 
-        assert False
+        event = MagicMock()
+        event.char = 'z'
+
+        spy = mocker.spy(window, 'on_zoom_tool')
+
+        window.on_keypress(event)
+
+        spy.assert_called()
 
     def test_on_keypress_a(self, setup, mocker):
         """
@@ -192,8 +310,16 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        window = MainWindow(self.mock_controller, MagicMock())
 
+        event = MagicMock()
+        event.char = 'a'
+
+        spy = mocker.spy(window, 'on_add_reg_tool')
+
+        window.on_keypress(event)
+
+        spy.assert_called()
 
     def test_on_keypress_r(self, setup, mocker):
         """
@@ -205,8 +331,16 @@ class TestView():
         :param mocker: mocker
         :returns: None
         """
+        window = MainWindow(self.mock_controller, MagicMock())
 
-        assert False
+        event = MagicMock()
+        event.char = 'r'
+
+        spy = mocker.spy(window, 'on_remove_reg_tool')
+
+        window.on_keypress(event)
+
+        spy.assert_called()
 
     def test_on_keypress_f(self, setup, mocker):
         """
@@ -219,7 +353,16 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.char = 'f'
+
+        spy = mocker.spy(window, 'on_flood_add_tool')
+
+        window.on_keypress(event)
+
+        spy.assert_called()
 
     def test_on_keypress_l(self, setup, mocker):
         """
@@ -232,7 +375,16 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.char = 'l'
+
+        spy = mocker.spy(window, 'on_flood_remove_tool')
+
+        window.on_keypress(event)
+
+        spy.assert_called()
 
     def test_on_keypress_invalid(self, setup, mocker):
         """
@@ -245,7 +397,13 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.char = 'w'
+
+        result = window.on_keypress(event)
+        assert result is None
 
     def test_on_load_image(self, setup, mocker):
         """
@@ -258,7 +416,11 @@ class TestView():
         :returns: None
         """
 
-        assert False
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.on_load_image()
+
+        self.mock_controller.load_new_image.assert_called()
 
     def test_show_image_no_id(self, setup, mocker):
         """
@@ -270,7 +432,22 @@ class TestView():
         :param mocker: mocker
         :returns: None
         """
-        assert False
+        mock_image = MagicMock()
+        mock_image.size = (5, 5)
+        mocker.patch('PIL.Image.fromarray', return_value=mock_image)
+        mocker.patch('PIL.ImageTk.PhotoImage')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.image_id = None
+        window.canvas = MagicMock()
+
+        img = MagicMock()
+        img.size = (5, 5)
+
+        window.show_image(img)
+
+        window.canvas.delete.assert_not_called()
 
     def test_show_image_id(self, setup, mocker):
         """
@@ -282,12 +459,21 @@ class TestView():
         :param mocker: mocker
         :returns: None
         """
+
+        mock_image = MagicMock()
+        mock_image.size = (5, 5)
+        mocker.patch('PIL.Image.fromarray', return_value=mock_image)
+        mocker.patch('PIL.ImageTk.PhotoImage')
+
         window = MainWindow(self.mock_controller, MagicMock())
 
         window.image_id = 5
         window.canvas = MagicMock()
 
-        window.show_image(MagicMock())
+        img = MagicMock()
+        img.size = (5, 5)
+
+        window.show_image(img)
 
         window.canvas.delete.assert_called()
 
@@ -603,6 +789,25 @@ class TestView():
         window.on_motion(MagicMock())
 
         spy.assert_not_called()
+
+    def test_draw_brush_not_none_brush(self, setup, mocker):
+        """
+        Test drawing the brush
+
+        :test_condition: canvas.delete is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.canvas = MagicMock()
+
+        window.brush_cursor = True
+        window.draw_brush((10, 10))
+
+        window.canvas.delete.assert_called_once()
 
     def test_draw_brush_not_none(self, setup, mocker):
         """

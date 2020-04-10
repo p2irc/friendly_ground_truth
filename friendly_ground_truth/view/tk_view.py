@@ -94,7 +94,6 @@ class MainWindow(Frame):
         self.bind_all("<Left>", self.on_left)
         self.bind_all("<Right>", self.on_right)
 
-
     def create_canvas(self):
         """
         Set up a canvas for displaying images
@@ -584,6 +583,3 @@ class MainWindow(Frame):
 
         # Toto, I don't think we're in canvas anymore...
         pass
-
-
-
