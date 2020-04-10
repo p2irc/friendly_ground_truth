@@ -9,13 +9,22 @@ Description: Tkinter Version of the GUI
 
 """
 import tkinter as tk
-import os
 
 from tkinter import LEFT, TOP, X, FLAT, RAISED, SUNKEN, ALL
 from tkinter import Frame
 
 from PIL import Image, ImageTk
 from sys import platform
+
+from friendly_ground_truth.view.icons.icon_strings import (add_region_icon,
+                                                           remove_region_icon,
+                                                           zoom_icon,
+                                                           threshold_icon,
+                                                           next_patch_icon,
+                                                           prev_patch_icon,
+                                                           flood_add_icon,
+                                                           flood_remove_icon,
+                                                           no_root_icon)
 
 import logging
 module_logger = logging.getLogger('friendly_gt.view')
@@ -148,111 +157,74 @@ class MainWindow(Frame):
         self.toolbar_buttons = {}
 
         # Threshold Button
-        thresh_icon_path = os.path.join(ICON_PATH,
-                                        "baseline_tune_black_18dp.png")
-        thresh_img = Image.open(thresh_icon_path)
-        thresh_icon = ImageTk.PhotoImage(thresh_img)
-
-        thresh_button = tk.Button(self.toolbar, image=thresh_icon,
+        thresh_img = tk.PhotoImage(data=threshold_icon)
+        thresh_button = tk.Button(self.toolbar, image=thresh_img,
                                   relief=FLAT, command=self.on_threshold_tool)
-        thresh_button.image = thresh_icon
+        thresh_button.image = thresh_img
         thresh_button.pack(side=LEFT, padx=2, pady=2)
 
         # Add Region Button
-        add_reg_icon_path = os.path.join(ICON_PATH,
-                                         "baseline_add_circle_outline_" +
-                                         "black_18dp.png")
-        add_reg_img = Image.open(add_reg_icon_path)
-        add_reg_icon = ImageTk.PhotoImage(add_reg_img)
+        add_reg_img = tk.PhotoImage(data=add_region_icon)
 
-        add_reg_button = tk.Button(self.toolbar, image=add_reg_icon,
+        add_reg_button = tk.Button(self.toolbar, image=add_reg_img,
                                    relief=FLAT, command=self.on_add_reg_tool)
-        add_reg_button.image = add_reg_icon
+        add_reg_button.image = add_reg_img
         add_reg_button.pack(side=LEFT, padx=2, pady=2)
 
         # Remove Region Button
-        remove_reg_icon_path = os.path.join(ICON_PATH,
-                                            "baseline_remove_circle_outline_" +
-                                            "black_18dp.png")
-        remove_reg_img = Image.open(remove_reg_icon_path)
-        remove_reg_icon = ImageTk.PhotoImage(remove_reg_img)
-
-        remove_reg_button = tk.Button(self.toolbar, image=remove_reg_icon,
+        remove_reg_img = tk.PhotoImage(data=remove_region_icon)
+        remove_reg_button = tk.Button(self.toolbar, image=remove_reg_img,
                                       relief=FLAT,
                                       command=self.on_remove_reg_tool)
-        remove_reg_button.image = remove_reg_icon
+        remove_reg_button.image = remove_reg_img
         remove_reg_button.pack(side=LEFT, padx=2, pady=2)
 
         # Zoom  Button
-        zoom_icon_path = os.path.join(ICON_PATH,
-                                      "baseline_zoom_in_black_18dp.png")
-        zoom_img = Image.open(zoom_icon_path)
-        zoom_icon = ImageTk.PhotoImage(zoom_img)
-
-        zoom_button = tk.Button(self.toolbar, image=zoom_icon,
+        zoom_img = tk.PhotoImage(data=zoom_icon)
+        zoom_button = tk.Button(self.toolbar, image=zoom_img,
                                 relief=FLAT, command=self.on_zoom_tool)
-        zoom_button.image = zoom_icon
+        zoom_button.image = zoom_img
         zoom_button.pack(side=LEFT, padx=2, pady=2)
 
         # Flood Add Button
-        flood_add_icon_path = os.path.join(ICON_PATH,
-                                           "sharp_gps_fixed_black_18dp.png")
-        flood_add_img = Image.open(flood_add_icon_path)
-        flood_add_icon = ImageTk.PhotoImage(flood_add_img)
-
-        flood_add_button = tk.Button(self.toolbar, image=flood_add_icon,
+        flood_add_img = tk.PhotoImage(data=flood_add_icon)
+        flood_add_button = tk.Button(self.toolbar, image=flood_add_img,
                                      relief=FLAT,
                                      command=self.on_flood_add_tool)
-        flood_add_button.image = flood_add_icon
+        flood_add_button.image = flood_add_img
         flood_add_button.pack(side=LEFT, padx=2, pady=2)
 
         # Flood Remove Button
-        flood_remove_icon_path = os.path.join(ICON_PATH,
-                                              "sharp_gps_not_fixed_black" +
-                                              "_18dp.png")
-        flood_remove_img = Image.open(flood_remove_icon_path)
-        flood_remove_icon = ImageTk.PhotoImage(flood_remove_img)
-
-        flood_remove_button = tk.Button(self.toolbar, image=flood_remove_icon,
+        flood_remove_img = tk.PhotoImage(data=flood_remove_icon)
+        flood_remove_button = tk.Button(self.toolbar, image=flood_remove_img,
                                         relief=FLAT,
                                         command=self.on_flood_remove_tool)
-        flood_remove_button.image = flood_remove_icon
+        flood_remove_button.image = flood_remove_img
         flood_remove_button.pack(side=LEFT, padx=2, pady=2)
 
         # No Root Button
-        no_root_icon_path = os.path.join(ICON_PATH,
-                                         "baseline_cancel_black_18dp.png")
-        no_root_img = Image.open(no_root_icon_path)
-        no_root_icon = ImageTk.PhotoImage(no_root_img)
-
-        no_root_button = tk.Button(self.toolbar, image=no_root_icon,
+        no_root_img = tk.PhotoImage(data=no_root_icon)
+        no_root_button = tk.Button(self.toolbar, image=no_root_img,
                                    relief=FLAT,
                                    command=self.on_no_root_tool)
-        no_root_button.image = no_root_icon
+        no_root_button.image = no_root_img
         no_root_button.pack(side=LEFT, padx=2, pady=2)
 
         # Prev Button
-        prev_icon_path = os.path.join(ICON_PATH,
-                                      "baseline_skip_previous_black_18dp.png")
-        prev_img = Image.open(prev_icon_path)
-        prev_icon = ImageTk.PhotoImage(prev_img)
-
-        prev_button = tk.Button(self.toolbar, image=prev_icon,
+        prev_img = tk.PhotoImage(data=prev_patch_icon)
+        prev_button = tk.Button(self.toolbar, image=prev_img,
                                 relief=FLAT,
                                 command=self.on_prev_tool)
-        prev_button.image = prev_icon
+        prev_button.image = prev_img
         prev_button.pack(side=LEFT, padx=2, pady=2)
 
         # Next Button
-        next_icon_path = os.path.join(ICON_PATH,
-                                      "baseline_skip_next_black_18dp.png")
-        next_img = Image.open(next_icon_path)
-        next_icon = ImageTk.PhotoImage(next_img)
+        next_img = tk.PhotoImage(data=next_patch_icon)
 
-        next_button = tk.Button(self.toolbar, image=next_icon,
+        next_button = tk.Button(self.toolbar, image=next_img,
                                 relief=FLAT,
                                 command=self.on_next_tool)
-        next_button.image = next_icon
+        next_button.image = next_img
         next_button.pack(side=LEFT, padx=2, pady=2)
 
         self.toolbar_buttons[self.ID_TOOL_THRESH] = thresh_button
