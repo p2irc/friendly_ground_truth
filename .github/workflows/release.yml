@@ -39,6 +39,8 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.7]
     runs-on: ${{ matrix.os }}
+    env:
+      KERNEL: $(uname | tr '[:upper:]' '[:lower:]')
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -51,6 +53,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
+          
       - name: Build project # This would actually build your project, using zip for an example artifact
         run: |
           pyinstaller --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
@@ -60,6 +63,7 @@ jobs:
           name: release_url
       - name: Get Rlease File Name and Upload URL
         id: get_release_info
+        shell: bash
         run: |
           value=`cat release_url/release_url.txt`
           echo ::set-output name=upload_url::$value
@@ -71,5 +75,5 @@ jobs:
         with:
           upload_url: ${{ steps.get_release_info.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: ./dist/friendly_gt
-          asset_name: friendly_gt-${{ matrix.os }}
+          asset_name: friendly_gt_${KERNEL}_amd64
           asset_content_type: application/octet-stream
