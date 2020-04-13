@@ -76,9 +76,9 @@ jobs:
           asset_path: ./dist/friendly_gt
           asset_name: friendly_gt_${matrix.os}
           asset_content_type: application/octet-stream
-      - name: Upload Release Asset - Ubuntu/Mac
+      - name: Upload Release Asset - Windows
         if: matrix.os == 'windows-latest'
-        id: upload-release-asset 
+        id: upload-release-asset-win 
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
