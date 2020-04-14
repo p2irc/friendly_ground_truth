@@ -10,7 +10,7 @@ Description: Test cases for the view
 """
 import pytest
 
-from mock import MagicMock, PropertyMock
+from mock import MagicMock  # , PropertyMock
 
 from friendly_ground_truth.view.tk_view import MainWindow
 
@@ -383,6 +383,94 @@ class TestView():
         event.char = 'l'
 
         spy = mocker.spy(window, 'on_flood_remove_tool')
+
+        window.on_keypress(event)
+
+        spy.assert_called()
+
+    def test_on_keypress_c(self, setup, mocker):
+        """
+        Test when the c key is pressed
+
+        :test_condition: on_add_cross_tool() is called
+
+        :param setup: Setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.char = 'c'
+
+        spy = mocker.spy(window, 'on_add_cross_tool')
+
+        window.on_keypress(event)
+
+        spy.assert_called()
+
+    def test_on_keypress_v(self, setup, mocker):
+        """
+        Test when the v key is pressed
+
+        :test_condition: on_add_tip_tool() is called
+
+        :param setup: Setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.char = 'v'
+
+        spy = mocker.spy(window, 'on_add_tip_tool')
+
+        window.on_keypress(event)
+
+        spy.assert_called()
+
+    def test_on_keypress_b(self, setup, mocker):
+        """
+        Test when the b key is pressed
+
+        :test_condition: on_add_branch_tool() is called
+
+        :param setup: Setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.char = 'b'
+
+        spy = mocker.spy(window, 'on_add_branch_tool')
+
+        window.on_keypress(event)
+
+        spy.assert_called()
+
+    def test_on_keypress_n(self, setup, mocker):
+        """
+        Test when the n key is pressed
+
+        :test_condition: on_remove_landmark_tool() is called
+
+        :param setup: Setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.char = 'n'
+
+        spy = mocker.spy(window, 'on_remove_landmark_tool')
 
         window.on_keypress(event)
 
