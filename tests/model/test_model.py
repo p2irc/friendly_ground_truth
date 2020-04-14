@@ -54,8 +54,12 @@ class TestImage:
     def export_mask_path(self):
         return os.path.abspath('tests/data/test_mask.png')
 
+    @pytest.fixture
+    def export_label_path(self):
+        return os.path.abspath('tests/data/test_labels.npy')
+
     @pytest.fixture(autouse=True)
-    def remove_test_mask(self, export_mask_path):
+    def remove_test_mask(self, export_mask_path, export_label_path):
         """
         Make sure the exported mask does not exist before or after any tests.
 
@@ -68,10 +72,20 @@ class TestImage:
         except FileNotFoundError:
             pass
 
+        try:
+            os.remove(export_label_path)
+        except FileNotFoundError:
+            pass
+
         yield
 
         try:
             os.remove(export_mask_path)
+        except FileNotFoundError:
+            pass
+
+        try:
+            os.remove(export_label_path)
         except FileNotFoundError:
             pass
 
@@ -348,6 +362,22 @@ class TestImage:
 
         assert image.mask.shape == image.image.shape
 
+    def test_create_labelling(self, valid_rgb_image_path):
+        """
+        Create a labelling from a valid image
+
+        :test_condition: The label matrix should be the same size as
+                         the original
+                         image.
+
+        :returns: None
+        """
+        image = Image(valid_rgb_image_path)
+
+        image.create_labelling()
+
+        assert image.landmark_matrix.shape == image.image.shape
+
     def test_export_mask(self, valid_rgb_image_path, export_mask_path):
         """
         Try to export the mask
@@ -361,6 +391,20 @@ class TestImage:
         image.export_mask(export_mask_path)
 
         assert os.path.exists(export_mask_path)
+
+    def test_export_labels(self, valid_rgb_image_path, export_label_path):
+        """
+        Try to export the labels
+
+        :test_condition: The image file should exist on the system.
+
+        :returns: None
+        """
+        image = Image(valid_rgb_image_path)
+
+        image.export_labels(export_label_path)
+
+        assert os.path.exists(export_label_path)
 
     def test_remove_small_components(self, valid_rgb_image_path,
                                      patch_data_many_components):
@@ -510,6 +554,28 @@ class TestPatch:
 
         assert patch.mask[position[0], position[1]] == 1
 
+    def test_add_landmark(self, patch_data_zeros, patch_data_many_components,
+                          patch_index):
+        """
+        Check that the given region is added
+
+        :test_condition: The landmarks at the given position is the given label
+
+
+        :returns: None
+        """
+        position = (patch_data_zeros.shape[0]//2,
+                    patch_data_zeros.shape[1]//2)
+
+        radius = 10
+
+        patch = Patch(patch_data_many_components, patch_index)
+        patch.mask = patch_data_zeros
+        patch.landmark_labels = patch_data_zeros
+        patch.add_landmark(position, radius, 21)
+
+        assert patch.landmark_labels[position[0], position[1]] == 21
+
     def test_remove_region(self, patch_data_ones, patch_data_many_components,
                            patch_index):
         """
@@ -531,6 +597,28 @@ class TestPatch:
         patch.remove_region(position, radius)
 
         assert patch.mask[position[0], position[1]] == 0
+
+    def test_remove_landmark(self, patch_data_ones, patch_data_many_components,
+                             patch_index):
+        """
+        Check that a given region is removed
+
+        :test_condition: The mask at the given position is 0
+
+
+        :returns: None
+        """
+        position = (patch_data_ones.shape[0]//2,
+                    patch_data_ones.shape[1]//2)
+
+        radius = 10
+
+        patch = Patch(patch_data_many_components, patch_index)
+        patch.mask = patch_data_ones
+
+        patch.remove_landmark(position, radius)
+
+        assert patch.landmark_labels[position[0], position[1]] == 0
 
     def test_check_displayable(self, patch_data_many_components, patch_index):
         """

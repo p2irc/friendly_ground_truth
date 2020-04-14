@@ -24,7 +24,11 @@ from friendly_ground_truth.view.icons.icon_strings import (add_region_icon,
                                                            prev_patch_icon,
                                                            flood_add_icon,
                                                            flood_remove_icon,
-                                                           no_root_icon)
+                                                           no_root_icon,
+                                                           add_tip_icon,
+                                                           add_branch_icon,
+                                                           add_cross_icon,
+                                                           remove_land_icon)
 
 import logging
 module_logger = logging.getLogger('friendly_gt.view')
@@ -44,6 +48,10 @@ class MainWindow(Frame):
     ID_TOOL_ZOOM = 107
     ID_TOOL_FLOOD_ADD = 108
     ID_TOOL_FLOOD_REMOVE = 109
+    ID_TOOL_ADD_TIP = 110
+    ID_TOOL_ADD_CROSS = 111
+    ID_TOOL_ADD_BRANCH = 112
+    ID_TOOL_REMOVE_LANDMARK = 113
 
     MAX_SCALE = 16
     MIN_SCALE = 0.25
@@ -227,6 +235,44 @@ class MainWindow(Frame):
         next_button.image = next_img
         next_button.pack(side=LEFT, padx=2, pady=2)
 
+        # Add Tip Button
+        add_tip_img = tk.PhotoImage(data=add_tip_icon)
+
+        add_tip_button = tk.Button(self.toolbar, image=add_tip_img,
+                                   relief=FLAT, command=self.on_add_tip_tool)
+        add_tip_button.image = add_tip_img
+        add_tip_button.pack(side=LEFT, padx=2, pady=2)
+
+        # Add Tip Button
+        add_cross_img = tk.PhotoImage(data=add_cross_icon)
+
+        add_cross_button = tk.Button(self.toolbar, image=add_cross_img,
+                                     relief=FLAT,
+                                     command=self.on_add_cross_tool)
+        add_cross_button.image = add_cross_img
+        add_cross_button.pack(side=LEFT, padx=2, pady=2)
+
+        # Add Tip Button
+        add_branch_img = tk.PhotoImage(data=add_branch_icon)
+
+        add_branch_button = tk.Button(self.toolbar, image=add_branch_img,
+                                      relief=FLAT,
+                                      command=self.on_add_branch_tool)
+        add_branch_button.image = add_branch_img
+        add_branch_button.pack(side=LEFT, padx=2, pady=2)
+
+        # Remove Landmark Button
+        remove_landmark_img = tk.PhotoImage(data=remove_land_icon)
+
+        remove_landmark_button = tk.Button(self.toolbar,
+                                           image=remove_landmark_img,
+                                           relief=FLAT,
+                                           command=self.
+                                           on_remove_landmark_tool)
+
+        remove_landmark_button.image = remove_landmark_img
+        remove_landmark_button.pack(side=LEFT, padx=2, pady=2)
+
         self.toolbar_buttons[self.ID_TOOL_THRESH] = thresh_button
         self.toolbar_buttons[self.ID_TOOL_ADD] = add_reg_button
         self.toolbar_buttons[self.ID_TOOL_REMOVE] = remove_reg_button
@@ -236,6 +282,11 @@ class MainWindow(Frame):
         self.toolbar_buttons[self.ID_TOOL_ZOOM] = zoom_button
         self.toolbar_buttons[self.ID_TOOL_FLOOD_ADD] = flood_add_button
         self.toolbar_buttons[self.ID_TOOL_FLOOD_REMOVE] = flood_remove_button
+        self.toolbar_buttons[self.ID_TOOL_ADD_TIP] = add_tip_button
+        self.toolbar_buttons[self.ID_TOOL_ADD_CROSS] = add_cross_button
+        self.toolbar_buttons[self.ID_TOOL_ADD_BRANCH] = add_branch_button
+        self.toolbar_buttons[self.ID_TOOL_REMOVE_LANDMARK] = \
+            remove_landmark_button
 
         self.toolbar.pack(side=TOP, fill=X)
 
@@ -291,6 +342,18 @@ class MainWindow(Frame):
 
         elif key == "l":
             self.on_flood_remove_tool()
+
+        elif key == "c":
+            self.on_add_cross_tool()
+
+        elif key == "v":
+            self.on_add_tip_tool()
+
+        elif key == "b":
+            self.on_add_branch_tool()
+
+        elif key == "n":
+            self.on_remove_landmark_tool()
 
         else:
             self.logger.debug("Keypress: {}".format(key))
@@ -381,6 +444,50 @@ class MainWindow(Frame):
         self.change_toolbar_state(self.ID_TOOL_ADD)
 
         self.controller.change_mode(self.ID_TOOL_ADD)
+
+    def on_add_tip_tool(self):
+        """
+        Called when the add tip brush tool is chosen
+
+        :returns: None
+        """
+
+        self.change_toolbar_state(self.ID_TOOL_ADD_TIP)
+
+        self.controller.change_mode(self.ID_TOOL_ADD_TIP)
+
+    def on_add_cross_tool(self):
+        """
+        Called when the add cross brush tool is chosen
+
+        :returns: None
+        """
+
+        self.change_toolbar_state(self.ID_TOOL_ADD_CROSS)
+
+        self.controller.change_mode(self.ID_TOOL_ADD_CROSS)
+
+    def on_add_branch_tool(self):
+        """
+        Called when the add branch brush tool is chosen
+
+        :returns: None
+        """
+
+        self.change_toolbar_state(self.ID_TOOL_ADD_BRANCH)
+
+        self.controller.change_mode(self.ID_TOOL_ADD_BRANCH)
+
+    def on_remove_landmark_tool(self):
+        """
+        Called when the remoive landmark brush tool is chosen
+
+        :returns: None
+        """
+
+        self.change_toolbar_state(self.ID_TOOL_REMOVE_LANDMARK)
+
+        self.controller.change_mode(self.ID_TOOL_REMOVE_LANDMARK)
 
     def on_remove_reg_tool(self):
         """
