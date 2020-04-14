@@ -115,6 +115,43 @@ class TestController:
         with pytest.raises(ValueError):
             controller.get_image_name_from_path(directory_path)
 
+    def test_get_landmark_name_from_path(self, setup,
+                                         display_current_patch_mock,
+                                         valid_rgb_image_path):
+        """
+        Test getting an image's name from its path
+
+        :test_condition: Should be able to get the correct image name from
+                         the given path
+
+        :returns: None
+        """
+        master = MagicMock()
+        controller = Controller(master)
+
+        name = controller.get_landmark_name_from_path(valid_rgb_image_path)
+
+        assert 'KyleS22_labels.npy' == name
+
+    def test_get_landmark_name_from_non_file_path(self, setup,
+                                                  display_current_patch_mock,
+                                                  directory_path):
+        """
+
+        Test geting an image name when a directory is given
+
+        :test_condition: Should raise a ValueError
+
+        :param directory_path: A path to a directory
+        :returns: None
+        """
+
+        master = MagicMock()
+        controller = Controller(master)
+
+        with pytest.raises(ValueError):
+            controller.get_landmark_name_from_path(directory_path)
+
     def test_next_patch_valid_index_displayable(self, setup,
                                                 display_current_patch_mock):
         """
@@ -634,6 +671,134 @@ class TestController:
 
         assert controller.current_mode == Mode.FLOOD_REMOVE
 
+    def test_change_mode_add_tip(self, setup, mocker,
+                                 display_current_patch_mock):
+        """
+        Test changing the mode to Add Tip
+
+        :test_condition: The current mode is set to Mode.ADD_TIP
+
+        :param setup: The setup fixture
+        :param mock_brush_radius: A fixture mocking the
+                                  MainWindow.set_brush_radius function
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_REGION
+
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.change_mode(MainWindow.ID_TOOL_ADD_TIP)
+
+        assert controller.current_mode == Mode.ADD_TIP
+
+    def test_change_mode_add_cross(self, setup, mocker,
+                                   display_current_patch_mock):
+        """
+        Test changing the mode to Add Cross
+
+        :test_condition: The current mode is set to Mode.ADD_CROSS
+
+        :param setup: The setup fixture
+        :param mock_brush_radius: A fixture mocking the
+                                  MainWindow.set_brush_radius function
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_REGION
+
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.change_mode(MainWindow.ID_TOOL_ADD_CROSS)
+
+        assert controller.current_mode == Mode.ADD_CROSSING
+
+    def test_change_mode_add_branch(self, setup, mocker,
+                                    display_current_patch_mock):
+        """
+        Test changing the mode to Add Branch
+
+        :test_condition: The current mode is set to Mode.ADD_BRANCH
+
+        :param setup: The setup fixture
+        :param mock_brush_radius: A fixture mocking the
+                                  MainWindow.set_brush_radius function
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_REGION
+
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.change_mode(MainWindow.ID_TOOL_ADD_BRANCH)
+
+        assert controller.current_mode == Mode.ADD_BRANCH
+
+    def test_change_mode_remove_landmark(self, setup, mocker,
+                                         display_current_patch_mock):
+        """
+        Test changing the mode to Remove Landmark
+
+        :test_condition: The current mode is set to Mode.REMOVE_LANDMARK
+
+        :param setup: The setup fixture
+        :param mock_brush_radius: A fixture mocking the
+                                  MainWindow.set_brush_radius function
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_REGION
+
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.change_mode(MainWindow.ID_TOOL_REMOVE_LANDMARK)
+
+        assert controller.current_mode == Mode.REMOVE_LANDMARK
+
     def test_change_mode_invalid(self, setup, mocker):
         """
         Test changing the mode to an invalid mode
@@ -863,6 +1028,98 @@ class TestController:
         controller.handle_mouse_wheel(-1)
 
         spy.assert_called_once_with(-1)
+
+    def test_handle_mouse_wheel_add_tip(self, setup, mocker,
+                                        display_current_patch_mock):
+        """
+        Test when the mouse wheel function is called and the current mode is
+        Mode.ADD_TIP
+
+        :test_condition: The adjust_add_tip_brush function is called
+                         and the function returns True
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_TIP
+
+        spy = mocker.spy(controller, 'adjust_add_tip_brush')
+
+        result = controller.handle_mouse_wheel(-1)
+
+        spy.assert_called_once_with(-1)
+        assert True is result
+
+    def test_handle_mouse_wheel_add_cross(self, setup, mocker,
+                                          display_current_patch_mock):
+        """
+        Test when the mouse wheel function is called and the current mode is
+        Mode.ADD_CROSSING
+
+        :test_condition: The adjust_add_crossing_brush function is called
+                         and the function returns True
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_CROSSING
+
+        spy = mocker.spy(controller, 'adjust_add_crossing_brush')
+
+        result = controller.handle_mouse_wheel(-1)
+
+        spy.assert_called_once_with(-1)
+        assert True is result
+
+    def test_handle_mouse_wheel_add_branch(self, setup, mocker,
+                                           display_current_patch_mock):
+        """
+        Test when the mouse wheel function is called and the current mode is
+        Mode.ADD_BRANCH
+
+        :test_condition: The adjust_add_branch_brush function is called
+                         and the function returns True
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_BRANCH
+
+        spy = mocker.spy(controller, 'adjust_add_branch_brush')
+
+        result = controller.handle_mouse_wheel(-1)
+
+        spy.assert_called_once_with(-1)
+        assert True is result
+
+    def test_handle_mouse_wheel_remove_landmark(self, setup, mocker,
+                                                display_current_patch_mock):
+        """
+        Test when the mouse wheel function is called and the current mode is
+        Mode.REMOVE_LANDMARK
+
+        :test_condition: The adjust_remove_landmark_brush function is called
+                         and the function returns True
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.REMOVE_LANDMARK
+
+        spy = mocker.spy(controller, 'adjust_remove_landmark_brush')
+
+        result = controller.handle_mouse_wheel(-1)
+
+        spy.assert_called_once_with(-1)
+        assert True is result
 
     def test_handle_mouse_wheel_invalid(self, setup,
                                         display_current_patch_mock):
@@ -1224,6 +1481,165 @@ class TestController:
 
         mock_patch.flood_remove_region.assert_called_with(position, tolerance)
 
+    def test_handle_left_click_add_tip(self, setup,
+                                       display_current_patch_mock):
+        """
+        Test when the left mouse button is clicked and the current mode is
+        Mode.ADD_TIP
+
+        :test_condition: The patch.add_landmark_function is
+                         called with the given
+                         position and the current add_tip_radius, and
+                         returns True
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_TIP
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
+
+        mock_patch = MagicMock()
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        position = (1, 2)
+        radius = controller.add_tip_radius
+
+        result = controller.handle_left_click(position)
+
+        mock_patch.add_landmark.assert_called_with(position, radius,
+                                                   mock_image.TIP_LABEL)
+        assert True is result
+
+    def test_handle_left_click_add_cross(self, setup,
+                                         display_current_patch_mock):
+        """
+        Test when the left mouse button is clicked and the current mode is
+        Mode.ADD_CROSSING
+
+        :test_condition: The patch.add_landmark_function is called
+                         with the given
+                         position and the current add_cross_radius, and
+                         returns True
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_CROSSING
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
+
+        mock_patch = MagicMock()
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        position = (1, 2)
+        radius = controller.add_cross_radius
+
+        result = controller.handle_left_click(position)
+
+        mock_patch.add_landmark.assert_called_with(position, radius,
+                                                   mock_image.CROSS_LABEL)
+        assert True is result
+
+    def test_handle_left_click_add_branch(self, setup,
+                                          display_current_patch_mock):
+        """
+        Test when the left mouse button is clicked and the current mode is
+        Mode.ADD_BRANCH
+
+        :test_condition: The patch.add_landmark_function is called with
+                         the given
+                         position and the current add_branch_radius, and
+                         returns True
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_BRANCH
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
+
+        mock_patch = MagicMock()
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        position = (1, 2)
+        radius = controller.add_branch_radius
+
+        result = controller.handle_left_click(position)
+
+        mock_patch.add_landmark.assert_called_with(position, radius,
+                                                   mock_image.BRANCH_LABEL)
+        assert True is result
+
+    def test_handle_left_click_remove_landmark(self, setup,
+                                               display_current_patch_mock):
+        """
+        Test when the left mouse button is clicked and the current mode is
+        Mode.REMOVE_LANDMARK
+
+        :test_condition: The patch.remove_landmark_function is called with the
+                         given
+                         position and the current remove_landmark_radius, and
+                         returns True
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.REMOVE_LANDMARK
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
+
+        mock_patch = MagicMock()
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        position = (1, 2)
+        radius = controller.remove_landmark_radius
+
+        result = controller.handle_left_click(position)
+
+        mock_patch.remove_landmark.assert_called_with(position, radius)
+        assert True is result
+
     def test_handle_left_click_invalid_mode(self, setup,
                                             display_current_patch_mock):
         """
@@ -1425,6 +1841,163 @@ class TestController:
 
         result = controller.handle_motion(position)
 
+        assert True is result
+
+    def test_handle_motion_add_tip(self, setup, display_current_patch_mock):
+        """
+        Test when the mouse is moved and the current mode is Mode.ADD_TIP
+
+        :test_condition: The patch add_landmark function is called with the
+                         given
+                         position and the current add_tip_radius
+                         and returns True
+
+        :param setup: The setip fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_TIP
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
+
+        mock_patch = MagicMock()
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        position = (1.0, 2.0)
+        radius = (controller.add_tip_radius /
+                  controller.main_window.image_scale)
+
+        result = controller.handle_motion(position)
+
+        mock_patch.add_landmark.assert_called_with(position, radius,
+                                                   mock_image.TIP_LABEL)
+        assert True is result
+
+    def test_handle_motion_add_cross(self, setup, display_current_patch_mock):
+        """
+        Test when the mouse is moved and the current mode is Mode.ADD_CROSS
+
+        :test_condition: The patch add_landmark function is called with the
+                         given
+                         position and the current add_cross_radius
+                         and returns True
+
+        :param setup: The setip fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_CROSSING
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
+
+        mock_patch = MagicMock()
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        position = (1.0, 2.0)
+        radius = (controller.add_cross_radius /
+                  controller.main_window.image_scale)
+
+        result = controller.handle_motion(position)
+
+        mock_patch.add_landmark.assert_called_with(position, radius,
+                                                   mock_image.CROSS_LABEL)
+        assert True is result
+
+    def test_handle_motion_add_branch(self, setup, display_current_patch_mock):
+        """
+        Test when the mouse is moved and the current mode is Mode.ADD_BRANCH
+
+        :test_condition: The patch add_landmark function is called with the
+                         given
+                         position and the current add_branch_radius
+                         and returns True
+
+        :param setup: The setip fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_BRANCH
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
+
+        mock_patch = MagicMock()
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        position = (1.0, 2.0)
+        radius = (controller.add_branch_radius /
+                  controller.main_window.image_scale)
+
+        result = controller.handle_motion(position)
+
+        mock_patch.add_landmark.assert_called_with(position, radius,
+                                                   mock_image.BRANCH_LABEL)
+        assert True is result
+
+    def test_handle_motion_remove_landmark(self, setup,
+                                           display_current_patch_mock):
+        """
+        Test when the mouse is moved and the current mode is
+        Mode.REMOVE_LANDMARK
+
+        :test_condition: The patch remove_landmark function is called with
+                         the given
+                         position and the current remove_landmark_radius
+                         and returns True
+
+        :param setup: The setip fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.REMOVE_LANDMARK
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
+
+        mock_patch = MagicMock()
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        position = (1.0, 2.0)
+        radius = (controller.remove_landmark_radius /
+                  controller.main_window.image_scale)
+
+        result = controller.handle_motion(position)
+
+        mock_patch.remove_landmark.assert_called_with(position, radius)
         assert True is result
 
     def test_handle_motion_invalid_mode(self, setup,
@@ -1922,3 +2495,157 @@ class TestController:
         controller.image = MagicMock()
 
         assert controller.handle_zoom(0) is False
+
+    def test_adjust_add_tip_brush_positive_rot(self, setup):
+        """
+        Test when the mouse wheel has a positive rotation in Mode.ADD_TIP
+
+        :test_condition: The add_tip_radius is increased by 1
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+
+        old_add_radius = controller.add_tip_radius
+
+        controller.adjust_add_tip_brush(1)
+
+        assert controller.add_tip_radius != old_add_radius
+        assert (controller.add_tip_radius - 1) == old_add_radius
+
+    def test_adjust_add_tip_brush_negative_rot(self, setup):
+        """
+        Test when the mouse wheel has a negative rotation in Mode.ADD_TIP
+
+        :test_condition: The add_tip_radius is decreased by 1
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+
+        old_add_radius = controller.add_tip_radius
+
+        controller.adjust_add_tip_brush(-1)
+
+        assert controller.add_tip_radius != old_add_radius
+        assert (controller.add_tip_radius + 1) == old_add_radius
+
+    def test_adjust_add_cross_brush_positive_rot(self, setup):
+        """
+        Test when the mouse wheel has a positive rotation in Mode.ADD_CROSS
+
+        :test_condition: The add_cross_radius is increased by 1
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+
+        old_add_radius = controller.add_cross_radius
+
+        controller.adjust_add_crossing_brush(1)
+
+        assert controller.add_cross_radius != old_add_radius
+        assert (controller.add_cross_radius - 1) == old_add_radius
+
+    def test_adjust_add_cross_brush_negative_rot(self, setup):
+        """
+        Test when the mouse wheel has a negative rotation in Mode.ADD_CROSSING
+
+        :test_condition: The add_cross_radius is decreased by 1
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+
+        old_add_radius = controller.add_cross_radius
+
+        controller.adjust_add_crossing_brush(-1)
+
+        assert controller.add_cross_radius != old_add_radius
+        assert (controller.add_cross_radius + 1) == old_add_radius
+
+    def test_adjust_add_branch_brush_positive_rot(self, setup):
+        """
+        Test when the mouse wheel has a positive rotation in Mode.ADD_BRANCH
+
+        :test_condition: The add_branch_radius is increased by 1
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+
+        old_add_radius = controller.add_branch_radius
+
+        controller.adjust_add_branch_brush(1)
+
+        assert controller.add_branch_radius != old_add_radius
+        assert (controller.add_branch_radius - 1) == old_add_radius
+
+    def test_adjust_add_branch_brush_negative_rot(self, setup):
+        """
+        Test when the mouse wheel has a negative rotation in Mode.ADD_BRANCH
+
+        :test_condition: The add_branch_radius is decreased by 1
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+
+        old_add_radius = controller.add_branch_radius
+
+        controller.adjust_add_branch_brush(-1)
+
+        assert controller.add_branch_radius != old_add_radius
+        assert (controller.add_branch_radius + 1) == old_add_radius
+
+    def test_adjust_remove_landmark_brush_positive_rot(self, setup):
+        """
+        Test when the mouse wheel has a positive rotation
+        in Mode.REMOVE_LANDMARK
+
+        :test_condition: The remove_landmark_radius is increased by 1
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+
+        old_add_radius = controller.remove_landmark_radius
+
+        controller.adjust_remove_landmark_brush(1)
+
+        assert controller.remove_landmark_radius != old_add_radius
+        assert (controller.remove_landmark_radius - 1) == old_add_radius
+
+    def test_adjust_remove_landmark_brush_negative_rot(self, setup):
+        """
+        Test when the mouse wheel has a negative rotation in
+        Mode.REMOVE_LANDMARK
+
+        :test_condition: The remove_landmark_radius is decreased by 1
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+
+        old_add_radius = controller.remove_landmark_radius
+
+        controller.adjust_remove_landmark_brush(-1)
+
+        assert controller.remove_landmark_radius != old_add_radius
+        assert (controller.remove_landmark_radius + 1) == old_add_radius

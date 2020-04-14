@@ -11,7 +11,7 @@ Description: Contains the model elements for the application
 import logging
 import numpy as np
 
-from skimage import io, img_as_float, img_as_ubyte, img_as_uint
+from skimage import io, img_as_float, img_as_uint, img_as_ubyte
 from skimage.util.shape import view_as_blocks
 from skimage.filters import threshold_otsu
 from skimage import color
@@ -25,6 +25,11 @@ class Image():
     """
     Represents a loaded image
     """
+
+    BG_LABEL = 0
+    TIP_LABEL = 1
+    BRANCH_LABEL = 2
+    CROSS_LABEL = 3
 
     def __init__(self, path):
         """
@@ -149,6 +154,35 @@ class Image():
 
         self.mask = mask[:self.image.shape[0], :self.image.shape[1]]
 
+    def create_labelling(self):
+        """
+        Take the labellings from all patches and combine them into one matrix
+
+        :returns: None
+        """
+
+        labels = np.zeros(self.padded_shape, dtype=np.uint8)
+
+        col_num = 0
+        row_num = 0
+
+        for patch in self.patches:
+
+            r, c = patch.patch_index
+            r = r * patch.patch.shape[0]
+            c = c * patch.patch.shape[1]
+            labels[r:r+patch.patch.shape[0],
+                   c:c+patch.patch.shape[1]] += patch.landmark_labels
+
+            col_num += 1
+
+            if col_num == self.num_patches:
+                col_num = 0
+                row_num += 1
+
+        self.landmark_matrix = labels[:self.image.shape[0],
+                                      :self.image.shape[1]]
+
     def export_mask(self, pathname):
         """
         Export the patch masks as a whole image mask
@@ -157,9 +191,21 @@ class Image():
         :returns: None
         """
         self.create_mask()
-        print(pathname)
+
         self.remove_small_components()
         io.imsave(pathname, img_as_uint(self.mask))
+
+    def export_labels(self, pathname):
+        """
+        Export the labelling matrix
+
+        :param pathname: The path to the labelling matrix file
+        :returns: None
+        """
+
+        self.create_labelling()
+
+        np.save(pathname, self.landmark_matrix)
 
     def remove_small_components(self):
         """
@@ -197,6 +243,8 @@ class Patch():
         self.logger = logging.getLogger('friendly_gt.model.Patch')
         self.patch = patch
         self.mask = np.zeros(self.patch.shape, dtype=bool)  # create empty mask
+        self.landmark_labels = np.zeros(self.patch.shape, dtype=np.uint8)
+
         self.patch_index = patch_index
 
         self.thresh = threshold_otsu(self.patch)
@@ -242,24 +290,13 @@ class Patch():
                         binary mask on top.
         """
 
-        alpha = 0.6
+        labeling = np.copy(self.landmark_labels)
+        labeling += self.mask
 
-        color_mask = np.zeros((self.patch.shape[0], self.patch.shape[1], 3),
-                              dtype=np.float64)
+        color_mask = color.label2rgb(labeling, image=self.patch, colors=['red',
+                                     'green', 'orange', 'blue'], bg_label=0)
 
-        color_mask[:, :, 0] = self.mask
-
-        img_color = np.dstack((self.patch, self.patch, self.patch))
-        img_hsv = color.rgb2hsv(img_color)
-        color_mask_hsv = color.rgb2hsv(color_mask)
-
-        img_hsv[:, :, 0] = color_mask_hsv[:, :, 0]
-        img_hsv[:, :, 1] = color_mask_hsv[:, :, 1] * alpha
-
-        img_masked = color.hsv2rgb(img_hsv)
-        img_masked = img_as_ubyte(img_masked)
-
-        self.overlay_image = img_masked
+        self.overlay_image = img_as_ubyte(color_mask)
 
     def clear_mask(self):
         """
@@ -271,6 +308,38 @@ class Patch():
 
         self.mask = np.zeros(self.patch.shape, dtype=bool)
         self.thresh = 1
+
+    def add_landmark(self, position, radius, label):
+        """
+        Label an area with the given label
+
+        :param position: The position to add to the labelling
+        :param radius: The radius
+        :param label: The class label for the pixels to be given
+        :returns: None
+        """
+        rr, cc = circle(position[1], position[0], radius)
+
+        self.landmark_labels[rr, cc] = label
+
+        self.landmark_labels[self.mask == 0] = 0
+
+        self.overlay_mask()
+
+    def remove_landmark(self, position, radius):
+        """
+        Un-label (label as 0) the pixels in the given region
+
+        :param position: The position to un-label
+        :param radius: The radius to un-label pixels in
+        :returns: None
+        """
+
+        rr, cc = circle(position[1], position[0], radius)
+
+        self.landmark_labels[rr, cc] = 0
+
+        self.overlay_mask()
 
     def add_region(self, position, radius):
         """
