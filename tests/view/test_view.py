@@ -12,7 +12,8 @@ import pytest
 
 from mock import MagicMock  # , PropertyMock
 
-from friendly_ground_truth.view.tk_view import MainWindow, AboutDialog
+from friendly_ground_truth.view.tk_view import (MainWindow, AboutDialog,
+                                                KeyboardShortcutDialog)
 
 
 class TestView():
@@ -602,6 +603,26 @@ class TestView():
 
         mock_dialog.assert_called()
 
+    def test_on_keyboard_shortcut(self, setup, mocker):
+        """
+        Test when the keyboard shortcuts button is pressed
+
+        :test_Condition: A dialog box is created
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        mock_dialog = mocker.patch("friendly_ground_truth.view."
+                                   "tk_view.KeyboardShortcutDialog")
+
+        window.on_keyboard_shortcuts()
+
+        mock_dialog.assert_called()
+
     def test_change_toolbar_state(self, setup, mocker):
         """
         Test changing the toolbar state
@@ -1157,3 +1178,20 @@ class TestAboutDialog():
         dialog.on_bug_click(MagicMock())
 
         web_mock.assert_called()
+
+
+class TestKeyboardShortcuts():
+
+    def test_init(self, mocker):
+        """
+        Test creating the dialog
+
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Toplevel')
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.PhotoImage')
+        dialog = KeyboardShortcutDialog()
+
+        assert dialog is not None
