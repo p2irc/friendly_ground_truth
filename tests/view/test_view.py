@@ -1098,7 +1098,8 @@ class TestAboutDialog():
         mocker.patch("friendly_ground_truth.version_info"
                      ".VersionInfo.check_newer_version",
                      return_value=True)
-
+        mocker.patch("friendly_ground_truth.version_info.VersionInfo."
+                     "get_newest_release_info")
         mocker.patch('tkinter.Label')
 
         dialog = AboutDialog()
@@ -1122,7 +1123,8 @@ class TestAboutDialog():
         mocker.patch("friendly_ground_truth.version_info"
                      ".VersionInfo.check_newer_version",
                      return_value=True)
-
+        mocker.patch("friendly_ground_truth.version_info.VersionInfo."
+                     "get_newest_release_info")
         mocker.patch('tkinter.Label')
 
         dialog = AboutDialog()
@@ -1145,8 +1147,9 @@ class TestAboutDialog():
                      "VersionInfo.check_for_update")
         mocker.patch("friendly_ground_truth.version_info"
                      ".VersionInfo.check_newer_version",
-                     return_value=True)
-
+                     return_value=False)
+        mocker.patch("friendly_ground_truth.version_info.VersionInfo."
+                     "get_newest_release_info")
         mocker.patch('tkinter.Label')
 
         dialog = AboutDialog()
