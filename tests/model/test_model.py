@@ -20,6 +20,7 @@ from skimage.draw import circle
 
 from friendly_ground_truth.model.model import Image, Patch
 
+from mock import MagicMock
 
 class TestImage:
     """
@@ -182,6 +183,33 @@ class TestImage:
 
         with pytest.raises(ValueError):
             image.create_patches(image_data, num_patches)
+
+    def test_create_patches_progress(self, valid_rgb_image_path,
+                                     num_patches, test_image_data, mocker):
+        """
+        Test creating patches with a progressbar
+
+        :param valid_rgb_image_path: Path to an image
+        :param num_patches: Number of patches
+        :returns: None
+        """
+        prog_func = MagicMock()
+
+        NUM_PATCHES = 10
+
+        image = Image(valid_rgb_image_path, progress_update_func=prog_func)
+
+        if test_image_data.shape[1] % NUM_PATCHES != 0:
+            pad_x = (0, (NUM_PATCHES -
+                         (test_image_data.shape[0] % NUM_PATCHES)))
+            pad_y = (0, 0)
+            img = np.pad(test_image_data, (pad_x, pad_y), 'constant',
+                         constant_values=(0, 0))
+        else:
+            img = test_image_data
+
+        image.create_patches(img, NUM_PATCHES)
+        prog_func.assert_called()
 
     def test_create_patches_multi_channel_image(self, num_patches,
                                                 valid_rgb_image_path,

@@ -9,9 +9,13 @@ Description: Tkinter Version of the GUI
 
 """
 import tkinter as tk
+import tkinter.messagebox
+
 
 from tkinter import LEFT, TOP, X, FLAT, RAISED, SUNKEN, ALL
 from tkinter import Frame
+from tkinter import ttk
+
 
 from PIL import Image, ImageTk
 from sys import platform
@@ -29,6 +33,10 @@ from friendly_ground_truth.view.icons.icon_strings import (add_region_icon,
                                                            add_branch_icon,
                                                            add_cross_icon,
                                                            remove_land_icon)
+
+from friendly_ground_truth.version_info import VersionInfo
+
+import webbrowser
 
 import logging
 module_logger = logging.getLogger('friendly_gt.view')
@@ -74,9 +82,11 @@ class MainWindow(Frame):
         self.flood_cursor = False
         self.brush_cursor = None
 
+        self.can_draw = True
+
         self.previous_position = (0, 0)
 
-        master.geometry("250x150+300+300")
+        master.geometry("500x300+300+300")
         master.title("Friendly Ground Truth")
         # Initialize the logger
         self.logger = logging.getLogger('friendly_gt.view.MainWindow')
@@ -119,9 +129,9 @@ class MainWindow(Frame):
         """
 
         self.canvas = tk.Canvas(self, cursor='none', width=1000, height=1000)
-        self.canvas.bind_all("<Enter>", self.on_enter_canvas)
-        self.canvas.bind_all("<Leave>", self.on_leave_canvas)
-        self.canvas.bind_all("<Motion>", self.on_motion)
+        self.canvas.bind("<Enter>", self.on_enter_canvas)
+        self.canvas.bind("<Leave>", self.on_leave_canvas)
+        self.canvas.bind("<Motion>", self.on_motion)
 
     def create_menubar(self):
         """
@@ -134,9 +144,28 @@ class MainWindow(Frame):
 
         self.create_file_menu()
 
+        self.create_help_menu()
+
         self.create_toolbar()
 
         self.master.config(menu=self.menubar)
+
+    def create_help_menu(self):
+        """
+        Create the help menu bar
+
+        :returns: None
+        """
+
+        self.helpmenu = tk.Menu(self.menubar, tearoff=0)
+
+        self.helpmenu.add_command(label="About",
+                                  command=self.on_about)
+
+        self.helpmenu.add_command(label="Keyboard Shortcuts",
+                                  command=self.on_keyboard_shortcuts)
+
+        self.menubar.add_cascade(label="Help", menu=self.helpmenu)
 
     def create_file_menu(self):
         """
@@ -292,6 +321,23 @@ class MainWindow(Frame):
 
         self.pack()
 
+    def on_about(self):
+        """
+        Display the about dialog
+
+        :param event: The event
+        :returns: None
+        """
+        AboutDialog()
+
+    def on_keyboard_shortcuts(self):
+        """
+        Display the keyboard shortcut dialog
+
+        :returns: None
+        """
+        KeyboardShortcutDialog()
+
     def on_left(self, event):
         """
         Called when the left arrow key is pressed
@@ -364,8 +410,31 @@ class MainWindow(Frame):
 
         :returns: None
         """
+
         self.controller.load_new_image()
         self.old_img = None
+
+    def start_progressbar(self, num_patches):
+        """
+        Start displaying a progressbar
+
+        :returns: None
+        """
+        self.prog_popup = tk.Toplevel()
+
+        self.prog_popup.geometry("100x50+500+400")
+
+        tk.Label(self.prog_popup, text="Image Loading").grid(row=0, column=0)
+
+        self.load_progress = 0
+        self.load_prog_var = tk.DoubleVar()
+        self.load_prog_bar = ttk.Progressbar(self.prog_popup,
+                                             variable=self.load_prog_var,
+                                             maximum=100)
+        self.load_prog_bar.grid(row=1, column=0)
+
+        self.progress_step = float(100.0/num_patches)
+        self.prog_popup.pack_slaves()
 
     def show_image(self, img):
         """
@@ -623,7 +692,9 @@ class MainWindow(Frame):
         :returns: None
         """
         self.previous_position = (event.x, event.y)
-        self.controller.handle_left_click((event.x, event.y))
+        self.logger.debug(self.can_draw)
+        if self.can_draw:
+            self.controller.handle_left_click((event.x, event.y))
 
     def set_brush_radius(self, radius):
         """
@@ -642,7 +713,7 @@ class MainWindow(Frame):
         :param event: The event
         :returns: None
         """
-
+        self.can_draw = True
         if self.zoom_cursor:
             self.canvas.config(cursor='sizing')
 
@@ -659,6 +730,205 @@ class MainWindow(Frame):
         :param event: The event
         :returns: none
         """
-
         # Toto, I don't think we're in canvas anymore...
-        pass
+        self.can_draw = False
+
+
+class AboutDialog(tk.Toplevel):
+
+    def __init__(self):
+        self.base = tk.Toplevel()
+        self.base.title("About")
+
+        version_info = VersionInfo()
+        current_version = version_info.get_version_string()
+
+        latest = version_info.check_for_update()
+
+        version_text = ("You are currently using version " +
+                        current_version + " ")
+
+        version_text += latest
+
+        self.version_link = ("https://github.com/KyleS22/friendly_ground" +
+                             "_truth/releases/latest")
+
+        manual_text = " A user manual can be found at: "
+        self.manual_link = ("https://github.com/KyleS22/friendly_ground" +
+                            "_truth/wiki/User-Manual")
+
+        bug_text = "Found a bug?  Please report it at:"
+        self.bug_link = ("https://github.com/KyleS22/friendly_ground_truth" +
+                         "/issues")
+
+        self.version_label = tk.Label(self.base, text=version_text)
+        self.version_label.pack(pady=15)
+
+        if version_info.check_newer_version(version_info.
+                                            get_newest_release_info()):
+            self.version_link_label = tk.Label(self.base,
+                                               text=self.version_link,
+                                               fg="blue", cursor="hand2")
+            self.version_link_label.pack(pady=15)
+            self.version_link_label.bind("<Button-1>", self.on_version_click)
+
+        self.manual_label = tk.Label(self.base, text=manual_text)
+        self.manual_label.pack(pady=15)
+
+        self.manual_link_label = tk.Label(self.base, text=self.manual_link,
+                                          fg="blue", cursor="hand2")
+        self.manual_link_label.pack(pady=15)
+        self.manual_link_label.bind("<Button-1>", self.on_manual_click)
+
+        self.bug_label = tk.Label(self.base, text=bug_text)
+        self.bug_label.pack(pady=15)
+
+        self.bug_link_label = tk.Label(self.base, text=self.bug_link,
+                                       fg="blue", cursor="hand2")
+        self.bug_link_label.pack(pady=15)
+        self.bug_link_label.bind("<Button-1>", self.on_bug_click)
+
+    def on_version_click(self, event):
+        webbrowser.open(self.version_link)
+
+    def on_manual_click(self, event):
+        webbrowser.open(self.manual_link)
+
+    def on_bug_click(self, event):
+        webbrowser.open(self.bug_link)
+
+
+class KeyboardShortcutDialog(tk.Toplevel):
+
+    def __init__(self):
+        self.base = tk.Toplevel()
+        self.base.title("Keyboard Shortcuts")
+
+        thresh_img = tk.PhotoImage(data=threshold_icon)
+        thresh_img_label = tk.Label(self.base, image=thresh_img)
+        thresh_img_label.image = thresh_img
+        thresh_img_label.grid(row=0, column=0)
+
+        thresh_label = tk.Label(self.base, text="Threshold Tool (t)")
+        thresh_label.grid(row=0, column=1)
+
+        space_label = tk.Label(self.base, text="    ")
+        space_label.grid(row=0, column=2)
+
+        add_reg_img = tk.PhotoImage(data=add_region_icon)
+        add_reg_img_label = tk.Label(self.base, image=add_reg_img)
+        add_reg_img_label.image = add_reg_img
+        add_reg_img_label.grid(row=0, column=3)
+
+        add_reg_label = tk.Label(self.base, text="Add Region Tool (a)")
+        add_reg_label.grid(row=0, column=4)
+
+        space_label = tk.Label(self.base, text="    ")
+        space_label.grid(row=0, column=5)
+
+        rem_reg_img = tk.PhotoImage(data=remove_region_icon)
+        rem_reg_img_label = tk.Label(self.base, image=rem_reg_img)
+        rem_reg_img_label.image = rem_reg_img
+        rem_reg_img_label.grid(row=0, column=6)
+
+        rem_reg_label = tk.Label(self.base, text="Remove Region Tool (r)")
+        rem_reg_label.grid(row=0, column=7)
+
+        zoom_img = tk.PhotoImage(data=zoom_icon)
+        zoom_img_label = tk.Label(self.base, image=zoom_img)
+        zoom_img_label.image = zoom_img
+        zoom_img_label.grid(row=1, column=0)
+
+        zoom_label = tk.Label(self.base, text="Zoom Tool (z)")
+        zoom_label.grid(row=1, column=1)
+
+        space_label = tk.Label(self.base, text="    ")
+        space_label.grid(row=1, column=2)
+
+        flood_add_reg_img = tk.PhotoImage(data=flood_add_icon)
+        flood_add_reg_img_label = tk.Label(self.base, image=flood_add_reg_img)
+        flood_add_reg_img_label.image = flood_add_reg_img
+        flood_add_reg_img_label.grid(row=1, column=3)
+
+        flood_add_reg_label = tk.Label(self.base, text="Flood Add Tool (f)")
+        flood_add_reg_label.grid(row=1, column=4)
+
+        space_label = tk.Label(self.base, text="    ")
+        space_label.grid(row=1, column=5)
+
+        flood_rem_reg_img = tk.PhotoImage(data=flood_remove_icon)
+        flood_rem_reg_img_label = tk.Label(self.base, image=flood_rem_reg_img)
+        flood_rem_reg_img_label.image = flood_rem_reg_img
+        flood_rem_reg_img_label.grid(row=1, column=6)
+
+        flood_rem_reg_label = tk.Label(self.base, text="Flood Remove Tool (l)")
+        flood_rem_reg_label.grid(row=1, column=7)
+
+        no_root_img = tk.PhotoImage(data=no_root_icon)
+        no_root_img_label = tk.Label(self.base, image=no_root_img)
+        no_root_img_label.image = no_root_img
+        no_root_img_label.grid(row=2, column=6)
+
+        no_root_label = tk.Label(self.base, text="No Root Tool (x)")
+        no_root_label.grid(row=2, column=7)
+
+        space_label = tk.Label(self.base, text="    ")
+        space_label.grid(row=2, column=5)
+
+        prev_img = tk.PhotoImage(data=prev_patch_icon)
+        prev_img_label = tk.Label(self.base, image=prev_img)
+        prev_img_label.image = prev_img
+        prev_img_label.grid(row=2, column=0)
+
+        prev_label = tk.Label(self.base, text="Previous Patch (Left-Arrow)")
+        prev_label.grid(row=2, column=1)
+
+        space_label = tk.Label(self.base, text="    ")
+        space_label.grid(row=2, column=2)
+
+        next_img = tk.PhotoImage(data=next_patch_icon)
+        next_img_label = tk.Label(self.base, image=next_img)
+        next_img_label.image = next_img
+        next_img_label.grid(row=2, column=3)
+
+        next_label = tk.Label(self.base, text="Next Patch (Right-Arrow)")
+        next_label.grid(row=2, column=4)
+
+        add_tip_img = tk.PhotoImage(data=add_tip_icon)
+        add_tip_img_label = tk.Label(self.base, image=add_tip_img)
+        add_tip_img_label.image = add_tip_img
+        add_tip_img_label.grid(row=3, column=6)
+
+        add_tip_label = tk.Label(self.base, text="Add Root Tip (v)")
+        add_tip_label.grid(row=3, column=7)
+
+        space_label = tk.Label(self.base, text="    ")
+        space_label.grid(row=3, column=5)
+
+        add_cross_img = tk.PhotoImage(data=add_cross_icon)
+        add_cross_img_label = tk.Label(self.base, image=add_cross_img)
+        add_cross_img_label.image = add_cross_img
+        add_cross_img_label.grid(row=3, column=0)
+
+        add_cross_label = tk.Label(self.base, text="Add Root Crossing (c)")
+        add_cross_label.grid(row=3, column=1)
+
+        space_label = tk.Label(self.base, text="    ")
+        space_label.grid(row=3, column=2)
+
+        add_branch_img = tk.PhotoImage(data=add_branch_icon)
+        add_branch_img_label = tk.Label(self.base, image=add_branch_img)
+        add_branch_img_label.image = add_branch_img
+        add_branch_img_label.grid(row=3, column=3)
+
+        add_branch_label = tk.Label(self.base, text="Add Root Branching (b)")
+        add_branch_label.grid(row=3, column=4)
+
+        remove_landmark_img = tk.PhotoImage(data=remove_land_icon)
+        remove_landmark_img_label = tk.Label(self.base,
+                                             image=remove_landmark_img)
+        remove_landmark_img_label.image = remove_landmark_img
+        remove_landmark_img_label.grid(row=4, column=0)
+
+        remove_landmark_label = tk.Label(self.base, text="Remove Landmark (n)")
+        remove_landmark_label.grid(row=4, column=1)

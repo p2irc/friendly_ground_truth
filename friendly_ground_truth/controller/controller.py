@@ -14,6 +14,12 @@ import tkinter.messagebox
 import logging
 import os
 
+import matplotlib.pyplot as plt
+import skimage.io as io
+import skimage.segmentation as segmentation
+import skimage.color as colour
+import numpy as np
+
 from friendly_ground_truth.view.tk_view import MainWindow
 from friendly_ground_truth.model.model import Image
 
@@ -92,7 +98,8 @@ class Controller:
         self.image_path = file_name
         self.logger.debug("File: {}".format(self.image_path))
         try:
-            self.image = Image(file_name)
+            self.main_window.start_progressbar(Image.NUM_PATCHES ** 2)
+            self.image = Image(file_name, self.update_progress_bar)
 
         except FileNotFoundError:
             self.logger.debug("There was a problem loading the image")
@@ -100,6 +107,20 @@ class Controller:
 
         self.current_patch = 0
         self.display_current_patch()
+
+    def update_progress_bar(self):
+        """
+        Update the progress bar popup
+
+        :returns: None
+        """
+
+        self.main_window.prog_popup.update()
+        self.main_window.load_progress += self.main_window.progress_step
+        self.main_window.load_prog_var.set(self.main_window.load_progress)
+
+        if self.main_window.load_progress >= Image.NUM_PATCHES ** 2:
+            self.main_window.prog_popup.destroy()
 
     def get_image_name_from_path(self, path):
         """
@@ -144,13 +165,14 @@ class Controller:
         image_name = self.get_image_name_from_path(self.image_path)
         labels_name = self.get_landmark_name_from_path(self.image_path)
 
-        pathname = os.path.join(dir_path, image_name)
-        label_pathname = os.path.join(dir_path, labels_name)
+        self.mask_pathname = os.path.join(dir_path, image_name)
+        self.label_pathname = os.path.join(dir_path, labels_name)
 
         try:
-            self.logger.debug("Saving mask to {}".format(pathname))
-            self.image.export_mask(pathname)
-            self.image.export_labels(label_pathname)
+            self.logger.debug("Saving mask to {}".format(self.mask_pathname))
+            self.image.export_mask(self.mask_pathname)
+            self.image.export_labels(self.label_pathname)
+
         except IOError:
             self.logger.error("Could not save file!")
             # TODO: display dialog
@@ -203,7 +225,36 @@ class Controller:
                 self.save_mask()
                 self.mask_saved = True
 
-                tkinter.messagebox.showinfo("Image Mask Saved!")
+                tkinter.messagebox.showinfo("Image Mask Saved!", "Image Mask"
+                                            " Saved!")
+
+            self.show_saved_preview()
+
+    def show_saved_preview(self):
+        """
+        Display a preview of the saved mask
+
+        :returns: None
+        """
+
+        img = io.imread(self.image_path)
+        landmarks = np.load(self.label_pathname)
+        mask = io.imread(self.mask_pathname)
+
+        rows = np.any(mask, axis=1)
+        cols = np.any(mask, axis=0)
+        rmin, rmax = np.where(rows)[0][[0, -1]]
+        cmin, cmax = np.where(cols)[0][[0, -1]]
+
+        overlay_img = colour.label2rgb(landmarks, img, bg_label=0,
+                                       colors=['red', 'green', 'blue'])
+
+        boundary_img = segmentation.mark_boundaries(overlay_img, mask)
+
+        boundary_img = boundary_img[rmin:rmax, cmin:cmax]
+
+        plt.imshow(boundary_img)
+        plt.show()
 
     def prev_patch(self):
         """
