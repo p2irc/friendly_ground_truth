@@ -13,6 +13,8 @@ import friendly_ground_truth.version_info as vi
 
 from friendly_ground_truth.version_info import VersionInfo
 
+from mock import MagicMock
+
 
 class TestVersionInfo:
 
@@ -261,3 +263,57 @@ class TestVersionInfo:
             vi.main(['x', version_string])
 
             assert e.value_code == 2
+
+    def test_get_newest_release_info(self, mocker):
+        """
+         Test getting the newest release info
+
+         :test_condition: Returns the version string
+         :returns: None
+         """
+
+        response_mock = MagicMock()
+        response_mock.json.return_value = {"name": "Release v0.1.1"}
+        mocker.patch('requests.get', return_value=response_mock)
+
+        info = VersionInfo()
+
+        assert "v0.1.1" == info.get_newest_release_info()
+
+    def test_check_for_update_true(self, mocker):
+        """
+        Test checking for updates
+
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        response_mock = MagicMock()
+        response_mock.json.return_value = {"name": "Release v0.1.1"}
+        mocker.patch('requests.get', return_value=response_mock)
+
+        info = VersionInfo()
+        mocker.patch.object(info, "check_newer_version", return_value=True)
+
+        result = info.check_for_update()
+
+        assert result == "There is a new version, v0.1.1."
+
+    def test_check_for_update_false(self, mocker):
+        """
+        Test checking for updates
+
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        response_mock = MagicMock()
+        response_mock.json.return_value = {"name": "Release v0.1.1"}
+        mocker.patch('requests.get', return_value=response_mock)
+
+        info = VersionInfo()
+        mocker.patch.object(info, "check_newer_version", return_value=False)
+
+        result = info.check_for_update()
+
+        assert result == "You are using the most current version. "

@@ -9,6 +9,8 @@ Description: Tkinter Version of the GUI
 
 """
 import tkinter as tk
+import tkinter.messagebox
+
 
 from tkinter import LEFT, TOP, X, FLAT, RAISED, SUNKEN, ALL
 from tkinter import Frame
@@ -29,6 +31,8 @@ from friendly_ground_truth.view.icons.icon_strings import (add_region_icon,
                                                            add_branch_icon,
                                                            add_cross_icon,
                                                            remove_land_icon)
+
+from friendly_ground_truth.version_info import VersionInfo
 
 import logging
 module_logger = logging.getLogger('friendly_gt.view')
@@ -134,9 +138,24 @@ class MainWindow(Frame):
 
         self.create_file_menu()
 
+        self.create_help_menu()
+
         self.create_toolbar()
 
         self.master.config(menu=self.menubar)
+
+    def create_help_menu(self):
+        """
+        Create the help menu bar
+
+        :returns: None
+        """
+
+        self.helpmenu = tk.Menu(self.menubar, tearoff=0)
+
+        self.helpmenu.add_command(label="About",
+                                  command=self.on_about)
+        self.menubar.add_cascade(label="Help", menu=self.helpmenu)
 
     def create_file_menu(self):
         """
@@ -291,6 +310,40 @@ class MainWindow(Frame):
         self.toolbar.pack(side=TOP, fill=X)
 
         self.pack()
+
+    def on_about(self):
+        """
+        Display the about dialog
+
+        :param event: The event
+        :returns: None
+        """
+
+        version_info = VersionInfo()
+        current_version = version_info.get_version_string()
+
+        latest = version_info.check_for_update()
+
+        dialog_title = "About"
+
+        dialog_text = ("You are currently using version " +
+                       current_version + " ")
+
+        dialog_text += latest
+
+        dialog_text += "\n\n"
+
+        dialog_text += (" A user manual can be found at " +
+                        "https://github.com/KyleS22/friendly_ground_truth/" +
+                        "wiki/User-Manual")
+
+        dialog_text += "\n\n"
+
+        dialog_text += ("Found a bug?  Please report it at " +
+                        "https://github.com/KyleS22/friendly_ground_truth/" +
+                        "issues")
+
+        tkinter.messagebox.showinfo(dialog_title, dialog_text)
 
     def on_left(self, event):
         """

@@ -10,6 +10,10 @@ Description: Version Info
 """
 import sys
 import re
+import requests
+
+REPO_URL = "https://api.github.com/repos/KyleS22/friendly_ground_truth/" + \
+           "releases/latest"
 
 
 class VersionInfo():
@@ -27,7 +31,6 @@ class VersionInfo():
     def check_newer_version(self, version_string):
         version_string = version_string.strip('v')
         parts = version_string.split(".")
-        print(parts)
         v_maj = int(parts[0])
         v_min = int(parts[1])
         v_patch = int(parts[2])
@@ -46,6 +49,23 @@ class VersionInfo():
                     return True
 
         return False
+
+    def get_newest_release_info(self):
+
+        response = requests.get(REPO_URL)
+        version = response.json()["name"]
+        version = version[version.index('v'):]
+
+        return version
+
+    def check_for_update(self):
+
+        latest = self.get_newest_release_info()
+
+        if self.check_newer_version(latest):
+            return "There is a new version, " + latest + "."
+        else:
+            return "You are using the most current version. "
 
 
 def main(args):

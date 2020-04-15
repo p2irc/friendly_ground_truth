@@ -582,7 +582,24 @@ class TestView():
 
         window.on_save_mask()
 
-        self.mock_controller.save_mask.assert_called()
+    def test_on_about(self, setup, mocker):
+        """
+        Test when the about button is pressed
+
+        :test_Condition: A dialog box is created
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        mock_dialog = mocker.patch("tkinter.messagebox.showinfo")
+
+        window.on_about()
+
+        mock_dialog.assert_called()
 
     def test_change_toolbar_state(self, setup, mocker):
         """
