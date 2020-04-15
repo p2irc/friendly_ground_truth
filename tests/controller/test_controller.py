@@ -13,6 +13,7 @@ import pytest
 import os
 import mock
 import tkinter.filedialog
+import numpy as np
 
 from mock import MagicMock, PropertyMock
 
@@ -274,6 +275,8 @@ class TestController:
 
         controller = Controller(MagicMock())
 
+        mocker.patch.object(controller, 'show_saved_preview')
+
         mock_patch = MagicMock()
         display_mock = PropertyMock(return_value=True)
 
@@ -311,6 +314,8 @@ class TestController:
         save_mask_patch = mocker.patch.object(Controller, 'save_mask')
 
         controller = Controller(MagicMock())
+
+        mocker.patch.object(controller, 'show_saved_preview')
 
         mock_patch = MagicMock()
         display_mock = PropertyMock(return_value=True)
@@ -2695,3 +2700,32 @@ class TestController:
 
         assert controller.remove_landmark_radius != old_add_radius
         assert (controller.remove_landmark_radius + 1) == old_add_radius
+
+    def test_show_saved_preview(self, setup, mocker):
+        """
+        Test showing the preview
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        mocker.patch('matplotlib.pyplot.imshow')
+        show_patch = mocker.patch('matplotlib.pyplot.show')
+        mocker.patch('skimage.io.imread')
+        mocker.patch('skimage.color.label2rgb')
+        mocker.patch('skimage.segmentation.mark_boundaries')
+
+        mask = np.random.randint(2, size=(10, 10))
+        rows = np.any(mask, axis=1)
+        mocker.patch('numpy.any', return_value=np.any(mask, axis=1))
+        mocker.patch('numpy.where', return_value=np.where(rows))
+        mocker.patch('numpy.load')
+
+        controller = Controller(MagicMock())
+        controller.image_path = MagicMock()
+        controller.label_pathname = MagicMock()
+        controller.mask_pathname = MagicMock()
+
+        controller.show_saved_preview()
+        show_patch.assert_called()

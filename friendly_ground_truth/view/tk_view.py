@@ -82,6 +82,8 @@ class MainWindow(Frame):
         self.flood_cursor = False
         self.brush_cursor = None
 
+        self.can_draw = True
+
         self.previous_position = (0, 0)
 
         master.geometry("500x300+300+300")
@@ -127,9 +129,9 @@ class MainWindow(Frame):
         """
 
         self.canvas = tk.Canvas(self, cursor='none', width=1000, height=1000)
-        self.canvas.bind_all("<Enter>", self.on_enter_canvas)
-        self.canvas.bind_all("<Leave>", self.on_leave_canvas)
-        self.canvas.bind_all("<Motion>", self.on_motion)
+        self.canvas.bind("<Enter>", self.on_enter_canvas)
+        self.canvas.bind("<Leave>", self.on_leave_canvas)
+        self.canvas.bind("<Motion>", self.on_motion)
 
     def create_menubar(self):
         """
@@ -690,7 +692,9 @@ class MainWindow(Frame):
         :returns: None
         """
         self.previous_position = (event.x, event.y)
-        self.controller.handle_left_click((event.x, event.y))
+        self.logger.debug(self.can_draw)
+        if self.can_draw:
+            self.controller.handle_left_click((event.x, event.y))
 
     def set_brush_radius(self, radius):
         """
@@ -709,7 +713,7 @@ class MainWindow(Frame):
         :param event: The event
         :returns: None
         """
-
+        self.can_draw = True
         if self.zoom_cursor:
             self.canvas.config(cursor='sizing')
 
@@ -726,9 +730,8 @@ class MainWindow(Frame):
         :param event: The event
         :returns: none
         """
-
         # Toto, I don't think we're in canvas anymore...
-        pass
+        self.can_draw = False
 
 
 class AboutDialog(tk.Toplevel):

@@ -1012,6 +1012,27 @@ class TestView():
 
         self.mock_controller.handle_left_click.called_with((21, 42))
 
+    def test_on_click_no_draw(self, setup, mocker):
+        """
+        Test on click
+
+        :test_condition: controller.handle_left_click() is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.x = 21
+        event.y = 42
+        window.can_draw = False
+
+        window.on_click(event)
+
+        self.mock_controller.handle_left_click.assert_not_called()
+
     def test_set_brush_radius(self, setup, mocker):
         """
         Test changing the brush radius
