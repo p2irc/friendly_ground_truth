@@ -316,4 +316,4 @@ class TestVersionInfo:
 
         result = info.check_for_update()
 
-        assert result == "You are using the most current version. "
+        assert result == "There are no updates."

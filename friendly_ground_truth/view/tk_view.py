@@ -34,6 +34,8 @@ from friendly_ground_truth.view.icons.icon_strings import (add_region_icon,
 
 from friendly_ground_truth.version_info import VersionInfo
 
+import webbrowser
+
 import logging
 module_logger = logging.getLogger('friendly_gt.view')
 
@@ -318,32 +320,7 @@ class MainWindow(Frame):
         :param event: The event
         :returns: None
         """
-
-        version_info = VersionInfo()
-        current_version = version_info.get_version_string()
-
-        latest = version_info.check_for_update()
-
-        dialog_title = "About"
-
-        dialog_text = ("You are currently using version " +
-                       current_version + " ")
-
-        dialog_text += latest
-
-        dialog_text += "\n\n"
-
-        dialog_text += (" A user manual can be found at " +
-                        "https://github.com/KyleS22/friendly_ground_truth/" +
-                        "wiki/User-Manual")
-
-        dialog_text += "\n\n"
-
-        dialog_text += ("Found a bug?  Please report it at " +
-                        "https://github.com/KyleS22/friendly_ground_truth/" +
-                        "issues")
-
-        tkinter.messagebox.showinfo(dialog_title, dialog_text)
+        AboutDialog()
 
     def on_left(self, event):
         """
@@ -715,3 +692,67 @@ class MainWindow(Frame):
 
         # Toto, I don't think we're in canvas anymore...
         pass
+
+
+class AboutDialog(tk.Toplevel):
+
+    def __init__(self):
+        self.base = tk.Toplevel()
+        self.base.title("About")
+
+        version_info = VersionInfo()
+        current_version = version_info.get_version_string()
+
+        latest = version_info.check_for_update()
+
+        version_text = ("You are currently using version " +
+                        current_version + " ")
+
+        version_text += latest
+
+        self.version_link = ("https://github.com/KyleS22/friendly_ground" +
+                             "_truth/releases/latest")
+
+        manual_text = " A user manual can be found at: "
+        self.manual_link = ("https://github.com/KyleS22/friendly_ground" +
+                            "_truth/wiki/User-Manual")
+
+        bug_text = "Found a bug?  Please report it at:"
+        self.bug_link = ("https://github.com/KyleS22/friendly_ground_truth" +
+                         "/issues")
+
+        self.version_label = tk.Label(self.base, text=version_text)
+        self.version_label.pack(pady=15)
+
+        if version_info.check_newer_version(version_info.
+                                            get_newest_release_info()):
+            self.version_link_label = tk.Label(self.base,
+                                               text=self.version_link,
+                                               fg="blue", cursor="hand2")
+            self.version_link_label.pack(pady=15)
+            self.version_link_label.bind("<Button-1>", self.on_version_click)
+
+        self.manual_label = tk.Label(self.base, text=manual_text)
+        self.manual_label.pack(pady=15)
+
+        self.manual_link_label = tk.Label(self.base, text=self.manual_link,
+                                          fg="blue", cursor="hand2")
+        self.manual_link_label.pack(pady=15)
+        self.manual_link_label.bind("<Button-1>", self.on_manual_click)
+
+        self.bug_label = tk.Label(self.base, text=bug_text)
+        self.bug_label.pack(pady=15)
+
+        self.bug_link_label = tk.Label(self.base, text=self.bug_link,
+                                       fg="blue", cursor="hand2")
+        self.bug_link_label.pack(pady=15)
+        self.bug_link_label.bind("<Button-1>", self.on_bug_click)
+
+    def on_version_click(self, event):
+        webbrowser.open(self.version_link)
+
+    def on_manual_click(self, event):
+        webbrowser.open(self.manual_link)
+
+    def on_bug_click(self, event):
+        webbrowser.open(self.bug_link)

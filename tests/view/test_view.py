@@ -12,7 +12,7 @@ import pytest
 
 from mock import MagicMock  # , PropertyMock
 
-from friendly_ground_truth.view.tk_view import MainWindow
+from friendly_ground_truth.view.tk_view import MainWindow, AboutDialog
 
 
 class TestView():
@@ -595,7 +595,8 @@ class TestView():
 
         window = MainWindow(self.mock_controller, MagicMock())
 
-        mock_dialog = mocker.patch("tkinter.messagebox.showinfo")
+        mock_dialog = mocker.patch("friendly_ground_truth.view."
+                                   "tk_view.AboutDialog")
 
         window.on_about()
 
@@ -1078,3 +1079,78 @@ class TestView():
         window = MainWindow(self.mock_controller, MagicMock())
 
         window.on_leave_canvas(MagicMock())
+
+
+class TestAboutDialog():
+
+    def test_on_version_click(self, mocker):
+        """
+        Test when the version link is clicked
+
+        :test_condition: webbrowser.open() is called
+        :param mocker: Mocker
+        :returns: None
+        """
+        web_mock = mocker.patch('webbrowser.open')
+        mocker.patch('tkinter.Toplevel')
+        mocker.patch("friendly_ground_truth.version_info."
+                     "VersionInfo.check_for_update")
+        mocker.patch("friendly_ground_truth.version_info"
+                     ".VersionInfo.check_newer_version",
+                     return_value=True)
+
+        mocker.patch('tkinter.Label')
+
+        dialog = AboutDialog()
+
+        dialog.on_version_click(MagicMock())
+
+        web_mock.assert_called()
+
+    def test_on_manual_click(self, mocker):
+        """
+        Test when the manual link is clicked
+
+        :test_condition: webbrowser.open() is called
+        :param mocker: Mocker
+        :returns: None
+        """
+        web_mock = mocker.patch('webbrowser.open')
+        mocker.patch('tkinter.Toplevel')
+        mocker.patch("friendly_ground_truth.version_info."
+                     "VersionInfo.check_for_update")
+        mocker.patch("friendly_ground_truth.version_info"
+                     ".VersionInfo.check_newer_version",
+                     return_value=True)
+
+        mocker.patch('tkinter.Label')
+
+        dialog = AboutDialog()
+
+        dialog.on_manual_click(MagicMock())
+
+        web_mock.assert_called()
+
+    def test_on_bug_click(self, mocker):
+        """
+        Test when the bug link is clicked
+
+        :test_condition: webbrowser.open() is called
+        :param mocker: Mocker
+        :returns: None
+        """
+        web_mock = mocker.patch('webbrowser.open')
+        mocker.patch('tkinter.Toplevel')
+        mocker.patch("friendly_ground_truth.version_info."
+                     "VersionInfo.check_for_update")
+        mocker.patch("friendly_ground_truth.version_info"
+                     ".VersionInfo.check_newer_version",
+                     return_value=True)
+
+        mocker.patch('tkinter.Label')
+
+        dialog = AboutDialog()
+
+        dialog.on_bug_click(MagicMock())
+
+        web_mock.assert_called()

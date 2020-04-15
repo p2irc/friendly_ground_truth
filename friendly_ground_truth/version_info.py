@@ -65,7 +65,7 @@ class VersionInfo():
         if self.check_newer_version(latest):
             return "There is a new version, " + latest + "."
         else:
-            return "You are using the most current version. "
+            return "There are no updates."
 
 
 def main(args):
