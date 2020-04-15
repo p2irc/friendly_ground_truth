@@ -1101,6 +1101,27 @@ class TestView():
 
         window.on_leave_canvas(MagicMock())
 
+    def test_start_progressbar(self, setup, mocker):
+        """
+        Test starting the progressbar
+
+        :test_condition: prog_popup.pack_slaves() is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.start_progressbar(10)
+
+        window.prog_popup.pack_slaves.assert_called()
+
 
 class TestAboutDialog():
 

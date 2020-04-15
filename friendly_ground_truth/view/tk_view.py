@@ -14,6 +14,8 @@ import tkinter.messagebox
 
 from tkinter import LEFT, TOP, X, FLAT, RAISED, SUNKEN, ALL
 from tkinter import Frame
+from tkinter import ttk
+
 
 from PIL import Image, ImageTk
 from sys import platform
@@ -406,8 +408,31 @@ class MainWindow(Frame):
 
         :returns: None
         """
+
         self.controller.load_new_image()
         self.old_img = None
+
+    def start_progressbar(self, num_patches):
+        """
+        Start displaying a progressbar
+
+        :returns: None
+        """
+        self.prog_popup = tk.Toplevel()
+
+        self.prog_popup.geometry("100x50+500+400")
+
+        tk.Label(self.prog_popup, text="Image Loading").grid(row=0, column=0)
+
+        self.load_progress = 0
+        self.load_prog_var = tk.DoubleVar()
+        self.load_prog_bar = ttk.Progressbar(self.prog_popup,
+                                             variable=self.load_prog_var,
+                                             maximum=100)
+        self.load_prog_bar.grid(row=1, column=0)
+
+        self.progress_step = float(100.0/num_patches)
+        self.prog_popup.pack_slaves()
 
     def show_image(self, img):
         """

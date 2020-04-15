@@ -31,7 +31,9 @@ class Image():
     BRANCH_LABEL = 2
     CROSS_LABEL = 3
 
-    def __init__(self, path):
+    NUM_PATCHES = 10
+
+    def __init__(self, path, progress_update_func=None):
         """
         Initialize an image object
 
@@ -41,10 +43,11 @@ class Image():
         self.logger = logging.getLogger('friendly_gt.model.Image')
 
         self.path = path
-        self.num_patches = 10
+        self.num_patches = self.NUM_PATCHES
         self.image = self.load_image(path)
         self.mask = np.zeros(self.image.shape, dtype=bool)  # create empty mask
-        self.patches = self.create_patches(self.image, self.num_patches)
+        self.patches = self.create_patches(self.image, self.num_patches,
+                                           progress_update_func)
         self.create_mask()
 
     def load_image(self, path):
@@ -63,12 +66,13 @@ class Image():
 
         return img
 
-    def create_patches(self, image, num_patches):
+    def create_patches(self, image, num_patches, progress_update_func=None):
         """
         Create a list of patches from the image
 
         :param image: The image to create patches from
         :param num_patches: The number of patches to create ALONG ONE DIMENSION
+        :param progress_update_func: A function to update a visual progressbar
         :returns: A list of patches made from the image
         :raises: ValueError if the image is not a  single channel image
         """
@@ -122,6 +126,9 @@ class Image():
             for j in range(num_patches):
                 patch_data = blocks[i, j]
                 patches.append(Patch(patch_data, (i, j)))
+
+                if progress_update_func is not None:
+                    progress_update_func()
 
         return patches
 

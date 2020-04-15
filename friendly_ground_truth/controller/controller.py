@@ -92,7 +92,8 @@ class Controller:
         self.image_path = file_name
         self.logger.debug("File: {}".format(self.image_path))
         try:
-            self.image = Image(file_name)
+            self.main_window.start_progressbar(Image.NUM_PATCHES ** 2)
+            self.image = Image(file_name, self.update_progress_bar)
 
         except FileNotFoundError:
             self.logger.debug("There was a problem loading the image")
@@ -100,6 +101,21 @@ class Controller:
 
         self.current_patch = 0
         self.display_current_patch()
+
+    def update_progress_bar(self):
+        """
+        Update the progress bar popup
+
+        :returns: None
+        """
+
+        self.main_window.prog_popup.update()
+        self.main_window.load_progress += self.main_window.progress_step
+        self.main_window.load_prog_var.set(self.main_window.load_progress)
+
+        print(self.main_window.load_progress)
+        if self.main_window.load_progress >= Image.NUM_PATCHES ** 2:
+            self.main_window.prog_popup.destroy()
 
     def get_image_name_from_path(self, path):
         """
