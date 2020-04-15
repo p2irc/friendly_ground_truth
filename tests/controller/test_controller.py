@@ -2243,7 +2243,8 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_patch = 5
-
+        mocker.patch('friendly_ground_truth.view.tk_view.MainWindow.'
+                     'start_progressbar')
         mocker.patch('friendly_ground_truth.model.model.Image.__init__',
                      return_value=None)
 
