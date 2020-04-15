@@ -18,7 +18,7 @@ from mock import MagicMock, PropertyMock
 
 from friendly_ground_truth.controller.controller import Controller, Mode
 from friendly_ground_truth.view.tk_view import MainWindow
-from friendly_ground_truth.model.model import Patch
+from friendly_ground_truth.model.model import Patch, Image
 
 from skimage import io
 from skimage.color import rgb2gray
@@ -2243,7 +2243,8 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_patch = 5
-
+        mocker.patch('friendly_ground_truth.view.tk_view.MainWindow.'
+                     'start_progressbar')
         mocker.patch('friendly_ground_truth.model.model.Image.__init__',
                      return_value=None)
 
@@ -2294,8 +2295,14 @@ class TestController:
         :returns: None
         """
 
-        def raise_FileNotFound(self):
+        def raise_FileNotFound(args, kwargs):
             raise FileNotFoundError
+
+        mocker.patch("friendly_ground_truth.controller.controller.Controller."
+                     "update_progress_bar")
+
+        mocker.patch("friendly_ground_truth.view.tk_view.MainWindow."
+                     "start_progressbar")
 
         controller = Controller(MagicMock())
         controller.current_patch = 5
@@ -2312,6 +2319,45 @@ class TestController:
 
         spy.assert_not_called()
         assert controller.current_patch == 5
+
+    def test_update_progressbar_not_done(self, setup, mocker):
+        """
+        Test updating the progressbar when there are still more patches to load
+
+        :test_condition: window.prog_popup.update() is called
+
+        :param setup: setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        controller = Controller(MagicMock())
+        controller.main_window.prog_popup = MagicMock()
+        controller.main_window.load_progress = 0
+        controller.main_window.progress_step = 10
+        controller.main_window.load_prog_var = MagicMock()
+        controller.update_progress_bar()
+
+        controller.main_window.prog_popup.update.assert_called()
+        controller.main_window.prog_popup.destroy.assert_not_called()
+
+    def test_update_progressbar_done(self, setup, mocker):
+        """
+        Test updating the progressbar when there are no more patches to load
+
+        :test_condition: window.prog_popup.destroy() is called
+
+        :param setup: setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        controller = Controller(MagicMock())
+        controller.main_window.prog_popup = MagicMock()
+        controller.main_window.load_progress = (Image.NUM_PATCHES ** 2) - 1
+        controller.main_window.progress_step = 1
+        controller.main_window.load_prog_var = MagicMock()
+        controller.update_progress_bar()
+
+        controller.main_window.prog_popup.destroy.assert_called()
 
     def test_save_mask_no_cancel(self, setup, mocker):
         """
