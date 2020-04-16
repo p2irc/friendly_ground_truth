@@ -68,9 +68,9 @@ class Controller:
         # Brush radii
         self.add_region_radius = 15
         self.remove_region_radius = 15
-        self.add_tip_radius = 15
-        self.add_branch_radius = 15
-        self.add_cross_radius = 15
+        self.add_tip_radius = 2.5
+        self.add_branch_radius = 2.5
+        self.add_cross_radius = 2.5
         self.remove_landmark_radius = 15
 
         # Flood Tolerances
@@ -323,15 +323,15 @@ class Controller:
 
         elif new_mode_id == self.main_window.ID_TOOL_ADD_TIP:
             self.current_mode = Mode.ADD_TIP
-            self.main_window.set_brush_radius(self.add_tip_radius)
+            self.main_window.flood_cursor = True
 
         elif new_mode_id == self.main_window.ID_TOOL_ADD_BRANCH:
             self.current_mode = Mode.ADD_BRANCH
-            self.main_window.set_brush_radius(self.add_branch_radius)
+            self.main_window.flood_cursor = True
 
         elif new_mode_id == self.main_window.ID_TOOL_ADD_CROSS:
             self.current_mode = Mode.ADD_CROSSING
-            self.main_window.set_brush_radius(self.add_cross_radius)
+            self.main_window.flood_cursor = True
 
         elif new_mode_id == self.main_window.ID_TOOL_REMOVE_LANDMARK:
             self.current_mode = Mode.REMOVE_LANDMARK
@@ -372,15 +372,6 @@ class Controller:
 
         elif self.current_mode == Mode.REMOVE_REGION:
             self.adjust_remove_region_brush(wheel_rotation)
-
-        elif self.current_mode == Mode.ADD_TIP:
-            self.adjust_add_tip_brush(wheel_rotation)
-
-        elif self.current_mode == Mode.ADD_CROSSING:
-            self.adjust_add_crossing_brush(wheel_rotation)
-
-        elif self.current_mode == Mode.ADD_BRANCH:
-            self.adjust_add_branch_brush(wheel_rotation)
 
         elif self.current_mode == Mode.REMOVE_LANDMARK:
             self.adjust_remove_landmark_brush(wheel_rotation)
@@ -505,29 +496,21 @@ class Controller:
             self.display_current_patch()
 
         elif self.current_mode == Mode.ADD_TIP:
-            draw_radius = (self.add_tip_radius /
-                           self.main_window.image_scale)
 
             patch = self.image.patches[self.current_patch]
-            patch.add_landmark(click_location, draw_radius,
+            patch.add_landmark(click_location, self.add_tip_radius,
                                self.image.TIP_LABEL)
             self.display_current_patch()
 
         elif self.current_mode == Mode.ADD_CROSSING:
-            draw_radius = (self.add_cross_radius /
-                           self.main_window.image_scale)
-
             patch = self.image.patches[self.current_patch]
-            patch.add_landmark(click_location, draw_radius,
+            patch.add_landmark(click_location, self.add_cross_radius,
                                self.image.CROSS_LABEL)
             self.display_current_patch()
 
         elif self.current_mode == Mode.ADD_BRANCH:
-            draw_radius = (self.add_branch_radius /
-                           self.main_window.image_scale)
-
             patch = self.image.patches[self.current_patch]
-            patch.add_landmark(click_location, draw_radius,
+            patch.add_landmark(click_location, self.add_branch_radius,
                                self.image.BRANCH_LABEL)
             self.display_current_patch()
 
@@ -622,34 +605,6 @@ class Controller:
             patch.remove_region(position, draw_radius)
             self.display_current_patch()
 
-        elif self.current_mode == Mode.ADD_TIP:
-            draw_radius = (self.add_tip_radius /
-                           self.main_window.image_scale)
-
-            patch = self.image.patches[self.current_patch]
-            patch.add_landmark(position, draw_radius,
-                               self.image.TIP_LABEL)
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.ADD_CROSSING:
-
-            draw_radius = (self.add_cross_radius /
-                           self.main_window.image_scale)
-
-            patch = self.image.patches[self.current_patch]
-            patch.add_landmark(position, draw_radius,
-                               self.image.CROSS_LABEL)
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.ADD_BRANCH:
-            draw_radius = (self.add_branch_radius /
-                           self.main_window.image_scale)
-
-            patch = self.image.patches[self.current_patch]
-            patch.add_landmark(position, draw_radius,
-                               self.image.BRANCH_LABEL)
-            self.display_current_patch()
-
         elif self.current_mode == Mode.REMOVE_LANDMARK:
             draw_radius = (self.remove_landmark_radius /
                            self.main_window.image_scale)
@@ -713,54 +668,6 @@ class Controller:
             self.add_region_radius -= 1
 
         self.main_window.set_brush_radius(self.add_region_radius)
-        self.main_window.draw_brush()
-
-    def adjust_add_tip_brush(self, wheel_rotation):
-        """
-        Adjust the size of the tip brush
-
-        :param wheel_rotation: The rotation of the mouse wheel
-        :returns: None
-        """
-
-        if wheel_rotation > 0:
-            self.add_tip_radius += 1
-        else:
-            self.add_tip_radius -= 1
-
-        self.main_window.set_brush_radius(self.add_tip_radius)
-        self.main_window.draw_brush()
-
-    def adjust_add_crossing_brush(self, wheel_rotation):
-        """
-        Adjust the size of the crossing brush
-
-        :param wheel_rotation: The rotation of the mouse wheel
-        :returns: None
-        """
-
-        if wheel_rotation > 0:
-            self.add_cross_radius += 1
-        else:
-            self.add_cross_radius -= 1
-
-        self.main_window.set_brush_radius(self.add_cross_radius)
-        self.main_window.draw_brush()
-
-    def adjust_add_branch_brush(self, wheel_rotation):
-        """
-        Adjust the size of the branch brush
-
-        :param wheel_rotation: The rotation of the mouse wheel
-        :returns: None
-        """
-
-        if wheel_rotation > 0:
-            self.add_branch_radius += 1
-        else:
-            self.add_branch_radius -= 1
-
-        self.main_window.set_brush_radius(self.add_branch_radius)
         self.main_window.draw_brush()
 
     def adjust_remove_landmark_brush(self, wheel_rotation):
