@@ -54,7 +54,7 @@ jobs:
           
       - name: Build project # This would actually build your project, using zip for an example artifact
         run: |
-          pyinstaller --noconsole --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
+          pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
       - name: Load Release URL File
         uses: actions/download-artifact@v1
         with:
