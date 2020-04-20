@@ -10,6 +10,7 @@ Description: Contains the model elements for the application
 """
 import logging
 import numpy as np
+import os
 
 from skimage import io, img_as_float, img_as_uint, img_as_ubyte
 from skimage.util.shape import view_as_blocks
@@ -198,6 +199,10 @@ class Image():
         :returns: None
         """
         self.create_mask()
+
+        backup_path = os.path.splitext(pathname)[0]
+        backup_path += "_bak.png"
+        io.imsave(backup_path, img_as_uint(self.mask))
 
         self.remove_small_components()
         io.imsave(pathname, img_as_uint(self.mask))

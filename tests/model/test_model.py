@@ -68,6 +68,10 @@ class TestImage:
                                  on
         :returns: None
         """
+
+        backup_path = os.path.splitext(export_mask_path)[0]
+        backup_path += "_bak.png"
+
         try:
             os.remove(export_mask_path)
         except FileNotFoundError:
@@ -75,6 +79,12 @@ class TestImage:
 
         try:
             os.remove(export_label_path)
+        except FileNotFoundError:
+            pass
+
+
+        try:
+            os.remove(backup_path)
         except FileNotFoundError:
             pass
 
@@ -90,6 +100,10 @@ class TestImage:
         except FileNotFoundError:
             pass
 
+        try:
+            os.remove(backup_path)
+        except FileNotFoundError:
+            pass
     @pytest.fixture
     def patch_data_many_components(self):
         image_size = (500, 500)
