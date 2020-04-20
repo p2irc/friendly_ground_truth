@@ -44,7 +44,7 @@ logger.addHandler(ch)
 
 if __name__ == '__main__':
     root = Tk()
-    root.attributes('-zoomed', True)
+    root.wm_attributes('-zoomed', 1)
     controller = Controller(root)
 
     logger.debug('Main application window is running')
