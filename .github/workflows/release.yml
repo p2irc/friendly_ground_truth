@@ -88,6 +88,7 @@ jobs:
           asset_name: friendly_gt_${{ matrix.os }}.exe
           asset_content_type: application/octet-stream
       - name: Bundle Mac OS App
+        if: matrix.os == 'macos-latest'
         run: |
            zip -r ./friendly_gt-macos-app.zip ./dist/friendly_gt.app
       - name: Upload Mac Os App
