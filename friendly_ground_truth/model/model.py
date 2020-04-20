@@ -300,8 +300,25 @@ class Patch():
         labeling = np.copy(self.landmark_labels)
         labeling += self.mask
 
-        color_mask = color.label2rgb(labeling, image=self.patch, colors=['red',
-                                     'green', 'orange', 'blue'], bg_label=0)
+        c1 = 'red'
+        c2 = 'green'
+        c3 = 'orange'
+        c4 = 'blue'
+
+        colours = []
+        unique_labels = np.unique(labeling)
+
+        mapping = [(1, c1), (2, c2), (3, c3), (4, c4)]
+
+        for m in mapping:
+            if m[0] in unique_labels:
+                colours.append(m[1])
+
+        if len(colours) <= 0:
+            colours = ['purple']
+
+        color_mask = color.label2rgb(labeling, image=self.patch,
+                                     colors=colours, bg_label=0)
 
         self.overlay_image = img_as_ubyte(color_mask)
 
