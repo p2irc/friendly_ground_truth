@@ -4,18 +4,53 @@
 A tool for manually creating ground truth masks from images where a significant amount of detail is required.
 
 # Installation
-To install download the [latest release](https://github.com/KyleS22/friendly_ground_truth/releases/latest), unpack it, and run `make install`.
 
-If you like, here is a bash script that will handle all of that for you
+The latest release of the project can be downloaded [here](https://github.com/KyleS22/friendly_ground_truth/releases/latest).
 
+Older versions can be found on the [releases page](https://github.com/KyleS22/friendly_ground_truth/releases)
+
+Download the binary for your preferred operating system and follow the instructions below.
+
+## Windows
+A windows executable can be downloaded [here](https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt_windows-latest.exe).
+
+You should be able to just download and run it.  You may need administrator privelages.
+
+### Troubleshooting
+Permission denied errors:
+- Check that you are an administrator
+- Try changing the file permissions to be executable
+- Perhaps anti-virus is interfering?
+
+## Ubuntu
+An Ubuntu binary can be downloaded [here](https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt_ubuntu-latest).
+
+You will need to change the permissions of the binary file to be executable, and then you can run it as any other binary file.
+
+Copy-pasta:
 ```
-newest_version=$(curl https://api.github.com/repos/KyleS22/friendly_ground_truth/releases/latest | grep "tag_name" | sed -E 's/.*"([^"]+)".*/\1/')
-tar_path=$(curl https://api.github.com/repos/KyleS22/friendly_ground_truth/releases/latest | grep "tarball_url" | sed -E 's/.*"([^"]+)".*/\1/')
-tar_name="friendly_gt-$newest_version.tar"
-wget $tar_path -O $tar_name
-new_dir_name=$(tar -tf $tar_name | sed -e 's@/.*@@' | uniq)
-tar xvfz "$tar_name" -C ./
-mv $new_dir_name friendly_ground_truth
-cd friendly_ground_truth
-make install
+wget https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt_ubuntu-latest
+chmod u+x friendly_gt_ubuntu-latest
+./friendly_gt_ubuntu-latest
 ```
+
+
+## MacOs
+A MacOs binary can be downloaded [here](https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt_macos-latest).
+
+You will need to change the permissions of the binary file to be executable, and then you can run it as any other binary file.
+
+Copy-pasta:
+```
+wget https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt_macos-latest
+chmod u+x friendly_gt_macos-latest
+./friendly_gt_macos-latest
+```
+
+# User Manual
+A user manual can be found [in the wiki](https://github.com/KyleS22/friendly_ground_truth/wiki/User-Manual)
+
+# Bug Reports
+Please report any software bugs on the [issues page](https://github.com/KyleS22/friendly_ground_truth/issues).
+
+Thanks in advance for helping out!
