@@ -13,6 +13,8 @@ from tkinter import Tk
 import logging
 import sys
 
+from sys import platform
+
 from friendly_ground_truth.controller.controller import Controller
 
 debug = False
@@ -44,7 +46,10 @@ logger.addHandler(ch)
 
 if __name__ == '__main__':
     root = Tk()
-    root.wm_attributes('-zoomed', 1)
+
+    if platform != "darwin":
+        root.wm_attributes('-zoomed', 1)
+
     controller = Controller(root)
 
     logger.debug('Main application window is running')

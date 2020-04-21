@@ -89,6 +89,12 @@ jobs:
           asset_content_type: application/octet-stream
       - name: Bundle Mac OS App
         run: |
+           cd ./dist/friendly_gt.app/Contents/MacOs
+           mkdir tcl tk
+           cp -R /Library/Frameworks/Python.framework/Versions/3.7/lib/tcl* tcl/
+           cp -R /Library/Frameworks/Python.framework/Versions/3.7/lib/tk* tk/
+           cp -R /Library/Frameworks/Python.framework/Versions/3.7/lib/Tk* tk/
+           cd ~
            zip -r ./friendly_gt-macos-app.zip ./dist/friendly_gt.app
       - name: Upload Mac Os App
         if: matrix.os == 'macos-latest'
