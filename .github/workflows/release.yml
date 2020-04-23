@@ -88,18 +88,18 @@ jobs:
           asset_path: ./dist/friendly_gt.exe
           asset_name: friendly_gt_${{ matrix.os }}.exe
           asset_content_type: application/octet-stream
-      - name: Bundle Mac OS App
-        if: matrix.os == 'macos-latest'
-        run: |
-           zip -r ./friendly_gt-macos-app.zip ./dist/friendly_gt.app
-      - name: Upload Mac Os App
-        if: matrix.os == 'macos-latest'
-        id: upload-release-asset-mac-app
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.get_release_info.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./friendly_gt-macos-app.zip
-          asset_name: friendly_gt_macos-app.zip
-          asset_content_type: application/zip
+          #- name: Bundle Mac OS App
+          #if: matrix.os == 'macos-latest'
+          #run: |
+          # zip -r ./friendly_gt-macos-app.zip ./dist/friendly_gt.app
+          #- name: Upload Mac Os App
+          #if: matrix.os == 'macos-latest'
+          #id: upload-release-asset-mac-app
+          #uses: actions/upload-release-asset@v1
+          #env:
+          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          #with:
+          #upload_url: ${{ steps.get_release_info.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          #asset_path: ./friendly_gt-macos-app.zip
+          #asset_name: friendly_gt_macos-app.zip
+          #asset_content_type: application/zip
