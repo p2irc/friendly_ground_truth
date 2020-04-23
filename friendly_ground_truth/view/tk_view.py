@@ -11,13 +11,16 @@ Description: Tkinter Version of the GUI
 import tkinter as tk
 import tkinter.messagebox
 
+from io import BytesIO
+import base64
 
 from tkinter import LEFT, TOP, X, FLAT, RAISED, SUNKEN, ALL
 from tkinter import Frame
 from tkinter import ttk
 
 
-from PIL import Image, ImageTk
+from PIL import Image
+from PIL import ImageTk as itk
 from sys import platform
 
 from friendly_ground_truth.view.icons.icon_strings import (add_region_icon,
@@ -194,14 +197,17 @@ class MainWindow(Frame):
         self.toolbar_buttons = {}
 
         # Threshold Button
-        thresh_img = tk.PhotoImage(data=threshold_icon)
+        thresh_data = Image.open(BytesIO(base64.b64decode(threshold_icon)))
+        thresh_img = itk.PhotoImage(thresh_data)
         thresh_button = tk.Button(self.toolbar, image=thresh_img,
                                   relief=FLAT, command=self.on_threshold_tool)
         thresh_button.image = thresh_img
         thresh_button.pack(side=LEFT, padx=2, pady=2)
 
         # Add Region Button
-        add_reg_img = tk.PhotoImage(data=add_region_icon)
+        add_region_data = Image.open(BytesIO(base64.
+                                             b64decode(add_region_icon)))
+        add_reg_img = itk.PhotoImage(add_region_data)
 
         add_reg_button = tk.Button(self.toolbar, image=add_reg_img,
                                    relief=FLAT, command=self.on_add_reg_tool)
@@ -209,7 +215,9 @@ class MainWindow(Frame):
         add_reg_button.pack(side=LEFT, padx=2, pady=2)
 
         # Remove Region Button
-        remove_reg_img = tk.PhotoImage(data=remove_region_icon)
+        remove_region_data = Image.open(BytesIO(base64.
+                                                b64decode(remove_region_icon)))
+        remove_reg_img = itk.PhotoImage(remove_region_data)
         remove_reg_button = tk.Button(self.toolbar, image=remove_reg_img,
                                       relief=FLAT,
                                       command=self.on_remove_reg_tool)
@@ -217,14 +225,16 @@ class MainWindow(Frame):
         remove_reg_button.pack(side=LEFT, padx=2, pady=2)
 
         # Zoom  Button
-        zoom_img = tk.PhotoImage(data=zoom_icon)
+        zoom_data = Image.open(BytesIO(base64.b64decode(zoom_icon)))
+        zoom_img = itk.PhotoImage(zoom_data)
         zoom_button = tk.Button(self.toolbar, image=zoom_img,
                                 relief=FLAT, command=self.on_zoom_tool)
         zoom_button.image = zoom_img
         zoom_button.pack(side=LEFT, padx=2, pady=2)
 
         # Flood Add Button
-        flood_add_img = tk.PhotoImage(data=flood_add_icon)
+        flood_add_data = Image.open(BytesIO(base64.b64decode(flood_add_icon)))
+        flood_add_img = itk.PhotoImage(flood_add_data)
         flood_add_button = tk.Button(self.toolbar, image=flood_add_img,
                                      relief=FLAT,
                                      command=self.on_flood_add_tool)
@@ -232,7 +242,9 @@ class MainWindow(Frame):
         flood_add_button.pack(side=LEFT, padx=2, pady=2)
 
         # Flood Remove Button
-        flood_remove_img = tk.PhotoImage(data=flood_remove_icon)
+        flood_remove_data = Image.open(BytesIO(base64.
+                                               b64decode(flood_remove_icon)))
+        flood_remove_img = itk.PhotoImage(flood_remove_data)
         flood_remove_button = tk.Button(self.toolbar, image=flood_remove_img,
                                         relief=FLAT,
                                         command=self.on_flood_remove_tool)
@@ -240,7 +252,8 @@ class MainWindow(Frame):
         flood_remove_button.pack(side=LEFT, padx=2, pady=2)
 
         # No Root Button
-        no_root_img = tk.PhotoImage(data=no_root_icon)
+        no_root_data = Image.open(BytesIO(base64.b64decode(no_root_icon)))
+        no_root_img = itk.PhotoImage(no_root_data)
         no_root_button = tk.Button(self.toolbar, image=no_root_img,
                                    relief=FLAT,
                                    command=self.on_no_root_tool)
@@ -248,7 +261,8 @@ class MainWindow(Frame):
         no_root_button.pack(side=LEFT, padx=2, pady=2)
 
         # Prev Button
-        prev_img = tk.PhotoImage(data=prev_patch_icon)
+        prev_data = Image.open(BytesIO(base64.b64decode(prev_patch_icon)))
+        prev_img = itk.PhotoImage(prev_data)
         prev_button = tk.Button(self.toolbar, image=prev_img,
                                 relief=FLAT,
                                 command=self.on_prev_tool)
@@ -256,8 +270,8 @@ class MainWindow(Frame):
         prev_button.pack(side=LEFT, padx=2, pady=2)
 
         # Next Button
-        next_img = tk.PhotoImage(data=next_patch_icon)
-
+        next_data = Image.open(BytesIO(base64.b64decode(next_patch_icon)))
+        next_img = itk.PhotoImage(next_data)
         next_button = tk.Button(self.toolbar, image=next_img,
                                 relief=FLAT,
                                 command=self.on_next_tool)
@@ -265,15 +279,17 @@ class MainWindow(Frame):
         next_button.pack(side=LEFT, padx=2, pady=2)
 
         # Add Tip Button
-        add_tip_img = tk.PhotoImage(data=add_tip_icon)
+        add_tip_data = Image.open(BytesIO(base64.b64decode(add_tip_icon)))
+        add_tip_img = itk.PhotoImage(add_tip_data)
 
         add_tip_button = tk.Button(self.toolbar, image=add_tip_img,
                                    relief=FLAT, command=self.on_add_tip_tool)
         add_tip_button.image = add_tip_img
         add_tip_button.pack(side=LEFT, padx=2, pady=2)
 
-        # Add Tip Button
-        add_cross_img = tk.PhotoImage(data=add_cross_icon)
+        # Add Cross Button
+        add_cross_data = Image.open(BytesIO(base64.b64decode(add_cross_icon)))
+        add_cross_img = itk.PhotoImage(add_cross_data)
 
         add_cross_button = tk.Button(self.toolbar, image=add_cross_img,
                                      relief=FLAT,
@@ -281,9 +297,10 @@ class MainWindow(Frame):
         add_cross_button.image = add_cross_img
         add_cross_button.pack(side=LEFT, padx=2, pady=2)
 
-        # Add Tip Button
-        add_branch_img = tk.PhotoImage(data=add_branch_icon)
-
+        # Add Branch Button
+        add_branch_data = Image.open(BytesIO(base64
+                                             .b64decode(add_branch_icon)))
+        add_branch_img = itk.PhotoImage(add_branch_data)
         add_branch_button = tk.Button(self.toolbar, image=add_branch_img,
                                       relief=FLAT,
                                       command=self.on_add_branch_tool)
@@ -451,13 +468,13 @@ class MainWindow(Frame):
 
         image = Image.fromarray(img)
 
-        self.display_img = ImageTk.PhotoImage(image=image,
-                                              master=self.master)
+        self.display_img = itk.PhotoImage(image=image,
+                                          master=self.master)
         iw, ih = image.size
 
         size = int(iw * self.image_scale), int(ih * self.image_scale)
 
-        self.display_img = ImageTk.PhotoImage(image=image.resize(size))
+        self.display_img = itk.PhotoImage(image=image.resize(size))
 
         x, y = self.image_x, self.image_y
 
