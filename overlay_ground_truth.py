@@ -17,7 +17,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def main(image_path, landmarks_path, mask_path):
+def main(image_path, landmarks_path, mask_path, out_path=None):
     """
     Run the script using the given image and ground truth
 
@@ -35,8 +35,11 @@ def main(image_path, landmarks_path, mask_path):
 
     boundary_img = segmentation.mark_boundaries(overlay_img, mask)
 
-    plt.imshow(boundary_img)
-    plt.show()
+    if out_path is None:
+        plt.imshow(boundary_img)
+        plt.show()
+    else:
+        io.imsave(out_path, boundary_img)
 
 
 if __name__ == "__main__":
@@ -47,8 +50,12 @@ if __name__ == "__main__":
 
         sys.exit(0)
 
+    out_path = None
+    if len(sys.argv) == 5:
+        out_path = sys.argv[4]
+
     image_path = sys.argv[1]
     landmark_path = sys.argv[2]
     mask_path = sys.argv[3]
 
-    main(image_path, landmark_path, mask_path)
+    main(image_path, landmark_path, mask_path, out_path)
