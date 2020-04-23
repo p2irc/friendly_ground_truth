@@ -47,8 +47,8 @@ logger.addHandler(ch)
 if __name__ == '__main__':
     root = Tk()
 
-    if platform != "darwin":
-        root.wm_attributes('-zoomed', 1)
+    w, h = root.winfo_screenwidth(), root.winfo_screenheight()
+    root.geometry("%dx%d+0+0" % (w, h))
 
     controller = Controller(root)
 

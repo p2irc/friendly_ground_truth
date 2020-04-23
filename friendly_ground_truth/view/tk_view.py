@@ -89,7 +89,7 @@ class MainWindow(Frame):
 
         self.previous_position = (0, 0)
 
-        master.geometry("500x300+300+300")
+        #master.geometry("500x300+300+300")
         master.title("Friendly Ground Truth")
         # Initialize the logger
         self.logger = logging.getLogger('friendly_gt.view.MainWindow')
