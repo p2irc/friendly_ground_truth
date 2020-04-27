@@ -1592,8 +1592,34 @@ class TestController:
         controller.current_mode = Mode.THRESHOLD
         controller.main_window = MagicMock()
         controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
 
-        result = controller.handle_left_click((0, 0))
+        result = controller.handle_left_click((10, 10))
+        assert False is result
+
+    def test_handle_left_click_out_of_bounds(self, setup,
+                                             display_current_patch_mock):
+        """
+        Test when clicking off of the image
+
+        :test condition: Returns False
+
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for displaying the patch
+        :returns: None
+        """
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.THRESHOLD
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
+
+        result = controller.handle_left_click((-10, 10))
+        assert False is result
+
+        result = controller.handle_left_click((10, -10))
         assert False is result
 
     def test_handle_right_click_zoom(self, setup, display_current_patch_mock):
@@ -1887,9 +1913,35 @@ class TestController:
         controller.current_mode = Mode.THRESHOLD
         controller.main_window = MagicMock()
         controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
 
-        result = controller.handle_motion((0, 0))
+        result = controller.handle_motion((10, 10))
 
+        assert False is result
+
+    def test_handle_motion_out_of_bounds(self, setup,
+                                         display_current_patch_mock):
+        """
+        Test when dragging off of the image
+
+        :test condition: Returns False
+
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for displaying the patch
+        :returns: None
+        """
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.THRESHOLD
+        controller.main_window = MagicMock()
+        controller.main_window.image_scale = 1
+        controller.main_window.image_x = 0
+        controller.main_window.image_y = 0
+
+        result = controller.handle_motion((-10, 10))
+        assert False is result
+
+        result = controller.handle_motion((10, -10))
         assert False is result
 
     def test_adjust_threshold_pos_rot_valid_thresh(self, setup,

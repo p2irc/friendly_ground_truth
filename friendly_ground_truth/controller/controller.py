@@ -475,8 +475,12 @@ class Controller:
         click_location = (click_location[0] / self.main_window.image_scale,
                           click_location[1] / self.main_window.image_scale)
 
+        # Make sure we are clicking on the image
+        if click_location[0] < 0 or click_location[1] < 0:
+            return False
+
         if self.current_mode == Mode.ADD_REGION:
-            self.logger.debug("Add region click")
+            self.logger.debug("Add region click {}".format(click_location))
 
             draw_radius = self.add_region_radius / self.main_window.image_scale
 
@@ -598,6 +602,10 @@ class Controller:
 
             position = (position[0] / self.main_window.image_scale,
                         position[1] / self.main_window.image_scale)
+
+        # Make sure we stay inside the image
+        if position[0] < 0 or position[1] < 0:
+            return False
 
         if self.current_mode == Mode.ADD_REGION:
             self.logger.debug("Adding region")

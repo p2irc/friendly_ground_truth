@@ -715,7 +715,9 @@ class MainWindow(Frame):
         :returns: None
         """
         self.previous_position = (event.x, event.y)
-        self.logger.debug(self.can_draw)
+
+        self.logger.debug("Click location: {}, {}".format(event.x, event.y))
+
         if self.can_draw:
             self.controller.handle_left_click((event.x, event.y))
 

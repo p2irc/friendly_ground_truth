@@ -795,3 +795,43 @@ class TestPatch:
         patch.flood_remove_region(position, tolerance)
 
         assert patch.mask[position[0], position[1]] == 0
+
+    def test_get_circle(self, patch_data_ones, patch_index):
+        """
+        Test getting circles
+
+        :test_condition: Returns the correct coodinate lists
+
+        :returns: None
+        """
+        patch = Patch(patch_data_ones, patch_index)
+        position = (2, 2)
+        radius = 2
+
+        expected_rr = [1, 1, 1, 2, 2, 2, 3, 3, 3]
+        expected_cc = [1, 2, 3, 1, 2, 3, 1, 2, 3]
+
+        rr, cc = patch.get_circle(position, radius)
+
+        assert rr == expected_rr
+        assert cc == expected_cc
+
+
+        position = (0, 0)
+        radius = 2
+
+        expected_rr = [0, 0, 1, 1]
+        expected_cc = [0, 1, 0, 1]
+
+        x, y = patch_data_ones.shape[0], patch_data_ones.shape[1]
+
+        position = (x, y)
+        radius = 2
+
+        expected_rr = [x-1]
+        expected_cc = [y-1]
+
+        rr, cc = patch.get_circle(position, radius)
+
+        assert rr == expected_rr
+        assert cc == expected_cc
