@@ -257,7 +257,10 @@ class Patch():
 
         self.patch_index = patch_index
 
-        self.thresh = threshold_otsu(self.patch)
+        try:
+            self.thresh = threshold_otsu(self.patch)
+        except ValueError:
+            self.thresh = 1
 
         self.apply_threshold(self.thresh)
 

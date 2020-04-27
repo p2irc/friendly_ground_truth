@@ -512,6 +512,21 @@ class TestPatch:
     def patch_index(self):
         return (1, 1)
 
+    def test_create_patch_black_image(self, patch_index):
+        """
+        Test creating a patch when all pixels are black
+
+        :test_condition: thresh is set to 1
+
+        :param patch_index: The patch index
+        :returns: None
+        """
+
+        data = np.zeros((10, 10))
+        patch = Patch(data, patch_index)
+
+        assert patch.thresh == 1
+
     def test_apply_threshold_negative_value(self, patch_data_many_components,
                                             patch_index):
         """
