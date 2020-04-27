@@ -120,6 +120,9 @@ class MainWindow(Frame):
 
         self.bind_all("<B1-Motion>", self.on_drag)
         self.bind_all("<Button-1>", self.on_click)
+        self.bind_all("<Button-2>", self.on_right_click)
+        self.bind_all("<Button-3>", self.on_right_click)
+
         self.bind_all("<KeyPress>", self.on_keypress)
         self.bind_all("<Left>", self.on_left)
         self.bind_all("<Right>", self.on_right)
@@ -713,6 +716,17 @@ class MainWindow(Frame):
         self.logger.debug(self.can_draw)
         if self.can_draw:
             self.controller.handle_left_click((event.x, event.y))
+
+    def on_right_click(self, event):
+        """
+        Called when the right mouse button is clicked
+
+        :param event: The mouse event
+        :returns: None
+        """
+        self.logger.debug("Right Click")
+        if self.can_draw:
+            self.controller.handle_right_click()
 
     def set_brush_radius(self, radius):
         """

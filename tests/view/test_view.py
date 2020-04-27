@@ -1018,7 +1018,7 @@ class TestView():
         """
         Test on click
 
-        :test_condition: controller.handle_left_click() is called
+        :test_condition: controller.handle_left_click() is not called
 
         :param setup: setup
         :param mocker: mocker
@@ -1034,6 +1034,44 @@ class TestView():
         window.on_click(event)
 
         self.mock_controller.handle_left_click.assert_not_called()
+
+    def test_on_right_click_draw(self, setup, mocker):
+        """
+        Test when the right mouse button is click and can_draw is truw
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: Nont
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+
+        window.on_right_click(event)
+
+        self.mock_controller.handle_right_click.assert_called()
+
+    def test_on_right_click_no_draw(self, setup, mocker):
+        """
+        Test on right click when can't draw
+
+        :test_condition: controller.handle_right_click() is not called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.x = 21
+        event.y = 42
+        window.can_draw = False
+
+        window.on_right_click(event)
+
+        self.mock_controller.handle_right_click.assert_not_called()
 
     def test_set_brush_radius(self, setup, mocker):
         """

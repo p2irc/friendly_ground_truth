@@ -547,6 +547,20 @@ class Controller:
 
         return True
 
+    def handle_right_click(self):
+        """
+        Called when the right mouse button is clickd
+
+        :returns: None
+        """
+        self.logger.debug("Right click")
+        # Reset zoom
+        if self.current_mode == Mode.ZOOM:
+            self.main_window.image_x = 0
+            self.main_window.image_y = 0
+            self.main_window.image_scale = 1
+            self.display_current_patch()
+
     def handle_left_release(self):
         """
         Handle the release of the left mouse button
