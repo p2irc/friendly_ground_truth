@@ -102,11 +102,9 @@ class Image():
         if image.shape[1] % num_patches != 0:
             pad_y = (0, (num_patches - (image.shape[1] % num_patches)))
 
-        print(image.shape, pad_x, pad_y)
         image = np.pad(image, (pad_x, pad_y), 'constant',
                        constant_values=(0, 0))
 
-        print(image.shape)
         self.padded_shape = image.shape
         # Get the size of each block
         block_size = (image.shape[0]//num_patches,
@@ -259,7 +257,10 @@ class Patch():
 
         self.patch_index = patch_index
 
-        self.thresh = threshold_otsu(self.patch)
+        try:
+            self.thresh = threshold_otsu(self.patch)
+        except ValueError:
+            self.thresh = 1
 
         self.apply_threshold(self.thresh)
 
@@ -347,7 +348,7 @@ class Patch():
         :param label: The class label for the pixels to be given
         :returns: None
         """
-        rr, cc = circle(position[1], position[0], radius)
+        rr, cc = self.get_circle(position, radius)
 
         self.landmark_labels[rr, cc] = label
 
@@ -364,7 +365,7 @@ class Patch():
         :returns: None
         """
 
-        rr, cc = circle(position[1], position[0], radius)
+        rr, cc = self.get_circle(position, radius)
 
         self.landmark_labels[rr, cc] = 0
 
@@ -380,8 +381,10 @@ class Patch():
         :postcondition: The circular region in the mask will be set to 1's
         """
         self.logger.debug("Add Region Position {}".format(position))
-        rr, cc = circle(position[1], position[0], radius)
+        rr, cc = self.get_circle(position, radius)
+
         self.mask[rr, cc] = 1
+
         self.overlay_mask()
 
     def remove_region(self, position, radius):
@@ -394,8 +397,10 @@ class Patch():
         :postcondition: The region in the mask will be set to 0's
         """
 
-        rr, cc = circle(position[1], position[0], radius)
+        rr, cc = self.get_circle(position, radius)
+
         self.mask[rr, cc] = 0
+
         self.overlay_mask()
 
     def flood_add_region(self, position, tolerance):
@@ -475,3 +480,33 @@ class Patch():
         # Turns out this is causing more trouble than it is worth right now
 
         self.display = True
+
+    def get_circle(self, position, radius):
+        """
+        Create a cicular region that does not allow negative values
+
+        :param position: (x, y) coordinates
+        :param radius: The radius of the circle
+        :returns: Two lists, rr and cc that represent points of the circle
+        """
+        # Note that the coordinates are automatically flipped to adhere to
+        # skimage indexing
+        rr, cc = circle(position[1], position[0], radius)
+
+        zipped = zip(rr, cc)
+
+        fixed_pairs = []
+
+        for pair in zipped:
+            if (pair[0] >= 0 and pair[1] >= 0 and pair[0] < self.mask.shape[0]
+                    and pair[1] < self.mask.shape[1]):
+                fixed_pairs.append(pair)
+
+        rr = []
+        cc = []
+
+        for p in fixed_pairs:
+            rr.append(p[0])
+            cc.append(p[1])
+
+        return rr, cc
