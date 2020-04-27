@@ -705,7 +705,7 @@ class MainWindow(Frame):
         y_min = pos[1] - self.brush_radius
 
         self.brush_cursor = self.canvas.create_oval(x_max, y_max, x_min, y_min,
-                                                    outline='black')
+                                                    outline='white')
 
     def on_click(self, event):
         """
