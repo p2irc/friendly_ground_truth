@@ -13,7 +13,8 @@ import pytest
 from mock import MagicMock  # , PropertyMock
 
 from friendly_ground_truth.view.tk_view import (MainWindow, AboutDialog,
-                                                KeyboardShortcutDialog)
+                                                KeyboardShortcutDialog,
+                                                ResizingCanvas)
 
 
 class TestView():
@@ -133,11 +134,12 @@ class TestView():
 
         window = MainWindow(self.mock_controller, MagicMock())
 
-        tk_patch = mocker.patch('tkinter.Canvas')
-
+        mocker.patch('tkinter.Canvas')
+        canvas_patch = mocker.patch('friendly_ground_truth.view.'
+                                    'tk_view.ResizingCanvas')
         window.create_canvas()
 
-        tk_patch.assert_called()
+        canvas_patch.assert_called()
 
     def test_create_menubar(self, setup, mocker):
         """
@@ -1237,3 +1239,29 @@ class TestKeyboardShortcuts():
         dialog = KeyboardShortcutDialog()
 
         assert dialog is not None
+
+
+class TestResizingCanvas():
+
+    def test_resize(self, mocker):
+
+        mocker.patch('tkinter.Canvas')
+        mocker.patch('tkinter.Canvas.bind')
+        mocker.patch('friendly_ground_truth.view.tk_view.ResizingCanvas.bind')
+        mocker.patch('friendly_ground_truth.view.tk_view.'
+                     'ResizingCanvas.winfo_reqheight')
+        mocker.patch('friendly_ground_truth.view.tk_view.'
+                     'ResizingCanvas.winfo_reqwidth')
+        mocker.patch('friendly_ground_truth.view.tk_view.'
+                     'ResizingCanvas._configure')
+        mocker.patch('friendly_ground_truth.view.tk_view.ResizingCanvas.scale')
+        canvas = ResizingCanvas(None)
+
+        event = MagicMock()
+        event.width = 42
+        event.height = 42
+
+        canvas.on_resize(event)
+
+        assert canvas.width == 42
+        assert canvas.height == 42

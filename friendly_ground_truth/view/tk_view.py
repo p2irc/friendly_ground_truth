@@ -14,7 +14,7 @@ import tkinter.messagebox
 from io import BytesIO
 import base64
 
-from tkinter import LEFT, TOP, X, FLAT, RAISED, SUNKEN, ALL
+from tkinter import LEFT, TOP, X, FLAT, RAISED, SUNKEN, ALL, BOTH, YES
 from tkinter import Frame
 from tkinter import ttk
 
@@ -131,10 +131,11 @@ class MainWindow(Frame):
         :returns: None
         """
 
-        self.canvas = tk.Canvas(self, cursor='none', width=1000, height=1000)
+        self.canvas = ResizingCanvas(self, cursor='none')#tk.Canvas(self, cursor='none', width=1000, height=1000)
         self.canvas.bind("<Enter>", self.on_enter_canvas)
         self.canvas.bind("<Leave>", self.on_leave_canvas)
         self.canvas.bind("<Motion>", self.on_motion)
+        self.canvas.pack(fill=BOTH, expand=YES)
 
     def create_menubar(self):
         """
@@ -949,3 +950,24 @@ class KeyboardShortcutDialog(tk.Toplevel):
 
         remove_landmark_label = tk.Label(self.base, text="Remove Landmark (n)")
         remove_landmark_label.grid(row=4, column=1)
+
+
+class ResizingCanvas(tk.Canvas):
+
+    def __init__(self, parent, **kwargs):
+        tk.Canvas.__init__(self, parent, **kwargs)
+
+        self.bind("<Configure>", self.on_resize)
+        self.height = self.winfo_reqheight()
+        self.width = self.winfo_reqwidth()
+
+    def on_resize(self, event):
+
+        wscale = float(event.width)/self.width
+        hscale = float(event.height)/self.height
+
+        self.width = event.width
+        self.height = event.height
+
+        self.config(width=self.width, height=self.height)
+        self.scale("all", 0, 0, wscale, hscale)
