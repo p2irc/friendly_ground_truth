@@ -14,7 +14,7 @@ import tkinter.messagebox
 from io import BytesIO
 import base64
 
-from tkinter import LEFT, TOP, X, FLAT, RAISED, SUNKEN, ALL
+from tkinter import LEFT, TOP, X, FLAT, RAISED, SUNKEN, ALL, BOTH, YES
 from tkinter import Frame
 from tkinter import ttk
 
@@ -120,6 +120,9 @@ class MainWindow(Frame):
 
         self.bind_all("<B1-Motion>", self.on_drag)
         self.bind_all("<Button-1>", self.on_click)
+        self.bind_all("<Button-2>", self.on_right_click)
+        self.bind_all("<Button-3>", self.on_right_click)
+
         self.bind_all("<KeyPress>", self.on_keypress)
         self.bind_all("<Left>", self.on_left)
         self.bind_all("<Right>", self.on_right)
@@ -131,10 +134,11 @@ class MainWindow(Frame):
         :returns: None
         """
 
-        self.canvas = tk.Canvas(self, cursor='none', width=1000, height=1000)
+        self.canvas = ResizingCanvas(self, cursor='none')#tk.Canvas(self, cursor='none', width=1000, height=1000)
         self.canvas.bind("<Enter>", self.on_enter_canvas)
         self.canvas.bind("<Leave>", self.on_leave_canvas)
         self.canvas.bind("<Motion>", self.on_motion)
+        self.canvas.pack(fill=BOTH, expand=YES)
 
     def create_menubar(self):
         """
@@ -715,6 +719,17 @@ class MainWindow(Frame):
         if self.can_draw:
             self.controller.handle_left_click((event.x, event.y))
 
+    def on_right_click(self, event):
+        """
+        Called when the right mouse button is clicked
+
+        :param event: The mouse event
+        :returns: None
+        """
+        self.logger.debug("Right Click")
+        if self.can_draw:
+            self.controller.handle_right_click()
+
     def set_brush_radius(self, radius):
         """
         Set the radius of the brush cursor representing the current brush
@@ -982,3 +997,24 @@ class KeyboardShortcutDialog(tk.Toplevel):
 
         remove_landmark_label = tk.Label(self.base, text="Remove Landmark (n)")
         remove_landmark_label.grid(row=4, column=1)
+
+
+class ResizingCanvas(tk.Canvas):
+
+    def __init__(self, parent, **kwargs):
+        tk.Canvas.__init__(self, parent, **kwargs)
+
+        self.bind("<Configure>", self.on_resize)
+        self.height = self.winfo_reqheight()
+        self.width = self.winfo_reqwidth()
+
+    def on_resize(self, event):
+
+        wscale = float(event.width)/self.width
+        hscale = float(event.height)/self.height
+
+        self.width = event.width
+        self.height = event.height
+
+        self.config(width=self.width, height=self.height)
+        self.scale("all", 0, 0, wscale, hscale)

@@ -102,11 +102,9 @@ class Image():
         if image.shape[1] % num_patches != 0:
             pad_y = (0, (num_patches - (image.shape[1] % num_patches)))
 
-        print(image.shape, pad_x, pad_y)
         image = np.pad(image, (pad_x, pad_y), 'constant',
                        constant_values=(0, 0))
 
-        print(image.shape)
         self.padded_shape = image.shape
         # Get the size of each block
         block_size = (image.shape[0]//num_patches,

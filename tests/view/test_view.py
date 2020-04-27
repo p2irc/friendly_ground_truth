@@ -13,7 +13,8 @@ import pytest
 from mock import MagicMock  # , PropertyMock
 
 from friendly_ground_truth.view.tk_view import (MainWindow, AboutDialog,
-                                                KeyboardShortcutDialog)
+                                                KeyboardShortcutDialog,
+                                                ResizingCanvas)
 
 
 class TestView():
@@ -133,11 +134,12 @@ class TestView():
 
         window = MainWindow(self.mock_controller, MagicMock())
 
-        tk_patch = mocker.patch('tkinter.Canvas')
-
+        mocker.patch('tkinter.Canvas')
+        canvas_patch = mocker.patch('friendly_ground_truth.view.'
+                                    'tk_view.ResizingCanvas')
         window.create_canvas()
 
-        tk_patch.assert_called()
+        canvas_patch.assert_called()
 
     def test_create_menubar(self, setup, mocker):
         """
@@ -1016,7 +1018,7 @@ class TestView():
         """
         Test on click
 
-        :test_condition: controller.handle_left_click() is called
+        :test_condition: controller.handle_left_click() is not called
 
         :param setup: setup
         :param mocker: mocker
@@ -1032,6 +1034,44 @@ class TestView():
         window.on_click(event)
 
         self.mock_controller.handle_left_click.assert_not_called()
+
+    def test_on_right_click_draw(self, setup, mocker):
+        """
+        Test when the right mouse button is click and can_draw is truw
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: Nont
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+
+        window.on_right_click(event)
+
+        self.mock_controller.handle_right_click.assert_called()
+
+    def test_on_right_click_no_draw(self, setup, mocker):
+        """
+        Test on right click when can't draw
+
+        :test_condition: controller.handle_right_click() is not called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.x = 21
+        event.y = 42
+        window.can_draw = False
+
+        window.on_right_click(event)
+
+        self.mock_controller.handle_right_click.assert_not_called()
 
     def test_set_brush_radius(self, setup, mocker):
         """
@@ -1237,3 +1277,29 @@ class TestKeyboardShortcuts():
         dialog = KeyboardShortcutDialog()
 
         assert dialog is not None
+
+
+class TestResizingCanvas():
+
+    def test_resize(self, mocker):
+
+        mocker.patch('tkinter.Canvas')
+        mocker.patch('tkinter.Canvas.bind')
+        mocker.patch('friendly_ground_truth.view.tk_view.ResizingCanvas.bind')
+        mocker.patch('friendly_ground_truth.view.tk_view.'
+                     'ResizingCanvas.winfo_reqheight')
+        mocker.patch('friendly_ground_truth.view.tk_view.'
+                     'ResizingCanvas.winfo_reqwidth')
+        mocker.patch('friendly_ground_truth.view.tk_view.'
+                     'ResizingCanvas._configure')
+        mocker.patch('friendly_ground_truth.view.tk_view.ResizingCanvas.scale')
+        canvas = ResizingCanvas(None)
+
+        event = MagicMock()
+        event.width = 42
+        event.height = 42
+
+        canvas.on_resize(event)
+
+        assert canvas.width == 42
+        assert canvas.height == 42
