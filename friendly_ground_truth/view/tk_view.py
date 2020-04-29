@@ -939,21 +939,21 @@ class KeyboardShortcutDialog(tk.Toplevel):
         rem_reg_label = tk.Label(self.base, text="Remove Region Tool (r)")
         rem_reg_label.grid(row=0, column=7)
 
-        space_label = tk.Label(self.base, text="    ")
-        space_label.grid(row=1, column=2)
+        # space_label = tk.Label(self.base, text="    ")
+        # space_label.grid(row=1, column=2)
 
         flood_add_data = Image.open(BytesIO(base64.b64decode(flood_add_icon)))
         flood_add_reg_img = itk.PhotoImage(flood_add_data)
 
         flood_add_reg_img_label = tk.Label(self.base, image=flood_add_reg_img)
         flood_add_reg_img_label.image = flood_add_reg_img
-        flood_add_reg_img_label.grid(row=1, column=3)
+        flood_add_reg_img_label.grid(row=1, column=0)
 
         flood_add_reg_label = tk.Label(self.base, text="Flood Add Tool (f)")
-        flood_add_reg_label.grid(row=1, column=4)
+        flood_add_reg_label.grid(row=1, column=1)
 
         space_label = tk.Label(self.base, text="    ")
-        space_label.grid(row=1, column=5)
+        space_label.grid(row=1, column=2)
 
         flood_remove_data = Image.open(BytesIO(base64.
                                        b64decode(flood_remove_icon)))
@@ -961,10 +961,10 @@ class KeyboardShortcutDialog(tk.Toplevel):
 
         flood_rem_reg_img_label = tk.Label(self.base, image=flood_rem_reg_img)
         flood_rem_reg_img_label.image = flood_rem_reg_img
-        flood_rem_reg_img_label.grid(row=1, column=6)
+        flood_rem_reg_img_label.grid(row=1, column=3)
 
         flood_rem_reg_label = tk.Label(self.base, text="Flood Remove Tool (l)")
-        flood_rem_reg_label.grid(row=1, column=7)
+        flood_rem_reg_label.grid(row=1, column=4)
 
         no_root_data = Image.open(BytesIO(base64.b64decode(no_root_icon)))
         no_root_img = itk.PhotoImage(no_root_data)
