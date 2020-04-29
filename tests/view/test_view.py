@@ -377,6 +377,7 @@ class TestView():
 
         spy.assert_called()
 
+    @pytest.mark.skip(reason="Feature removed until future version")
     def test_on_keypress_c(self, setup, mocker):
         """
         Test when the c key is pressed
@@ -400,6 +401,7 @@ class TestView():
 
         spy.assert_called()
 
+    @pytest.mark.skip(reason="Feature removed until future version")
     def test_on_keypress_v(self, setup, mocker):
         """
         Test when the v key is pressed
@@ -423,6 +425,7 @@ class TestView():
 
         spy.assert_called()
 
+    @pytest.mark.skip(reason="Feature removed until future version")
     def test_on_keypress_b(self, setup, mocker):
         """
         Test when the b key is pressed
@@ -446,6 +449,7 @@ class TestView():
 
         spy.assert_called()
 
+    @pytest.mark.skip(reason="Feature removed until future version")
     def test_on_keypress_n(self, setup, mocker):
         """
         Test when the n key is pressed
