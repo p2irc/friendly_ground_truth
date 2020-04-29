@@ -325,6 +325,8 @@ class MainWindow(Frame):
         remove_landmark_button.image = remove_landmark_img
         remove_landmark_button.pack(side=LEFT, padx=2, pady=2)
 
+        self.orig_button_colour = remove_reg_button.cget("background")
+
         self.toolbar_buttons[self.ID_TOOL_THRESH] = thresh_button
         self.toolbar_buttons[self.ID_TOOL_ADD] = add_reg_button
         self.toolbar_buttons[self.ID_TOOL_REMOVE] = remove_reg_button
@@ -516,12 +518,17 @@ class MainWindow(Frame):
         :param new_tool_id: The id of the tool that was chosen
         :returns: None
         """
-
         for id, button in self.toolbar_buttons.items():
             if id == new_tool_id:
-                button.config(relief=SUNKEN)
+                if platform != "darwin":
+                    button.config(relief=SUNKEN)
+                button.config(bg="yellow")
+
             else:
-                button.config(relief=RAISED)
+                if platform != "darwin":
+                    button.config(relief=RAISED)
+
+                button.config(bg=self.orig_button_colour)
 
     def on_threshold_tool(self):
         """
