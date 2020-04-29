@@ -633,7 +633,31 @@ class TestView():
 
         window.change_toolbar_state(window.ID_TOOL_THRESH)
         window.toolbar_buttons[window.ID_TOOL_THRESH]\
-            .config.assert_called_once()
+            .config.assert_called()
+
+    def test_change_toolbar_state_darwin(self, setup, mocker):
+        """
+        Test chaning the toolbar state on a mac
+
+        :test_condition: button.config is called
+
+
+        :param setup: Setup
+        :param mocker: mocker
+        :returns: None
+        """
+        from friendly_ground_truth.view import tk_view
+
+        tk_view.platform = 'darwin'
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.toolbar_buttons = {window.ID_TOOL_THRESH: MagicMock(), 7:
+                                  MagicMock()}
+
+        window.change_toolbar_state(window.ID_TOOL_THRESH)
+        window.toolbar_buttons[window.ID_TOOL_THRESH]\
+            .config.assert_called()
 
     def test_on_threshold_tool(self, setup, mocker):
         """
