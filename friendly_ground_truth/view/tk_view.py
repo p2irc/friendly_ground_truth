@@ -31,10 +31,11 @@ from friendly_ground_truth.view.icons.icon_strings import (add_region_icon,
                                                            flood_add_icon,
                                                            flood_remove_icon,
                                                            no_root_icon,
-                                                           add_tip_icon,
-                                                           add_branch_icon,
-                                                           add_cross_icon,
-                                                           remove_land_icon)
+                                                           # add_tip_icon,
+                                                           # add_branch_icon,
+                                                           # add_cross_icon,
+                                                           # remove_land_icon
+                                                           )
 
 from friendly_ground_truth.version_info import VersionInfo
 
@@ -283,47 +284,48 @@ class MainWindow(Frame):
         next_button.pack(side=LEFT, padx=2, pady=2)
 
         # Add Tip Button
-        add_tip_data = Image.open(BytesIO(base64.b64decode(add_tip_icon)))
-        add_tip_img = itk.PhotoImage(add_tip_data)
+        # add_tip_data = Image.open(BytesIO(base64.b64decode(add_tip_icon)))
+        # add_tip_img = itk.PhotoImage(add_tip_data)
 
-        add_tip_button = tk.Button(self.toolbar, image=add_tip_img,
-                                   relief=FLAT, command=self.on_add_tip_tool)
-        add_tip_button.image = add_tip_img
-        add_tip_button.pack(side=LEFT, padx=2, pady=2)
+        # add_tip_button = tk.Button(self.toolbar, image=add_tip_img,
+        #                           relief=FLAT, command=self.on_add_tip_tool)
+        # add_tip_button.image = add_tip_img
+        # add_tip_button.pack(side=LEFT, padx=2, pady=2)
 
         # Add Cross Button
-        add_cross_data = Image.open(BytesIO(base64.b64decode(add_cross_icon)))
-        add_cross_img = itk.PhotoImage(add_cross_data)
+        # add_cross_data = Image.\
+        #        open(BytesIO(base64.b64decode(add_cross_icon)))
+        # add_cross_img = itk.PhotoImage(add_cross_data)
 
-        add_cross_button = tk.Button(self.toolbar, image=add_cross_img,
-                                     relief=FLAT,
-                                     command=self.on_add_cross_tool)
-        add_cross_button.image = add_cross_img
-        add_cross_button.pack(side=LEFT, padx=2, pady=2)
+        # add_cross_button = tk.Button(self.toolbar, image=add_cross_img,
+        #                              relief=FLAT,
+        #                              command=self.on_add_cross_tool)
+        # add_cross_button.image = add_cross_img
+        # add_cross_button.pack(side=LEFT, padx=2, pady=2)
 
         # Add Branch Button
-        add_branch_data = Image.open(BytesIO(base64
-                                             .b64decode(add_branch_icon)))
-        add_branch_img = itk.PhotoImage(add_branch_data)
-        add_branch_button = tk.Button(self.toolbar, image=add_branch_img,
-                                      relief=FLAT,
-                                      command=self.on_add_branch_tool)
-        add_branch_button.image = add_branch_img
-        add_branch_button.pack(side=LEFT, padx=2, pady=2)
+        # add_branch_data = Image.open(BytesIO(base64
+        #                                      .b64decode(add_branch_icon)))
+        # add_branch_img = itk.PhotoImage(add_branch_data)
+        # add_branch_button = tk.Button(self.toolbar, image=add_branch_img,
+        #                               relief=FLAT,
+        #                               command=self.on_add_branch_tool)
+        # add_branch_button.image = add_branch_img
+        # add_branch_button.pack(side=LEFT, padx=2, pady=2)
 
         # Remove Landmark Button
-        remove_landmark_data = Image.open(BytesIO(base64.
-                                                  b64decode(remove_land_icon)))
-        remove_landmark_img = itk.PhotoImage(remove_landmark_data)
+        # remove_landmark_data = Image.open(BytesIO(base64.
+        #                                           b64decode(remove_land_icon)))
+        # remove_landmark_img = itk.PhotoImage(remove_landmark_data)
 
-        remove_landmark_button = tk.Button(self.toolbar,
-                                           image=remove_landmark_img,
-                                           relief=FLAT,
-                                           command=self.
-                                           on_remove_landmark_tool)
+        # remove_landmark_button = tk.Button(self.toolbar,
+        #                                    image=remove_landmark_img,
+        #                                    relief=FLAT,
+        #                                    command=self.
+        #                                    on_remove_landmark_tool)
 
-        remove_landmark_button.image = remove_landmark_img
-        remove_landmark_button.pack(side=LEFT, padx=2, pady=2)
+        # remove_landmark_button.image = remove_landmark_img
+        # remove_landmark_button.pack(side=LEFT, padx=2, pady=2)
 
         self.orig_button_colour = remove_reg_button.cget("background")
 
@@ -335,11 +337,11 @@ class MainWindow(Frame):
         self.toolbar_buttons[self.ID_TOOL_NEXT_IMAGE] = next_button
         self.toolbar_buttons[self.ID_TOOL_FLOOD_ADD] = flood_add_button
         self.toolbar_buttons[self.ID_TOOL_FLOOD_REMOVE] = flood_remove_button
-        self.toolbar_buttons[self.ID_TOOL_ADD_TIP] = add_tip_button
-        self.toolbar_buttons[self.ID_TOOL_ADD_CROSS] = add_cross_button
-        self.toolbar_buttons[self.ID_TOOL_ADD_BRANCH] = add_branch_button
-        self.toolbar_buttons[self.ID_TOOL_REMOVE_LANDMARK] = \
-            remove_landmark_button
+        # self.toolbar_buttons[self.ID_TOOL_ADD_TIP] = add_tip_button
+        # self.toolbar_buttons[self.ID_TOOL_ADD_CROSS] = add_cross_button
+        # self.toolbar_buttons[self.ID_TOOL_ADD_BRANCH] = add_branch_button
+        # self.toolbar_buttons[self.ID_TOOL_REMOVE_LANDMARK] = \
+        #    remove_landmark_button
 
         self.toolbar.pack(side=TOP, fill=X)
 
@@ -424,17 +426,17 @@ class MainWindow(Frame):
         elif key == "l":
             self.on_flood_remove_tool()
 
-        elif key == "c":
-            self.on_add_cross_tool()
+        # elif key == "c":
+        #    self.on_add_cross_tool()
 
-        elif key == "v":
-            self.on_add_tip_tool()
+        # elif key == "v":
+        #    self.on_add_tip_tool()
 
-        elif key == "b":
-            self.on_add_branch_tool()
+        # elif key == "b":
+        #     self.on_add_branch_tool()
 
-        elif key == "n":
-            self.on_remove_landmark_tool()
+        # elif key == "n":
+        #    self.on_remove_landmark_tool()
         else:
             self.logger.debug("Keypress: {}".format(key))
 
@@ -1001,54 +1003,56 @@ class KeyboardShortcutDialog(tk.Toplevel):
         next_label = tk.Label(self.base, text="Next Patch (Right-Arrow)")
         next_label.grid(row=2, column=4)
 
-        add_tip_data = Image.open(BytesIO(base64.b64decode(add_tip_icon)))
-        add_tip_img = itk.PhotoImage(add_tip_data)
+        #  add_tip_data = Image.open(BytesIO(base64.b64decode(add_tip_icon)))
+        #  add_tip_img = itk.PhotoImage(add_tip_data)
 
-        add_tip_img_label = tk.Label(self.base, image=add_tip_img)
-        add_tip_img_label.image = add_tip_img
-        add_tip_img_label.grid(row=3, column=6)
+        #  add_tip_img_label = tk.Label(self.base, image=add_tip_img)
+        #  add_tip_img_label.image = add_tip_img
+        #  add_tip_img_label.grid(row=3, column=6)
 
-        add_tip_label = tk.Label(self.base, text="Add Root Tip (v)")
-        add_tip_label.grid(row=3, column=7)
+        #  add_tip_label = tk.Label(self.base, text="Add Root Tip (v)")
+        #  add_tip_label.grid(row=3, column=7)
 
-        space_label = tk.Label(self.base, text="    ")
-        space_label.grid(row=3, column=5)
+        # space_label = tk.Label(self.base, text="    ")
+        # space_label.grid(row=3, column=5)
 
-        add_cross_data = Image.open(BytesIO(base64.b64decode(add_cross_icon)))
-        add_cross_img = itk.PhotoImage(add_cross_data)
+        # add_cross_data = Image.\
+        #        open(BytesIO(base64.b64decode(add_cross_icon)))
+        # add_cross_img = itk.PhotoImage(add_cross_data)
 
-        add_cross_img_label = tk.Label(self.base, image=add_cross_img)
-        add_cross_img_label.image = add_cross_img
-        add_cross_img_label.grid(row=3, column=0)
+        # add_cross_img_label = tk.Label(self.base, image=add_cross_img)
+        # add_cross_img_label.image = add_cross_img
+        # add_cross_img_label.grid(row=3, column=0)
 
-        add_cross_label = tk.Label(self.base, text="Add Root Crossing (c)")
-        add_cross_label.grid(row=3, column=1)
+        # add_cross_label = tk.Label(self.base, text="Add Root Crossing (c)")
+        # add_cross_label.grid(row=3, column=1)
 
-        space_label = tk.Label(self.base, text="    ")
-        space_label.grid(row=3, column=2)
+        # space_label = tk.Label(self.base, text="    ")
+        # space_label.grid(row=3, column=2)
 
-        add_branch_data = Image.open(BytesIO(base64.
-                                     b64decode(add_branch_icon)))
-        add_branch_img = itk.PhotoImage(add_branch_data)
+        # add_branch_data = Image.open(BytesIO(base64.
+        #                              b64decode(add_branch_icon)))
+        # add_branch_img = itk.PhotoImage(add_branch_data)
 
-        add_branch_img_label = tk.Label(self.base, image=add_branch_img)
-        add_branch_img_label.image = add_branch_img
-        add_branch_img_label.grid(row=3, column=3)
+        # add_branch_img_label = tk.Label(self.base, image=add_branch_img)
+        # add_branch_img_label.image = add_branch_img
+        # add_branch_img_label.grid(row=3, column=3)
 
-        add_branch_label = tk.Label(self.base, text="Add Root Branching (b)")
-        add_branch_label.grid(row=3, column=4)
+        # add_branch_label = tk.Label(self.base, text="Add Root Branching (b)")
+        # add_branch_label.grid(row=3, column=4)
 
-        remove_land_data = Image.open(BytesIO(base64
-                                              .b64decode(remove_land_icon)))
-        remove_landmark_img = itk.PhotoImage(remove_land_data)
+        # remove_land_data = Image.open(BytesIO(base64
+        #                                       .b64decode(remove_land_icon)))
+        # remove_landmark_img = itk.PhotoImage(remove_land_data)
 
-        remove_landmark_img_label = tk.Label(self.base,
-                                             image=remove_landmark_img)
-        remove_landmark_img_label.image = remove_landmark_img
-        remove_landmark_img_label.grid(row=4, column=0)
+        # remove_landmark_img_label = tk.Label(self.base,
+        #                                      image=remove_landmark_img)
+        # remove_landmark_img_label.image = remove_landmark_img
+        # remove_landmark_img_label.grid(row=4, column=0)
 
-        remove_landmark_label = tk.Label(self.base, text="Remove Landmark (n)")
-        remove_landmark_label.grid(row=4, column=1)
+        # remove_landmark_label = tk.Label(self.base, \
+        #        text="Remove Landmark (n)")
+        # remove_landmark_label.grid(row=4, column=1)
 
 
 class ResizingCanvas(tk.Canvas):
