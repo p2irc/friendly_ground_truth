@@ -36,13 +36,20 @@ class Mode(Enum):
     ADD_REGION = 2
     REMOVE_REGION = 3
     NO_ROOT = 4
-    ZOOM = 5
     FLOOD_ADD = 6
     FLOOD_REMOVE = 7
     ADD_TIP = 8
     ADD_BRANCH = 9
     ADD_CROSSING = 10
     REMOVE_LANDMARK = 11
+
+
+class SecondaryMode(Enum):
+    """
+    Class representing secondary adjustment modes
+    """
+    ZOOM = 1
+    ADJUST_TOOL = 2
 
 
 class Controller:
@@ -65,6 +72,7 @@ class Controller:
 
         # Set up the current mode
         self.current_mode = Mode.THRESHOLD
+        self.current_secondary_mode = SecondaryMode.ZOOM
 
         # Brush radii
         self.add_region_radius = 15
@@ -305,11 +313,6 @@ class Controller:
         elif new_mode_id == self.main_window.ID_TOOL_NO_ROOT:
             self.no_root_activate()
 
-        elif new_mode_id == self.main_window.ID_TOOL_ZOOM:
-            self.current_mode = Mode.ZOOM
-            self.main_window.set_brush_radius(0)
-            self.main_window.zoom_cursor = True
-
         elif new_mode_id == self.main_window.ID_TOOL_FLOOD_ADD:
             self.current_mode = Mode.FLOOD_ADD
             self.main_window.flood_cursor = True
@@ -343,6 +346,20 @@ class Controller:
 
             return False
 
+    def change_secondary_mode(self, new_mode_id):
+        """
+        Change the secondary mode (for mouse wheel tool adjustments)
+
+        :param new_mode_id: The id of the new mode
+        :returns: None
+        """
+
+        if new_mode_id == self.main_window.ID_TOOL_ZOOM:
+            self.current_secondary_mode = SecondaryMode.ZOOM
+
+        elif new_mode_id == self.main_window.ID_ADJUST_TOOL:
+            self.current_secondary_mode = SecondaryMode.ADJUST_TOOL
+
     def no_root_activate(self):
         """
         Set the mask for the patch to zero, there is no root here
@@ -366,27 +383,30 @@ class Controller:
         :returns: True on success, False otherwise
         """
 
-        if self.current_mode == Mode.THRESHOLD:
+        if self.current_secondary_mode == SecondaryMode.ADJUST_TOOL:
+            if self.current_mode == Mode.THRESHOLD:
 
-            self.adjust_threshold(wheel_rotation)
+                self.adjust_threshold(wheel_rotation)
 
-        elif self.current_mode == Mode.ADD_REGION:
-            self.adjust_add_region_brush(wheel_rotation)
+            elif self.current_mode == Mode.ADD_REGION:
+                self.adjust_add_region_brush(wheel_rotation)
 
-        elif self.current_mode == Mode.REMOVE_REGION:
-            self.adjust_remove_region_brush(wheel_rotation)
+            elif self.current_mode == Mode.REMOVE_REGION:
+                self.adjust_remove_region_brush(wheel_rotation)
 
-        elif self.current_mode == Mode.REMOVE_LANDMARK:
-            self.adjust_remove_landmark_brush(wheel_rotation)
+            elif self.current_mode == Mode.REMOVE_LANDMARK:
+                self.adjust_remove_landmark_brush(wheel_rotation)
 
-        elif self.current_mode == Mode.ZOOM:
+            elif self.current_mode == Mode.FLOOD_ADD:
+                self.handle_flood_add_tolerance(wheel_rotation)
+
+            elif self.current_mode == Mode.FLOOD_REMOVE:
+                self.handle_flood_remove_tolerance(wheel_rotation)
+            else:
+                return False
+
+        elif self.current_secondary_mode == SecondaryMode.ZOOM:
             self.handle_zoom(wheel_rotation, x, y)
-
-        elif self.current_mode == Mode.FLOOD_ADD:
-            self.handle_flood_add_tolerance(wheel_rotation)
-
-        elif self.current_mode == Mode.FLOOD_REMOVE:
-            self.handle_flood_remove_tolerance(wheel_rotation)
 
         else:
             self.logger.error("Invalid mouse wheel rotation")
@@ -585,12 +605,6 @@ class Controller:
         :returns: None
         """
         self.logger.debug("Right click")
-        # Reset zoom
-        if self.current_mode == Mode.ZOOM:
-            self.main_window.image_x = 0
-            self.main_window.image_y = 0
-            self.main_window.image_scale = 1
-            self.display_current_patch()
 
     def handle_left_release(self):
         """
@@ -606,11 +620,6 @@ class Controller:
         elif self.current_mode == Mode.REMOVE_REGION:
             self.logger.debug("Remove region release")
             return True
-
-        elif self.current_mode == Mode.ZOOM:
-            self.display_current_patch()
-            return True
-
         else:
             return False
 
@@ -621,14 +630,11 @@ class Controller:
         :param position: The position (x, y) of the mouse during the event
         :returns: True on success, False otherwise
         """
+        position = (position[0] - self.main_window.image_x,
+                    position[1] - self.main_window.image_y)
 
-        if self.current_mode is not Mode.ZOOM:
-
-            position = (position[0] - self.main_window.image_x,
-                        position[1] - self.main_window.image_y)
-
-            position = (position[0] / self.main_window.image_scale,
-                        position[1] / self.main_window.image_scale)
+        position = (position[0] / self.main_window.image_scale,
+                    position[1] / self.main_window.image_scale)
 
         # Make sure we stay inside the image
         if position[0] < 0 or position[1] < 0:
@@ -662,7 +668,20 @@ class Controller:
             patch.remove_landmark(position, draw_radius)
             self.display_current_patch()
 
-        elif self.current_mode == Mode.ZOOM:
+        else:
+            return False
+
+        return True
+
+    def handle_mouse_wheel_motion(self, position):
+        """
+        Handle when the mouse wheel is clicked and the mouse is dragged
+
+        :param position: The position of the mouse
+        :returns: None
+        """
+
+        if self.current_secondary_mode == SecondaryMode.ZOOM:
             self.main_window.image_x += (position[0] -
                                          self.main_window.previous_position[0])
 
@@ -670,11 +689,6 @@ class Controller:
                                          self.main_window.previous_position[1])
 
             self.display_current_patch()
-
-        else:
-            return False
-
-        return True
 
     def adjust_threshold(self, wheel_rotation):
         """

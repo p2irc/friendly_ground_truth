@@ -25,7 +25,6 @@ from sys import platform
 
 from friendly_ground_truth.view.icons.icon_strings import (add_region_icon,
                                                            remove_region_icon,
-                                                           zoom_icon,
                                                            threshold_icon,
                                                            next_patch_icon,
                                                            prev_patch_icon,
@@ -63,6 +62,7 @@ class MainWindow(Frame):
     ID_TOOL_ADD_CROSS = 111
     ID_TOOL_ADD_BRANCH = 112
     ID_TOOL_REMOVE_LANDMARK = 113
+    ID_ADJUST_TOOL = 114
 
     MAX_SCALE = 16
     MIN_SCALE = 0.25
@@ -88,6 +88,8 @@ class MainWindow(Frame):
         self.can_draw = True
 
         self.previous_position = (0, 0)
+
+        self.ctrl_pressed = False
 
         # master.geometry("500x300+300+300")
         master.title("Friendly Ground Truth")
@@ -119,8 +121,14 @@ class MainWindow(Frame):
             self.bind_all("<MouseWheel>", self.on_mousewheel)
 
         self.bind_all("<B1-Motion>", self.on_drag)
+
         self.bind_all("<Button-1>", self.on_click)
-        self.bind_all("<Button-2>", self.on_right_click)
+        self.bind_all("<ButtonRelease-1>", self.on_click_release)
+
+        self.bind_all("<B2-Motion>", self.on_wheel_motion)
+        self.bind_all("<Button-2>", self.on_wheel_click)
+        self.bind_all("<ButtonRelease-2>", self.on_wheel_release)
+
         self.bind_all("<Button-3>", self.on_right_click)
 
         self.bind_all("<KeyPress>", self.on_keypress)
@@ -134,7 +142,7 @@ class MainWindow(Frame):
         :returns: None
         """
 
-        self.canvas = ResizingCanvas(self, cursor='none')#tk.Canvas(self, cursor='none', width=1000, height=1000)
+        self.canvas = ResizingCanvas(self, cursor='none')
         self.canvas.bind("<Enter>", self.on_enter_canvas)
         self.canvas.bind("<Leave>", self.on_leave_canvas)
         self.canvas.bind("<Motion>", self.on_motion)
@@ -227,14 +235,6 @@ class MainWindow(Frame):
                                       command=self.on_remove_reg_tool)
         remove_reg_button.image = remove_reg_img
         remove_reg_button.pack(side=LEFT, padx=2, pady=2)
-
-        # Zoom  Button
-        zoom_data = Image.open(BytesIO(base64.b64decode(zoom_icon)))
-        zoom_img = itk.PhotoImage(zoom_data)
-        zoom_button = tk.Button(self.toolbar, image=zoom_img,
-                                relief=FLAT, command=self.on_zoom_tool)
-        zoom_button.image = zoom_img
-        zoom_button.pack(side=LEFT, padx=2, pady=2)
 
         # Flood Add Button
         flood_add_data = Image.open(BytesIO(base64.b64decode(flood_add_icon)))
@@ -331,7 +331,6 @@ class MainWindow(Frame):
         self.toolbar_buttons[self.ID_TOOL_NO_ROOT] = no_root_button
         self.toolbar_buttons[self.ID_TOOL_PREV_IMAGE] = prev_button
         self.toolbar_buttons[self.ID_TOOL_NEXT_IMAGE] = next_button
-        self.toolbar_buttons[self.ID_TOOL_ZOOM] = zoom_button
         self.toolbar_buttons[self.ID_TOOL_FLOOD_ADD] = flood_add_button
         self.toolbar_buttons[self.ID_TOOL_FLOOD_REMOVE] = flood_remove_button
         self.toolbar_buttons[self.ID_TOOL_ADD_TIP] = add_tip_button
@@ -391,14 +390,25 @@ class MainWindow(Frame):
 
         key = event.char
 
+        s = event.state
+        ctrl = (s & 0x4) != 0
+        alt = (s & 0x8) != 0 or (s & 0x80) != 0
+        shift = (s & 0x1) != 0
+
+        if shift:
+            key = 'shift+' + key
+
+        if alt:
+            key = 'alt+' + key
+
+        if ctrl:
+            key = 'ctrl+' + key
+
         if key == 'x':
             self.on_no_root_tool()
 
         elif key == "t":
             self.on_threshold_tool()
-
-        elif key == "z":
-            self.on_zoom_tool()
 
         elif key == "a":
             self.on_add_reg_tool()
@@ -423,7 +433,6 @@ class MainWindow(Frame):
 
         elif key == "n":
             self.on_remove_landmark_tool()
-
         else:
             self.logger.debug("Keypress: {}".format(key))
 
@@ -598,15 +607,6 @@ class MainWindow(Frame):
         """
         self.controller.change_mode(self.ID_TOOL_NO_ROOT)
 
-    def on_zoom_tool(self):
-        """
-        Called when the zoom tool is chosen
-
-        :returns: None
-        """
-        self.change_toolbar_state(self.ID_TOOL_ZOOM)
-        self.controller.change_mode(self.ID_TOOL_ZOOM)
-
     def on_flood_add_tool(self):
         """
         Called when the flood add tool is chosen
@@ -659,7 +659,16 @@ class MainWindow(Frame):
         if event.delta != 0:
             rotation = event.delta
 
+        self.previous_position = event.x, event.y
+        s = event.state
+
+        alt = (s & 0x8) != 0 or (s & 0x80) != 0
+
+        if alt:
+            self.controller.change_secondary_mode(self.ID_ADJUST_TOOL)
+
         self.controller.handle_mouse_wheel(rotation, event.x, event.y)
+        self.controller.change_secondary_mode(self.ID_TOOL_ZOOM)
 
     def on_drag(self, event):
         """
@@ -668,8 +677,27 @@ class MainWindow(Frame):
         :param event: the mouse event
         :returns: none
         """
+        state = event.state
+        ctrl = (state & 0x4) != 0
 
-        self.controller.handle_motion((event.x, event.y))
+        if not ctrl:
+            self.controller.handle_motion((event.x, event.y))
+        else:
+            self.canvas.config(cursor="hand2")
+            self.controller.handle_mouse_wheel_motion((event.x, event.y))
+
+        self.previous_position = (event.x, event.y)
+        self.on_motion(event)
+
+    def on_wheel_motion(self, event):
+        """
+        Called when the mouuse is dragged with the mouswheel pressed
+
+        :param event: The mouse event
+        :returns: None
+        """
+
+        self.controller.handle_mouse_wheel_motion((event.x, event.y))
         self.previous_position = (event.x, event.y)
 
     def on_motion(self, event):
@@ -707,6 +735,25 @@ class MainWindow(Frame):
         self.brush_cursor = self.canvas.create_oval(x_max, y_max, x_min, y_min,
                                                     outline='white')
 
+    def on_wheel_click(self, event):
+        """
+        Called when the mouse wheel is clicekd
+
+        :param event: The Mouse event
+        :returns: None
+        """
+        self.canvas.config(cursor="hand2")
+        self.previous_position = (event.x, event.y)
+
+    def on_wheel_release(self, event):
+        """
+        Called when the mouse wheel is released
+
+        :param event: THe mouse event
+        :returns: None
+        """
+        self.on_enter_canvas(event)
+
     def on_click(self, event):
         """
         Called when the left mouse button is clicked
@@ -720,6 +767,15 @@ class MainWindow(Frame):
 
         if self.can_draw:
             self.controller.handle_left_click((event.x, event.y))
+
+    def on_click_release(self, event):
+        """
+        Called when the left mouse button is released
+
+        :param event: Mouse Event
+        :returns: None
+        """
+        self.on_enter_canvas(None)
 
     def on_right_click(self, event):
         """
@@ -750,10 +806,7 @@ class MainWindow(Frame):
         :returns: None
         """
         self.can_draw = True
-        if self.zoom_cursor:
-            self.canvas.config(cursor='sizing')
-
-        elif self.flood_cursor:
+        if self.flood_cursor:
             self.canvas.config(cursor='cross')
 
         else:
@@ -876,16 +929,6 @@ class KeyboardShortcutDialog(tk.Toplevel):
 
         rem_reg_label = tk.Label(self.base, text="Remove Region Tool (r)")
         rem_reg_label.grid(row=0, column=7)
-
-        zoom_data = Image.open(BytesIO(base64.b64decode(zoom_icon)))
-        zoom_img = itk.PhotoImage(zoom_data)
-
-        zoom_img_label = tk.Label(self.base, image=zoom_img)
-        zoom_img_label.image = zoom_img
-        zoom_img_label.grid(row=1, column=0)
-
-        zoom_label = tk.Label(self.base, text="Zoom Tool (z)")
-        zoom_label.grid(row=1, column=1)
 
         space_label = tk.Label(self.base, text="    ")
         space_label.grid(row=1, column=2)

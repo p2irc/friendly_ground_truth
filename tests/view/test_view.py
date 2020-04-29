@@ -232,6 +232,7 @@ class TestView():
         window = MainWindow(self.mock_controller, MagicMock())
 
         event = MagicMock()
+        event.state = 0
 
         spy = mocker.spy(window, 'on_next_tool')
 
@@ -254,6 +255,7 @@ class TestView():
 
         event = MagicMock()
         event.char = 'x'
+        event.state = 0
 
         spy = mocker.spy(window, 'on_no_root_tool')
 
@@ -276,29 +278,9 @@ class TestView():
 
         event = MagicMock()
         event.char = 't'
+        event.state = 0
 
         spy = mocker.spy(window, 'on_threshold_tool')
-
-        window.on_keypress(event)
-
-        spy.assert_called()
-
-    def test_on_keypress_z(self, setup, mocker):
-        """
-        Test when the z key is pressed
-
-        :test_condition: on_zoom_tool() is called
-
-        :param setup: Setup fixture
-        :param mocker: mocker
-        :returns: None
-        """
-        window = MainWindow(self.mock_controller, MagicMock())
-
-        event = MagicMock()
-        event.char = 'z'
-
-        spy = mocker.spy(window, 'on_zoom_tool')
 
         window.on_keypress(event)
 
@@ -319,6 +301,7 @@ class TestView():
 
         event = MagicMock()
         event.char = 'a'
+        event.state = 0
 
         spy = mocker.spy(window, 'on_add_reg_tool')
 
@@ -340,6 +323,7 @@ class TestView():
 
         event = MagicMock()
         event.char = 'r'
+        event.state = 0
 
         spy = mocker.spy(window, 'on_remove_reg_tool')
 
@@ -362,6 +346,7 @@ class TestView():
 
         event = MagicMock()
         event.char = 'f'
+        event.state = 0
 
         spy = mocker.spy(window, 'on_flood_add_tool')
 
@@ -384,6 +369,7 @@ class TestView():
 
         event = MagicMock()
         event.char = 'l'
+        event.state = 0
 
         spy = mocker.spy(window, 'on_flood_remove_tool')
 
@@ -406,6 +392,7 @@ class TestView():
 
         event = MagicMock()
         event.char = 'c'
+        event.state = 0
 
         spy = mocker.spy(window, 'on_add_cross_tool')
 
@@ -428,6 +415,7 @@ class TestView():
 
         event = MagicMock()
         event.char = 'v'
+        event.state = 0
 
         spy = mocker.spy(window, 'on_add_tip_tool')
 
@@ -450,6 +438,7 @@ class TestView():
 
         event = MagicMock()
         event.char = 'b'
+        event.state = 0
 
         spy = mocker.spy(window, 'on_add_branch_tool')
 
@@ -472,6 +461,7 @@ class TestView():
 
         event = MagicMock()
         event.char = 'n'
+        event.state = 0
 
         spy = mocker.spy(window, 'on_remove_landmark_tool')
 
@@ -713,23 +703,6 @@ class TestView():
         self.mock_controller.change_mode\
                             .assert_called_with(window.ID_TOOL_NO_ROOT)
 
-    def test_on_zoom_tool(self, setup, mocker):
-        """
-        Test when the zoom tool is chosen
-
-        :test_condition: controller.change_mode is called with ID_TOOL_ZOOM
-
-        :param setup: setup
-        :param mocker: mocker
-        :returns: None
-        """
-
-        window = MainWindow(self.mock_controller, MagicMock())
-        window.on_zoom_tool()
-
-        self.mock_controller.change_mode\
-                            .assert_called_with(window.ID_TOOL_ZOOM)
-
     def test_on_flood_add_tool(self, setup, mocker):
         """
         Test when the flood add region tool is chosen
@@ -823,6 +796,32 @@ class TestView():
                                                                    event.x,
                                                                    event.y)
 
+    def test_on_click_release(self, setup, mocker):
+        """
+        Test when the left mouse click is released
+
+        :test_condition: on_enter_canvas is called
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.on_enter_canvas = MagicMock()
+
+        event = MagicMock()
+        event.num = 0
+        event.delta = 120
+        event.x = 0
+        event.y = 10
+        event.state = 0x8
+
+        window.on_click_release(event)
+
+        window.on_enter_canvas.assert_called()
+
     def test_on_mousewheel_5(self, setup, mocker):
         """
         Test when the mousewheel is used and event.num is 5 and event.delta is
@@ -867,12 +866,110 @@ class TestView():
         event.delta = 120
         event.x = 0
         event.y = 10
-
+        event.state = 0x5
         window.on_mousewheel(event)
 
         self.mock_controller.handle_mouse_wheel.assert_called_with(120,
                                                                    event.x,
                                                                    event.y)
+
+    def test_on_mousewheel_alt(self, setup, mocker):
+        """
+        Test the mousewheel when alt is pressed
+
+        :test_condition: change_secondary_mode is called
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.num = 0
+        event.delta = 120
+        event.x = 0
+        event.y = 10
+        event.state = 0x8
+
+        window.on_mousewheel(event)
+
+        self.mock_controller.change_secondary_mode\
+            .assert_called()
+
+    def test_on_wheel_release(self, setup, mocker):
+        """
+        Test when the mouse wheel is released
+
+        :test_condition: on_enter_canvas is called
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.num = 0
+        event.delta = 120
+        event.x = 0
+        event.y = 10
+        event.state = 0x8
+
+        window.on_enter_canvas = MagicMock()
+
+        window.on_wheel_release(event)
+
+        window.on_enter_canvas.assert_called()
+
+    def test_on_wheel_click(self, setup, mocker):
+        """
+        Test when the mouse wheel is clicked
+
+        :test_condition: Canvas.config is called and previous position is
+                         set to the event position
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        canvas_mock = mocker.patch('tkinter.Canvas.config')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.num = 0
+        event.delta = 120
+        event.x = 0
+        event.y = 10
+        event.state = 0x8
+
+        window.on_wheel_click(event)
+
+        canvas_mock.assert_called()
+
+        assert window.previous_position == (event.x, event.y)
+
+    def test_on_wheel_motion(self, setup, mocker):
+        """
+        Test when the mouse is moved with the wheel depressed
+
+        :test_condition: handle_mouse_wheel_motion is called
+
+        :returns: None
+        """
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.num = 0
+        event.delta = 120
+        event.x = 0
+        event.y = 10
+        event.state = 0x8
+
+        window.on_wheel_motion(event)
+
+        self.mock_controller.handle_mouse_wheel_motion\
+            .assert_called()
 
     def test_on_drag(self, setup, mocker):
         """
@@ -884,12 +981,35 @@ class TestView():
         :param mocker: mocker
         :returns: None
         """
-
+        mocker.patch('tkinter.Canvas.config')
         window = MainWindow(self.mock_controller, MagicMock())
 
-        window.on_drag(MagicMock())
+        event = MagicMock()
+        event.state = 0
+
+        window.on_drag(event)
 
         self.mock_controller.handle_motion.assert_called()
+
+    def test_on_drag_ctrl(self, setup, mocker):
+        """
+        Test when the mouse is dragged with ctrl pressed
+
+        :test_condition: controller.handle_mouse_wheel_motion is called
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Canvas.config')
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        event = MagicMock()
+        event.state = 0x4
+
+        window.on_drag(event)
+
+        self.mock_controller.handle_mouse_wheel_motion.assert_called()
 
     def test_on_motion_not_zoom(self, setup, mocker):
         """
