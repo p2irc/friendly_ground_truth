@@ -814,10 +814,14 @@ class TestView():
         event = MagicMock()
         event.num = 4
         event.delta = 0
+        event.x = 34
+        event.y = 21
 
         window.on_mousewheel(event)
 
-        self.mock_controller.handle_mouse_wheel.assert_called_with(120)
+        self.mock_controller.handle_mouse_wheel.assert_called_with(120,
+                                                                   event.x,
+                                                                   event.y)
 
     def test_on_mousewheel_5(self, setup, mocker):
         """
@@ -835,10 +839,14 @@ class TestView():
         event = MagicMock()
         event.num = 5
         event.delta = 0
+        event.x = 10
+        event.y = 20
 
         window.on_mousewheel(event)
 
-        self.mock_controller.handle_mouse_wheel.assert_called_with(-120)
+        self.mock_controller.handle_mouse_wheel.assert_called_with(-120,
+                                                                   event.x,
+                                                                   event.y)
 
     def test_on_mousewheel_not_0(self, setup, mocker):
         """
@@ -857,10 +865,14 @@ class TestView():
         event = MagicMock()
         event.num = 0
         event.delta = 120
+        event.x = 0
+        event.y = 10
 
         window.on_mousewheel(event)
 
-        self.mock_controller.handle_mouse_wheel.assert_called_with(120)
+        self.mock_controller.handle_mouse_wheel.assert_called_with(120,
+                                                                   event.x,
+                                                                   event.y)
 
     def test_on_drag(self, setup, mocker):
         """
