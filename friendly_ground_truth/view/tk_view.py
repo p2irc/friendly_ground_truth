@@ -14,7 +14,7 @@ import tkinter.messagebox
 from io import BytesIO
 import base64
 
-from tkinter import LEFT, TOP, X, FLAT, RAISED, SUNKEN, ALL, BOTH, YES
+from tkinter import LEFT, TOP, X, FLAT, RAISED, SUNKEN, ALL, BOTH, YES, RIGHT
 from tkinter import Frame
 from tkinter import ttk
 
@@ -343,6 +343,9 @@ class MainWindow(Frame):
         # self.toolbar_buttons[self.ID_TOOL_REMOVE_LANDMARK] = \
         #    remove_landmark_button
 
+        self.image_indicator = tk.Label(self.toolbar, text="No Image Loaded")
+        self.image_indicator.pack(side=RIGHT, padx=2, pady=2)
+
         self.toolbar.pack(side=TOP, fill=X)
 
         self.pack()
@@ -449,6 +452,10 @@ class MainWindow(Frame):
 
         self.controller.load_new_image()
         self.old_img = None
+
+        image_name = self.controller.image.path
+
+        self.image_indicator.config(text="Annotating " + image_name)
 
     def start_progressbar(self, num_patches):
         """
