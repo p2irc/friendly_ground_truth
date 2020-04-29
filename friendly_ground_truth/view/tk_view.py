@@ -555,49 +555,49 @@ class MainWindow(Frame):
 
         self.controller.change_mode(self.ID_TOOL_ADD)
 
-    def on_add_tip_tool(self):
-        """
-        Called when the add tip brush tool is chosen
+    # def on_add_tip_tool(self):
+    #     """
+    #     Called when the add tip brush tool is chosen
 
-        :returns: None
-        """
+    #     :returns: None
+    #     """
 
-        self.change_toolbar_state(self.ID_TOOL_ADD_TIP)
+    #     self.change_toolbar_state(self.ID_TOOL_ADD_TIP)
 
-        self.controller.change_mode(self.ID_TOOL_ADD_TIP)
+    #     self.controller.change_mode(self.ID_TOOL_ADD_TIP)
 
-    def on_add_cross_tool(self):
-        """
-        Called when the add cross brush tool is chosen
+    # def on_add_cross_tool(self):
+    #     """
+    #     Called when the add cross brush tool is chosen
 
-        :returns: None
-        """
+    #     :returns: None
+    #     """
 
-        self.change_toolbar_state(self.ID_TOOL_ADD_CROSS)
+    #     self.change_toolbar_state(self.ID_TOOL_ADD_CROSS)
 
-        self.controller.change_mode(self.ID_TOOL_ADD_CROSS)
+    #     self.controller.change_mode(self.ID_TOOL_ADD_CROSS)
 
-    def on_add_branch_tool(self):
-        """
-        Called when the add branch brush tool is chosen
+    # def on_add_branch_tool(self):
+    #     """
+    #     Called when the add branch brush tool is chosen
 
-        :returns: None
-        """
+    #     :returns: None
+    #     """
 
-        self.change_toolbar_state(self.ID_TOOL_ADD_BRANCH)
+    #     self.change_toolbar_state(self.ID_TOOL_ADD_BRANCH)
 
-        self.controller.change_mode(self.ID_TOOL_ADD_BRANCH)
+    #     self.controller.change_mode(self.ID_TOOL_ADD_BRANCH)
 
-    def on_remove_landmark_tool(self):
-        """
-        Called when the remoive landmark brush tool is chosen
+    # def on_remove_landmark_tool(self):
+    #     """
+    #     Called when the remoive landmark brush tool is chosen
 
-        :returns: None
-        """
+    #     :returns: None
+    #     """
 
-        self.change_toolbar_state(self.ID_TOOL_REMOVE_LANDMARK)
+    #     self.change_toolbar_state(self.ID_TOOL_REMOVE_LANDMARK)
 
-        self.controller.change_mode(self.ID_TOOL_REMOVE_LANDMARK)
+    #     self.controller.change_mode(self.ID_TOOL_REMOVE_LANDMARK)
 
     def on_remove_reg_tool(self):
         """
