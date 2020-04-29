@@ -49,6 +49,7 @@ class Controller:
     """
     The main controller object for the application
     """
+    ZOOM_SCALE = 1.10
 
     def __init__(self, master):
         """
@@ -355,11 +356,13 @@ class Controller:
 
         self.display_current_patch()
 
-    def handle_mouse_wheel(self, wheel_rotation):
+    def handle_mouse_wheel(self, wheel_rotation, x, y):
         """
         Handle wheel rotation coming from the mouse
 
         :param wheel_rotation: The wheel rotation
+        :param x: The x-position of the mouse event
+        :param y: The y-position of the mouse event
         :returns: True on success, False otherwise
         """
 
@@ -377,7 +380,7 @@ class Controller:
             self.adjust_remove_landmark_brush(wheel_rotation)
 
         elif self.current_mode == Mode.ZOOM:
-            self.handle_zoom(wheel_rotation)
+            self.handle_zoom(wheel_rotation, x, y)
 
         elif self.current_mode == Mode.FLOOD_ADD:
             self.handle_flood_add_tolerance(wheel_rotation)
@@ -437,21 +440,45 @@ class Controller:
         patch.overlay_mask()
         self.display_current_patch()
 
-    def handle_zoom(self, wheel_rotation):
+    def handle_zoom(self, wheel_rotation, x, y):
         """
         Handle zooming with the mouse wheel
 
         :param wheel_rotation: The roation of the mouse wheel
+        :param x: The x-cooridinate
+        :param y: The y-coordinate
         :returns: True on success, False otherwise
         """
 
         old_scale = self.main_window.image_scale
 
+        img_point = (x - self.main_window.image_x,
+                     y - self.main_window.image_y)
+
+        img_point = (img_point[0] / self.main_window.image_scale,
+                     img_point[1] / self.main_window.image_scale)
+
         if wheel_rotation > 0 and old_scale < self.main_window.MAX_SCALE:
-            self.main_window.image_scale *= 2.0
+            self.main_window.image_scale *= self.ZOOM_SCALE
+            new_img_point = (img_point[0] * self.ZOOM_SCALE, img_point[1] *
+                             self.ZOOM_SCALE)
+
+            translation = (new_img_point[0] - img_point[0],
+                           new_img_point[1] - img_point[1])
+
+            self.main_window.image_x -= translation[0]
+            self.main_window.image_y -= translation[1]
 
         elif wheel_rotation < 0 and old_scale > self.main_window.MIN_SCALE:
-            self.main_window.image_scale /= 2.0
+            self.main_window.image_scale /= self.ZOOM_SCALE
+            new_img_point = (img_point[0] / self.ZOOM_SCALE, img_point[1] /
+                             self.ZOOM_SCALE)
+
+            translation = (new_img_point[0] - img_point[0],
+                           new_img_point[1] - img_point[1])
+
+            self.main_window.image_x -= translation[0]
+            self.main_window.image_y -= translation[1]
 
         else:
             return False

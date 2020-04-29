@@ -659,7 +659,7 @@ class MainWindow(Frame):
         if event.delta != 0:
             rotation = event.delta
 
-        self.controller.handle_mouse_wheel(rotation)
+        self.controller.handle_mouse_wheel(rotation, event.x, event.y)
 
     def on_drag(self, event):
         """
