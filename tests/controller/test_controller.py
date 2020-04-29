@@ -877,7 +877,7 @@ class TestController:
 
         spy = mocker.spy(controller, 'adjust_threshold')
 
-        result = controller.handle_mouse_wheel(-1)
+        result = controller.handle_mouse_wheel(-1, 0, 0)
 
         spy.assert_called_once_with(-1)
         assert True is result
@@ -900,7 +900,7 @@ class TestController:
 
         spy = mocker.spy(controller, 'adjust_add_region_brush')
 
-        result = controller.handle_mouse_wheel(-1)
+        result = controller.handle_mouse_wheel(-1, 0, 0)
 
         spy.assert_called_once_with(-1)
         assert True is result
@@ -923,7 +923,7 @@ class TestController:
 
         spy = mocker.spy(controller, 'adjust_remove_region_brush')
 
-        result = controller.handle_mouse_wheel(-1)
+        result = controller.handle_mouse_wheel(-1, 0, 0)
 
         spy.assert_called_once_with(-1)
         assert True is result
@@ -961,9 +961,9 @@ class TestController:
 
         spy = mocker.spy(controller, 'handle_zoom')
 
-        result = controller.handle_mouse_wheel(-1)
+        result = controller.handle_mouse_wheel(-1, 0, 0)
 
-        spy.assert_called_once_with(-1)
+        spy.assert_called_once_with(-1, 0, 0)
         assert True is result
 
     def test_handle_mouse_wheel_flood_add(self, setup, mocker,
@@ -996,7 +996,7 @@ class TestController:
 
         spy = mocker.spy(controller, 'handle_flood_add_tolerance')
 
-        controller.handle_mouse_wheel(-1)
+        controller.handle_mouse_wheel(-1, 0, 0)
 
         spy.assert_called_once_with(-1)
 
@@ -1030,7 +1030,7 @@ class TestController:
 
         spy = mocker.spy(controller, 'handle_flood_remove_tolerance')
 
-        controller.handle_mouse_wheel(-1)
+        controller.handle_mouse_wheel(-1, 0, 0)
 
         spy.assert_called_once_with(-1)
 
@@ -1052,7 +1052,7 @@ class TestController:
 
         spy = mocker.spy(controller, 'adjust_remove_landmark_brush')
 
-        result = controller.handle_mouse_wheel(-1)
+        result = controller.handle_mouse_wheel(-1, 0, 0)
 
         spy.assert_called_once_with(-1)
         assert True is result
@@ -1072,7 +1072,7 @@ class TestController:
         controller = Controller(MagicMock())
         controller.current_mode = Mode.NO_ROOT
 
-        result = controller.handle_mouse_wheel(-1)
+        result = controller.handle_mouse_wheel(-1, 0, 0)
 
         assert False is result
 
@@ -2416,10 +2416,12 @@ class TestController:
 
         old_scale = controller.main_window.image_scale
 
-        result = controller.handle_zoom(1)
+        result = controller.handle_zoom(1, 10, 10)
 
         assert controller.main_window.image_scale != old_scale
-        assert (controller.main_window.image_scale / 2) == old_scale
+        computed_old_scale = (controller.main_window.image_scale /
+                              controller.ZOOM_SCALE)
+        assert computed_old_scale == old_scale
         assert True is result
 
     def test_handle_zoom_negative(self, setup, mocker):
@@ -2442,10 +2444,12 @@ class TestController:
 
         old_scale = controller.main_window.image_scale
 
-        result = controller.handle_zoom(-1)
+        result = controller.handle_zoom(-1, 15, 15)
 
         assert controller.main_window.image_scale != old_scale
-        assert (controller.main_window.image_scale * 2) == old_scale
+        computed_old_scale = (controller.main_window.image_scale *
+                              controller.ZOOM_SCALE)
+        assert computed_old_scale == old_scale
         assert True is result
 
     def test_handle_zoom_invalid(self, setup, mocker):
@@ -2463,7 +2467,7 @@ class TestController:
         controller.main_window.image_scale = 2
         controller.image = MagicMock()
 
-        assert controller.handle_zoom(0) is False
+        assert controller.handle_zoom(0, 32, 32) is False
 
     def test_adjust_remove_landmark_brush_positive_rot(self, setup):
         """
