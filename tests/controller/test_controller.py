@@ -17,7 +17,8 @@ import numpy as np
 
 from mock import MagicMock, PropertyMock
 
-from friendly_ground_truth.controller.controller import Controller, Mode
+from friendly_ground_truth.controller.controller import (Controller, Mode,
+                                                         SecondaryMode)
 from friendly_ground_truth.view.tk_view import MainWindow
 from friendly_ground_truth.model.model import Patch, Image
 
@@ -71,6 +72,8 @@ class TestController:
         self.mock_C_display_current_patch = mocker.\
             patch.\
             object(Controller, 'display_current_patch')
+
+        return self.mock_C_display_current_patch
 
     @pytest.fixture
     def dialog_mock(self):
@@ -575,14 +578,13 @@ class TestController:
 
         spy.assert_called_once()
 
-    def test_change_mode_zoom(self, setup, mocker,
-                              display_current_patch_mock):
+    def test_change_secondary_mode_zoom(self, setup, mocker,
+                                        display_current_patch_mock):
         """
-        Test changing the mode to zoom
+        Test changing the secondary mode to zoom
 
-        :test_condition: The current mode is set to Mode.ZOOM and
-                         MainWindow.set_brush_radius is called once
-
+        :test_condition: The current secondary mode is set to
+                         SecondaryMode.ZOOM
         :param setup: The setup fixture
         :param mock_brush_radius: A fixture mocking the
                                   MainWindow.set_brush_radius function
@@ -591,7 +593,7 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_mode = Mode.ADD_REGION
-
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
         mock_patch = MagicMock()
         thresh_mock = PropertyMock(return_value=0.5)
 
@@ -604,13 +606,73 @@ class TestController:
 
         controller.image = mock_image
 
-        spy = mocker.spy(MainWindow, 'set_brush_radius')
+        controller.change_secondary_mode(MainWindow.ID_TOOL_ZOOM)
 
-        controller.change_mode(MainWindow.ID_TOOL_ZOOM)
+        assert controller.current_secondary_mode == SecondaryMode.ZOOM
 
-        spy.assert_called_once()
+    def test_change_secondary_mode_adjust(self, setup, mocker,
+                                          display_current_patch_mock):
+        """
+        Test changing the secondary mode to adjust tool
 
-        assert controller.current_mode == Mode.ZOOM
+        :test_condition: The current secondary mode is set to
+                         SecondaryMode.ADJUST_TOOL
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :param display_current_patch_mock: Mock for display_current_patch
+        :returns: None
+        """
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_REGION
+        controller.current_secondary_mode = SecondaryMode.ZOOM
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.change_secondary_mode(MainWindow.ID_ADJUST_TOOL)
+
+        assert controller.current_secondary_mode == SecondaryMode.ADJUST_TOOL
+
+    def test_change_secondary_mode_invalid(self, setup, mocker,
+                                           display_current_patch_mock):
+        """
+        Test changing the secondary mode to adjust tool
+
+        :test_condition: The current secondary mode is set to
+                         SecondaryMode.ADJUST_TOOL
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :param display_current_patch_mock: Mock for display_current_patch
+        :returns: None
+        """
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_REGION
+        controller.current_secondary_mode = SecondaryMode.ZOOM
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.change_secondary_mode(MainWindow.ID_TOOL_ADD_TIP)
+
+        assert controller.current_secondary_mode == SecondaryMode.ZOOM
 
     def test_change_mode_flood_add(self, setup, mocker,
                                    display_current_patch_mock):
@@ -862,6 +924,7 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_mode = Mode.THRESHOLD
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
 
         mock_patch = MagicMock()
         thresh_mock = PropertyMock(return_value=0.5)
@@ -897,6 +960,7 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_mode = Mode.ADD_REGION
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
 
         spy = mocker.spy(controller, 'adjust_add_region_brush')
 
@@ -920,6 +984,7 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_mode = Mode.REMOVE_REGION
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
 
         spy = mocker.spy(controller, 'adjust_remove_region_brush')
 
@@ -941,7 +1006,8 @@ class TestController:
         """
 
         controller = Controller(MagicMock())
-        controller.current_mode = Mode.ZOOM
+        controller.current_mode = Mode.THRESHOLD
+        controller.current_secondary_mode = SecondaryMode.ZOOM
         controller.main_window = MagicMock()
         controller.main_window.image_scale = 1
         controller.main_window.MAX_SCALE = 16
@@ -980,6 +1046,7 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_mode = Mode.FLOOD_ADD
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
         controller.flood_add_position = (0, 0)
 
         mock_patch = MagicMock()
@@ -1014,6 +1081,7 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_mode = Mode.FLOOD_REMOVE
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
         controller.flood_remove_position = (0, 0)
 
         mock_patch = MagicMock()
@@ -1048,6 +1116,7 @@ class TestController:
         """
 
         controller = Controller(MagicMock())
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
         controller.current_mode = Mode.REMOVE_LANDMARK
 
         spy = mocker.spy(controller, 'adjust_remove_landmark_brush')
@@ -1071,7 +1140,26 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_mode = Mode.NO_ROOT
+        controller.current_secondary_mode = Mode.NO_ROOT
+        result = controller.handle_mouse_wheel(-1, 0, 0)
 
+        assert False is result
+
+    def test_handle_mouse_wheel_invalid_adjust(self, setup,
+                                               display_current_patch_mock):
+        """
+        Test when the mouse wheel function is called and the current mode is
+        invalid and SecondaryMode.ADJUST_TOOL
+
+        :test_condition: The function returns False
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.NO_ROOT
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
         result = controller.handle_mouse_wheel(-1, 0, 0)
 
         assert False is result
@@ -1622,32 +1710,6 @@ class TestController:
         result = controller.handle_left_click((10, -10))
         assert False is result
 
-    def test_handle_right_click_zoom(self, setup, display_current_patch_mock):
-        """
-        Test when a right click happens while zooming
-
-        :test_condition: The main_window.image_scale is set to 1, and the
-                         main_window.image_x and image_y are set to 0
-
-        :param setup: Setup
-        :param display_current_patch_mock: Mock for displaying the current
-                                           patch
-        :returns: None
-        """
-
-        controller = Controller(MagicMock())
-        controller.current_mode = Mode.ZOOM
-        controller.main_window = MagicMock()
-        controller.main_window.image_scale = 10
-        controller.main_window.image_x = 10
-        controller.main_window.image_y = 10
-
-        controller.handle_right_click()
-
-        assert controller.main_window.image_scale == 1
-        assert controller.main_window.image_x == 0
-        assert controller.main_window.image_y == 0
-
     def test_handle_right_click_other(self, setup, display_current_patch_mock):
         """
         Test when a right click happens while not zooming
@@ -1710,26 +1772,6 @@ class TestController:
         result = controller.handle_left_release()
 
         assert True is result
-
-    def test_handle_left_release_zoom(self, setup, mocker,
-                                      display_current_patch_mock):
-        """
-        Test when the mouse is released and the current mode is Mode.ZOOM
-
-        :test_condition:  display_current_patch() is called and the function
-                          returns True
-
-        :param setup: The setup fixture
-        :returns: None
-        """
-
-        controller = Controller(MagicMock())
-        controller.current_mode = Mode.ZOOM
-
-        result = controller.handle_left_release()
-
-        assert True is result
-        self.mock_C_display_current_patch.assert_called_once()
 
     def test_handle_left_release_invalid_mode(self, setup,
                                               display_current_patch_mock):
@@ -1825,18 +1867,21 @@ class TestController:
         mock_patch.remove_region.assert_called_with(position, radius)
         assert True is result
 
-    def test_handle_motion_zoom(self, setup, display_current_patch_mock):
+    def test_handle_mouse_wheel_motion_zoom(self, setup,
+                                            display_current_patch_mock):
         """
-        Test when the mouse is moved and the current mode is Mode.ZOOM
+        Test when the mouse is moved and the current secondary mode is
+        SecondaryMode.ZOOM
 
-        :test_condition: Returns True
+        :test_condition: controller.display_current_patch is called
 
         :param setup: The setip fixture
         :returns: None
         """
 
         controller = Controller(MagicMock())
-        controller.current_mode = Mode.ZOOM
+        controller.current_mode = Mode.THRESHOLD
+        controller.current_secondary_mode = SecondaryMode.ZOOM
         controller.main_window = MagicMock()
         controller.main_window.image_scale = 1
         controller.main_window.image_x = 0
@@ -1853,9 +1898,9 @@ class TestController:
 
         position = (1, 2)
 
-        result = controller.handle_motion(position)
+        controller.handle_mouse_wheel_motion(position)
 
-        assert True is result
+        display_current_patch_mock.assert_called()
 
     def test_handle_motion_remove_landmark(self, setup,
                                            display_current_patch_mock):
@@ -2537,3 +2582,34 @@ class TestController:
 
         controller.show_saved_preview()
         show_patch.assert_called()
+
+    def test_handle_mouse_wheel_motion_adjust(self, setup,
+                                              display_current_patch_mock):
+        """
+        Test when the mouse is moved with the mouse wheel clicked in
+
+        :test_condition: display_current_patch is not called
+
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for the display current patch
+                                           function
+        :returns: None
+        """
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.THRESHOLD
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
+
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.handle_mouse_wheel_motion((0, 0))
+        display_current_patch_mock.assert_not_called()
