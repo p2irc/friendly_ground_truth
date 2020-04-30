@@ -57,6 +57,7 @@ class Controller:
     The main controller object for the application
     """
     ZOOM_SCALE = 1.10
+    CONTEXT_TRANSPARENCY = 100
 
     def __init__(self, master):
         """
@@ -194,8 +195,113 @@ class Controller:
         """
 
         patch = self.image.patches[self.current_patch]
+        img = self.get_context_patches(patch)
 
-        self.main_window.show_image(patch.overlay_image)
+        self.main_window.show_image(img)
+
+    def get_context_patches(self, patch):
+        """
+        Get the patches immediately surrounding the current patch and place
+        them in a larger image
+
+        :param patch: The current patch
+        :returns: A matrix of patches for display
+        """
+
+        # Find the neighbouring patches
+        index = patch.patch_index
+
+        neighbouring_indices = []
+
+        start_i = index[0] - 1
+        start_j = index[1] - 1
+
+        num_rows = 0
+        num_cols = 0
+
+        for i in range(start_i, start_i + 3):
+            if i < 0 or i >= self.image.NUM_PATCHES:
+                continue
+            for j in range(start_j, start_j + 3):
+                if j < 0 or j >= self.image.NUM_PATCHES:
+                    continue
+
+                neighbouring_indices.append((i, j))
+
+                if num_rows == 0:
+                    num_cols += 1
+            num_rows += 1
+
+        neighbouring_patches = []
+        drawable_patch_index = None  # Index of our patch in this list
+
+        # TODO: This could be more efficient I'm sure
+        for i in neighbouring_indices:
+            for patch in self.image.patches:
+                if patch.patch_index == i:
+                    o_img = patch.overlay_image
+
+                    if i == index:
+                        o_img = np.dstack((o_img, np.full(o_img.shape[0:-1],
+                                           255,
+                                           dtype=o_img.dtype)))
+                        drawable_patch_index = neighbouring_indices.index(i)
+                    else:
+                        o_img = np.dstack((o_img, np.full(o_img.shape[0:-1],
+                                           self.CONTEXT_TRANSPARENCY,
+                                           dtype=o_img.dtype)))
+
+                    neighbouring_patches.append(o_img)
+
+        # Layer them into a numpy array
+        img_shape = (patch.overlay_image.shape[0] * num_rows,
+                     patch.overlay_image.shape[1] * num_cols, 4)
+        img = np.zeros(img_shape, dtype=np.ubyte)
+
+        col_num = 0
+        row_num = 0
+
+        i = 0
+        for patch in neighbouring_patches:
+            r, c = row_num, col_num
+            r = r * patch.shape[0]
+            c = c * patch.shape[1]
+            img[r:r+patch.shape[0],
+                c:c+patch.shape[1]] += patch
+            if i == drawable_patch_index:
+                self.patch_offset = (r, c)
+
+            col_num += 1
+
+            if col_num == num_cols:
+                col_num = 0
+                row_num += 1
+
+            i += 1
+
+        return img
+
+    def convert_click_to_image_position(self, click_location):
+        """
+        Convert a click location to coordinates in the image
+
+        :param click_location: (x, y) coords of the click
+        :returns: The corresponding coordinates in the image
+        """
+        click_location = (click_location[0] - self.main_window.image_x,
+                          click_location[1] - self.main_window.image_y)
+
+        click_location = (click_location[0] / self.main_window.image_scale,
+                          click_location[1] / self.main_window.image_scale)
+
+        click_location = (click_location[0] - self.patch_offset[1],
+                          click_location[1] - self.patch_offset[0])
+
+        # Make sure we are clicking on the image
+        if click_location[0] < 0 or click_location[1] < 0:
+            return None
+
+        return click_location
 
     def next_patch(self):
         """
@@ -516,14 +622,9 @@ class Controller:
         :returns: True on success, False otherwise
         """
 
-        click_location = (click_location[0] - self.main_window.image_x,
-                          click_location[1] - self.main_window.image_y)
+        click_location = self.convert_click_to_image_position(click_location)
 
-        click_location = (click_location[0] / self.main_window.image_scale,
-                          click_location[1] / self.main_window.image_scale)
-
-        # Make sure we are clicking on the image
-        if click_location[0] < 0 or click_location[1] < 0:
+        if click_location is None:
             return False
 
         if self.current_mode == Mode.ADD_REGION:
@@ -630,14 +731,9 @@ class Controller:
         :param position: The position (x, y) of the mouse during the event
         :returns: True on success, False otherwise
         """
-        position = (position[0] - self.main_window.image_x,
-                    position[1] - self.main_window.image_y)
+        position = self.convert_click_to_image_position(position)
 
-        position = (position[0] / self.main_window.image_scale,
-                    position[1] / self.main_window.image_scale)
-
-        # Make sure we stay inside the image
-        if position[0] < 0 or position[1] < 0:
+        if position is None:
             return False
 
         if self.current_mode == Mode.ADD_REGION:
