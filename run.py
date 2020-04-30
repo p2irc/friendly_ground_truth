@@ -10,12 +10,16 @@ Description: The entry point for the application
 """
 
 from tkinter import Tk
+from PIL import ImageTk as itk
+from PIL import Image
+from io import BytesIO
+
 import logging
 import sys
-
-from sys import platform
+import base64
 
 from friendly_ground_truth.controller.controller import Controller
+from friendly_ground_truth.view.icons.icon_strings import fgt_favicon
 
 debug = False
 
@@ -45,7 +49,15 @@ logger.addHandler(ch)
 
 
 if __name__ == '__main__':
+
+    icon_data = base64.b64decode(fgt_favicon)
+    icon_data = Image.open(BytesIO(icon_data))
+
     root = Tk()
+
+    img = itk.PhotoImage(icon_data)
+
+    root.wm_iconphoto(True, img)
 
     w, h = root.winfo_screenwidth(), root.winfo_screenheight()
     root.geometry("%dx%d+0+0" % (w, h))

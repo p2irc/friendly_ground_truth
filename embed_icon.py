@@ -90,6 +90,8 @@ if __name__ == "__main__":
         print("Usage: python embed_icon.py path_to_icon icon_name"
               "path_to_icon_string_file")
 
+        sys.exit(0)
+
     icon_path = sys.argv[1]
     icon_name = sys.argv[2]
     string_file = sys.argv[3]
