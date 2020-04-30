@@ -2412,9 +2412,7 @@ class TestController:
         """
         Test displaying the current patch
 
-        :test_condition: main_window.show_image is called with the current
-                         patch's overlay image
-
+        :test_condition: main_window.show_image is called
         :param setup: A setup fixture
         :param mocker: Mocker
         :returns: None
@@ -2437,8 +2435,6 @@ class TestController:
         controller.display_current_patch()
 
         mock_window.show_image.assert_called()
-        mock_window.show_image.assert_called_with(mock_image.
-                                                  patches[0].overlay_image)
 
     def test_handle_zoom_positive(self, setup, mocker):
         """
@@ -2613,3 +2609,115 @@ class TestController:
 
         controller.handle_mouse_wheel_motion((0, 0))
         display_current_patch_mock.assert_not_called()
+
+    def test_get_context_patches_top_left_corner(self, setup):
+        """
+        Test getting the context patches when the current patch is the top left
+        corner patch of the image
+
+        :test_condition: Returns an image the size of a 2x2 grid of patches
+
+        :param setup: Setup
+        :returns: None
+        """
+
+        master = MagicMock()
+        controller = Controller(master)
+
+        controller.current_patch = 0
+
+        mock_patch1 = MagicMock()
+        mock_patch1.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch1.patch_index = (0, 0)
+
+        mock_patch2 = MagicMock()
+        mock_patch2.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch2.patch_index = (0, 1)
+
+        mock_patch3 = MagicMock()
+        mock_patch3.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch3.patch_index = (1, 0)
+
+        mock_patch4 = MagicMock()
+        mock_patch4.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch4.patch_index = (1, 1)
+
+        mock_image = MagicMock()
+        mock_image.NUM_PATCHES = 2
+        patches_mock = PropertyMock(return_value=[mock_patch1,
+                                    mock_patch2,  mock_patch3, mock_patch4])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        context_img = controller.get_context_patches(mock_patch1)
+
+        assert context_img.shape == (20, 20, 4)
+
+    def test_get_context_patches_middle(self, setup):
+        """
+        Test getting the context patches when the current patch is somewhere in
+        the middle
+
+        :test_condition: Returns an image the size of a 2x2 grid of patches
+
+        :param setup: Setup
+        :returns: None
+        """
+
+        master = MagicMock()
+        controller = Controller(master)
+
+        controller.current_patch = 0
+
+        mock_patch1 = MagicMock()
+        mock_patch1.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch1.patch_index = (0, 0)
+
+        mock_patch2 = MagicMock()
+        mock_patch2.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch2.patch_index = (0, 1)
+
+        mock_patch3 = MagicMock()
+        mock_patch3.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch3.patch_index = (0, 2)
+
+        mock_patch4 = MagicMock()
+        mock_patch4.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch4.patch_index = (1, 0)
+
+        mock_patch5 = MagicMock()
+        mock_patch5.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch5.patch_index = (1, 1)
+
+        mock_patch6 = MagicMock()
+        mock_patch6.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch6.patch_index = (1, 2)
+
+        mock_patch7 = MagicMock()
+        mock_patch7.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch7.patch_index = (2, 0)
+
+        mock_patch8 = MagicMock()
+        mock_patch8.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch8.patch_index = (2, 1)
+
+        mock_patch9 = MagicMock()
+        mock_patch9.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch9.patch_index = (2, 2)
+
+        mock_image = MagicMock()
+        mock_image.NUM_PATCHES = 3
+        patches_mock = PropertyMock(return_value=[mock_patch1,
+                                    mock_patch2,  mock_patch3, mock_patch4,
+                                    mock_patch5, mock_patch6, mock_patch7,
+                                    mock_patch8, mock_patch9])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        context_img = controller.get_context_patches(mock_patch5)
+
+        assert context_img.shape == (30, 30, 4)

@@ -90,6 +90,9 @@ class Controller:
         # Set up the main window
         self.main_window = MainWindow(self, master)
 
+        # Offset of the patch within the context image
+        self.patch_offset = (0, 0)
+
     def load_new_image(self):
         """
         Called when the user wants to load a new image to open a file
@@ -220,10 +223,13 @@ class Controller:
         num_cols = 0
 
         for i in range(start_i, start_i + 3):
+
             if i < 0 or i >= self.image.NUM_PATCHES:
+                self.logger.debug("Patch Out Of Bounds")
                 continue
             for j in range(start_j, start_j + 3):
                 if j < 0 or j >= self.image.NUM_PATCHES:
+                    self.logger.debug("Patch Out Of Bounds")
                     continue
 
                 neighbouring_indices.append((i, j))
@@ -316,10 +322,6 @@ class Controller:
             while self.image.patches[self.current_patch].display is False:
                 self.current_patch += 1
 
-            self.main_window.image_scale = 1
-            self.main_window.image_x = 0
-            self.main_window.image_y = 0
-
             self.display_current_patch()
         else:
 
@@ -383,10 +385,6 @@ class Controller:
             self.current_patch -= 1
             while self.image.patches[self.current_patch].display is False:
                 self.current_patch -= 1
-
-            self.main_window.image_scale = 1
-            self.main_window.image_x = 0
-            self.main_window.image_y = 0
 
             self.display_current_patch()
 
