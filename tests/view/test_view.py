@@ -14,7 +14,8 @@ from mock import MagicMock  # , PropertyMock
 
 from friendly_ground_truth.view.tk_view import (MainWindow, AboutDialog,
                                                 KeyboardShortcutDialog,
-                                                ResizingCanvas)
+                                                ResizingCanvas,
+                                                CreateToolTip)
 
 
 class TestView():
@@ -1463,3 +1464,91 @@ class TestResizingCanvas():
 
         assert canvas.width == 42
         assert canvas.height == 42
+
+
+class TestToolTips():
+
+    def test_enter(self, mocker):
+
+        mock_button = mocker.patch('tkinter.Button')
+
+        tip = CreateToolTip(mock_button, "test text")
+
+        mock_schedule = mocker.patch.object(tip, "schedule")
+
+        tip.enter()
+
+        mock_schedule.assert_called()
+
+    def test_leave(self, mocker):
+
+        mock_button = mocker.patch('tkinter.Button')
+
+        tip = CreateToolTip(mock_button, "test text")
+
+        mock_unschedule = mocker.patch.object(tip, 'unschedule')
+        mock_hidetip = mocker.patch.object(tip, 'hidetip')
+
+        tip.leave()
+
+        mock_unschedule.assert_called()
+        mock_hidetip.assert_called()
+
+    def test_schedule(self, mocker):
+
+        mock_button = mocker.patch('tkinter.Button')
+
+        tip = CreateToolTip(mock_button, "test text")
+
+        mock_unschedule = mocker.patch.object(tip, 'unschedule')
+
+        tip.schedule()
+
+        mock_unschedule.assert_called()
+
+        assert tip.id is not None
+
+    def test_unschedule(self, mocker):
+
+        mock_button = mocker.patch('tkinter.Button')
+
+        tip = CreateToolTip(mock_button, "test text")
+
+        tip.id = 10
+        tip.unschedule()
+
+        assert tip.id is None
+
+        tip.id = None
+        tip.unschedule()
+
+        assert tip.id is None
+
+    def test_showtip(self, mocker):
+        mocker.patch('tkinter.Toplevel')
+        mocker.patch('tkinter.Label')
+        mock_button = mocker.patch('tkinter.Button')
+        mock_button.bbox.return_value = (0, 0, 0, 0)
+
+        tip = CreateToolTip(mock_button, 'test text')
+
+        tip.showtip()
+
+        mock_button.bbox.assert_called()
+
+    def test_hidetip(self, mocker):
+        mock_button = mocker.patch('tkinter.Button')
+
+        tip = CreateToolTip(mock_button, 'test text')
+
+        tip.tw = MagicMock()
+
+        tip.hidetip()
+
+        assert tip.tw is None
+
+        tip.tw = None
+
+        tip.hidetip()
+
+        assert tip.tw is None

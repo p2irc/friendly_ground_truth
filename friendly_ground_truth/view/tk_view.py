@@ -217,6 +217,8 @@ class MainWindow(Frame):
         thresh_button.image = thresh_img
         thresh_button.pack(side=LEFT, padx=2, pady=2)
 
+        CreateToolTip(thresh_button, "Threshold (t)")
+
         # Add Region Button
         add_region_data = Image.open(BytesIO(base64.
                                              b64decode(add_region_icon)))
@@ -226,6 +228,8 @@ class MainWindow(Frame):
                                    relief=FLAT, command=self.on_add_reg_tool)
         add_reg_button.image = add_reg_img
         add_reg_button.pack(side=LEFT, padx=2, pady=2)
+
+        CreateToolTip(add_reg_button, "Add Region (a)")
 
         # Remove Region Button
         remove_region_data = Image.open(BytesIO(base64.
@@ -237,6 +241,8 @@ class MainWindow(Frame):
         remove_reg_button.image = remove_reg_img
         remove_reg_button.pack(side=LEFT, padx=2, pady=2)
 
+        CreateToolTip(remove_reg_button, "Remove Region (r)")
+
         # Flood Add Button
         flood_add_data = Image.open(BytesIO(base64.b64decode(flood_add_icon)))
         flood_add_img = itk.PhotoImage(flood_add_data)
@@ -245,6 +251,8 @@ class MainWindow(Frame):
                                      command=self.on_flood_add_tool)
         flood_add_button.image = flood_add_img
         flood_add_button.pack(side=LEFT, padx=2, pady=2)
+
+        CreateToolTip(flood_add_button, "Flood Add (f)")
 
         # Flood Remove Button
         flood_remove_data = Image.open(BytesIO(base64.
@@ -256,6 +264,8 @@ class MainWindow(Frame):
         flood_remove_button.image = flood_remove_img
         flood_remove_button.pack(side=LEFT, padx=2, pady=2)
 
+        CreateToolTip(flood_remove_button, "Flood Remove (l)")
+
         # No Root Button
         no_root_data = Image.open(BytesIO(base64.b64decode(no_root_icon)))
         no_root_img = itk.PhotoImage(no_root_data)
@@ -264,6 +274,8 @@ class MainWindow(Frame):
                                    command=self.on_no_root_tool)
         no_root_button.image = no_root_img
         no_root_button.pack(side=LEFT, padx=2, pady=2)
+
+        CreateToolTip(no_root_button, "No Root (x)")
 
         # Prev Button
         prev_data = Image.open(BytesIO(base64.b64decode(prev_patch_icon)))
@@ -274,6 +286,8 @@ class MainWindow(Frame):
         prev_button.image = prev_img
         prev_button.pack(side=LEFT, padx=2, pady=2)
 
+        CreateToolTip(prev_button, "Previous Patch (<Left Arrow>)")
+
         # Next Button
         next_data = Image.open(BytesIO(base64.b64decode(next_patch_icon)))
         next_img = itk.PhotoImage(next_data)
@@ -282,6 +296,8 @@ class MainWindow(Frame):
                                 command=self.on_next_tool)
         next_button.image = next_img
         next_button.pack(side=LEFT, padx=2, pady=2)
+
+        CreateToolTip(next_button, "Next Patch (<Right Arrow>)")
 
         # Add Tip Button
         # add_tip_data = Image.open(BytesIO(base64.b64decode(add_tip_icon)))
@@ -1081,3 +1097,58 @@ class ResizingCanvas(tk.Canvas):
 
         self.config(width=self.width, height=self.height)
         self.scale("all", 0, 0, wscale, hscale)
+
+
+class CreateToolTip(object):
+    """
+    create a tooltip for a given widget
+    """
+    def __init__(self, widget, text='widget info'):
+        self.waittime = 500     # miliseconds
+        self.wraplength = 180   # pixels
+        self.widget = widget
+        self.text = text
+        self.widget.bind("<Enter>", self.enter)
+        self.widget.bind("<Leave>", self.leave)
+        self.widget.bind("<ButtonPress>", self.leave)
+        self.id = None
+        self.tw = None
+
+    def enter(self, event=None):
+        self.schedule()
+
+    def leave(self, event=None):
+        self.unschedule()
+        self.hidetip()
+
+    def schedule(self):
+        self.unschedule()
+        self.id = self.widget.after(self.waittime, self.showtip)
+
+    def unschedule(self):
+        id = self.id
+        print("id: ", id)
+        self.id = None
+        if id:
+            self.widget.after_cancel(id)
+
+    def showtip(self, event=None):
+        x = y = 0
+        x, y, cx, cy = self.widget.bbox("insert")
+        x += self.widget.winfo_rootx() + 25
+        y += self.widget.winfo_rooty() + 20
+        # creates a toplevel window
+        self.tw = tk.Toplevel(self.widget)
+        # Leaves only the label and removes the app window
+        self.tw.wm_overrideredirect(True)
+        self.tw.wm_geometry("+%d+%d" % (x, y))
+        label = tk.Label(self.tw, text=self.text, justify='left',
+                         background="#ffffff", relief='solid', borderwidth=1,
+                         wraplength=self.wraplength)
+        label.pack(ipadx=1)
+
+    def hidetip(self):
+        tw = self.tw
+        self.tw = None
+        if tw:
+            tw.destroy()
