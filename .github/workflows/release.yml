@@ -52,7 +52,17 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
           
-      - name: Build project # This would actually build your project, using zip for an example artifact
+      - name: Build project Mac # This would actually build your project, using zip for an example artifact
+        if: matrix.os == 'macos-latest'
+        run: |
+          python make_icns.py
+          pyinstaller -i icon.icns --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
+      - name: Build project Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          pyinstaller -i icon.ico --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
+      - name: Build project Ubuntu
+        if: matrix.os == 'ubuntu-latest'
         run: |
           pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
       - name: Load Release URL File

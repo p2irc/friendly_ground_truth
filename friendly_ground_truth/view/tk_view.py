@@ -1127,7 +1127,6 @@ class CreateToolTip(object):
 
     def unschedule(self):
         id = self.id
-        print("id: ", id)
         self.id = None
         if id:
             self.widget.after_cancel(id)
