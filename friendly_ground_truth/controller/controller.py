@@ -200,6 +200,15 @@ class Controller:
         patch = self.image.patches[self.current_patch]
         img = self.get_context_patches(patch)
 
+        self.main_window.update_tool = False
+        self.main_window.update_thresh_slider_value(patch.thresh)
+        self.main_window.update_add_brush_sizer(self.add_region_radius)
+        self.main_window.update_remove_brush_sizer(self.remove_region_radius)
+        self.main_window.\
+            update_flood_add_slider_value(self.flood_add_tolerance)
+        self.main_window.\
+            update_flood_remove_slider_value(self.flood_remove_tolerance)
+        self.main_window.set_brush_radius
         self.main_window.show_image(img)
 
     def get_context_patches(self, patch):
@@ -405,14 +414,19 @@ class Controller:
         if new_mode_id == self.main_window.ID_TOOL_THRESH:
             self.current_mode = Mode.THRESHOLD
             self.main_window.set_brush_radius(0)
+            patch = self.image.patches[self.current_patch]
+            self.main_window.update_thresh_slider_value(patch.thresh)
 
         elif new_mode_id == self.main_window.ID_TOOL_ADD:
             self.current_mode = Mode.ADD_REGION
             self.main_window.set_brush_radius(self.add_region_radius)
+            self.main_window.update_add_brush_sizer(self.add_region_radius)
 
         elif new_mode_id == self.main_window.ID_TOOL_REMOVE:
             self.current_mode = Mode.REMOVE_REGION
             self.main_window.set_brush_radius(self.remove_region_radius)
+            self.main_window.\
+                update_remove_brush_sizer(self.remove_region_radius)
 
         elif new_mode_id == self.main_window.ID_TOOL_NO_ROOT:
             self.no_root_activate()
@@ -422,12 +436,16 @@ class Controller:
             self.main_window.flood_cursor = True
             self.flood_add_position = None
             self.flood_add_tolerance = 0.05
+            self.main_window.\
+                update_flood_add_slider_value(self.flood_add_tolerance)
 
         elif new_mode_id == self.main_window.ID_TOOL_FLOOD_REMOVE:
             self.current_mode = Mode.FLOOD_REMOVE
             self.main_window.flood_cursor = True
             self.flood_remove_position = None
             self.flood_remove_tolerance = 0.05
+            self.main_window.\
+                update_flood_remove_slider_value(self.flood_remove_tolerance)
 
         elif new_mode_id == self.main_window.ID_TOOL_ADD_TIP:
             self.current_mode = Mode.ADD_TIP
@@ -541,6 +559,26 @@ class Controller:
         patch.overlay_mask()
         self.display_current_patch()
 
+    def set_flood_add_tolerance(self, value):
+        """
+        Set the current flood add tolerance
+
+        :param value: The value to set it to
+        :returns: None
+        """
+
+        if self.flood_remove_tolerance is None:
+            return
+
+        self.flood_add_tolerance = value
+
+        patch = self.image.patches[self.current_patch]
+        patch.flood_add_region(self.flood_add_position,
+                               self.flood_add_tolerance)
+
+        patch.overlay_mask()
+        self.display_current_patch()
+
     def handle_flood_remove_tolerance(self, wheel_rotation):
         """
         Adjust the current tolerance of the flood_remove tool
@@ -556,6 +594,26 @@ class Controller:
             self.flood_remove_tolerance += 0.01
         elif wheel_rotation < 0:
             self.flood_remove_tolerance -= 0.01
+
+        patch = self.image.patches[self.current_patch]
+        patch.flood_remove_region(self.flood_remove_position,
+                                  self.flood_remove_tolerance)
+
+        patch.overlay_mask()
+        self.display_current_patch()
+
+    def set_flood_remove_tolerance(self, value):
+        """
+        Set the current flood remove tolerance
+
+        :param value: The value to set it to
+        :returns: None
+        """
+
+        if self.flood_remove_position is None:
+            return
+
+        self.flood_remove_tolerance = value
 
         patch = self.image.patches[self.current_patch]
         patch.flood_remove_region(self.flood_remove_position,
@@ -804,10 +862,27 @@ class Controller:
 
             patch.thresh += 0.01
 
+        self.main_window.update_thresh_slider_value(patch.thresh)
+        self.main_window.update_add_brush_sizer(self.add_region_radius)
         patch.apply_threshold(patch.thresh)
         patch.overlay_mask()
 
         self.logger.debug("Threshold value: {}".format(patch.thresh))
+        self.display_current_patch()
+
+    def set_threshold(self, value):
+        """
+        Set the value of the threshold
+
+        :param value: Value for the threshold
+        :returns: Nonw
+        """
+
+        patch = self.image.patches[self.current_patch]
+        patch.thresh = value
+        patch.apply_threshold(patch.thresh)
+        patch.overlay_mask()
+
         self.display_current_patch()
 
     def adjust_add_region_brush(self, wheel_rotation):
@@ -823,6 +898,20 @@ class Controller:
             self.add_region_radius += 1
         else:
             self.add_region_radius -= 1
+
+        self.main_window.update_add_brush_sizer(self.add_region_radius)
+        self.main_window.set_brush_radius(self.add_region_radius)
+        self.main_window.draw_brush()
+
+    def set_add_region_brush(self, value):
+        """
+        Set the value of the add region brush size
+
+        :param value: The size
+        :returns: None
+        """
+
+        self.add_region_radius = value
 
         self.main_window.set_brush_radius(self.add_region_radius)
         self.main_window.draw_brush()
@@ -856,6 +945,19 @@ class Controller:
             self.remove_region_radius += 1
         else:
             self.remove_region_radius -= 1
+
+        self.main_window.update_remove_brush_sizer(self.remove_region_radius)
+        self.main_window.set_brush_radius(self.remove_region_radius)
+        self.main_window.draw_brush()
+
+    def set_remove_region_brush(self, value):
+        """
+        Set the value of the remove region brush size
+
+        :param value: The value
+        :returns: None
+        """
+        self.remove_region_radius = value
 
         self.main_window.set_brush_radius(self.remove_region_radius)
         self.main_window.draw_brush()

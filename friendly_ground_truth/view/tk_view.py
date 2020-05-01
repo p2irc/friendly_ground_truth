@@ -14,7 +14,8 @@ import tkinter.messagebox
 from io import BytesIO
 import base64
 
-from tkinter import LEFT, TOP, X, FLAT, RAISED, SUNKEN, ALL, BOTH, YES, RIGHT
+from tkinter import (LEFT, TOP, X, FLAT, RAISED, SUNKEN, ALL, BOTH, YES, RIGHT,
+                     RIDGE, BOTTOM)
 from tkinter import Frame
 from tkinter import ttk
 
@@ -99,8 +100,9 @@ class MainWindow(Frame):
 
         self.create_menubar()
 
-        self.create_canvas()
+        self.create_info_panel()
 
+        self.create_canvas()
         self.set_up_interactions()
 
     def set_up_interactions(self):
@@ -123,7 +125,7 @@ class MainWindow(Frame):
 
         self.bind_all("<B1-Motion>", self.on_drag)
 
-        self.bind_all("<Button-1>", self.on_click)
+        self.canvas.bind("<Button-1>", self.on_click)
         self.bind_all("<ButtonRelease-1>", self.on_click_release)
 
         self.bind_all("<B2-Motion>", self.on_wheel_motion)
@@ -148,6 +150,29 @@ class MainWindow(Frame):
         self.canvas.bind("<Leave>", self.on_leave_canvas)
         self.canvas.bind("<Motion>", self.on_motion)
         self.canvas.pack(fill=BOTH, expand=YES)
+
+    def create_info_panel(self):
+        """
+        Create a panel for information about the current tool
+
+        :returns: None
+        """
+
+        self.info_panel = tk.Frame(self, borderwidth=5, relief=RIDGE,
+                                   padx=50,
+                                   pady=2)
+
+        self.info_panel_label = tk.Label(self.info_panel,
+                                         text="No Tool Selected")
+
+        self.info_panel_label.pack()
+        self.info_panel.pack(side=BOTTOM, fill=BOTH)
+
+        self.thresh_slider = None
+        self.add_brush_sizer = None
+        self.remove_brush_sizer = None
+        self.flood_add_slider = None
+        self.flood_remove_slider = None
 
     def create_menubar(self):
         """
@@ -564,7 +589,7 @@ class MainWindow(Frame):
 
         self.change_toolbar_state(self.ID_TOOL_THRESH)
         self.logger.debug("Threshold tool chosen")
-
+        self.update_info_panel(self.ID_TOOL_THRESH)
         self.controller.change_mode(self.ID_TOOL_THRESH)
 
     def on_add_reg_tool(self):
@@ -575,7 +600,7 @@ class MainWindow(Frame):
         """
 
         self.change_toolbar_state(self.ID_TOOL_ADD)
-
+        self.update_info_panel(self.ID_TOOL_ADD)
         self.controller.change_mode(self.ID_TOOL_ADD)
 
     # def on_add_tip_tool(self):
@@ -629,6 +654,7 @@ class MainWindow(Frame):
         :returns: None
         """
         self.change_toolbar_state(self.ID_TOOL_REMOVE)
+        self.update_info_panel(self.ID_TOOL_REMOVE)
         self.controller.change_mode(self.ID_TOOL_REMOVE)
 
     def on_no_root_tool(self):
@@ -646,6 +672,7 @@ class MainWindow(Frame):
         :returns: None
         """
         self.change_toolbar_state(self.ID_TOOL_FLOOD_ADD)
+        self.update_info_panel(self.ID_TOOL_FLOOD_ADD)
         self.controller.change_mode(self.ID_TOOL_FLOOD_ADD)
 
     def on_flood_remove_tool(self):
@@ -655,6 +682,7 @@ class MainWindow(Frame):
         :returns: None
         """
         self.change_toolbar_state(self.ID_TOOL_FLOOD_REMOVE)
+        self.update_info_panel(self.ID_TOOL_FLOOD_REMOVE)
         self.controller.change_mode(self.ID_TOOL_FLOOD_REMOVE)
 
     def on_prev_tool(self):
@@ -853,6 +881,275 @@ class MainWindow(Frame):
         """
         # Toto, I don't think we're in canvas anymore...
         self.can_draw = False
+
+    def on_thresh_slider(self, value):
+        """
+        Called when the threshold slider is moved
+
+        :param value: The value of the slider
+        :returns: None
+        """
+
+        self.logger.debug("Threshold Slider Value: {}".format(value))
+
+        if self.update_tool:
+            self.controller.set_threshold(float(value))
+        else:
+            self.update_tool = True
+
+    def update_thresh_slider_value(self, value):
+        """
+        Update the value of the threshold slider
+
+        :param value: The value to set it to
+        :returns: None
+        """
+
+        try:
+            self.thresh_slider_var = value
+            self.thresh_slider.set(value)
+        except Exception:
+            pass
+
+    def on_add_brush_sizer(self, a, b, c):
+        """
+        Called when the add brush sizer is updated
+
+        :returns: None
+        """
+
+        if self.update_tool:
+            val = self.add_brush_sizer_var.get()
+            self.controller.set_add_region_brush(val)
+        else:
+            self.update_tool = True
+
+    def update_add_brush_sizer(self, value):
+        """
+        Update the value of the add brush sizer
+
+        :param value: The Value to update to
+        :returns: None
+        """
+
+        try:
+            self.add_brush_sizer_var.set(value)
+        except Exception:
+            pass
+
+    def on_remove_brush_sizer(self, a, b, c):
+        """
+        Called when the remove brush sizer is updated
+
+        :returns: None
+        """
+
+        if self.update_tool:
+            val = self.remove_brush_sizer_var.get()
+            self.controller.set_remove_region_brush(val)
+        else:
+            self.update_tool = True
+
+    def update_remove_brush_sizer(self, value):
+        """
+        Update the value of the remove brush sizer
+
+        :param value: The Value to update to
+        :returns: None
+        """
+
+        try:
+            self.remove_brush_sizer_var.set(value)
+        except Exception:
+            pass
+
+    def on_flood_add_slider(self, value):
+        """
+        Called when the flood_add slider is moved
+
+        :param value: The value of the slider
+        :returns: None
+        """
+
+        if self.update_tool:
+            self.controller.set_flood_add_tolerance(float(value))
+        else:
+            self.update_tool = True
+
+    def update_flood_add_slider_value(self, value):
+        """
+        Update the value of the flood_add slider
+
+        :param value: The value to set it to
+        :returns: None
+        """
+
+        try:
+            self.flood_add_slider_var = value
+            self.flood_add_slider.set(value)
+        except Exception:
+            pass
+
+    def on_flood_remove_slider(self, value):
+        """
+        Called when the flood_remove slider is moved
+
+        :param value: The value of the slider
+        :returns: None
+        """
+
+        if self.update_tool:
+            self.controller.set_flood_remove_tolerance(float(value))
+        else:
+            self.update_tool = True
+
+    def update_flood_remove_slider_value(self, value):
+        """
+        Update the value of the flood_remove slider
+
+        :param value: The value to set it to
+        :returns: None
+        """
+
+        try:
+            self.flood_remove_slider_var = value
+            self.flood_remove_slider.set(value)
+        except Exception:
+            pass
+
+    def update_info_panel(self, tool_id):
+        """
+        Change the information in the info panel to match the current tool
+
+        :param tool_id: The id of the tool to change to
+        :returns: None
+        """
+
+        self.update_tool = False
+
+        if self.thresh_slider:
+            self.thresh_slider.destroy()
+            self.thresh_slider = None
+
+        if self.add_brush_sizer:
+            self.brush_size_panel.destroy()
+            self.add_brush_sizer.destroy()
+            self.add_brush_sizer = None
+
+        if self.remove_brush_sizer:
+            self.brush_size_panel.destroy()
+            self.remove_brush_sizer.destroy()
+            self.remove_brush_sizer = None
+
+        if self.flood_add_slider:
+            self.flood_add_slider.destroy()
+            self.flood_add_slider = None
+
+        if self.flood_remove_slider:
+            self.flood_remove_slider.destroy()
+            self.flood_remove_slider = None
+
+        if tool_id == self.ID_TOOL_THRESH:
+            self.info_panel_label.config(text="Threshold Tool")
+
+            self.thresh_slider_var = tk.DoubleVar()
+
+            self.thresh_slider = tk.Scale(self.info_panel,
+                                          from_=0.00,
+                                          to=1.00,
+                                          tickinterval=0.50,
+                                          resolution=0.01,
+                                          length=200,
+                                          variable=self.thresh_slider_var,
+                                          orient='horizontal',
+                                          command=self.on_thresh_slider)
+
+            self.thresh_slider.pack(side=TOP)
+
+        elif tool_id == self.ID_TOOL_ADD:
+            self.info_panel_label.config(text="Add Region Tool")
+
+            self.brush_size_panel = tk.Frame(self.info_panel,
+                                             padx=0, pady=15)
+
+            self.brush_size_label = tk.Label(self.brush_size_panel,
+                                             text="Brush Size")
+
+            self.add_brush_sizer_var = tk.IntVar()
+            self.add_brush_sizer_var.trace('w', self.on_add_brush_sizer)
+
+            self.add_brush_sizer = tk.Spinbox(self.brush_size_panel,
+                                              from_=0,
+                                              to=64,
+                                              width=17,
+                                              textvariable=self.
+                                              add_brush_sizer_var)
+
+            self.brush_size_label.pack(side=LEFT)
+            self.add_brush_sizer.pack(side=LEFT)
+
+            self.brush_size_panel.pack(side=TOP)
+
+        elif tool_id == self.ID_TOOL_REMOVE:
+            self.info_panel_label.config(text="Remove Region Tool")
+
+            self.brush_size_panel = tk.Frame(self.info_panel,
+                                             padx=0, pady=15)
+
+            self.brush_size_label = tk.Label(self.brush_size_panel,
+                                             text="Brush Size")
+
+            self.remove_brush_sizer_var = tk.IntVar()
+            self.remove_brush_sizer_var.trace('w', self.on_remove_brush_sizer)
+
+            self.remove_brush_sizer = tk.Spinbox(self.brush_size_panel,
+                                                 from_=0,
+                                                 to=64,
+                                                 width=17,
+                                                 textvariable=self.
+                                                 remove_brush_sizer_var)
+
+            self.brush_size_label.pack(side=LEFT)
+            self.remove_brush_sizer.pack(side=LEFT)
+
+            self.brush_size_panel.pack(side=TOP)
+
+        elif tool_id == self.ID_TOOL_FLOOD_ADD:
+            self.info_panel_label.config(text="Flood Add Tool")
+
+            self.flood_add_slider_var = tk.DoubleVar()
+
+            self.flood_add_slider = tk.Scale(self.info_panel,
+                                             from_=0.00,
+                                             to=1.00,
+                                             tickinterval=0.50,
+                                             resolution=0.01,
+                                             length=200,
+                                             variable=self.
+                                             flood_add_slider_var,
+                                             orient='horizontal',
+                                             command=self.on_flood_add_slider)
+
+            self.flood_add_slider.pack(side=TOP)
+
+        elif tool_id == self.ID_TOOL_FLOOD_REMOVE:
+            self.info_panel_label.config(text="Flood Remove Tool")
+
+            self.flood_remove_slider_var = tk.DoubleVar()
+
+            self.flood_remove_slider = tk.Scale(self.info_panel,
+                                                from_=0.00,
+                                                to=1.00,
+                                                tickinterval=0.50,
+                                                resolution=0.01,
+                                                length=200,
+                                                variable=self.
+                                                flood_remove_slider_var,
+                                                orient='horizontal',
+                                                command=self.
+                                                on_flood_remove_slider)
+
+            self.flood_remove_slider.pack(side=TOP)
 
 
 class AboutDialog(tk.Toplevel):
