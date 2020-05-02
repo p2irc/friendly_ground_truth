@@ -1904,6 +1904,34 @@ class TestView():
         assert window.flood_add_slider is None
         assert window.flood_remove_slider is None
 
+    def test_handle_focus(self, setup, mocker):
+        """
+        Test handling the focus
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+        mocker.patch('tkinter.Scale')
+        mocker.patch('tkinter.Spinbox')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.flood_cursor = True
+        window.canvas = MagicMock()
+
+        window.handle_focus(MagicMock())
+        window.canvas.config.assert_called_with(cursor='cross')
+
+        window.flood_cursor = False
+        window.canvas = MagicMock()
+
+        window.handle_focus(MagicMock())
+        window.canvas.config.assert_called_with(cursor='none')
+
 
 class TestAboutDialog():
 
