@@ -105,6 +105,20 @@ class MainWindow(Frame):
         self.create_canvas()
         self.set_up_interactions()
 
+        self.master.bind("<FocusIn>", self.handle_focus)
+
+    def handle_focus(self, event):
+        """
+        Called when the window comes into focus
+
+        :param event: The event
+        :returns: None
+        """
+        if self.flood_cursor:
+            self.canvas.config(cursor='cross')
+        else:
+            self.canvas.config(cursor='none')
+
     def set_up_interactions(self):
         """
         Set up user interactions with keyboard and mouse
