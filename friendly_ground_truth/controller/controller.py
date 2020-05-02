@@ -13,6 +13,7 @@ import tkinter.filedialog
 import tkinter.messagebox
 import logging
 import os
+import copy
 
 import matplotlib.pyplot as plt
 import skimage.io as io
@@ -92,6 +93,9 @@ class Controller:
 
         # Offset of the patch within the context image
         self.patch_offset = (0, 0)
+
+        # Undo Management
+        self.undo_manager = UndoManager()
 
     def load_new_image(self):
         """
@@ -325,6 +329,8 @@ class Controller:
         :returns: None
         """
 
+        self.undo_manager.clear_undos()
+
         if self.current_patch < len(self.image.patches)-1:
 
             self.current_patch += 1
@@ -388,6 +394,8 @@ class Controller:
 
         :returns: None
         """
+
+        self.undo_manager.clear_undos()
 
         if self.current_patch > 0:
 
@@ -488,8 +496,10 @@ class Controller:
 
         :returns: None
         """
-
         patch = self.image.patches[self.current_patch]
+
+        self.undo_manager.add_to_undo_stack(copy.deepcopy(patch), 'no_root')
+
         patch.clear_mask()
         patch.overlay_mask()
 
@@ -553,6 +563,10 @@ class Controller:
             self.flood_add_tolerance -= 0.01
 
         patch = self.image.patches[self.current_patch]
+
+        #self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
+        #                                    'flood_add_adjust')
+
         patch.flood_add_region(self.flood_add_position,
                                self.flood_add_tolerance)
 
@@ -573,6 +587,10 @@ class Controller:
         self.flood_add_tolerance = value
 
         patch = self.image.patches[self.current_patch]
+
+        #self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
+        #                                    'flood_add_adjust')
+
         patch.flood_add_region(self.flood_add_position,
                                self.flood_add_tolerance)
 
@@ -596,6 +614,10 @@ class Controller:
             self.flood_remove_tolerance -= 0.01
 
         patch = self.image.patches[self.current_patch]
+
+        #self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
+        #                                    'flood_remove_adjust')
+
         patch.flood_remove_region(self.flood_remove_position,
                                   self.flood_remove_tolerance)
 
@@ -616,6 +638,10 @@ class Controller:
         self.flood_remove_tolerance = value
 
         patch = self.image.patches[self.current_patch]
+
+        #self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
+        #                                    'flood_remove_adjust')
+
         patch.flood_remove_region(self.flood_remove_position,
                                   self.flood_remove_tolerance)
 
@@ -689,6 +715,10 @@ class Controller:
             draw_radius = self.add_region_radius / self.main_window.image_scale
 
             patch = self.image.patches[self.current_patch]
+
+            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
+                                                'add_region')
+
             patch.add_region(click_location, draw_radius)
 
             self.display_current_patch()
@@ -700,6 +730,10 @@ class Controller:
                            self.main_window.image_scale)
 
             patch = self.image.patches[self.current_patch]
+
+            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
+                                                'remove_region')
+
             patch.remove_region(click_location, draw_radius)
             self.display_current_patch()
 
@@ -734,6 +768,9 @@ class Controller:
 
             patch = self.image.patches[self.current_patch]
 
+            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
+                                                'flood_add')
+
             patch.flood_add_region(click_location, self.flood_add_tolerance)
 
             self.flood_add_position = click_location
@@ -742,6 +779,9 @@ class Controller:
 
         elif self.current_mode == Mode.FLOOD_REMOVE:
             patch = self.image.patches[self.current_patch]
+
+            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
+                                                'flood_remove')
 
             patch.flood_remove_region(click_location,
                                       self.flood_remove_tolerance)
@@ -798,6 +838,10 @@ class Controller:
             draw_radius = self.add_region_radius / self.main_window.image_scale
 
             patch = self.image.patches[self.current_patch]
+
+            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
+                                                'add_region_adjust')
+
             patch.add_region(position, draw_radius)
 
             self.display_current_patch()
@@ -809,6 +853,10 @@ class Controller:
                            self.main_window.image_scale)
 
             patch = self.image.patches[self.current_patch]
+
+            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
+                                                'remove_region_adjust')
+
             patch.remove_region(position, draw_radius)
             self.display_current_patch()
 
@@ -852,6 +900,9 @@ class Controller:
 
         patch = self.image.patches[self.current_patch]
 
+        self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
+                                            'threshold_adjust')
+
         # Adjust the threshold.  Note that it is inverted, because it feels
         # more natural to scroll down to 'reduce' the region, rather than
         # reducing the threshold
@@ -879,6 +930,10 @@ class Controller:
         """
 
         patch = self.image.patches[self.current_patch]
+
+        self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
+                                            'threshold_adjust')
+
         patch.thresh = value
         patch.apply_threshold(patch.thresh)
         patch.overlay_mask()
@@ -961,3 +1016,112 @@ class Controller:
 
         self.main_window.set_brush_radius(self.remove_region_radius)
         self.main_window.draw_brush()
+
+    def undo(self):
+
+        patch = self.image.patches[self.current_patch]
+
+        redo_patch, operation = self.undo_manager.undo()
+
+        if redo_patch is None:
+            return
+
+        self.undo_manager.add_to_redo_stack(patch, operation)
+
+        self.image.patches[self.current_patch] = redo_patch
+
+        self.display_current_patch()
+
+    def redo(self):
+
+        patch = self.image.patches[self.current_patch]
+
+        undo_patch, operation = self.undo_manager.redo()
+
+        if undo_patch is None:
+            return
+
+        self.undo_manager.add_to_undo_stack(patch, operation)
+
+        self.image.patches[self.current_patch] = undo_patch
+
+        self.display_current_patch()
+
+class UndoManager():
+    """
+    Manages Undo Stuff
+    """
+
+    MAX_SIZE = 20
+
+    def __init__(self):
+        """
+        Initialize the Undo Manager
+
+        :returns: None
+        """
+
+        self.undo_stack = []
+        self.redo_stack = []
+
+    def add_to_undo_stack(self, patch, operation):
+        """
+        Add the given operation to the undo stack
+
+        :returns: None
+        """
+
+        if "threshold_adjust" == operation and len(self.undo_stack) > 0:
+            if self.undo_stack[-1][1] == operation:
+                return
+        elif "adjust" in operation and len(self.undo_stack) > 0:
+            if self.undo_stack[-1][1] == operation:
+                self.undo_stack.pop()
+
+        self.undo_stack.append((patch, operation))
+
+        if len(self.undo_stack) > self.MAX_SIZE:
+            self.undo_stack.pop(0)
+
+    def undo(self):
+        """
+        Undo the last operation added to the stack
+
+        :returns: The function and its parameters
+        """
+        try:
+            patch, operation = self.undo_stack.pop()
+            return patch, operation
+
+        except IndexError:
+            return None, None
+
+    def add_to_redo_stack(self, patch, operation):
+        """
+        Add the given operation to the redo stack
+
+        :returns: None
+        """
+
+        self.redo_stack.append((patch, operation))
+
+        if len(self.redo_stack) > self.MAX_SIZE:
+            self.redo_stack.pop(0)
+
+    def redo(self):
+        """
+        Redo the last undone operation
+
+        :returns: The function and its parameters
+        """
+
+        try:
+            patch, operation = self.redo_stack.pop()
+            return patch, operation
+        except IndexError:
+            return None, None
+
+    def clear_undos(self):
+
+        self.undo_stack = []
+        self.redo_stack = []

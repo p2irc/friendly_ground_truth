@@ -32,6 +32,8 @@ from friendly_ground_truth.view.icons.icon_strings import (add_region_icon,
                                                            flood_add_icon,
                                                            flood_remove_icon,
                                                            no_root_icon,
+                                                           undo_icon,
+                                                           redo_icon
                                                            # add_tip_icon,
                                                            # add_branch_icon,
                                                            # add_cross_icon,
@@ -107,6 +109,8 @@ class MainWindow(Frame):
 
         self.master.bind("<FocusIn>", self.handle_focus)
 
+        self.control_down = False
+
     def handle_focus(self, event):
         """
         Called when the window comes into focus
@@ -151,6 +155,11 @@ class MainWindow(Frame):
         self.bind_all("<KeyPress>", self.on_keypress)
         self.bind_all("<Left>", self.on_left)
         self.bind_all("<Right>", self.on_right)
+        self.bind_all("<KeyRelease-Control_L>", self.on_control_release)
+
+    def on_control_release(self, event):
+
+        self.control_down = False
 
     def create_canvas(self):
         """
@@ -316,6 +325,34 @@ class MainWindow(Frame):
 
         CreateToolTip(no_root_button, "No Root (x)")
 
+        sep = tk.ttk.Separator(self.toolbar, orient="vertical")
+        sep.pack(side=LEFT, padx=5, fill=BOTH)
+
+        # Undo Button
+        undo_data = Image.open(BytesIO(base64.b64decode(undo_icon)))
+        undo_img = itk.PhotoImage(undo_data)
+        undo_button = tk.Button(self.toolbar, image=undo_img,
+                                relief=FLAT,
+                                command=self.controller.undo)
+        undo_button.image = undo_img
+        undo_button.pack(side=LEFT, padx=2, pady=2)
+
+        CreateToolTip(undo_button, "Undo (CTRL+Z)")
+
+        # Redo Button
+        redo_data = Image.open(BytesIO(base64.b64decode(redo_icon)))
+        redo_img = itk.PhotoImage(redo_data)
+        redo_button = tk.Button(self.toolbar, image=redo_img,
+                                relief=FLAT,
+                                command=self.controller.redo)
+        redo_button.image = redo_img
+        redo_button.pack(side=LEFT, padx=2, pady=2)
+
+        CreateToolTip(redo_button, "Redo (CTRL+R)")
+
+        sep = tk.ttk.Separator(self.toolbar, orient="vertical")
+        sep.pack(side=LEFT, padx=5, fill=BOTH)
+
         # Prev Button
         prev_data = Image.open(BytesIO(base64.b64decode(prev_patch_icon)))
         prev_img = itk.PhotoImage(prev_data)
@@ -451,7 +488,6 @@ class MainWindow(Frame):
         """
 
         key = event.char
-
         s = event.state
         ctrl = (s & 0x4) != 0
         alt = (s & 0x8) != 0 or (s & 0x80) != 0
@@ -464,39 +500,46 @@ class MainWindow(Frame):
             key = 'alt+' + key
 
         if ctrl:
+            self.control_down = True
             key = 'ctrl+' + key
 
-        if key == 'x':
-            self.on_no_root_tool()
+        if self.control_down:
+            key = event.keysym
 
-        elif key == "t":
-            self.on_threshold_tool()
-
-        elif key == "a":
-            self.on_add_reg_tool()
-
-        elif key == "r":
-            self.on_remove_reg_tool()
-
-        elif key == "f":
-            self.on_flood_add_tool()
-
-        elif key == "l":
-            self.on_flood_remove_tool()
-
-        # elif key == "c":
-        #    self.on_add_cross_tool()
-
-        # elif key == "v":
-        #    self.on_add_tip_tool()
-
-        # elif key == "b":
-        #     self.on_add_branch_tool()
-
-        # elif key == "n":
-        #    self.on_remove_landmark_tool()
+            if key == 'z':
+                self.controller.undo()
+            elif key == 'r':
+                self.controller.redo()
         else:
-            self.logger.debug("Keypress: {}".format(key))
+            if key == 'x':
+                self.on_no_root_tool()
+
+            elif key == "t":
+                self.on_threshold_tool()
+
+            elif key == "a":
+                self.on_add_reg_tool()
+
+            elif key == "r":
+                self.on_remove_reg_tool()
+
+            elif key == "f":
+                self.on_flood_add_tool()
+
+            elif key == "l":
+                self.on_flood_remove_tool()
+
+            # elif key == "c":
+            #    self.on_add_cross_tool()
+
+            # elif key == "v":
+            #    self.on_add_tip_tool()
+
+            # elif key == "b":
+            #     self.on_add_branch_tool()
+
+            # elif key == "n":
+            #    self.on_remove_landmark_tool()
 
     def on_load_image(self):
         """

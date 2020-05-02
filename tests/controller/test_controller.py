@@ -18,7 +18,8 @@ import numpy as np
 from mock import MagicMock, PropertyMock
 
 from friendly_ground_truth.controller.controller import (Controller, Mode,
-                                                         SecondaryMode)
+                                                         SecondaryMode,
+                                                         UndoManager)
 from friendly_ground_truth.view.tk_view import MainWindow
 from friendly_ground_truth.model.model import Patch, Image
 
@@ -2850,3 +2851,361 @@ class TestController:
         context_img = controller.get_context_patches(mock_patch5)
 
         assert context_img.shape == (30, 30, 4)
+
+    def test_undo(self, setup, display_current_patch_mock):
+        """
+        Test undoing an action
+
+        :param setup: The setup fixture
+        :param display_current_patch_mock:  A mock for displaying the current
+                                            patch
+        :returns: None
+        """
+        master = MagicMock()
+        controller = Controller(master)
+
+        controller.current_patch = 0
+
+        mock_patch = MagicMock()
+        mock_patch.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch.patch_index = (2, 2)
+
+        mock_patch2 = MagicMock()
+        mock_patch2.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch2.patch_index = (2, 2)
+
+        mock_image = MagicMock()
+        mock_image.NUM_PATCHES = 3
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        undo_manager = MagicMock()
+        undo_manager.undo.return_value = mock_patch2, 'test'
+
+        controller.undo_manager = undo_manager
+
+        controller.undo()
+
+        undo_manager.undo.assert_called()
+        undo_manager.add_to_redo_stack.assert_called_with(mock_patch, 'test')
+        assert controller.image.patches[0] == mock_patch2
+
+    def test_redo(self, setup, display_current_patch_mock):
+        """
+        Test redoing an action
+
+        :param setup: The setup fixture
+        :param display_current_patch_mock:  A mock for displaying the current
+                                            patch
+        :returns: None
+        """
+
+        master = MagicMock()
+        controller = Controller(master)
+
+        controller.current_patch = 0
+
+        mock_patch = MagicMock()
+        mock_patch.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch.patch_index = (2, 2)
+
+        mock_patch2 = MagicMock()
+        mock_patch2.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch2.patch_index = (2, 2)
+
+        mock_image = MagicMock()
+        mock_image.NUM_PATCHES = 3
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        undo_manager = MagicMock()
+        undo_manager.redo.return_value = mock_patch2, 'test'
+
+        controller.undo_manager = undo_manager
+
+        controller.redo()
+
+        undo_manager.redo.assert_called()
+        undo_manager.add_to_undo_stack.assert_called_with(mock_patch, 'test')
+        assert controller.image.patches[0] == mock_patch2
+
+    def test_undo_none(self, setup, display_current_patch_mock):
+        """
+        Test undoing an action
+
+        :param setup: The setup fixture
+        :param display_current_patch_mock:  A mock for displaying the current
+                                            patch
+        :returns: None
+        """
+        master = MagicMock()
+        controller = Controller(master)
+
+        controller.current_patch = 0
+
+        mock_patch = MagicMock()
+        mock_patch.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch.patch_index = (2, 2)
+
+        mock_patch2 = MagicMock()
+        mock_patch2.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch2.patch_index = (2, 2)
+
+        mock_image = MagicMock()
+        mock_image.NUM_PATCHES = 3
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        undo_manager = MagicMock()
+        undo_manager.undo.return_value = None, None
+
+        controller.undo_manager = undo_manager
+
+        controller.undo()
+
+        undo_manager.undo.assert_called()
+        undo_manager.add_to_redo_stack.assert_not_called()
+        assert controller.image.patches[0] == mock_patch
+
+    def test_redo_none(self, setup, display_current_patch_mock):
+        """
+        Test redoing an action
+
+        :param setup: The setup fixture
+        :param display_current_patch_mock:  A mock for displaying the current
+                                            patch
+        :returns: None
+        """
+
+        master = MagicMock()
+        controller = Controller(master)
+
+        controller.current_patch = 0
+
+        mock_patch = MagicMock()
+        mock_patch.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch.patch_index = (2, 2)
+
+        mock_patch2 = MagicMock()
+        mock_patch2.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch2.patch_index = (2, 2)
+
+        mock_image = MagicMock()
+        mock_image.NUM_PATCHES = 3
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        undo_manager = MagicMock()
+        undo_manager.redo.return_value = None, None
+
+        controller.undo_manager = undo_manager
+
+        controller.redo()
+
+        undo_manager.redo.assert_called()
+        undo_manager.add_to_undo_stack.assert_not_called()
+        assert controller.image.patches[0] == mock_patch
+
+class TestUndoManager():
+
+
+    def test_add_to_undo_stack(self, mocker):
+
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_undo_stack(patch, "test")
+
+        assert undo_manager.undo_stack[-1] == (patch, "test")
+
+
+    def test_add_to_undo_stack_threshold_adj(self, mocker):
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_undo_stack(patch, "threshold_adjust")
+
+        assert undo_manager.undo_stack[-1] == (patch, "threshold_adjust")
+
+        undo_manager.add_to_undo_stack(patch, "threshold_adjust")
+
+        assert undo_manager.undo_stack[-1] == (patch, "threshold_adjust")
+        assert len(undo_manager.undo_stack) == 1
+
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "threshold_adjust")
+
+
+        assert len(undo_manager.undo_stack) == 3
+        assert undo_manager.undo_stack[-1] == (patch, "threshold_adjust")
+
+    def test_add_to_undo_stack_adjust(self, mocker):
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_undo_stack(patch, "test_adjust")
+
+        assert undo_manager.undo_stack[-1] == (patch, "test_adjust")
+
+        undo_manager.add_to_undo_stack(patch, "test_adjust")
+
+        assert undo_manager.undo_stack[-1] == (patch, "test_adjust")
+        assert len(undo_manager.undo_stack) == 1
+
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test_adjust")
+
+        assert len(undo_manager.undo_stack) == 3
+        assert undo_manager.undo_stack[-1] == (patch, "test_adjust")
+
+
+    def test_add_to_undo_stack_fill(self, mocker):
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+
+        assert len(undo_manager.undo_stack) == 20
+
+        undo_manager.add_to_undo_stack(patch, "test")
+
+        assert len(undo_manager.undo_stack) == 20
+
+    def test_undo(self):
+
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_undo_stack(patch, "test")
+
+        p, o = undo_manager.undo()
+
+        assert p == patch
+        assert o == "test"
+
+    def test_undo_except(self, mocker):
+
+        def raise_indexerror():
+            raise IndexError
+
+        undo_manager = UndoManager()
+        undo_manager.undo_stack = MagicMock()
+        undo_manager.undo_stack.pop.side_effect = raise_indexerror
+
+        p, o = undo_manager.undo()
+
+        assert p == None
+        assert o == None
+
+
+    def test_add_to_redo_stack(self, mocker):
+
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_redo_stack(patch, "test")
+
+        assert undo_manager.redo_stack[-1] == (patch, "test")
+
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+
+        assert len(undo_manager.redo_stack) == 20
+
+        undo_manager.add_to_redo_stack(patch, "test")
+        assert len(undo_manager.redo_stack) == 20
+
+    def test_redo(self):
+
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_redo_stack(patch, "test")
+
+        p, o = undo_manager.redo()
+
+        assert p == patch
+        assert o == "test"
+
+    def test_redo_except(self, mocker):
+
+        def raise_indexerror():
+            raise IndexError
+
+        undo_manager = UndoManager()
+        undo_manager.redo_stack = MagicMock()
+        undo_manager.redo_stack.pop.side_effect = raise_indexerror
+
+        p, o = undo_manager.redo()
+
+        assert p == None
+        assert o == None
+
+    def test_clear_undos(self, mocker):
+
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+
+        undo_manager.clear_undos()
+
+        assert len(undo_manager.undo_stack) == 0
+        assert len(undo_manager.redo_stack) == 0
