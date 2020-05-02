@@ -1344,6 +1344,566 @@ class TestView():
 
         window.prog_popup.pack_slaves.assert_called()
 
+    def test_on_thresh_slider_update(self, setup, mocker):
+        """
+        Test when the thresh slider is interacted with
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.update_tool = True
+
+        window.on_thresh_slider(10)
+
+        window.controller.set_threshold.assert_called_with(10.0)
+
+    def test_on_thresh_slider_no_update(self, setup, mocker):
+        """
+        Test when the thresh slider is interacted with
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.update_tool = False
+
+        window.on_thresh_slider(10)
+
+        assert window.update_tool is True
+
+    def test_update_thresh_slider_value(self, setup, mocker):
+        """
+        Test when the thresh slider is updated
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.thresh_slider = MagicMock()
+
+        window.update_thresh_slider_value(10)
+
+        window.thresh_slider.set.assert_called_with(10)
+        assert window.thresh_slider_var == 10
+
+    def test_update_thresh_slider_value_except(self, setup, mocker):
+        """
+        Test when the thresh slider is updated
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        def raise_exception(args, kwargs):
+            raise Exception
+
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.thresh_slider = MagicMock()
+        window.thresh_slider.set.side_effect = raise_exception
+
+        res = window.update_thresh_slider_value(10)
+
+        assert res is None
+
+    def test_on_add_brush_sizer_update(self, setup, mocker):
+        """
+        Test when the add brush sizer is used
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.update_tool = True
+
+        window.add_brush_sizer_var = MagicMock()
+        window.add_brush_sizer_var.get.return_value = 10.0
+
+        window.on_add_brush_sizer(1, 2, 3)
+
+        window.controller.set_add_region_brush.assert_called_with(10.0)
+
+    def test_on_add_brush_sizer_no_update(self, setup, mocker):
+        """
+        Test when the add brush sizer is used
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.update_tool = False
+
+        window.add_brush_sizer_var = MagicMock()
+        window.add_brush_sizer_var.get.return_value = 10.0
+
+        window.on_add_brush_sizer(1, 2, 3)
+
+        assert window.update_tool is True
+
+    def test_on_remove_brush_sizer_update(self, setup, mocker):
+        """
+        Test when the remove brush sizer is used
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.update_tool = True
+
+        window.remove_brush_sizer_var = MagicMock()
+        window.remove_brush_sizer_var.get.return_value = 10.0
+
+        window.on_remove_brush_sizer(1, 2, 3)
+
+        window.controller.set_remove_region_brush.assert_called_with(10.0)
+
+    def test_on_remove_brush_sizer_no_update(self, setup, mocker):
+        """
+        Test when the remove brush sizer is used
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.update_tool = False
+
+        window.remove_brush_sizer_var = MagicMock()
+        window.remove_brush_sizer_var.get.return_value = 10.0
+
+        window.on_remove_brush_sizer(1, 2, 3)
+
+        assert window.update_tool is True
+
+    def test_on_flood_add_slider_update(self, setup, mocker):
+        """
+        Test when the flood_add slider is interacted with
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.update_tool = True
+
+        window.on_flood_add_slider(10)
+
+        window.controller.set_flood_add_tolerance.assert_called_with(10.0)
+
+    def test_on_flood_add_slider_no_update(self, setup, mocker):
+        """
+        Test when the flood_add slider is interacted with
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.update_tool = False
+
+        window.on_flood_add_slider(10)
+
+        assert window.update_tool is True
+
+    def test_on_flood_remove_slider_update(self, setup, mocker):
+        """
+        Test when the flood_remove slider is interacted with
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.update_tool = True
+
+        window.on_flood_remove_slider(10)
+
+        window.controller.set_flood_remove_tolerance.assert_called_with(10.0)
+
+    def test_on_flood_remove_slider_no_update(self, setup, mocker):
+        """
+        Test when the flood_remove slider is interacted with
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.update_tool = False
+
+        window.on_flood_remove_slider(10)
+
+        assert window.update_tool is True
+
+    def test_update_add_brush_sizer(self, setup, mocker):
+        """
+        Test when the brush sizer is updated
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.add_brush_sizer_var = MagicMock()
+
+        window.update_add_brush_sizer(10)
+
+        window.add_brush_sizer_var.set.assert_called_with(10)
+
+    def test_update_add_brush_sizer_value_except(self, setup, mocker):
+        """
+        Test when the brush sizer is updated
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        def raise_exception(args, kwargs):
+            raise Exception
+
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.add_brush_sizer_var = MagicMock()
+        window.add_brush_sizer_var.set.side_effect = raise_exception
+
+        res = window.update_add_brush_sizer(10)
+
+        assert res is None
+
+    def test_update_remove_brush_sizer(self, setup, mocker):
+        """
+        Test when the brush sizer is updated
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.remove_brush_sizer_var = MagicMock()
+
+        window.update_remove_brush_sizer(10)
+
+        window.remove_brush_sizer_var.set.assert_called_with(10)
+
+    def test_update_remove_brush_sizer_value_except(self, setup, mocker):
+        """
+        Test when the brush sizer is updated
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        def raise_exception(args, kwargs):
+            raise Exception
+
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.removebrush_sizer_var = MagicMock()
+        window.removebrush_sizer_var.set.side_effect = raise_exception
+
+        res = window.update_remove_brush_sizer(10)
+
+        assert res is None
+
+    def test_update_flood_add_slider_value(self, setup, mocker):
+        """
+        Test when the flood_add slider is updated
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.flood_add_slider = MagicMock()
+
+        window.update_flood_add_slider_value(10)
+
+        window.flood_add_slider.set.assert_called_with(10)
+        assert window.flood_add_slider_var == 10
+
+    def test_update_flood_add_slider_value_except(self, setup, mocker):
+        """
+        Test when the flood_add slider is updated
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        def raise_exception(args, kwargs):
+            raise Exception
+
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.flood_add_slider = MagicMock()
+        window.flood_add_slider.set.side_effect = raise_exception
+
+        res = window.update_flood_add_slider_value(10)
+
+        assert res is None
+
+    def test_update_flood_remove_slider_value(self, setup, mocker):
+        """
+        Test when the flood_remove slider is updated
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.flood_remove_slider = MagicMock()
+
+        window.update_flood_remove_slider_value(10)
+
+        window.flood_remove_slider.set.assert_called_with(10)
+        assert window.flood_remove_slider_var == 10
+
+    def test_update_flood_remove_slider_value_except(self, setup, mocker):
+        """
+        Test when the flood_remove slider is updated
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+
+        def raise_exception(args, kwargs):
+            raise Exception
+
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.flood_remove_slider = MagicMock()
+        window.flood_remove_slider.set.side_effect = raise_exception
+
+        res = window.update_flood_remove_slider_value(10)
+
+        assert res is None
+
+    def test_update_info_panel_thresh(self, setup, mocker):
+        """
+        Test updating the info panel when all sliders exist
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+        mocker.patch('tkinter.Scale')
+        mocker.patch('tkinter.Spinbox')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.brush_size_panel = MagicMock()
+        window.thresh_slider = MagicMock()
+        window.add_brush_sizer = MagicMock()
+        window.remove_brush_sizer = MagicMock()
+        window.flood_add_slider = MagicMock()
+        window.flood_remove_slider = MagicMock()
+        window.info_panel_label = MagicMock()
+        window.info_panel = MagicMock()
+
+        window.update_info_panel(window.ID_TOOL_THRESH)
+
+        window.info_panel_label.config\
+            .assert_called_with(text="Threshold Tool")
+
+        assert window.thresh_slider is not None
+        assert window.add_brush_sizer is None
+        assert window.remove_brush_sizer is None
+        assert window.flood_add_slider is None
+        assert window.flood_remove_slider is None
+
+    def test_update_info_panel_add_region(self, setup, mocker):
+        """
+        Test updating the info panel when all sliders exist
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+        mocker.patch('tkinter.Scale')
+        mocker.patch('tkinter.Spinbox')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.brush_size_panel = None
+        window.thresh_slider = None
+        window.add_brush_sizer = None
+        window.remove_brush_sizer = None
+        window.flood_add_slider = None
+        window.flood_remove_slider = None
+        window.info_panel_label = MagicMock()
+        window.info_panel = MagicMock()
+
+        window.update_info_panel(window.ID_TOOL_ADD)
+
+        window.info_panel_label.config\
+            .assert_called_with(text="Add Region Tool")
+
+        assert window.thresh_slider is None
+        assert window.add_brush_sizer is not None
+        assert window.remove_brush_sizer is None
+        assert window.flood_add_slider is None
+        assert window.flood_remove_slider is None
+
+    def test_update_info_panel_invalid(self, setup, mocker):
+        """
+        Test updating the info panel when all sliders exist
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :returns: None
+        """
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+        mocker.patch('tkinter.Scale')
+        mocker.patch('tkinter.Spinbox')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.brush_size_panel = None
+        window.thresh_slider = None
+        window.add_brush_sizer = None
+        window.remove_brush_sizer = None
+        window.flood_add_slider = None
+        window.flood_remove_slider = None
+        window.info_panel_label = MagicMock()
+        window.info_panel = MagicMock()
+
+        window.update_info_panel(-1)
+
+        assert window.thresh_slider is None
+        assert window.add_brush_sizer is None
+        assert window.remove_brush_sizer is None
+        assert window.flood_add_slider is None
+        assert window.flood_remove_slider is None
+
 
 class TestAboutDialog():
 

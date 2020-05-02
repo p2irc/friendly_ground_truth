@@ -1212,6 +1212,43 @@ class TestController:
 
         assert controller.flood_add_tolerance > old_tol
 
+    def test_set_flood_add_tolerance(self, setup, display_current_patch_mock):
+        """
+        Test setting the flood add tolerance
+
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.flood_add_position = (0, 0)
+        controller.image = MagicMock()
+
+        controller.set_flood_add_tolerance(0.50)
+
+        assert controller.flood_add_tolerance == 0.50
+
+    def test_set_flood_add_tolerance_none_pos(self, setup,
+                                              display_current_patch_mock):
+        """
+        Test setting the flood add tolerance when no position was set
+
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.flood_add_position = None
+        controller.image = MagicMock()
+
+        old_tol = controller.flood_add_tolerance
+
+        controller.set_flood_add_tolerance(0.50)
+
+        assert controller.flood_add_tolerance == old_tol
+
     def test_handle_flood_remove_tolerance_no_pos(self, setup,
                                                   display_current_patch_mock):
         """
@@ -1283,6 +1320,44 @@ class TestController:
         controller.handle_flood_remove_tolerance(-1)
 
         assert controller.flood_remove_tolerance < old_tol
+
+    def test_set_flood_remove_tolerance(self, setup,
+                                        display_current_patch_mock):
+        """
+        Test setting the flood remove tolerance
+
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.flood_remove_position = (0, 0)
+        controller.image = MagicMock()
+
+        controller.set_flood_remove_tolerance(0.50)
+
+        assert controller.flood_remove_tolerance == 0.50
+
+    def test_set_flood_remove_tolerance_none_pos(self, setup,
+                                                 display_current_patch_mock):
+        """
+        Test setting the flood remove tolerance when no position was set
+
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.flood_remove_position = None
+        controller.image = MagicMock()
+
+        old_tol = controller.flood_remove_tolerance
+
+        controller.set_flood_remove_tolerance(0.50)
+
+        assert controller.flood_remove_tolerance == old_tol
 
     def test_handle_flood_add_tolerance_neg_rot(self, setup,
                                                 display_current_patch_mock):
@@ -1989,6 +2064,34 @@ class TestController:
         result = controller.handle_motion((10, -10))
         assert False is result
 
+    def test_set_threshold(self, setup, test_image_data,
+                           display_current_patch_mock):
+        """
+        Test setting the threshold
+
+        :param setup: Setup
+        :param test_image_data: Image data to test with
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        patch = Patch(test_image_data, (0, 0))
+        patch.thresh = 0.5
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.set_threshold(0.2)
+
+        new_patch = controller.image.patches[controller.current_patch]
+
+        assert 0.2 == new_patch.thresh
+
     def test_adjust_threshold_pos_rot_valid_thresh(self, setup,
                                                    test_image_data,
                                                    display_current_patch_mock):
@@ -2159,6 +2262,19 @@ class TestController:
         assert controller.add_region_radius != old_add_radius
         assert (controller.add_region_radius + 1) == old_add_radius
 
+    def test_set_add_region_brush(self, setup):
+        """
+        Test setting the radius of the add region brush
+
+        :param setup: Setup
+        :returns: None
+        """
+        controller = Controller(MagicMock())
+
+        controller.set_add_region_brush(11)
+
+        assert controller.add_region_radius == 11
+
     def test_adjust_remove_region_brush_positive_rot(self, setup):
         """
         Test when the mouse wheel has a positive rotation in Mode.REMOVE_REGION
@@ -2196,6 +2312,19 @@ class TestController:
 
         assert controller.remove_region_radius != old_remove_radius
         assert (controller.remove_region_radius + 1) == old_remove_radius
+
+    def test_set_remove_region_brush(self, setup):
+        """
+        Test setting the radius of the remove region brush
+
+        :param setup: Setup
+        :returns: None
+        """
+        controller = Controller(MagicMock())
+
+        controller.set_remove_region_brush(11)
+
+        assert controller.remove_region_radius == 11
 
     def test_load_new_image_no_cancel(self, setup, mocker,
                                       display_current_patch_mock):
