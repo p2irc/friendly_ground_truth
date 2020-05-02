@@ -487,8 +487,31 @@ class TestView():
 
         window = MainWindow(self.mock_controller, MagicMock())
 
+        window.control_down = False
         event = MagicMock()
         event.char = 'w'
+        event.state = 0
+
+        result = window.on_keypress(event)
+        assert result is None
+
+    def test_on_keypress_invalid_ctrl(self, setup, mocker):
+        """
+        Test when an invalid key is pressed
+
+        :test_condition: returns none
+
+        :param setup: Setup fixture
+        :param mocker: mocker
+        :returns: None
+        """
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.control_down = True
+        event = MagicMock()
+        event.char = 'w'
+        event.state = 0
 
         result = window.on_keypress(event)
         assert result is None
@@ -1931,6 +1954,57 @@ class TestView():
 
         window.handle_focus(MagicMock())
         window.canvas.config.assert_called_with(cursor='none')
+
+    def test_on_control_release(self, setup, mocker):
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+        mocker.patch('tkinter.Scale')
+        mocker.patch('tkinter.Spinbox')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.on_control_release(None)
+
+        assert window.control_down is False
+
+    def test_keypress_ctrl_z(self, setup, mocker):
+
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+        mocker.patch('tkinter.Scale')
+        mocker.patch('tkinter.Spinbox')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.control_down = True
+
+        event = MagicMock()
+        event.keysym = 'z'
+
+        window.on_keypress(event)
+
+        self.mock_controller.undo.assert_called()
+
+    def test_keypress_ctrl_r(self, setup, mocker):
+
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+        mocker.patch('tkinter.Scale')
+        mocker.patch('tkinter.Spinbox')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.control_down = True
+
+        event = MagicMock()
+        event.keysym = 'r'
+
+        window.on_keypress(event)
+
+        self.mock_controller.redo.assert_called()
 
 
 class TestAboutDialog():
