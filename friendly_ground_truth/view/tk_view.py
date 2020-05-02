@@ -909,7 +909,7 @@ class MainWindow(Frame):
             self.thresh_slider_var = value
             self.thresh_slider.set(value)
         except Exception:
-            pass
+            return
 
     def on_add_brush_sizer(self, a, b, c):
         """

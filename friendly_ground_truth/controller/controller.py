@@ -567,7 +567,7 @@ class Controller:
         :returns: None
         """
 
-        if self.flood_remove_tolerance is None:
+        if self.flood_add_position is None:
             return
 
         self.flood_add_tolerance = value
