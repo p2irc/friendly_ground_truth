@@ -443,7 +443,7 @@ class Controller:
             self.current_mode = Mode.FLOOD_ADD
             self.main_window.flood_cursor = True
             self.flood_add_position = None
-            self.flood_add_tolerance = 0.05
+            # self.flood_add_tolerance = 0.05
             self.main_window.\
                 update_flood_add_slider_value(self.flood_add_tolerance)
 
@@ -451,7 +451,7 @@ class Controller:
             self.current_mode = Mode.FLOOD_REMOVE
             self.main_window.flood_cursor = True
             self.flood_remove_position = None
-            self.flood_remove_tolerance = 0.05
+            # self.flood_remove_tolerance = 0.05
             self.main_window.\
                 update_flood_remove_slider_value(self.flood_remove_tolerance)
 
@@ -564,9 +564,6 @@ class Controller:
 
         patch = self.image.patches[self.current_patch]
 
-        #self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-        #                                    'flood_add_adjust')
-
         patch.flood_add_region(self.flood_add_position,
                                self.flood_add_tolerance)
 
@@ -587,9 +584,6 @@ class Controller:
         self.flood_add_tolerance = value
 
         patch = self.image.patches[self.current_patch]
-
-        #self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-        #                                    'flood_add_adjust')
 
         patch.flood_add_region(self.flood_add_position,
                                self.flood_add_tolerance)
@@ -615,9 +609,6 @@ class Controller:
 
         patch = self.image.patches[self.current_patch]
 
-        #self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-        #                                    'flood_remove_adjust')
-
         patch.flood_remove_region(self.flood_remove_position,
                                   self.flood_remove_tolerance)
 
@@ -638,9 +629,6 @@ class Controller:
         self.flood_remove_tolerance = value
 
         patch = self.image.patches[self.current_patch]
-
-        #self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-        #                                    'flood_remove_adjust')
 
         patch.flood_remove_region(self.flood_remove_position,
                                   self.flood_remove_tolerance)
@@ -1046,6 +1034,7 @@ class Controller:
         self.image.patches[self.current_patch] = undo_patch
 
         self.display_current_patch()
+
 
 class UndoManager():
     """
