@@ -97,6 +97,10 @@ class Controller:
         # Undo Management
         self.undo_manager = UndoManager()
 
+        # Remember chosen directories
+        self.last_load_dir = None
+        self.last_save_dir = None
+
     def load_new_image(self):
         """
         Called when the user wants to load a new image to open a file
@@ -107,10 +111,18 @@ class Controller:
         self.logger.debug("Opening load file dialog")
         filetypes = [("TIF Files", "*.tif"), ("TIFF Files", "*.tiff"),
                      ("PNG Files", "*.png")]
-        file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes)
 
+        if self.last_load_dir is None:
+            initial_dir = os.path.expanduser('~')
+        else:
+            initial_dir = self.last_load_dir
+
+        file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
+                                                       initialdir=initial_dir)
         if file_name is None:
             return
+
+        self.last_load_dir = os.path.split(file_name)[0]
 
         self.image_path = file_name
         self.logger.debug("File: {}".format(self.image_path))
@@ -173,7 +185,16 @@ class Controller:
 
         :returns: None
         """
-        dir_path = tkinter.filedialog.askdirectory()
+
+        if self.last_save_dir is None:
+            initial_dir = os.path.expanduser('~')
+        else:
+            initial_dir = self.last_save_dir
+
+        dir_path = tkinter.filedialog.askdirectory(initialdir=initial_dir)
+
+        self.last_save_dir = dir_path
+
         self.logger.debug(dir_path)
 
         if dir_path is None:

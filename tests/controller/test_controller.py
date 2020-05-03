@@ -2338,7 +2338,6 @@ class TestController:
         :param setup: The setup fixture
         :returns: None
         """
-
         controller = Controller(MagicMock())
         controller.current_patch = 5
         mocker.patch('friendly_ground_truth.view.tk_view.MainWindow.'
@@ -2376,6 +2375,13 @@ class TestController:
 
         spy = mocker.spy(controller, 'display_current_patch')
         mocker.patch.object(controller, 'display_current_patch')
+
+        controller.load_new_image()
+
+        spy.assert_not_called()
+        assert controller.current_patch == 5
+
+        controller.last_load_dir = "a/path/"
 
         controller.load_new_image()
 
@@ -2478,6 +2484,12 @@ class TestController:
 
         controller.image = mock_image
         controller.image_path = '/this/is/a/path.png'
+        controller.save_mask()
+
+        mock_image.export_mask.assert_called()
+
+        controller.last_save_dir = "a/path/"
+
         controller.save_mask()
 
         mock_image.export_mask.assert_called()
@@ -3018,8 +3030,8 @@ class TestController:
         undo_manager.add_to_undo_stack.assert_not_called()
         assert controller.image.patches[0] == mock_patch
 
-class TestUndoManager():
 
+class TestUndoManager():
 
     def test_add_to_undo_stack(self, mocker):
 
@@ -3030,7 +3042,6 @@ class TestUndoManager():
         undo_manager.add_to_undo_stack(patch, "test")
 
         assert undo_manager.undo_stack[-1] == (patch, "test")
-
 
     def test_add_to_undo_stack_threshold_adj(self, mocker):
         undo_manager = UndoManager()
@@ -3048,7 +3059,6 @@ class TestUndoManager():
 
         undo_manager.add_to_undo_stack(patch, "test")
         undo_manager.add_to_undo_stack(patch, "threshold_adjust")
-
 
         assert len(undo_manager.undo_stack) == 3
         assert undo_manager.undo_stack[-1] == (patch, "threshold_adjust")
@@ -3072,7 +3082,6 @@ class TestUndoManager():
 
         assert len(undo_manager.undo_stack) == 3
         assert undo_manager.undo_stack[-1] == (patch, "test_adjust")
-
 
     def test_add_to_undo_stack_fill(self, mocker):
         undo_manager = UndoManager()
@@ -3130,9 +3139,8 @@ class TestUndoManager():
 
         p, o = undo_manager.undo()
 
-        assert p == None
-        assert o == None
-
+        assert p is None
+        assert o is None
 
     def test_add_to_redo_stack(self, mocker):
 
@@ -3193,8 +3201,8 @@ class TestUndoManager():
 
         p, o = undo_manager.redo()
 
-        assert p == None
-        assert o == None
+        assert p is None
+        assert o is None
 
     def test_clear_undos(self, mocker):
 
