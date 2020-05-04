@@ -607,6 +607,8 @@ class MainWindow(Frame):
 
         image = image.resize(size)
 
+        x, y = self.image_x, self.image_y
+
         if size[0] > canvas_w and size[1] > canvas_h:
             left = -self.image_x
             right = canvas_w - self.image_x
@@ -615,9 +617,9 @@ class MainWindow(Frame):
 
             image = image.crop([left, upper, right, lower])
 
-        self.display_img = itk.PhotoImage(image=image)
+            x, y = 0, 0
 
-        x, y = 0, 0  # self.image_x, self.image_y
+        self.display_img = itk.PhotoImage(image=image)
 
         self.image_id = self.canvas.create_image(x, y, anchor="nw",
                                                  image=self.display_img)
