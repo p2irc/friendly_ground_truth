@@ -15,12 +15,13 @@ import logging
 import os
 import copy
 
-import matplotlib.pyplot as plt
-import skimage.io as io
+# import matplotlib.pyplot as plt
+# import skimage.io as io
 import skimage.segmentation as segmentation
-import skimage.color as colour
+# import skimage.color as colour
 import numpy as np
 
+from skimage import img_as_ubyte
 from friendly_ground_truth.view.tk_view import MainWindow
 from friendly_ground_truth.model.model import Image
 
@@ -75,6 +76,9 @@ class Controller:
         # Set up the current mode
         self.current_mode = Mode.THRESHOLD
         self.current_secondary_mode = SecondaryMode.ZOOM
+
+        # Whether the preview has been shown
+        self.previewed = False
 
         # Brush radii
         self.add_region_radius = 15
@@ -187,6 +191,12 @@ class Controller:
         :returns: None
         """
 
+        if not self.previewed:
+            self.show_saved_preview()
+            return
+
+        self.mask_saved = True
+
         if self.last_save_dir is None:
             initial_dir = os.path.expanduser('~')
         else:
@@ -210,7 +220,9 @@ class Controller:
         try:
             self.logger.debug("Saving mask to {}".format(self.mask_pathname))
             self.image.export_mask(self.mask_pathname)
-            self.image.export_labels(self.label_pathname)
+            # self.image.export_labels(self.label_pathname)
+            tkinter.messagebox.showinfo("Image Mask Saved!", "Image Mask"
+                                        " Saved!")
 
         except IOError:
             self.logger.error("Could not save file!")
@@ -392,13 +404,7 @@ class Controller:
                                                  message=dialog_message)
             self.logger.debug(result)
             if result:
-                self.save_mask()
-                self.mask_saved = True
-
-                tkinter.messagebox.showinfo("Image Mask Saved!", "Image Mask"
-                                            " Saved!")
-
-            self.show_saved_preview()
+                self.show_saved_preview()
 
     def show_saved_preview(self):
         """
@@ -406,25 +412,35 @@ class Controller:
 
         :returns: None
         """
+        self.previewed = True
+        img = self.image.image
+        self.image.create_mask()
+        mask = self.image.mask
 
-        img = io.imread(self.image_path)
-        landmarks = np.load(self.label_pathname)
-        mask = io.imread(self.mask_pathname)
+        overlay = segmentation.mark_boundaries(img, mask)
+
+        overlay = img_as_ubyte(overlay)
 
         rows = np.any(mask, axis=1)
         cols = np.any(mask, axis=0)
         rmin, rmax = np.where(rows)[0][[0, -1]]
         cmin, cmax = np.where(cols)[0][[0, -1]]
 
-        overlay_img = colour.label2rgb(landmarks, img, bg_label=0,
-                                       colors=['red', 'green', 'blue'])
+        if rmin - 50 >= 0:
+            rmin -= 50
 
-        boundary_img = segmentation.mark_boundaries(overlay_img, mask)
+        if cmin - 50 >= 0:
+            cmin -= 50
 
-        boundary_img = boundary_img[rmin:rmax, cmin:cmax]
+        if rmax + 50 < img.shape[0]:
+            rmax += 50
 
-        plt.imshow(boundary_img)
-        plt.show()
+        if cmax + 50 < img.shape[0]:
+            cmax += 50
+
+        overlay = overlay[rmin:rmax, cmin:cmax]
+
+        self.main_window.create_annotation_preview(overlay)
 
     def prev_patch(self):
         """
