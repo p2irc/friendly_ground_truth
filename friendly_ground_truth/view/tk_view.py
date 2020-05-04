@@ -110,6 +110,7 @@ class MainWindow(Frame):
         self.master.bind("<FocusIn>", self.handle_focus)
 
         self.control_down = False
+        self.alt_down = False
 
     def handle_focus(self, event):
         """
@@ -156,6 +157,18 @@ class MainWindow(Frame):
         self.bind_all("<Left>", self.on_left)
         self.bind_all("<Right>", self.on_right)
         self.bind_all("<KeyRelease-Control_L>", self.on_control_release)
+        self.bind_all("<Alt-equal>", self.on_key_increase_tool)
+        self.bind_all("<Alt-minus>", self.on_key_decrease_tool)
+
+    def on_key_increase_tool(self, event):
+        self.controller.change_secondary_mode(self.ID_ADJUST_TOOL)
+        self.controller.handle_mouse_wheel(1, 0, 0)
+        self.controller.change_secondary_mode(self.ID_TOOL_ZOOM)
+
+    def on_key_decrease_tool(self, event):
+        self.controller.change_secondary_mode(self.ID_ADJUST_TOOL)
+        self.controller.handle_mouse_wheel(-1, 0, 0)
+        self.controller.change_secondary_mode(self.ID_TOOL_ZOOM)
 
     def on_control_release(self, event):
 
@@ -489,6 +502,7 @@ class MainWindow(Frame):
 
         key = event.char
         s = event.state
+        print(key, s)
         ctrl = (s & 0x4) != 0
         alt = (s & 0x8) != 0 or (s & 0x80) != 0
         shift = (s & 0x1) != 0
@@ -503,6 +517,8 @@ class MainWindow(Frame):
             self.control_down = True
             key = 'ctrl+' + key
 
+        print(self.alt_down)
+
         if self.control_down:
             key = event.keysym
 
@@ -510,6 +526,17 @@ class MainWindow(Frame):
                 self.controller.undo()
             elif key == 'r':
                 self.controller.redo()
+            elif key == 'equal':
+                x = self.previous_position[0]
+                y = self.previous_position[1]
+
+                self.controller.handle_zoom(1, x, y)
+
+            elif key == 'minus':
+                x = self.previous_position[0]
+                y = self.previous_position[1]
+
+                self.controller.handle_zoom(-1, x, y)
         else:
             if key == 'x':
                 self.on_no_root_tool()
