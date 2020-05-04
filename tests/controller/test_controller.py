@@ -2561,6 +2561,7 @@ class TestController:
         """
         controller = Controller(MagicMock())
         controller.current_patch = 0
+        controller.context_img = None
 
         mock_image = MagicMock()
         mock_patch = MagicMock()
@@ -2594,6 +2595,7 @@ class TestController:
         controller.main_window.image_scale = 1
         controller.main_window.MAX_SCALE = 16
         controller.main_window.MIN_SCALE = 0.25
+        controller.context_img = None
 
         controller.image = MagicMock()
 
@@ -2624,6 +2626,7 @@ class TestController:
         controller.main_window.MAX_SCALE = 16
         controller.main_window.MIN_SCALE = 0.25
         controller.image = MagicMock()
+        controller.context_img = None
 
         old_scale = controller.main_window.image_scale
 
@@ -2767,6 +2770,53 @@ class TestController:
         controller = Controller(master)
 
         controller.current_patch = 0
+        controller.context_img = None
+
+        mock_patch1 = MagicMock()
+        mock_patch1.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch1.patch_index = (0, 0)
+
+        mock_patch2 = MagicMock()
+        mock_patch2.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch2.patch_index = (0, 1)
+
+        mock_patch3 = MagicMock()
+        mock_patch3.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch3.patch_index = (1, 0)
+
+        mock_patch4 = MagicMock()
+        mock_patch4.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch4.patch_index = (1, 1)
+
+        mock_image = MagicMock()
+        mock_image.NUM_PATCHES = 2
+        patches_mock = PropertyMock(return_value=[mock_patch1,
+                                    mock_patch2,  mock_patch3, mock_patch4])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        context_img = controller.get_context_patches(mock_patch1)
+
+        assert context_img.shape == (20, 20, 4)
+
+    def test_get_context_patches_cached(self, setup):
+        """
+        Test getting the context patches when the current patch is the top left
+        corner patch of the image
+
+        :test_condition: Returns an image the size of a 2x2 grid of patches
+
+        :param setup: Setup
+        :returns: None
+        """
+
+        master = MagicMock()
+        controller = Controller(master)
+
+        controller.current_patch = 0
+        controller.context_img = np.ones((20, 20, 4), dtype=np.uint8)
 
         mock_patch1 = MagicMock()
         mock_patch1.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
@@ -2812,6 +2862,7 @@ class TestController:
         controller = Controller(master)
 
         controller.current_patch = 0
+        controller.context_img = None
 
         mock_patch1 = MagicMock()
         mock_patch1.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)

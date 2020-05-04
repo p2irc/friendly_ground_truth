@@ -598,9 +598,26 @@ class MainWindow(Frame):
 
         size = int(iw * self.image_scale), int(ih * self.image_scale)
 
-        self.display_img = itk.PhotoImage(image=image.resize(size))
+        self.logger.debug("Image Size: {}, Canvas Size: {}".format(size,
+                          (self.canvas.winfo_width(),
+                           self.canvas.winfo_height())))
 
-        x, y = self.image_x, self.image_y
+        canvas_w = self.canvas.winfo_width()
+        canvas_h = self.canvas.winfo_height()
+
+        image = image.resize(size)
+
+        if size[0] > canvas_w and size[1] > canvas_h:
+            left = -self.image_x
+            right = canvas_w - self.image_x
+            upper = -self.image_y
+            lower = canvas_h - self.image_y
+
+            image = image.crop([left, upper, right, lower])
+
+        self.display_img = itk.PhotoImage(image=image)
+
+        x, y = 0, 0  # self.image_x, self.image_y
 
         self.image_id = self.canvas.create_image(x, y, anchor="nw",
                                                  image=self.display_img)

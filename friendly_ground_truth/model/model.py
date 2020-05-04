@@ -269,9 +269,6 @@ class Patch():
         self.overlay_image = None
         self.overlay_mask()
 
-        self.logger.debug("Created patch with index {} and shape {}"
-                          .format(patch_index, patch.shape))
-
         self.old_flood_add_tolerance = 100
         self.old_flood_add_position = None
 

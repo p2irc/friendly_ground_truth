@@ -552,6 +552,8 @@ class TestView():
 
         window.image_id = None
         window.canvas = MagicMock()
+        window.canvas.winfo_height.return_value = 100
+        window.canvas.winfo_width.return_value = 100
 
         img = MagicMock()
         img.size = (5, 5)
@@ -580,6 +582,38 @@ class TestView():
 
         window.image_id = 5
         window.canvas = MagicMock()
+        window.canvas.winfo_width.return_value = 100
+        window.canvas.winfo_height.return_value = 100
+
+        img = MagicMock()
+        img.size = (5, 5)
+
+        window.show_image(img)
+
+        window.canvas.delete.assert_called()
+
+    def test_show_image_bigger(self, setup, mocker):
+        """
+        Test the show image function when an image id exists
+
+        :test_condition: canvas.delete() is called
+
+        :param setup: setup
+        :param mocker: mocker
+        :returns: None
+        """
+
+        mock_image = MagicMock()
+        mock_image.size = (50, 50)
+        mocker.patch('PIL.Image.fromarray', return_value=mock_image)
+        mocker.patch('PIL.ImageTk.PhotoImage')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.image_id = 5
+        window.canvas = MagicMock()
+        window.canvas.winfo_width.return_value = 20
+        window.canvas.winfo_height.return_value = 20
 
         img = MagicMock()
         img.size = (5, 5)

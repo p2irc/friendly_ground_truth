@@ -108,6 +108,7 @@ class Controller:
 
         :returns: None
         """
+        self.context_img = None
         self.logger.debug("Opening load file dialog")
         filetypes = [("TIF Files", "*.tif"), ("TIFF Files", "*.tiff"),
                      ("PNG Files", "*.png")]
@@ -248,6 +249,21 @@ class Controller:
         # Find the neighbouring patches
         index = patch.patch_index
 
+        if self.context_img is not None:
+            patch = self.image.patches[self.current_patch]
+            r_start = self.patch_offset[0]
+            r_end = r_start + patch.overlay_image.shape[0]
+            c_start = self.patch_offset[1]
+            c_end = c_start + patch.overlay_image.shape[1]
+
+            o_img = patch.overlay_image
+            o_img = np.dstack((o_img, np.full(o_img.shape[0:-1],
+                               255, dtype=o_img.dtype)))
+            self.logger.debug("Using cached context image")
+
+            self.context_img[r_start:r_end, c_start:c_end] = o_img
+            return self.context_img
+
         neighbouring_indices = []
 
         start_i = index[0] - 1
@@ -319,6 +335,7 @@ class Controller:
 
             i += 1
 
+        self.context_img = img
         return img
 
     def convert_click_to_image_position(self, click_location):
@@ -349,7 +366,7 @@ class Controller:
 
         :returns: None
         """
-
+        self.context_img = None
         self.undo_manager.clear_undos()
 
         if self.current_patch < len(self.image.patches)-1:
@@ -415,7 +432,7 @@ class Controller:
 
         :returns: None
         """
-
+        self.context_img = None
         self.undo_manager.clear_undos()
 
         if self.current_patch > 0:
