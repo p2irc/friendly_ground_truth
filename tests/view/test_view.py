@@ -2041,6 +2041,44 @@ class TestView():
 
         self.mock_controller.redo.assert_called()
 
+    def test_keypress_ctrl_equal(self, setup, mocker):
+
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+        mocker.patch('tkinter.Scale')
+        mocker.patch('tkinter.Spinbox')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.control_down = True
+
+        event = MagicMock()
+        event.keysym = 'equal'
+
+        window.on_keypress(event)
+
+        self.mock_controller.handle_zoom.assert_called()
+
+    def test_keypress_ctrl_minus(self, setup, mocker):
+
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+        mocker.patch('tkinter.Scale')
+        mocker.patch('tkinter.Spinbox')
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.control_down = True
+
+        event = MagicMock()
+        event.keysym = 'minus'
+
+        window.on_keypress(event)
+
+        self.mock_controller.handle_zoom.assert_called()
+
     def test_create_annotation_preview(self, setup, mocker):
         mocker.patch('tkinter.Toplevel', return_value=MagicMock())
         mocker.patch('tkinter.Label')
@@ -2056,6 +2094,22 @@ class TestView():
         window.create_annotation_preview(MagicMock())
 
         mock_dialog.assert_called()
+
+    def test_on_key_increase_tool(self, setup, mocker):
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.on_key_increase_tool(MagicMock())
+
+        self.mock_controller.handle_mouse_wheel.assert_called()
+
+    def test_on_key_decrease_tool(self, setup, mocker):
+
+        window = MainWindow(self.mock_controller, MagicMock())
+
+        window.on_key_decrease_tool(MagicMock())
+
+        self.mock_controller.handle_mouse_wheel.assert_called()
 
 
 class TestAboutDialog():
