@@ -1225,6 +1225,10 @@ class MainWindow(Frame):
 
             self.flood_remove_slider.pack(side=TOP)
 
+    def create_annotation_preview(self, img):
+
+        AnnotationPreview(img, self.controller)
+
 
 class AboutDialog(tk.Toplevel):
 
@@ -1447,6 +1451,68 @@ class KeyboardShortcutDialog(tk.Toplevel):
         # remove_landmark_label = tk.Label(self.base, \
         #        text="Remove Landmark (n)")
         # remove_landmark_label.grid(row=4, column=1)
+
+
+class AnnotationPreview(tk.Toplevel):
+
+    def __init__(self, img, controller):
+        self.base = tk.Toplevel()
+        self.base.title("Preview")
+
+        self.canvas_size = img.shape[0]//2, img.shape[1]//2
+
+        self.base.minsize(width=self.canvas_size[1] + 50,
+                          height=self.canvas_size[0] + 50)
+        self.img = img
+        self.controller = controller
+
+        self.button_panel = tk.Frame(self.base, borderwidth=5, relief=RIDGE,
+                                     padx=50,
+                                     pady=2)
+
+        self.save_button = tk.Button(self.button_panel, text="Save",
+                                     command=self.on_save)
+
+        self.save_button.pack(side=RIGHT)
+
+        self.cancel_button = tk.Button(self.button_panel, text="Cancel",
+                                       command=self.on_cancel)
+
+        self.cancel_button.pack(side=LEFT)
+
+        self.button_panel.pack(side=TOP, fill=BOTH)
+
+        self.canvas = tk.Canvas(self.base)
+        self.canvas.pack(fill=BOTH, expand=YES)
+
+        self.show_image()
+
+    def on_save(self):
+        self.base.withdraw()
+        self.controller.save_mask()
+        self.base.destroy()
+
+    def on_cancel(self):
+        self.base.destroy()
+
+    def show_image(self):
+        image = Image.fromarray(self.img)
+
+        canvas_h = self.canvas_size[0]
+        canvas_w = self.canvas_size[1]
+
+        size = (canvas_w, canvas_h)
+        print(size)
+        image = image.resize(size)
+        print(image.size)
+        self.display_img = itk.PhotoImage(image=image)
+
+        x, y = 0, 0  # self.image_x, self.image_y
+
+        self.image_id = self.canvas.create_image(x, y, anchor="nw",
+                                                 image=self.display_img)
+        self.canvas.image = self.display_img
+        self.canvas.pack()
 
 
 class ResizingCanvas(tk.Canvas):
