@@ -15,7 +15,8 @@ from mock import MagicMock  # , PropertyMock
 from friendly_ground_truth.view.tk_view import (MainWindow, AboutDialog,
                                                 KeyboardShortcutDialog,
                                                 ResizingCanvas,
-                                                CreateToolTip)
+                                                CreateToolTip,
+                                                AnnotationPreview)
 
 
 class TestView():
@@ -2040,6 +2041,22 @@ class TestView():
 
         self.mock_controller.redo.assert_called()
 
+    def test_create_annotation_preview(self, setup, mocker):
+        mocker.patch('tkinter.Toplevel', return_value=MagicMock())
+        mocker.patch('tkinter.Label')
+        mocker.patch('tkinter.ttk.Progressbar')
+        mocker.patch('tkinter.DoubleVar')
+        mocker.patch('tkinter.Scale')
+        mocker.patch('tkinter.Spinbox')
+
+        mock_dialog = mocker.patch("friendly_ground_truth.view."
+                                   "tk_view.AnnotationPreview")
+
+        window = MainWindow(self.mock_controller, MagicMock())
+        window.create_annotation_preview(MagicMock())
+
+        mock_dialog.assert_called()
+
 
 class TestAboutDialog():
 
@@ -2248,3 +2265,35 @@ class TestToolTips():
         tip.hidetip()
 
         assert tip.tw is None
+
+
+class TestAnnotationPreview():
+
+    def test_on_save(self, mocker):
+        mocker.patch('tkinter.Toplevel')
+        mocker.patch('tkinter.Button')
+        mocker.patch('tkinter.Canvas')
+        mocker.patch('tkinter.Frame')
+        mocker.patch('PIL.Image.fromarray')
+        mocker.patch('PIL.ImageTk.PhotoImage')
+
+        preview = AnnotationPreview(MagicMock(), MagicMock())
+
+        preview.on_save()
+
+        preview.base.withdraw.assert_called()
+        preview.controller.save_mask.assert_called()
+
+    def test_on_cancel(self, mocker):
+        mocker.patch('tkinter.Toplevel')
+        mocker.patch('tkinter.Button')
+        mocker.patch('tkinter.Canvas')
+        mocker.patch('tkinter.Frame')
+        mocker.patch('PIL.Image.fromarray')
+        mocker.patch('PIL.ImageTk.PhotoImage')
+
+        preview = AnnotationPreview(MagicMock(), MagicMock())
+
+        preview.on_cancel()
+
+        preview.base.destroy.assert_called()

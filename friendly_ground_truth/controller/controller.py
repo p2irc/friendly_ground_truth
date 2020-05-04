@@ -426,18 +426,6 @@ class Controller:
         rmin, rmax = np.where(rows)[0][[0, -1]]
         cmin, cmax = np.where(cols)[0][[0, -1]]
 
-        if rmin - 50 >= 0:
-            rmin -= 50
-
-        if cmin - 50 >= 0:
-            cmin -= 50
-
-        if rmax + 50 < img.shape[0]:
-            rmax += 50
-
-        if cmax + 50 < img.shape[0]:
-            cmax += 50
-
         overlay = overlay[rmin:rmax, cmin:cmax]
 
         self.main_window.create_annotation_preview(overlay)

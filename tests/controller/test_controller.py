@@ -275,11 +275,10 @@ class TestController:
         tkinter.messagebox.askyesno = MagicMock()
         tkinter.messagebox.showinfo = MagicMock()
 
-        save_mask_patch = mocker.patch.object(Controller, 'save_mask')
+        save_mask_patch = mocker.patch.object(Controller,
+                                              'show_saved_preview')
 
         controller = Controller(MagicMock())
-
-        mocker.patch.object(controller, 'show_saved_preview')
 
         mock_patch = MagicMock()
         display_mock = PropertyMock(return_value=True)
@@ -2472,9 +2471,28 @@ class TestController:
         :param setup: The setup fixture
         :returns: None
         """
+        mocker.patch('friendly_ground_truth.'
+                     'view.tk_view.MainWindow.'
+                     'create_annotation_preview')
+
+        mocker.patch('skimage.io.imread')
+        mocker.patch('skimage.color.label2rgb')
+
+        mask = np.random.randint(2, size=(10, 10))
+        rows = np.any(mask, axis=1)
+
+        mocker.patch('skimage.segmentation.mark_boundaries',
+                     return_value=mask)
+
+        mocker.patch('numpy.any', return_value=np.any(mask, axis=1))
+        mocker.patch('numpy.where', return_value=np.where(rows))
+        mocker.patch('numpy.load')
+
+        mocker.patch('skimage.img_as_ubyte', return_value=mask)
 
         controller = Controller(MagicMock())
         controller.current_patch = 5
+        controller.previewed = True
 
         # fd = file_dialog_patch.return_value.__enter__.return_value
 
@@ -2494,6 +2512,10 @@ class TestController:
 
         mock_image.export_mask.assert_called()
 
+        mocker.patch('tkinter.filedialog.askdirectory', return_value=None)
+
+        controller.save_mask()
+
     def test_save_mask_cancel(self, setup, mocker):
         """
         Test exporting a mask when the user cancels
@@ -2503,6 +2525,26 @@ class TestController:
         :param setup: The setup fixture
         :returns: None
         """
+
+        mocker.patch('friendly_ground_truth.'
+                     'view.tk_view.MainWindow.'
+                     'create_annotation_preview')
+
+        mocker.patch('skimage.io.imread')
+        mocker.patch('skimage.color.label2rgb')
+
+        mask = np.random.randint(2, size=(10, 10))
+        rows = np.any(mask, axis=1)
+
+        mocker.patch('skimage.segmentation.mark_boundaries',
+                     return_value=mask)
+
+        mocker.patch('numpy.any', return_value=np.any(mask, axis=1))
+        mocker.patch('numpy.where', return_value=np.where(rows))
+        mocker.patch('numpy.load')
+
+        mocker.patch('skimage.img_as_ubyte', return_value=mask)
+
         controller = Controller(MagicMock())
         controller.current_patch = 5
 
@@ -2528,6 +2570,24 @@ class TestController:
         :param setup: The setup fixture
         :returns: None
         """
+        mocker.patch('friendly_ground_truth.'
+                     'view.tk_view.MainWindow.'
+                     'create_annotation_preview')
+
+        mocker.patch('skimage.io.imread')
+        mocker.patch('skimage.color.label2rgb')
+
+        mask = np.random.randint(2, size=(10, 10))
+        rows = np.any(mask, axis=1)
+
+        mocker.patch('skimage.segmentation.mark_boundaries',
+                     return_value=mask)
+
+        mocker.patch('numpy.any', return_value=np.any(mask, axis=1))
+        mocker.patch('numpy.where', return_value=np.where(rows))
+        mocker.patch('numpy.load')
+
+        mocker.patch('skimage.img_as_ubyte', return_value=mask)
 
         def raise_IOError(self):
             raise IOError
@@ -2543,7 +2603,7 @@ class TestController:
         mock_image.export_mask.side_effect = raise_IOError
 
         controller.image = mock_image
-
+        controller.previewed = True
         controller.image_path = '/this/is/a/path.png'
 
         controller.save_mask()
@@ -2704,22 +2764,30 @@ class TestController:
         :returns: None
         """
 
-        mocker.patch('matplotlib.pyplot.imshow')
-        show_patch = mocker.patch('matplotlib.pyplot.show')
+        show_patch = mocker.patch('friendly_ground_truth.'
+                                  'view.tk_view.MainWindow.'
+                                  'create_annotation_preview')
+
         mocker.patch('skimage.io.imread')
         mocker.patch('skimage.color.label2rgb')
-        mocker.patch('skimage.segmentation.mark_boundaries')
 
         mask = np.random.randint(2, size=(10, 10))
         rows = np.any(mask, axis=1)
+
+        mocker.patch('skimage.segmentation.mark_boundaries',
+                     return_value=mask)
+
         mocker.patch('numpy.any', return_value=np.any(mask, axis=1))
         mocker.patch('numpy.where', return_value=np.where(rows))
         mocker.patch('numpy.load')
+
+        mocker.patch('skimage.img_as_ubyte', return_value=mask)
 
         controller = Controller(MagicMock())
         controller.image_path = MagicMock()
         controller.label_pathname = MagicMock()
         controller.mask_pathname = MagicMock()
+        controller.image = MagicMock()
 
         controller.show_saved_preview()
         show_patch.assert_called()
