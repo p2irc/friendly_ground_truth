@@ -13,8 +13,8 @@ jobs:
       - name: Check Changelog
         run: |
           git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
-          git diff origin/$BASE_BRANCH origin/$TARGET_BRANCH
           git diff origin/$BASE_BRANCH origin/$TARGET_BRANCH --quiet -- changelog.txt; nochanges=$?
+          echo $nochanges
           if [ $nochanges -eq 0 ]; then
                 exit 1
           else
