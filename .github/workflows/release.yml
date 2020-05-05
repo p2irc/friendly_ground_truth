@@ -18,6 +18,9 @@ jobs:
         run: |
           bash generate_release_changes.sh
           value=`cat changes.txt`
+          value="${value//'%'/'%25'}"
+          value="${value//$'\n'/'%0A'}"
+          value="${value//$'\r'/'%0D'}" 
           echo ::set-output name=changelog::"$value"
       - name: create release
         id: create_release
@@ -68,9 +71,13 @@ jobs:
       - name: Build project Windows
         if: matrix.os == 'windows-latest'
         run: |
+          pwd
+          ls
           pyinstaller -i icon.ico --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
-          # pyinstaller --windowed --hidden-import='PIL._tkinter_finder --onefile windows/windows_install.py -n install_shortcut 
-          # mv ./install_shortcut.exe ./windows/install_shortcut.exe
+          cd ./windows
+          pwd
+          ls
+          pyinstaller --windowed --hidden-import='PIL._tkinter_finder --onefile windows_install.py -n install_shortcut 
       # Build the project on ubuntu
       - name: Build project Ubuntu
         if: matrix.os == 'ubuntu-latest'
