@@ -1,3 +1,7 @@
+## v0.7.1
+
+- Add enforcement check on changelogs
+
 ## v0.7.0
 
 - Improved panning and zooming, allowed from any tool 
