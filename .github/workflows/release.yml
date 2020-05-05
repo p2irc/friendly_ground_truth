@@ -124,9 +124,9 @@ jobs:
         if: matrix.os == 'windows-latest'
         id: package-windows
         run: |
-          cp ./dist/friendly_gt.exe ./windows
-          zip -r ./friendly_gt-windows.zip ./windows
-        shell: bash
+          Copy-Item  "dist\friendly_gt.exe" -Destination "windows\friendly_gt.exe" #cp ./dist/friendly_gt.exe ./windows
+          Compress-Archive "windows" "friendly_gt-windows.zip" #zip -r ./friendly_gt-windows.zip ./windowsi
+        shell: powershell
       - name: Upload Release Asset - Windows
         if: matrix.os == 'windows-latest'
         id: upload-release-asset-win 
