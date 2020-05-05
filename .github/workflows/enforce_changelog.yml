@@ -11,7 +11,7 @@ jobs:
           ref: ${{ github.head_ref }}
       - name: Check Changelog
         run: |
-          git diff $BASE_BRANCH $TARGET_BRANCH --quiet -- changelog.txt; nochanges=$?
+          git diff origin/$BASE_BRANCH origin/$TARGET_BRANCH --quiet -- changelog.txt; nochanges=$?
           if [ $nochanges -eq 0 ]; then
                 exit 1
           else
