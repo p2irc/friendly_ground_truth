@@ -71,13 +71,9 @@ jobs:
       - name: Build project Windows
         if: matrix.os == 'windows-latest'
         run: |
-          pwd
-          ls
           pyinstaller -i icon.ico --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
-          cd ./windows
-          pwd
-          ls
-          pyinstaller --windowed --hidden-import='PIL._tkinter_finder --onefile windows_install.py -n install_shortcut 
+          pyinstaller --windowed --hidden-import='PIL._tkinter_finder --onefile windows_install.py -n install_shortcut
+        shell: bash 
       # Build the project on ubuntu
       - name: Build project Ubuntu
         if: matrix.os == 'ubuntu-latest'
@@ -128,6 +124,7 @@ jobs:
         run: |
           cp ./dist/friendly_gt.exe ./windows
           zip -r ./friendly_gt-windows.zip ./windows
+        shell: bash
       - name: Upload Release Asset - Windows
         if: matrix.os == 'windows-latest'
         id: upload-release-asset-win 
