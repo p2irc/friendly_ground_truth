@@ -1,5 +1,3 @@
-git diff master master --quiet -- changelog.txt; nochanges=$?
-
 name: Enforce Changelog
 on: [pull_request]
 
