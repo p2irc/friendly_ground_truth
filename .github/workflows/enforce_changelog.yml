@@ -18,10 +18,3 @@ jobs:
         env:
          BASE_BRANCH: ${{ github.base_ref }}
          TARGET_BRANCH:  ${{ github.head_ref }}
-      - name: fix fail
-        if: failure()
-        run: exit 0
-      - name: fix not-fail
-        if: success()
-        run: exit 1
-    
