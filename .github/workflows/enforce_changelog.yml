@@ -22,6 +22,6 @@ jobs:
         if: failure()
         run: exit 0
       - name: fix not-fail
-        if: success)_
+        if: success()
         run: exit 1
     
