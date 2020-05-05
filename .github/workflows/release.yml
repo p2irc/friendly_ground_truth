@@ -127,7 +127,7 @@ jobs:
         run: |
           New-Item -path "." -name "windows_app" -ItemType "directory"
           Copy-Item  "dist\friendly_gt.exe" -Destination "windows_app\friendly_gt.exe" #cp ./dist/friendly_gt.exe ./windows
-          Copy-Item "windows\install_shortcut.exe" -Destination "windows_app\dist\install_shortcut.exe"
+          Copy-Item "windows\dist\install_shortcut.exe" -Destination "windows_app\install_shortcut.exe"
           Compress-Archive "windows_app" "friendly_gt-windows.zip" #zip -r ./friendly_gt-windows.zip ./windowsi
         shell: powershell
       - name: Upload Release Asset - Windows
