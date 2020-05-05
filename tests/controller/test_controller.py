@@ -17,7 +17,9 @@ import numpy as np
 
 from mock import MagicMock, PropertyMock
 
-from friendly_ground_truth.controller.controller import Controller, Mode
+from friendly_ground_truth.controller.controller import (Controller, Mode,
+                                                         SecondaryMode,
+                                                         UndoManager)
 from friendly_ground_truth.view.tk_view import MainWindow
 from friendly_ground_truth.model.model import Patch, Image
 
@@ -71,6 +73,8 @@ class TestController:
         self.mock_C_display_current_patch = mocker.\
             patch.\
             object(Controller, 'display_current_patch')
+
+        return self.mock_C_display_current_patch
 
     @pytest.fixture
     def dialog_mock(self):
@@ -271,11 +275,10 @@ class TestController:
         tkinter.messagebox.askyesno = MagicMock()
         tkinter.messagebox.showinfo = MagicMock()
 
-        save_mask_patch = mocker.patch.object(Controller, 'save_mask')
+        save_mask_patch = mocker.patch.object(Controller,
+                                              'show_saved_preview')
 
         controller = Controller(MagicMock())
-
-        mocker.patch.object(controller, 'show_saved_preview')
 
         mock_patch = MagicMock()
         display_mock = PropertyMock(return_value=True)
@@ -575,14 +578,13 @@ class TestController:
 
         spy.assert_called_once()
 
-    def test_change_mode_zoom(self, setup, mocker,
-                              display_current_patch_mock):
+    def test_change_secondary_mode_zoom(self, setup, mocker,
+                                        display_current_patch_mock):
         """
-        Test changing the mode to zoom
+        Test changing the secondary mode to zoom
 
-        :test_condition: The current mode is set to Mode.ZOOM and
-                         MainWindow.set_brush_radius is called once
-
+        :test_condition: The current secondary mode is set to
+                         SecondaryMode.ZOOM
         :param setup: The setup fixture
         :param mock_brush_radius: A fixture mocking the
                                   MainWindow.set_brush_radius function
@@ -591,7 +593,7 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_mode = Mode.ADD_REGION
-
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
         mock_patch = MagicMock()
         thresh_mock = PropertyMock(return_value=0.5)
 
@@ -604,13 +606,73 @@ class TestController:
 
         controller.image = mock_image
 
-        spy = mocker.spy(MainWindow, 'set_brush_radius')
+        controller.change_secondary_mode(MainWindow.ID_TOOL_ZOOM)
 
-        controller.change_mode(MainWindow.ID_TOOL_ZOOM)
+        assert controller.current_secondary_mode == SecondaryMode.ZOOM
 
-        spy.assert_called_once()
+    def test_change_secondary_mode_adjust(self, setup, mocker,
+                                          display_current_patch_mock):
+        """
+        Test changing the secondary mode to adjust tool
 
-        assert controller.current_mode == Mode.ZOOM
+        :test_condition: The current secondary mode is set to
+                         SecondaryMode.ADJUST_TOOL
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :param display_current_patch_mock: Mock for display_current_patch
+        :returns: None
+        """
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_REGION
+        controller.current_secondary_mode = SecondaryMode.ZOOM
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.change_secondary_mode(MainWindow.ID_ADJUST_TOOL)
+
+        assert controller.current_secondary_mode == SecondaryMode.ADJUST_TOOL
+
+    def test_change_secondary_mode_invalid(self, setup, mocker,
+                                           display_current_patch_mock):
+        """
+        Test changing the secondary mode to adjust tool
+
+        :test_condition: The current secondary mode is set to
+                         SecondaryMode.ADJUST_TOOL
+
+        :param setup: Setup
+        :param mocker: Mocker
+        :param display_current_patch_mock: Mock for display_current_patch
+        :returns: None
+        """
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.ADD_REGION
+        controller.current_secondary_mode = SecondaryMode.ZOOM
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.change_secondary_mode(MainWindow.ID_TOOL_ADD_TIP)
+
+        assert controller.current_secondary_mode == SecondaryMode.ZOOM
 
     def test_change_mode_flood_add(self, setup, mocker,
                                    display_current_patch_mock):
@@ -862,6 +924,7 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_mode = Mode.THRESHOLD
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
 
         mock_patch = MagicMock()
         thresh_mock = PropertyMock(return_value=0.5)
@@ -877,7 +940,7 @@ class TestController:
 
         spy = mocker.spy(controller, 'adjust_threshold')
 
-        result = controller.handle_mouse_wheel(-1)
+        result = controller.handle_mouse_wheel(-1, 0, 0)
 
         spy.assert_called_once_with(-1)
         assert True is result
@@ -897,10 +960,11 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_mode = Mode.ADD_REGION
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
 
         spy = mocker.spy(controller, 'adjust_add_region_brush')
 
-        result = controller.handle_mouse_wheel(-1)
+        result = controller.handle_mouse_wheel(-1, 0, 0)
 
         spy.assert_called_once_with(-1)
         assert True is result
@@ -920,10 +984,11 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_mode = Mode.REMOVE_REGION
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
 
         spy = mocker.spy(controller, 'adjust_remove_region_brush')
 
-        result = controller.handle_mouse_wheel(-1)
+        result = controller.handle_mouse_wheel(-1, 0, 0)
 
         spy.assert_called_once_with(-1)
         assert True is result
@@ -941,7 +1006,8 @@ class TestController:
         """
 
         controller = Controller(MagicMock())
-        controller.current_mode = Mode.ZOOM
+        controller.current_mode = Mode.THRESHOLD
+        controller.current_secondary_mode = SecondaryMode.ZOOM
         controller.main_window = MagicMock()
         controller.main_window.image_scale = 1
         controller.main_window.MAX_SCALE = 16
@@ -961,9 +1027,9 @@ class TestController:
 
         spy = mocker.spy(controller, 'handle_zoom')
 
-        result = controller.handle_mouse_wheel(-1)
+        result = controller.handle_mouse_wheel(-1, 0, 0)
 
-        spy.assert_called_once_with(-1)
+        spy.assert_called_once_with(-1, 0, 0)
         assert True is result
 
     def test_handle_mouse_wheel_flood_add(self, setup, mocker,
@@ -980,6 +1046,7 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_mode = Mode.FLOOD_ADD
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
         controller.flood_add_position = (0, 0)
 
         mock_patch = MagicMock()
@@ -996,7 +1063,7 @@ class TestController:
 
         spy = mocker.spy(controller, 'handle_flood_add_tolerance')
 
-        controller.handle_mouse_wheel(-1)
+        controller.handle_mouse_wheel(-1, 0, 0)
 
         spy.assert_called_once_with(-1)
 
@@ -1014,6 +1081,7 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_mode = Mode.FLOOD_REMOVE
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
         controller.flood_remove_position = (0, 0)
 
         mock_patch = MagicMock()
@@ -1030,7 +1098,7 @@ class TestController:
 
         spy = mocker.spy(controller, 'handle_flood_remove_tolerance')
 
-        controller.handle_mouse_wheel(-1)
+        controller.handle_mouse_wheel(-1, 0, 0)
 
         spy.assert_called_once_with(-1)
 
@@ -1048,11 +1116,12 @@ class TestController:
         """
 
         controller = Controller(MagicMock())
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
         controller.current_mode = Mode.REMOVE_LANDMARK
 
         spy = mocker.spy(controller, 'adjust_remove_landmark_brush')
 
-        result = controller.handle_mouse_wheel(-1)
+        result = controller.handle_mouse_wheel(-1, 0, 0)
 
         spy.assert_called_once_with(-1)
         assert True is result
@@ -1071,8 +1140,27 @@ class TestController:
 
         controller = Controller(MagicMock())
         controller.current_mode = Mode.NO_ROOT
+        controller.current_secondary_mode = Mode.NO_ROOT
+        result = controller.handle_mouse_wheel(-1, 0, 0)
 
-        result = controller.handle_mouse_wheel(-1)
+        assert False is result
+
+    def test_handle_mouse_wheel_invalid_adjust(self, setup,
+                                               display_current_patch_mock):
+        """
+        Test when the mouse wheel function is called and the current mode is
+        invalid and SecondaryMode.ADJUST_TOOL
+
+        :test_condition: The function returns False
+
+        :param setup: The setup fixture
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.NO_ROOT
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
+        result = controller.handle_mouse_wheel(-1, 0, 0)
 
         assert False is result
 
@@ -1123,6 +1211,43 @@ class TestController:
         controller.handle_flood_add_tolerance(1)
 
         assert controller.flood_add_tolerance > old_tol
+
+    def test_set_flood_add_tolerance(self, setup, display_current_patch_mock):
+        """
+        Test setting the flood add tolerance
+
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.flood_add_position = (0, 0)
+        controller.image = MagicMock()
+
+        controller.set_flood_add_tolerance(0.50)
+
+        assert controller.flood_add_tolerance == 0.50
+
+    def test_set_flood_add_tolerance_none_pos(self, setup,
+                                              display_current_patch_mock):
+        """
+        Test setting the flood add tolerance when no position was set
+
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.flood_add_position = None
+        controller.image = MagicMock()
+
+        old_tol = controller.flood_add_tolerance
+
+        controller.set_flood_add_tolerance(0.50)
+
+        assert controller.flood_add_tolerance == old_tol
 
     def test_handle_flood_remove_tolerance_no_pos(self, setup,
                                                   display_current_patch_mock):
@@ -1195,6 +1320,44 @@ class TestController:
         controller.handle_flood_remove_tolerance(-1)
 
         assert controller.flood_remove_tolerance < old_tol
+
+    def test_set_flood_remove_tolerance(self, setup,
+                                        display_current_patch_mock):
+        """
+        Test setting the flood remove tolerance
+
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.flood_remove_position = (0, 0)
+        controller.image = MagicMock()
+
+        controller.set_flood_remove_tolerance(0.50)
+
+        assert controller.flood_remove_tolerance == 0.50
+
+    def test_set_flood_remove_tolerance_none_pos(self, setup,
+                                                 display_current_patch_mock):
+        """
+        Test setting the flood remove tolerance when no position was set
+
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        controller.flood_remove_position = None
+        controller.image = MagicMock()
+
+        old_tol = controller.flood_remove_tolerance
+
+        controller.set_flood_remove_tolerance(0.50)
+
+        assert controller.flood_remove_tolerance == old_tol
 
     def test_handle_flood_add_tolerance_neg_rot(self, setup,
                                                 display_current_patch_mock):
@@ -1622,32 +1785,6 @@ class TestController:
         result = controller.handle_left_click((10, -10))
         assert False is result
 
-    def test_handle_right_click_zoom(self, setup, display_current_patch_mock):
-        """
-        Test when a right click happens while zooming
-
-        :test_condition: The main_window.image_scale is set to 1, and the
-                         main_window.image_x and image_y are set to 0
-
-        :param setup: Setup
-        :param display_current_patch_mock: Mock for displaying the current
-                                           patch
-        :returns: None
-        """
-
-        controller = Controller(MagicMock())
-        controller.current_mode = Mode.ZOOM
-        controller.main_window = MagicMock()
-        controller.main_window.image_scale = 10
-        controller.main_window.image_x = 10
-        controller.main_window.image_y = 10
-
-        controller.handle_right_click()
-
-        assert controller.main_window.image_scale == 1
-        assert controller.main_window.image_x == 0
-        assert controller.main_window.image_y == 0
-
     def test_handle_right_click_other(self, setup, display_current_patch_mock):
         """
         Test when a right click happens while not zooming
@@ -1710,26 +1847,6 @@ class TestController:
         result = controller.handle_left_release()
 
         assert True is result
-
-    def test_handle_left_release_zoom(self, setup, mocker,
-                                      display_current_patch_mock):
-        """
-        Test when the mouse is released and the current mode is Mode.ZOOM
-
-        :test_condition:  display_current_patch() is called and the function
-                          returns True
-
-        :param setup: The setup fixture
-        :returns: None
-        """
-
-        controller = Controller(MagicMock())
-        controller.current_mode = Mode.ZOOM
-
-        result = controller.handle_left_release()
-
-        assert True is result
-        self.mock_C_display_current_patch.assert_called_once()
 
     def test_handle_left_release_invalid_mode(self, setup,
                                               display_current_patch_mock):
@@ -1825,18 +1942,21 @@ class TestController:
         mock_patch.remove_region.assert_called_with(position, radius)
         assert True is result
 
-    def test_handle_motion_zoom(self, setup, display_current_patch_mock):
+    def test_handle_mouse_wheel_motion_zoom(self, setup,
+                                            display_current_patch_mock):
         """
-        Test when the mouse is moved and the current mode is Mode.ZOOM
+        Test when the mouse is moved and the current secondary mode is
+        SecondaryMode.ZOOM
 
-        :test_condition: Returns True
+        :test_condition: controller.display_current_patch is called
 
         :param setup: The setip fixture
         :returns: None
         """
 
         controller = Controller(MagicMock())
-        controller.current_mode = Mode.ZOOM
+        controller.current_mode = Mode.THRESHOLD
+        controller.current_secondary_mode = SecondaryMode.ZOOM
         controller.main_window = MagicMock()
         controller.main_window.image_scale = 1
         controller.main_window.image_x = 0
@@ -1853,9 +1973,9 @@ class TestController:
 
         position = (1, 2)
 
-        result = controller.handle_motion(position)
+        controller.handle_mouse_wheel_motion(position)
 
-        assert True is result
+        display_current_patch_mock.assert_called()
 
     def test_handle_motion_remove_landmark(self, setup,
                                            display_current_patch_mock):
@@ -1943,6 +2063,34 @@ class TestController:
 
         result = controller.handle_motion((10, -10))
         assert False is result
+
+    def test_set_threshold(self, setup, test_image_data,
+                           display_current_patch_mock):
+        """
+        Test setting the threshold
+
+        :param setup: Setup
+        :param test_image_data: Image data to test with
+        :param display_current_patch_mock: Mock for display current patch
+        :returns: None
+        """
+
+        controller = Controller(MagicMock())
+        patch = Patch(test_image_data, (0, 0))
+        patch.thresh = 0.5
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.set_threshold(0.2)
+
+        new_patch = controller.image.patches[controller.current_patch]
+
+        assert 0.2 == new_patch.thresh
 
     def test_adjust_threshold_pos_rot_valid_thresh(self, setup,
                                                    test_image_data,
@@ -2114,6 +2262,19 @@ class TestController:
         assert controller.add_region_radius != old_add_radius
         assert (controller.add_region_radius + 1) == old_add_radius
 
+    def test_set_add_region_brush(self, setup):
+        """
+        Test setting the radius of the add region brush
+
+        :param setup: Setup
+        :returns: None
+        """
+        controller = Controller(MagicMock())
+
+        controller.set_add_region_brush(11)
+
+        assert controller.add_region_radius == 11
+
     def test_adjust_remove_region_brush_positive_rot(self, setup):
         """
         Test when the mouse wheel has a positive rotation in Mode.REMOVE_REGION
@@ -2152,6 +2313,19 @@ class TestController:
         assert controller.remove_region_radius != old_remove_radius
         assert (controller.remove_region_radius + 1) == old_remove_radius
 
+    def test_set_remove_region_brush(self, setup):
+        """
+        Test setting the radius of the remove region brush
+
+        :param setup: Setup
+        :returns: None
+        """
+        controller = Controller(MagicMock())
+
+        controller.set_remove_region_brush(11)
+
+        assert controller.remove_region_radius == 11
+
     def test_load_new_image_no_cancel(self, setup, mocker,
                                       display_current_patch_mock):
         """
@@ -2163,7 +2337,6 @@ class TestController:
         :param setup: The setup fixture
         :returns: None
         """
-
         controller = Controller(MagicMock())
         controller.current_patch = 5
         mocker.patch('friendly_ground_truth.view.tk_view.MainWindow.'
@@ -2201,6 +2374,13 @@ class TestController:
 
         spy = mocker.spy(controller, 'display_current_patch')
         mocker.patch.object(controller, 'display_current_patch')
+
+        controller.load_new_image()
+
+        spy.assert_not_called()
+        assert controller.current_patch == 5
+
+        controller.last_load_dir = "a/path/"
 
         controller.load_new_image()
 
@@ -2291,9 +2471,28 @@ class TestController:
         :param setup: The setup fixture
         :returns: None
         """
+        mocker.patch('friendly_ground_truth.'
+                     'view.tk_view.MainWindow.'
+                     'create_annotation_preview')
+
+        mocker.patch('skimage.io.imread')
+        mocker.patch('skimage.color.label2rgb')
+
+        mask = np.random.randint(2, size=(10, 10))
+        rows = np.any(mask, axis=1)
+
+        mocker.patch('skimage.segmentation.mark_boundaries',
+                     return_value=mask)
+
+        mocker.patch('numpy.any', return_value=np.any(mask, axis=1))
+        mocker.patch('numpy.where', return_value=np.where(rows))
+        mocker.patch('numpy.load')
+
+        mocker.patch('skimage.img_as_ubyte', return_value=mask)
 
         controller = Controller(MagicMock())
         controller.current_patch = 5
+        controller.previewed = True
 
         # fd = file_dialog_patch.return_value.__enter__.return_value
 
@@ -2307,6 +2506,16 @@ class TestController:
 
         mock_image.export_mask.assert_called()
 
+        controller.last_save_dir = "a/path/"
+
+        controller.save_mask()
+
+        mock_image.export_mask.assert_called()
+
+        mocker.patch('tkinter.filedialog.askdirectory', return_value=None)
+
+        controller.save_mask()
+
     def test_save_mask_cancel(self, setup, mocker):
         """
         Test exporting a mask when the user cancels
@@ -2316,6 +2525,26 @@ class TestController:
         :param setup: The setup fixture
         :returns: None
         """
+
+        mocker.patch('friendly_ground_truth.'
+                     'view.tk_view.MainWindow.'
+                     'create_annotation_preview')
+
+        mocker.patch('skimage.io.imread')
+        mocker.patch('skimage.color.label2rgb')
+
+        mask = np.random.randint(2, size=(10, 10))
+        rows = np.any(mask, axis=1)
+
+        mocker.patch('skimage.segmentation.mark_boundaries',
+                     return_value=mask)
+
+        mocker.patch('numpy.any', return_value=np.any(mask, axis=1))
+        mocker.patch('numpy.where', return_value=np.where(rows))
+        mocker.patch('numpy.load')
+
+        mocker.patch('skimage.img_as_ubyte', return_value=mask)
+
         controller = Controller(MagicMock())
         controller.current_patch = 5
 
@@ -2341,6 +2570,24 @@ class TestController:
         :param setup: The setup fixture
         :returns: None
         """
+        mocker.patch('friendly_ground_truth.'
+                     'view.tk_view.MainWindow.'
+                     'create_annotation_preview')
+
+        mocker.patch('skimage.io.imread')
+        mocker.patch('skimage.color.label2rgb')
+
+        mask = np.random.randint(2, size=(10, 10))
+        rows = np.any(mask, axis=1)
+
+        mocker.patch('skimage.segmentation.mark_boundaries',
+                     return_value=mask)
+
+        mocker.patch('numpy.any', return_value=np.any(mask, axis=1))
+        mocker.patch('numpy.where', return_value=np.where(rows))
+        mocker.patch('numpy.load')
+
+        mocker.patch('skimage.img_as_ubyte', return_value=mask)
 
         def raise_IOError(self):
             raise IOError
@@ -2356,7 +2603,7 @@ class TestController:
         mock_image.export_mask.side_effect = raise_IOError
 
         controller.image = mock_image
-
+        controller.previewed = True
         controller.image_path = '/this/is/a/path.png'
 
         controller.save_mask()
@@ -2367,15 +2614,14 @@ class TestController:
         """
         Test displaying the current patch
 
-        :test_condition: main_window.show_image is called with the current
-                         patch's overlay image
-
+        :test_condition: main_window.show_image is called
         :param setup: A setup fixture
         :param mocker: Mocker
         :returns: None
         """
         controller = Controller(MagicMock())
         controller.current_patch = 0
+        controller.context_img = None
 
         mock_image = MagicMock()
         mock_patch = MagicMock()
@@ -2392,8 +2638,6 @@ class TestController:
         controller.display_current_patch()
 
         mock_window.show_image.assert_called()
-        mock_window.show_image.assert_called_with(mock_image.
-                                                  patches[0].overlay_image)
 
     def test_handle_zoom_positive(self, setup, mocker):
         """
@@ -2411,15 +2655,18 @@ class TestController:
         controller.main_window.image_scale = 1
         controller.main_window.MAX_SCALE = 16
         controller.main_window.MIN_SCALE = 0.25
+        controller.context_img = None
 
         controller.image = MagicMock()
 
         old_scale = controller.main_window.image_scale
 
-        result = controller.handle_zoom(1)
+        result = controller.handle_zoom(1, 10, 10)
 
         assert controller.main_window.image_scale != old_scale
-        assert (controller.main_window.image_scale / 2) == old_scale
+        computed_old_scale = (controller.main_window.image_scale /
+                              controller.ZOOM_SCALE)
+        assert computed_old_scale == old_scale
         assert True is result
 
     def test_handle_zoom_negative(self, setup, mocker):
@@ -2439,13 +2686,16 @@ class TestController:
         controller.main_window.MAX_SCALE = 16
         controller.main_window.MIN_SCALE = 0.25
         controller.image = MagicMock()
+        controller.context_img = None
 
         old_scale = controller.main_window.image_scale
 
-        result = controller.handle_zoom(-1)
+        result = controller.handle_zoom(-1, 15, 15)
 
         assert controller.main_window.image_scale != old_scale
-        assert (controller.main_window.image_scale * 2) == old_scale
+        computed_old_scale = (controller.main_window.image_scale *
+                              controller.ZOOM_SCALE)
+        assert computed_old_scale == old_scale
         assert True is result
 
     def test_handle_zoom_invalid(self, setup, mocker):
@@ -2463,7 +2713,7 @@ class TestController:
         controller.main_window.image_scale = 2
         controller.image = MagicMock()
 
-        assert controller.handle_zoom(0) is False
+        assert controller.handle_zoom(0, 32, 32) is False
 
     def test_adjust_remove_landmark_brush_positive_rot(self, setup):
         """
@@ -2514,22 +2764,575 @@ class TestController:
         :returns: None
         """
 
-        mocker.patch('matplotlib.pyplot.imshow')
-        show_patch = mocker.patch('matplotlib.pyplot.show')
+        show_patch = mocker.patch('friendly_ground_truth.'
+                                  'view.tk_view.MainWindow.'
+                                  'create_annotation_preview')
+
         mocker.patch('skimage.io.imread')
         mocker.patch('skimage.color.label2rgb')
-        mocker.patch('skimage.segmentation.mark_boundaries')
 
         mask = np.random.randint(2, size=(10, 10))
         rows = np.any(mask, axis=1)
+
+        mocker.patch('skimage.segmentation.mark_boundaries',
+                     return_value=mask)
+
         mocker.patch('numpy.any', return_value=np.any(mask, axis=1))
         mocker.patch('numpy.where', return_value=np.where(rows))
         mocker.patch('numpy.load')
+
+        mocker.patch('skimage.img_as_ubyte', return_value=mask)
 
         controller = Controller(MagicMock())
         controller.image_path = MagicMock()
         controller.label_pathname = MagicMock()
         controller.mask_pathname = MagicMock()
+        controller.image = MagicMock()
 
         controller.show_saved_preview()
         show_patch.assert_called()
+
+    def test_handle_mouse_wheel_motion_adjust(self, setup,
+                                              display_current_patch_mock):
+        """
+        Test when the mouse is moved with the mouse wheel clicked in
+
+        :test_condition: display_current_patch is not called
+
+        :param setup: Setup
+        :param display_current_patch_mock: Mock for the display current patch
+                                           function
+        :returns: None
+        """
+        controller = Controller(MagicMock())
+        controller.current_mode = Mode.THRESHOLD
+        controller.current_secondary_mode = SecondaryMode.ADJUST_TOOL
+
+        mock_patch = MagicMock()
+        thresh_mock = PropertyMock(return_value=0.5)
+
+        type(mock_patch).thresh = thresh_mock
+
+        mock_image = MagicMock()
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        controller.handle_mouse_wheel_motion((0, 0))
+        display_current_patch_mock.assert_not_called()
+
+    def test_get_context_patches_top_left_corner(self, setup):
+        """
+        Test getting the context patches when the current patch is the top left
+        corner patch of the image
+
+        :test_condition: Returns an image the size of a 2x2 grid of patches
+
+        :param setup: Setup
+        :returns: None
+        """
+
+        master = MagicMock()
+        controller = Controller(master)
+
+        controller.current_patch = 0
+        controller.context_img = None
+
+        mock_patch1 = MagicMock()
+        mock_patch1.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch1.patch_index = (0, 0)
+
+        mock_patch2 = MagicMock()
+        mock_patch2.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch2.patch_index = (0, 1)
+
+        mock_patch3 = MagicMock()
+        mock_patch3.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch3.patch_index = (1, 0)
+
+        mock_patch4 = MagicMock()
+        mock_patch4.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch4.patch_index = (1, 1)
+
+        mock_image = MagicMock()
+        mock_image.NUM_PATCHES = 2
+        patches_mock = PropertyMock(return_value=[mock_patch1,
+                                    mock_patch2,  mock_patch3, mock_patch4])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        context_img = controller.get_context_patches(mock_patch1)
+
+        assert context_img.shape == (20, 20, 4)
+
+    def test_get_context_patches_cached(self, setup):
+        """
+        Test getting the context patches when the current patch is the top left
+        corner patch of the image
+
+        :test_condition: Returns an image the size of a 2x2 grid of patches
+
+        :param setup: Setup
+        :returns: None
+        """
+
+        master = MagicMock()
+        controller = Controller(master)
+
+        controller.current_patch = 0
+        controller.context_img = np.ones((20, 20, 4), dtype=np.uint8)
+
+        mock_patch1 = MagicMock()
+        mock_patch1.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch1.patch_index = (0, 0)
+
+        mock_patch2 = MagicMock()
+        mock_patch2.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch2.patch_index = (0, 1)
+
+        mock_patch3 = MagicMock()
+        mock_patch3.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch3.patch_index = (1, 0)
+
+        mock_patch4 = MagicMock()
+        mock_patch4.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch4.patch_index = (1, 1)
+
+        mock_image = MagicMock()
+        mock_image.NUM_PATCHES = 2
+        patches_mock = PropertyMock(return_value=[mock_patch1,
+                                    mock_patch2,  mock_patch3, mock_patch4])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        context_img = controller.get_context_patches(mock_patch1)
+
+        assert context_img.shape == (20, 20, 4)
+
+    def test_get_context_patches_middle(self, setup):
+        """
+        Test getting the context patches when the current patch is somewhere in
+        the middle
+
+        :test_condition: Returns an image the size of a 2x2 grid of patches
+
+        :param setup: Setup
+        :returns: None
+        """
+
+        master = MagicMock()
+        controller = Controller(master)
+
+        controller.current_patch = 0
+        controller.context_img = None
+
+        mock_patch1 = MagicMock()
+        mock_patch1.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch1.patch_index = (0, 0)
+
+        mock_patch2 = MagicMock()
+        mock_patch2.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch2.patch_index = (0, 1)
+
+        mock_patch3 = MagicMock()
+        mock_patch3.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch3.patch_index = (0, 2)
+
+        mock_patch4 = MagicMock()
+        mock_patch4.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch4.patch_index = (1, 0)
+
+        mock_patch5 = MagicMock()
+        mock_patch5.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch5.patch_index = (1, 1)
+
+        mock_patch6 = MagicMock()
+        mock_patch6.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch6.patch_index = (1, 2)
+
+        mock_patch7 = MagicMock()
+        mock_patch7.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch7.patch_index = (2, 0)
+
+        mock_patch8 = MagicMock()
+        mock_patch8.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch8.patch_index = (2, 1)
+
+        mock_patch9 = MagicMock()
+        mock_patch9.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch9.patch_index = (2, 2)
+
+        mock_image = MagicMock()
+        mock_image.NUM_PATCHES = 3
+        patches_mock = PropertyMock(return_value=[mock_patch1,
+                                    mock_patch2,  mock_patch3, mock_patch4,
+                                    mock_patch5, mock_patch6, mock_patch7,
+                                    mock_patch8, mock_patch9])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        context_img = controller.get_context_patches(mock_patch5)
+
+        assert context_img.shape == (30, 30, 4)
+
+    def test_undo(self, setup, display_current_patch_mock):
+        """
+        Test undoing an action
+
+        :param setup: The setup fixture
+        :param display_current_patch_mock:  A mock for displaying the current
+                                            patch
+        :returns: None
+        """
+        master = MagicMock()
+        controller = Controller(master)
+
+        controller.current_patch = 0
+
+        mock_patch = MagicMock()
+        mock_patch.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch.patch_index = (2, 2)
+
+        mock_patch2 = MagicMock()
+        mock_patch2.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch2.patch_index = (2, 2)
+
+        mock_image = MagicMock()
+        mock_image.NUM_PATCHES = 3
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        undo_manager = MagicMock()
+        undo_manager.undo.return_value = mock_patch2, 'test'
+
+        controller.undo_manager = undo_manager
+
+        controller.undo()
+
+        undo_manager.undo.assert_called()
+        undo_manager.add_to_redo_stack.assert_called_with(mock_patch, 'test')
+        assert controller.image.patches[0] == mock_patch2
+
+    def test_redo(self, setup, display_current_patch_mock):
+        """
+        Test redoing an action
+
+        :param setup: The setup fixture
+        :param display_current_patch_mock:  A mock for displaying the current
+                                            patch
+        :returns: None
+        """
+
+        master = MagicMock()
+        controller = Controller(master)
+
+        controller.current_patch = 0
+
+        mock_patch = MagicMock()
+        mock_patch.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch.patch_index = (2, 2)
+
+        mock_patch2 = MagicMock()
+        mock_patch2.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch2.patch_index = (2, 2)
+
+        mock_image = MagicMock()
+        mock_image.NUM_PATCHES = 3
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        undo_manager = MagicMock()
+        undo_manager.redo.return_value = mock_patch2, 'test'
+
+        controller.undo_manager = undo_manager
+
+        controller.redo()
+
+        undo_manager.redo.assert_called()
+        undo_manager.add_to_undo_stack.assert_called_with(mock_patch, 'test')
+        assert controller.image.patches[0] == mock_patch2
+
+    def test_undo_none(self, setup, display_current_patch_mock):
+        """
+        Test undoing an action
+
+        :param setup: The setup fixture
+        :param display_current_patch_mock:  A mock for displaying the current
+                                            patch
+        :returns: None
+        """
+        master = MagicMock()
+        controller = Controller(master)
+
+        controller.current_patch = 0
+
+        mock_patch = MagicMock()
+        mock_patch.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch.patch_index = (2, 2)
+
+        mock_patch2 = MagicMock()
+        mock_patch2.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch2.patch_index = (2, 2)
+
+        mock_image = MagicMock()
+        mock_image.NUM_PATCHES = 3
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        undo_manager = MagicMock()
+        undo_manager.undo.return_value = None, None
+
+        controller.undo_manager = undo_manager
+
+        controller.undo()
+
+        undo_manager.undo.assert_called()
+        undo_manager.add_to_redo_stack.assert_not_called()
+        assert controller.image.patches[0] == mock_patch
+
+    def test_redo_none(self, setup, display_current_patch_mock):
+        """
+        Test redoing an action
+
+        :param setup: The setup fixture
+        :param display_current_patch_mock:  A mock for displaying the current
+                                            patch
+        :returns: None
+        """
+
+        master = MagicMock()
+        controller = Controller(master)
+
+        controller.current_patch = 0
+
+        mock_patch = MagicMock()
+        mock_patch.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch.patch_index = (2, 2)
+
+        mock_patch2 = MagicMock()
+        mock_patch2.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch2.patch_index = (2, 2)
+
+        mock_image = MagicMock()
+        mock_image.NUM_PATCHES = 3
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        undo_manager = MagicMock()
+        undo_manager.redo.return_value = None, None
+
+        controller.undo_manager = undo_manager
+
+        controller.redo()
+
+        undo_manager.redo.assert_called()
+        undo_manager.add_to_undo_stack.assert_not_called()
+        assert controller.image.patches[0] == mock_patch
+
+
+class TestUndoManager():
+
+    def test_add_to_undo_stack(self, mocker):
+
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_undo_stack(patch, "test")
+
+        assert undo_manager.undo_stack[-1] == (patch, "test")
+
+    def test_add_to_undo_stack_threshold_adj(self, mocker):
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_undo_stack(patch, "threshold_adjust")
+
+        assert undo_manager.undo_stack[-1] == (patch, "threshold_adjust")
+
+        undo_manager.add_to_undo_stack(patch, "threshold_adjust")
+
+        assert undo_manager.undo_stack[-1] == (patch, "threshold_adjust")
+        assert len(undo_manager.undo_stack) == 1
+
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "threshold_adjust")
+
+        assert len(undo_manager.undo_stack) == 3
+        assert undo_manager.undo_stack[-1] == (patch, "threshold_adjust")
+
+    def test_add_to_undo_stack_adjust(self, mocker):
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_undo_stack(patch, "test_adjust")
+
+        assert undo_manager.undo_stack[-1] == (patch, "test_adjust")
+
+        undo_manager.add_to_undo_stack(patch, "test_adjust")
+
+        assert undo_manager.undo_stack[-1] == (patch, "test_adjust")
+        assert len(undo_manager.undo_stack) == 1
+
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test_adjust")
+
+        assert len(undo_manager.undo_stack) == 3
+        assert undo_manager.undo_stack[-1] == (patch, "test_adjust")
+
+    def test_add_to_undo_stack_fill(self, mocker):
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+
+        assert len(undo_manager.undo_stack) == 20
+
+        undo_manager.add_to_undo_stack(patch, "test")
+
+        assert len(undo_manager.undo_stack) == 20
+
+    def test_undo(self):
+
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_undo_stack(patch, "test")
+
+        p, o = undo_manager.undo()
+
+        assert p == patch
+        assert o == "test"
+
+    def test_undo_except(self, mocker):
+
+        def raise_indexerror():
+            raise IndexError
+
+        undo_manager = UndoManager()
+        undo_manager.undo_stack = MagicMock()
+        undo_manager.undo_stack.pop.side_effect = raise_indexerror
+
+        p, o = undo_manager.undo()
+
+        assert p is None
+        assert o is None
+
+    def test_add_to_redo_stack(self, mocker):
+
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_redo_stack(patch, "test")
+
+        assert undo_manager.redo_stack[-1] == (patch, "test")
+
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_redo_stack(patch, "test")
+
+        assert len(undo_manager.redo_stack) == 20
+
+        undo_manager.add_to_redo_stack(patch, "test")
+        assert len(undo_manager.redo_stack) == 20
+
+    def test_redo(self):
+
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_redo_stack(patch, "test")
+
+        p, o = undo_manager.redo()
+
+        assert p == patch
+        assert o == "test"
+
+    def test_redo_except(self, mocker):
+
+        def raise_indexerror():
+            raise IndexError
+
+        undo_manager = UndoManager()
+        undo_manager.redo_stack = MagicMock()
+        undo_manager.redo_stack.pop.side_effect = raise_indexerror
+
+        p, o = undo_manager.redo()
+
+        assert p is None
+        assert o is None
+
+    def test_clear_undos(self, mocker):
+
+        undo_manager = UndoManager()
+
+        patch = MagicMock()
+
+        undo_manager.add_to_redo_stack(patch, "test")
+        undo_manager.add_to_undo_stack(patch, "test")
+
+        undo_manager.clear_undos()
+
+        assert len(undo_manager.undo_stack) == 0
+        assert len(undo_manager.redo_stack) == 0
