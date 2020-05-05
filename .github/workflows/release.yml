@@ -129,7 +129,9 @@ jobs:
           mkdir windows_app 
           cp ./dist/friendly_gt.exe ./windows_app/friendly_gt.exe
           cp ./windows/dist/install_shortcut.exe ./windows_app/install_shortcut.exe
-          7z a ./friendly_gt-windows ./windows_app
+          ls
+          ls ./windows_app
+          7z a ./friendly_gt-windows ./windows_app/
         shell: bash
       - name: Upload Release Asset - Windows
         if: matrix.os == 'windows-latest'
