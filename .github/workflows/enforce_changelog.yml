@@ -13,14 +13,8 @@ jobs:
       - name: Check Changelog
         run: |
           git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
-          git diff origin/$BASE_BRANCH origin/$TARGET_BRANCH -- changelog.txt
-          git diff origin/$BASE_BRANCH origin/$TARGET_BRANCH --quiet -- changelog.txt; nochanges=$?
-          echo $nochanges
-          if [ $nochanges -eq 0 ]; then
-                exit 1
-          else
-                exit 0
-          fi
+          git diff origin/$BASE_BRANCH origin/$TARGET_BRANCH --quiet -- changelog.txt
+          
         env:
          BASE_BRANCH: ${{ github.base_ref }}
          TARGET_BRANCH:  ${{ github.head_ref }}
