@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Check Changelog
         run: |
-          git diff $BASE_BRANCH $TARGET_BRANCH --quiet -- changelog.txt; nochanges=$?
+          git diff $TARGET_BRANCH $BASE_BRANCH --quiet -- changelog.txt; nochanges=$?
           if [ $nochanges -eq 0 ]; then
                 exit 1
           else
