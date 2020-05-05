@@ -130,14 +130,15 @@ jobs:
       - name: Bundle Mac OS App
         if: matrix.os == 'macos-latest'
         run: |
-           zip -r ./friendly_gt-macos-app.zip ./dist/friendly_gt.app
+          zip -r ./friendly_gt-macos-app.zip ./dist/friendly_gt.app
       - name: Upload Mac Os App
         if: matrix.os == 'macos-latest'
         id: upload-release-asset-mac-app
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+
           upload_url: ${{ steps.get_release_info.outputs.upload_url }}
           asset_path: ./friendly_gt-macos-app.zip
           asset_name: friendly_gt_macos-app.zip
