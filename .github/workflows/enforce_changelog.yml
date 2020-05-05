@@ -7,9 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
       - name: Check Changelog
         run: |
-          git diff origin/$BASE_BRANCH --quiet -- changelog.txt; nochanges=$?
+          git diff $BASE_BRANCH $TARGET_BRANCH --quiet -- changelog.txt; nochanges=$?
           if [ $nochanges -eq 0 ]; then
                 exit 1
           else
@@ -17,3 +19,4 @@ jobs:
           fi
         env:
          BASE_BRANCH: ${{ github.base_ref }}
+         TARGET_BRANCH:  ${{ github.head_ref }}
