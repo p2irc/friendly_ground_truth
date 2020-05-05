@@ -74,7 +74,8 @@ jobs:
           pip install tornado
           pip install pywin32
           pyinstaller -i icon.ico --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
-          # pyinstaller --windowed --hidden-import='PIL._tkinter_finder --onefile windows_install.py -n install_shortcut
+          cd windows
+          pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n install_shortcut
         shell: bash 
       # Build the project on ubuntu
       - name: Build project Ubuntu
@@ -124,8 +125,10 @@ jobs:
         if: matrix.os == 'windows-latest'
         id: package-windows
         run: |
-          Copy-Item  "dist\friendly_gt.exe" -Destination "windows\friendly_gt.exe" #cp ./dist/friendly_gt.exe ./windows
-          Compress-Archive "windows" "friendly_gt-windows.zip" #zip -r ./friendly_gt-windows.zip ./windowsi
+          New-Item -path "." -name "windows_app" -ItemType "directory"
+          Copy-Item  "dist\friendly_gt.exe" -Destination "windows_app\friendly_gt.exe" #cp ./dist/friendly_gt.exe ./windows
+          Copy-Item "windows\install_shortcut.exe" -Destination "windows_app\install_shortcut.exe"
+          Compress-Archive "windows_app" "friendly_gt-windows.zip" #zip -r ./friendly_gt-windows.zip ./windowsi
         shell: powershell
       - name: Upload Release Asset - Windows
         if: matrix.os == 'windows-latest'
