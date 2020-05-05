@@ -70,7 +70,11 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
-      # Get Release Details
+      - name: Ubuntu App
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+           mv ./dist/friendly_gt ./ubuntu/friendly_gt_ubuntu-latest
+           zip -r ./friendly_gt-ubuntu.zip ./ubuntu
       - name: Load Release URL File
         uses: actions/download-artifact@v1
         with:
@@ -81,9 +85,20 @@ jobs:
         run: |
           value=`cat release_url/release_url.txt`
           echo ::set-output name=upload_url::$value
-      # Upload the linux binaries
-      - name: Upload Release Asset - Ubuntu/Mac
-        if: matrix.os != 'windows-latest'
+      - name: Upload Release Asset - Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        id: upload-release-asset-ubuntu
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./friendly_gt-ubuntu.zip
+          asset_name: friendly_gt-ubuntu.zip
+          asset_content_type: application/zip
+
+      - name: Upload Release Asset - Mac
+        if: matrix.os == 'macos-latest'
         id: upload-release-asset 
         uses: actions/upload-release-asset@v1
         env:
