@@ -3,7 +3,7 @@
 # friendly_ground_truth
 A tool for manually creating ground truth masks from images where a significant amount of detail is required.  Particularily suited for large images of plant roots.
 
-
+![favicon](https://github.com/KyleS22/friendly_ground_truth/blob/master/doc/images/icon.png)
 
 # Installation
 

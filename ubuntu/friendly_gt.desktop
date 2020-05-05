@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Friendly Ground Truth
+Exec=friendly_gt
+Icon=friendly_gt.png
+Terminal=false
+Type=Application

@@ -269,9 +269,6 @@ class Patch():
         self.overlay_image = None
         self.overlay_mask()
 
-        self.logger.debug("Created patch with index {} and shape {}"
-                          .format(patch_index, patch.shape))
-
         self.old_flood_add_tolerance = 100
         self.old_flood_add_position = None
 
@@ -427,7 +424,6 @@ class Patch():
         if position == self.old_flood_add_position:
             self.logger.debug("Reverting mask ")
             self.mask = np.copy(self.old_mask)
-            self.overlay_mask()
         else:
             self.logger.debug("Storing old mask")
             self.old_mask = np.copy(self.mask)
@@ -435,6 +431,8 @@ class Patch():
         add_mask = flood(self.patch, position, tolerance=tolerance)
 
         self.mask += add_mask
+
+        self.overlay_mask()
 
         self.old_flood_add_tolerance = tolerance
         self.old_flood_add_position = position
@@ -458,7 +456,6 @@ class Patch():
         if position == self.old_flood_remove_position:
             self.logger.debug("Reverting mask ")
             self.mask = np.copy(self.old_mask)
-            self.overlay_mask()
         else:
             self.logger.debug("Storing old mask")
             self.old_mask = np.copy(self.mask)
@@ -466,6 +463,8 @@ class Patch():
         remove_mask = flood(self.patch, position, tolerance=tolerance)
 
         self.mask[remove_mask] = 0
+
+        self.overlay_mask()
 
         self.old_flood_remove_tolerance = tolerance
         self.old_flood_remove_position = position

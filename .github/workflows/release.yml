@@ -51,10 +51,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
-          
-      - name: Build project # This would actually build your project, using zip for an example artifact
+      # Build the mac binaries
+      - name: Build project Mac
+        if: matrix.os == 'macos-latest'
+        run: |
+          python make_icns.py
+          pyinstaller -i icon.icns --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
+      # Build the windows binaries
+      - name: Build project Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          pyinstaller -i icon.ico --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
+          cd windows
+          pyinstaller --windowed --hidden-import='PIL._tkinter_finder --onefile windows_install.py -n install_shortcut 
+          cd ..
+      # Build the project on ubuntu
+      - name: Build project Ubuntu
+        if: matrix.os == 'ubuntu-latest'
         run: |
           pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
+      - name: Ubuntu App
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+           mv ./dist/friendly_gt ./ubuntu/friendly_gt_ubuntu-latest
+           zip -r ./friendly_gt-ubuntu.zip ./ubuntu
       - name: Load Release URL File
         uses: actions/download-artifact@v1
         with:
@@ -65,17 +85,36 @@ jobs:
         run: |
           value=`cat release_url/release_url.txt`
           echo ::set-output name=upload_url::$value
-      - name: Upload Release Asset - Ubuntu/Mac
-        if: matrix.os != 'windows-latest'
-        id: upload-release-asset 
+      - name: Upload Release Asset - Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        id: upload-release-asset-ubuntu
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.get_release_info.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./friendly_gt-ubuntu.zip
+          asset_name: friendly_gt-ubuntu.zip
+          asset_content_type: application/zip
+
+      - name: Upload Release Asset - Mac
+        if: matrix.os == 'macos-latest'
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }} 
           asset_path: ./dist/friendly_gt
           asset_name: friendly_gt_${{ matrix.os }}
           asset_content_type: application/octet-stream
+      # Upload the windows executables
+      - name: Package Windows Assets
+        if: matrix.os == 'windows-latest'
+        id: package-windows
+        run: |
+          cp ./dist/friendly_gt.exe ./windows
+          zip -r ./friendly_gt-windows.zip ./windows
       - name: Upload Release Asset - Windows
         if: matrix.os == 'windows-latest'
         id: upload-release-asset-win 
@@ -83,10 +122,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.get_release_info.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }} 
           asset_path: ./dist/friendly_gt.exe
-          asset_name: friendly_gt_${{ matrix.os }}.exe
-          asset_content_type: application/octet-stream
+          asset_name: friendly_gt-windows.zip
+          asset_content_type: application/zip
+      # Bundle and upload the macos app folder
       - name: Bundle Mac OS App
         if: matrix.os == 'macos-latest'
         run: |
@@ -98,7 +138,8 @@ jobs:
         env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-         upload_url: ${{ steps.get_release_info.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-         asset_path: ./friendly_gt-macos-app.zip
-         asset_name: friendly_gt_macos-app.zip
-         asset_content_type: application/zip
+
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+          asset_path: ./friendly_gt-macos-app.zip
+          asset_name: friendly_gt_macos-app.zip
+          asset_content_type: application/zip
