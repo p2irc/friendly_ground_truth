@@ -141,7 +141,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.get_release_info.outputs.upload_url }} 
-          asset_path: ./dist/friendly_gt.exe
+          asset_path: ./friendly_gt-windows.zip
           asset_name: friendly_gt-windows.zip
           asset_content_type: application/zip
       # Bundle and upload the macos app folder
