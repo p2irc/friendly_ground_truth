@@ -18,7 +18,6 @@ jobs:
         run: |
           bash generate_release_changes.sh
           value=`cat changes.txt`
-          echo "$value"
           echo ::set-output name=changelog::"$value"
       - name: create release
         id: create_release
@@ -28,7 +27,7 @@ jobs:
         with:
            tag_name: ${{ github.ref }}
            release_name: Release ${{ github.ref }}
-           body: ${{ steps.get_release_notes.outputs.changelog }}
+           body: "${{ steps.get_release_notes.outputs.changelog }}"
            draft: false
            prerelease: false
       - name: Output Release URL File
@@ -70,8 +69,8 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           pyinstaller -i icon.ico --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
-          pyinstaller --windowed --hidden-import='PIL._tkinter_finder --onefile windows/windows_install.py -n install_shortcut 
-          #mv ./install_shortcut.exe ./windows/install_shortcut.exe
+          # pyinstaller --windowed --hidden-import='PIL._tkinter_finder --onefile windows/windows_install.py -n install_shortcut 
+          # mv ./install_shortcut.exe ./windows/install_shortcut.exe
       # Build the project on ubuntu
       - name: Build project Ubuntu
         if: matrix.os == 'ubuntu-latest'
