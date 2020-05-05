@@ -13,6 +13,7 @@ jobs:
       - name: Check Changelog
         run: |
           git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
+          cd doc
           bash check_changelog.sh origin/$BASE_BRANCH origin/$TARGET_BRANCH 
         env:
          BASE_BRANCH: ${{ github.base_ref }}

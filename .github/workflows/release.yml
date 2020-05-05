@@ -16,6 +16,7 @@ jobs:
       - name: Get Release Notes
         id: get_release_notes
         run: |
+          cd doc
           bash generate_release_changes.sh
           value=`cat changes.txt`
           value="${value//'%'/'%25'}"
