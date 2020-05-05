@@ -72,7 +72,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           pip install tornado
-          pyinstaller -i icon.ico --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
+          pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
           pyinstaller --windowed --hidden-import='PIL._tkinter_finder --onefile windows_install.py -n install_shortcut
         shell: bash 
       # Build the project on ubuntu
