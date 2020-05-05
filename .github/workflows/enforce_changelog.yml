@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Check Changelog
         run: |
-          git diff $TARGET_BRANCH $BASE_BRANCH --quiet -- changelog.txt; nochanges=$?
+          git diff $BASE_BRANCH --quiet -- changelog.txt; nochanges=$?
           if [ $nochanges -eq 0 ]; then
                 exit 1
           else
@@ -17,4 +17,3 @@ jobs:
           fi
         env:
          BASE_BRANCH: ${{ github.base_ref }}
-         TARGET_BRANCH: ${{ github.head_ref }}
