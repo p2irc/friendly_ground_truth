@@ -1,0 +1,19 @@
+## v0.7.0
+
+- Improved panning and zooming, allowed from any tool 
+      - Panning can be done by clicking the mouse wheel and dragging, or Ctrl-clicking and dragging
+      - Zooming can be done at any time by scrolling the mouse wheel, or by Ctrl +/-
+- Tool info panels display properties of the selected tool and allow adjustment
+- Fixes for indicating the active tool on Mac
+- Removal of landmark annotations
+- The top right corner displays the name of the image currently being annotated
+- Context patches around the current patch allow better annotations
+- Tooltips for the toolbar icons
+- Application icon
+- New Undo and Redo tools
+- Flood tools now take effect on first click
+- When loading and saving images, the dialog starts in the user's home directory, and remembers their choice for future use
+- Installation scripts that hopefully work
+
+## v0.6.0
+- Test

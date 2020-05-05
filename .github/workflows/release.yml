@@ -13,6 +13,15 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v1
+      - name: Get Release Notes
+        id: get_release_notes
+        run: |
+          bash generate_release_changes.sh
+          value=`cat changes.txt`
+          value="${value//'%'/'%25'}"
+          value="${value//$'\n'/'%0A'}"
+          value="${value//$'\r'/'%0D'}" 
+          echo ::set-output name=changelog::"$value"
       - name: create release
         id: create_release
         uses: actions/create-release@v1
@@ -21,6 +30,7 @@ jobs:
         with:
            tag_name: ${{ github.ref }}
            release_name: Release ${{ github.ref }}
+           body: "${{ steps.get_release_notes.outputs.changelog }}"
            draft: false
            prerelease: false
       - name: Output Release URL File
@@ -61,10 +71,12 @@ jobs:
       - name: Build project Windows
         if: matrix.os == 'windows-latest'
         run: |
+          pip install tornado
+          pip install pywin32
           pyinstaller -i icon.ico --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
           cd windows
-          pyinstaller --windowed --hidden-import='PIL._tkinter_finder --onefile windows_install.py -n install_shortcut 
-          cd ..
+          pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n install_shortcut
+        shell: bash 
       # Build the project on ubuntu
       - name: Build project Ubuntu
         if: matrix.os == 'ubuntu-latest'
@@ -113,8 +125,11 @@ jobs:
         if: matrix.os == 'windows-latest'
         id: package-windows
         run: |
-          cp ./dist/friendly_gt.exe ./windows
-          zip -r ./friendly_gt-windows.zip ./windows
+          New-Item -path "." -name "windows_app" -ItemType "directory"
+          Copy-Item  "dist\friendly_gt.exe" -Destination "windows_app\friendly_gt.exe" #cp ./dist/friendly_gt.exe ./windows
+          Copy-Item "windows\dist\install_shortcut.exe" -Destination "windows_app\install_shortcut.exe"
+          Compress-Archive "windows_app" "friendly_gt-windows.zip" #zip -r ./friendly_gt-windows.zip ./windowsi
+        shell: powershell
       - name: Upload Release Asset - Windows
         if: matrix.os == 'windows-latest'
         id: upload-release-asset-win 
