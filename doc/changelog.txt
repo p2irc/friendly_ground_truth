@@ -1,3 +1,6 @@
+## v0.7.0d
+- Allow windows debug builds
+
 ## v0.7.0
 
 - Improved panning and zooming, allowed from any tool 
