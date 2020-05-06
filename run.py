@@ -83,7 +83,7 @@ if __name__ == '__main__':
                 if not os.path.exists(tools):
                     os.mkdir(tools)
 
-                program_path = os.path.join(tools, 'friendly_gt.exe')
+                program_path = os.path.join(tools, 'friendly_gt-windows.exe')
 
                 shutil.copy(EXE, program_path)
 
