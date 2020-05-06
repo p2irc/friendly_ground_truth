@@ -69,7 +69,7 @@ if __name__ == '__main__':
                 root.destroy()
 
             def install():
-                EXE = "./friendly_gt.exe"
+                EXE = "./friendly_gt-windows.exe"
 
                 if sys.platform != 'win32':
                     sys.exit(0)
