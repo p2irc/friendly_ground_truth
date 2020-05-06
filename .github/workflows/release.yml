@@ -78,12 +78,12 @@ jobs:
           pip install pywin32
           if [ `echo ${{ github.ref }} | grep -c "d"` -eq 0 ]; then
             pyinstaller -i icon.ico --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
-            cd windows
-            pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n install_shortcut
+            #cd windows
+            #pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n install_shortcut
           else
             pyinstaller -i icon.ico --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
-            cd windows
-            pyinstaller --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n install_shortcut
+            #cd windows
+            #pyinstaller --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n install_shortcut
           fi
         shell: bash 
         
@@ -110,15 +110,15 @@ jobs:
            mv ./dist/friendly_gt ./ubuntu/friendly_gt_ubuntu-latest
            zip -r ./friendly_gt-ubuntu.zip ./ubuntu
            
-      - name: Package Windows Assets
-        if: matrix.os == 'windows-latest'
-        id: package-windows
-        run: |
-          New-Item -path "." -name "windows_app" -ItemType "directory"
-          Copy-Item  "dist\friendly_gt.exe" -Destination "windows_app\friendly_gt.exe" #cp ./dist/friendly_gt.exe ./windows
-          Copy-Item "windows\dist\install_shortcut.exe" -Destination "windows_app\install_shortcut.exe"
-          Compress-Archive -path ".\windows_app" -DestinationPath ".\friendly_gt-windows.zip"
-        shell: powershell
+           #- name: Package Windows Assets
+           # if: matrix.os == 'windows-latest'
+           # id: package-windows
+           #run: |
+           #New-Item -path "." -name "windows_app" -ItemType "directory"
+           #Copy-Item  "dist\friendly_gt.exe" -Destination "windows_app\friendly_gt.exe" #cp ./dist/friendly_gt.exe ./windows
+           #Copy-Item "windows\dist\install_shortcut.exe" -Destination "windows_app\install_shortcut.exe"
+           #Compress-Archive -path ".\windows_app" -DestinationPath ".\friendly_gt-windows.zip"
+           #shell: powershell
         # Bundle and upload the macos app folder
       - name: Bundle Mac OS App
         if: matrix.os == 'macos-latest'
@@ -158,9 +158,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.get_release_info.outputs.upload_url }} 
-          asset_path: ./friendly_gt-windows.zip
-          asset_name: friendly_gt-windows.zip
-          asset_content_type: application/zip
+          asset_path: ./dist/friendly_gt.exe
+          asset_name: friendly_gt-windows.exe
+          asset_content_type: application/octet-stream
       
       - name: Upload Mac Os App
         if: matrix.os == 'macos-latest'
