@@ -108,7 +108,8 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
            mv ./dist/friendly_gt ./ubuntu/friendly_gt_ubuntu-latest
-           zip -r ./friendly_gt-ubuntu.zip ./ubuntu
+           mv ./ubuntu ./friendly_gt_ubuntu
+           zip -r ./friendly_gt-ubuntu.zip ./friendly_gt_ubuntu
            
            #- name: Package Windows Assets
            # if: matrix.os == 'windows-latest'
