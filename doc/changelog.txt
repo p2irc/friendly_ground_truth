@@ -1,3 +1,7 @@
+## v0.7.1
+
+- Fix path expansion on windows for installing shortcut
+
 ## v0.7.0d
 - Allow windows debug builds
 

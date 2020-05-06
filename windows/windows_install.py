@@ -27,7 +27,7 @@ def install():
 
     from win32com.client import Dispatch
 
-    home = os.expanduser("~")
+    home = os.path.expanduser("~")
 
     tools = os.path.join(home, "Tools")
 
