@@ -130,6 +130,10 @@ jobs:
           Copy-Item  "dist\friendly_gt.exe" -Destination "windows_app\friendly_gt.exe" #cp ./dist/friendly_gt.exe ./windows
           Copy-Item "windows\dist\install_shortcut.exe" -Destination "windows_app\install_shortcut.exe"
           Compress-Archive -path ".\windows_app" -DestinationPath ".\friendly_gt-windows.zip" #zip -r ./friendly_gt-windows.zip ./windowsi
+          #mkdir windows_app 
+          #cp ./dist/friendly_gt.exe ./windows_app/friendly_gt.exe
+          #cp ./windows/dist/install_shortcut.exe ./windows_app/install_shortcut.exe
+          #7z a ./friendly_gt-windows ./windows_app/
         shell: powershell
       - name: Upload Release Asset - Windows
         if: matrix.os == 'windows-latest'
@@ -139,7 +143,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.get_release_info.outputs.upload_url }} 
-          asset_path: ./dist/friendly_gt.exe
+          asset_path: ./friendly_gt-windows.zip
           asset_name: friendly_gt-windows.zip
           asset_content_type: application/zip
       # Bundle and upload the macos app folder
