@@ -38,7 +38,7 @@ def install():
 
     shutil.copy(EXE, program_path)
 
-    path = "%appdata%\Microsoft\Windows\Start Menu\Programs\Friendly Ground Truth.lnk"
+    path = "AppData\Roaming\Microsoft\Windows\Start Menu\Programs"
 
     path = os.path.join(home, path)
 
@@ -47,6 +47,7 @@ def install():
                             "there was an issue creating the shortcut.")
         sys.exit(0)
 
+    path = os.path.join(path, "Friendly Ground Truth.lnk")
     target = program_path
     wDir = tools
     icon = program_path
@@ -59,6 +60,8 @@ def install():
     shortcut.save()
 
     messagebox.showinfo(title="Success!", message="Application Installed!")
+
+    sys.exit(0)
 
 root = tk.Tk()
 
