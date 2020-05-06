@@ -6,41 +6,57 @@ A tool for manually creating ground truth masks from images where a significant 
 ![favicon](https://github.com/KyleS22/friendly_ground_truth/blob/master/doc/images/icon.png)
 
 # Installation
-
+An in-depth installation guide can be found [here](https://github.com/KyleS22/friendly_ground_truth/wiki/Installation)
 The latest release of the project can be downloaded [here](https://github.com/KyleS22/friendly_ground_truth/releases/latest).
 
-Older versions can be found on the [releases page](https://github.com/KyleS22/friendly_ground_truth/releases)
+## Quick Links
+[Windows](#Windows)
 
-Download the binary for your preferred operating system and follow the instructions below.
+[Ubuntu](#Ubuntu)
+
+[MacOs](#MacOs)
 
 ## Windows
-A windows executable can be downloaded [here](https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt_windows-latest.exe).
+A windows executable can be downloaded [here](https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt-windows.exe).
 
-You should be able to just download and run it.  You may need administrator privelages.
+You should be able to just download and run it.  You may need administrator privileges.
 
-### Troubleshooting
-Permission denied errors:
-- Check that you are an administrator
-- Try changing the file permissions to be executable
-- Perhaps anti-virus is interfering?
+NOTE: If windows gives a popup saying that "it protected you from a file", click on "more info", and then "run anyways".
 
 ## Ubuntu
-An Ubuntu binary can be downloaded [here](https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt_ubuntu-latest).
+An Ubuntu version of the app can be downloaded [here](https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt-ubuntu.zip).
 
-You will need to change the permissions of the binary file to be executable, and then you can run it as any other binary file.
+The zip file contains an executable binary file, an image, and a bash script that will install the application.  
 
-Copy-pasta:
+### Copy-pasta:
+#### Install
 ```
-wget https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt_ubuntu-latest
+wget https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt-ubuntu.zip
+unzip friendly_gt-ubuntu.zip
+cd friendly_gt_ubuntu
+bash install_friendly_gt.sh
+```
+
+At this point, if no prompt appears, the application has been installed.
+
+Otherwise:
+```
+Add ~/bin to your path? (Y/N): yes
+Specify bash profile file (blank uses ~/.bashrc): ~/.bash_profile # This can be left blank if you prefer
+```
+
+#### Don't Install
+```
+wget https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt-ubuntu.zip
+unzip friendly_gt-ubuntu.zip
+cd friendly_gt_ubuntu
 chmod u+x friendly_gt_ubuntu-latest
 ./friendly_gt_ubuntu-latest
 ```
-
-
 ## MacOs
-A MacOs binary can be downloaded [here](https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt_macos-latest).
+A MacOs binary can be downloaded [here](https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt_macos-latest). 
 
-You will need to change the permissions of the binary file to be executable, and then you can run it as any other binary file.
+You will need to change the permissions of the binary file to be executable, and then you can run it by double clicking it in the file browser, or by navigating to it in the terminal and typing `./friendly_gt_macos-latest`.
 
 Copy-pasta:
 ```
@@ -48,6 +64,7 @@ wget https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/f
 chmod u+x friendly_gt_macos-latest
 ./friendly_gt_macos-latest
 ```
+An experimental MacOs application bundle can be downloaded [here](https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt_macos-app.zip).  This bundle has not been fully tested, and may not work at all.  It should be runnable just like any other mac app bundle once you have unzipped it.  If you encounter problems with this bundle, please leave a [Bug Report](https://github.com/KyleS22/friendly_ground_truth/issues).
 
 # User Manual
 A user manual can be found [in the wiki](https://github.com/KyleS22/friendly_ground_truth/wiki/User-Manual)
