@@ -62,6 +62,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
+          
+      - name: Check Debug
+        id: check_debug
+        run: |
+          debug=`echo ${{ github.ref }} | grep -c "d"`
+          echo ::set-output name=debug_version::"$debug"
+        
+      # BUILD
       # Build the mac binaries
       - name: Build project Mac
         if: matrix.os == 'macos-latest'
@@ -70,7 +78,7 @@ jobs:
           pyinstaller -i icon.icns --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
       # Build the windows binaries
       - name: Build project Windows
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-latest' and !${{ steps.check_debug.outputs.debug_version }} 
         run: |
           pip install tornado
           pip install pywin32
@@ -78,26 +86,56 @@ jobs:
           cd windows
           pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n install_shortcut
         shell: bash 
+        
+      - name: Build project Windows Debug
+        if: matrix.os == 'windows-latest' and ${{ steps.check_debug.outputs.debug_version }} 
+        run: |
+          pip install tornado
+          pip install pywin32
+          pyinstaller -i icon.ico --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
+          cd windows
+          pyinstaller --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n install_shortcut
+        shell: bash 
+        
       # Build the project on ubuntu
       - name: Build project Ubuntu
         if: matrix.os == 'ubuntu-latest'
         run: |
           pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
-      - name: Ubuntu App
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-           mv ./dist/friendly_gt ./ubuntu/friendly_gt_ubuntu-latest
-           zip -r ./friendly_gt-ubuntu.zip ./ubuntu
       - name: Load Release URL File
         uses: actions/download-artifact@v1
         with:
           name: release_url
+        
       - name: Get Rlease File Name and Upload URL
         id: get_release_info
         shell: bash
         run: |
           value=`cat release_url/release_url.txt`
           echo ::set-output name=upload_url::$value
+      # PACKAGE
+      - name: Bundle Ubuntu App
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+           mv ./dist/friendly_gt ./ubuntu/friendly_gt_ubuntu-latest
+           zip -r ./friendly_gt-ubuntu.zip ./ubuntu
+           
+      - name: Package Windows Assets
+        if: matrix.os == 'windows-latest'
+        id: package-windows
+        run: |
+          New-Item -path "." -name "windows_app" -ItemType "directory"
+          Copy-Item  "dist\friendly_gt.exe" -Destination "windows_app\friendly_gt.exe" #cp ./dist/friendly_gt.exe ./windows
+          Copy-Item "windows\dist\install_shortcut.exe" -Destination "windows_app\install_shortcut.exe"
+          Compress-Archive -path ".\windows_app" -DestinationPath ".\friendly_gt-windows.zip"
+        shell: powershell
+        # Bundle and upload the macos app folder
+      - name: Bundle Mac OS App
+        if: matrix.os == 'macos-latest'
+        run: |
+          zip -r ./friendly_gt-macos-app.zip ./dist/friendly_gt.app
+          
+      # RELEASE
       - name: Upload Release Asset - Ubuntu
         if: matrix.os == 'ubuntu-latest'
         id: upload-release-asset-ubuntu
@@ -109,7 +147,7 @@ jobs:
           asset_path: ./friendly_gt-ubuntu.zip
           asset_name: friendly_gt-ubuntu.zip
           asset_content_type: application/zip
-
+        
       - name: Upload Release Asset - Mac
         if: matrix.os == 'macos-latest'
         id: upload-release-asset 
@@ -121,20 +159,7 @@ jobs:
           asset_path: ./dist/friendly_gt
           asset_name: friendly_gt_${{ matrix.os }}
           asset_content_type: application/octet-stream
-      # Upload the windows executables
-      - name: Package Windows Assets
-        if: matrix.os == 'windows-latest'
-        id: package-windows
-        run: |
-          New-Item -path "." -name "windows_app" -ItemType "directory"
-          Copy-Item  "dist\friendly_gt.exe" -Destination "windows_app\friendly_gt.exe" #cp ./dist/friendly_gt.exe ./windows
-          Copy-Item "windows\dist\install_shortcut.exe" -Destination "windows_app\install_shortcut.exe"
-          Compress-Archive -path ".\windows_app" -DestinationPath ".\friendly_gt-windows.zip" #zip -r ./friendly_gt-windows.zip ./windowsi
-          #mkdir windows_app 
-          #cp ./dist/friendly_gt.exe ./windows_app/friendly_gt.exe
-          #cp ./windows/dist/install_shortcut.exe ./windows_app/install_shortcut.exe
-          #7z a ./friendly_gt-windows ./windows_app/
-        shell: powershell
+      
       - name: Upload Release Asset - Windows
         if: matrix.os == 'windows-latest'
         id: upload-release-asset-win 
@@ -146,11 +171,7 @@ jobs:
           asset_path: ./friendly_gt-windows.zip
           asset_name: friendly_gt-windows.zip
           asset_content_type: application/zip
-      # Bundle and upload the macos app folder
-      - name: Bundle Mac OS App
-        if: matrix.os == 'macos-latest'
-        run: |
-          zip -r ./friendly_gt-macos-app.zip ./dist/friendly_gt.app
+      
       - name: Upload Mac Os App
         if: matrix.os == 'macos-latest'
         id: upload-release-asset-mac-app
