@@ -78,23 +78,19 @@ jobs:
           pyinstaller -i icon.icns --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
       # Build the windows binaries
       - name: Build project Windows
-        if: (matrix.os == 'windows-latest') && (${{ steps.check_debug.outputs.debug_version }} == 0)
+        if: matrix.os == 'windows-latest'
         run: |
           pip install tornado
           pip install pywin32
-          pyinstaller -i icon.ico --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
-          cd windows
-          pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n install_shortcut
-        shell: bash 
-        
-      - name: Build project Windows Debug
-        if: (matrix.os == 'windows-latest') && (${{ steps.check_debug.outputs.debug_version }} == 1)
-        run: |
-          pip install tornado
-          pip install pywin32
-          pyinstaller -i icon.ico --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
-          cd windows
-          pyinstaller --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n install_shortcut
+          if [ ${{ steps.check_debug.outputs.debug_version }} -eq 0 ]; then
+            pyinstaller -i icon.ico --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
+            cd windows
+            pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n install_shortcut
+          else
+            pyinstaller -i icon.ico --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
+            cd windows
+            pyinstaller --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n install_shortcut
+          fi
         shell: bash 
         
       # Build the project on ubuntu
