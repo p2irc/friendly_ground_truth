@@ -21,6 +21,15 @@ from tkinter import messagebox
 def exit():
     sys.exit(0)
 
+def copytree(src, dst, symlinks=False, ignore=None):
+     for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
+
 def install():
     folder = "./friendly_gt"
     EXE = "./friendly_gt/friendly_gt.exe"
@@ -38,8 +47,9 @@ def install():
         os.mkdir(tools)
 
 
-    shutil.copytree(folder, tools)
+    copytree(folder, tools)
 
+    program_path = os.path.join(tools, "friendly_gt", "friendly_gt.exe")
     path = "AppData\Roaming\Microsoft\Windows\Start Menu\Programs"
 
     path = os.path.join(home, path)
@@ -50,7 +60,7 @@ def install():
         sys.exit(0)
 
     path = os.path.join(path, "Friendly Ground Truth.lnk")
-    target = os.path.joun(tools, "friendly_gt", "friendly_gt.exe")
+    target = os.path.join(tools, "friendly_gt", "friendly_gt.exe")
     wDir = tools
     icon = program_path
 

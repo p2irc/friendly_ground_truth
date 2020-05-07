@@ -117,8 +117,8 @@ jobs:
         run: |
            #New-Item -path "." -name "windows_app" -ItemType "directory"
            #Copy-Item  "dist\friendly_gt.exe" -Destination "windows_app\friendly_gt.exe" #cp ./dist/friendly_gt.exe ./windows
-           Copy-Item "windows\dist\friendly_gt-installer.exe" -Destination "dist\install_shortcut.exe"
-           Compress-Archive -path ".\dist" -DestinationPath ".\friendly_gt-windows.zip"
+           Copy-Item "windows\dist\friendly_gt-installer.exe" -Destination "dist\friendly_gt_installer.exe"
+           Compress-Archive -path ".\dist\*" -DestinationPath ".\friendly_gt-windows.zip"
         shell: powershell
         # Bundle and upload the macos app folder
       - name: Bundle Mac OS App
