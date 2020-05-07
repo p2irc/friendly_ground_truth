@@ -1057,6 +1057,8 @@ class Controller:
             return
 
         self.undo_manager.add_to_redo_stack(patch, operation)
+        self.main_window.toolbar_buttons[self.main_window.ID_TOOL_REDO]\
+            .config(state="normal")
 
         self.image.patches[self.current_patch] = redo_patch
 
@@ -1072,6 +1074,9 @@ class Controller:
             return
 
         self.undo_manager.add_to_undo_stack(patch, operation)
+        if len(self.undo_manager.redo_stack) == 0:
+            self.main_window.toolbar_buttons[self.main_window.ID_TOOL_REDO]\
+                .config(state="disabled")
 
         self.image.patches[self.current_patch] = undo_patch
 

@@ -67,6 +67,8 @@ class MainWindow(Frame):
     ID_TOOL_ADD_BRANCH = 112
     ID_TOOL_REMOVE_LANDMARK = 113
     ID_ADJUST_TOOL = 114
+    ID_TOOL_UNDO = 115
+    ID_TOOL_REDO = 116
 
     MAX_SCALE = 16
     MIN_SCALE = 0.25
@@ -360,6 +362,7 @@ class MainWindow(Frame):
                                 command=self.controller.redo)
         redo_button.image = redo_img
         redo_button.pack(side=LEFT, padx=2, pady=2)
+        redo_button.config(state="disabled")
 
         CreateToolTip(redo_button, "Redo (CTRL+R)")
 
@@ -447,6 +450,8 @@ class MainWindow(Frame):
         # self.toolbar_buttons[self.ID_TOOL_ADD_BRANCH] = add_branch_button
         # self.toolbar_buttons[self.ID_TOOL_REMOVE_LANDMARK] = \
         #    remove_landmark_button
+        self.toolbar_buttons[self.ID_TOOL_UNDO] = undo_button
+        self.toolbar_buttons[self.ID_TOOL_REDO] = redo_button
 
         self.image_indicator = tk.Label(self.toolbar, text="No Image Loaded")
         self.image_indicator.pack(side=RIGHT, padx=2, pady=2)
@@ -1398,10 +1403,37 @@ class KeyboardShortcutDialog(tk.Toplevel):
 
         no_root_img_label = tk.Label(self.base, image=no_root_img)
         no_root_img_label.image = no_root_img
-        no_root_img_label.grid(row=2, column=6)
+        no_root_img_label.grid(row=1, column=6)
 
         no_root_label = tk.Label(self.base, text="No Root Tool (x)")
-        no_root_label.grid(row=2, column=7)
+        no_root_label.grid(row=1, column=7)
+
+        space_label = tk.Label(self.base, text="    ")
+        space_label.grid(row=2, column=5)
+
+        undo_img_data = Image.open(BytesIO(base64.b64decode(undo_icon)))
+        undo_img = itk.PhotoImage(undo_img_data)
+
+        undo_img_label = tk.Label(self.base, image=undo_img)
+        undo_img_label.image = undo_img
+        undo_img_label.grid(row=2, column=0)
+
+        undo_label = tk.Label(self.base, text="Undo (CTRL-Z)")
+        undo_label.grid(row=2, column=1)
+
+        space_label = tk.Label(self.base, text="    ")
+        space_label.grid(row=2, column=2)
+
+        redo_data = Image.open(BytesIO(base64.
+                               b64decode(redo_icon)))
+        redo_img = itk.PhotoImage(redo_data)
+
+        redo_img_label = tk.Label(self.base, image=redo_img)
+        redo_img_label.image = redo_img
+        redo_img_label.grid(row=2, column=3)
+
+        redo_label = tk.Label(self.base, text="Redo (CTRL-R)")
+        redo_label.grid(row=2, column=4)
 
         space_label = tk.Label(self.base, text="    ")
         space_label.grid(row=2, column=5)
@@ -1411,13 +1443,13 @@ class KeyboardShortcutDialog(tk.Toplevel):
 
         prev_img_label = tk.Label(self.base, image=prev_img)
         prev_img_label.image = prev_img
-        prev_img_label.grid(row=2, column=0)
+        prev_img_label.grid(row=3, column=0)
 
         prev_label = tk.Label(self.base, text="Previous Patch (Left-Arrow)")
-        prev_label.grid(row=2, column=1)
+        prev_label.grid(row=3, column=1)
 
         space_label = tk.Label(self.base, text="    ")
-        space_label.grid(row=2, column=2)
+        space_label.grid(row=3, column=2)
 
         next_patch_data = Image.open(BytesIO(base64.
                                      b64decode(next_patch_icon)))
@@ -1425,11 +1457,23 @@ class KeyboardShortcutDialog(tk.Toplevel):
 
         next_img_label = tk.Label(self.base, image=next_img)
         next_img_label.image = next_img
-        next_img_label.grid(row=2, column=3)
+        next_img_label.grid(row=3, column=3)
 
         next_label = tk.Label(self.base, text="Next Patch (Right-Arrow)")
-        next_label.grid(row=2, column=4)
+        next_label.grid(row=3, column=4)
 
+        pan_label = tk.Label(self.base, text="Pan (CTRL-Drag or click and drag"
+                             " mousewheel)")
+        pan_label.grid(row=4, column=1)
+
+        zoom_label = tk.Label(self.base, text="Zoom (CTRL +/- or scroll"
+                              " mousewheel)")
+
+        zoom_label.grid(row=4, column=4)
+
+        adjust_label = tk.Label(self.base, text="Adjust Tool (ALT +/- or ALT"
+                                " scroll mousewheel)")
+        adjust_label.grid(row=4, column=7)
         #  add_tip_data = Image.open(BytesIO(base64.b64decode(add_tip_icon)))
         #  add_tip_img = itk.PhotoImage(add_tip_data)
 
