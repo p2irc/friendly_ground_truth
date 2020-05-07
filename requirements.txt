@@ -23,7 +23,6 @@ pluggy==0.13.1
 py==1.8.1
 pycodestyle==2.5.0
 pyflakes==2.1.1
-PyInstaller==4.0.dev0+f877f3eb8a
 pyparsing==2.4.7
 pytest==5.4.1
 pytest-cov==2.8.1
