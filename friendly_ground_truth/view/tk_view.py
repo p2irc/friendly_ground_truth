@@ -67,6 +67,8 @@ class MainWindow(Frame):
     ID_TOOL_ADD_BRANCH = 112
     ID_TOOL_REMOVE_LANDMARK = 113
     ID_ADJUST_TOOL = 114
+    ID_TOOL_UNDO = 115
+    ID_TOOL_REDO = 116
 
     MAX_SCALE = 16
     MIN_SCALE = 0.25
@@ -360,6 +362,7 @@ class MainWindow(Frame):
                                 command=self.controller.redo)
         redo_button.image = redo_img
         redo_button.pack(side=LEFT, padx=2, pady=2)
+        redo_button.config(state="disabled")
 
         CreateToolTip(redo_button, "Redo (CTRL+R)")
 
@@ -447,6 +450,8 @@ class MainWindow(Frame):
         # self.toolbar_buttons[self.ID_TOOL_ADD_BRANCH] = add_branch_button
         # self.toolbar_buttons[self.ID_TOOL_REMOVE_LANDMARK] = \
         #    remove_landmark_button
+        self.toolbar_buttons[self.ID_TOOL_UNDO] = undo_button
+        self.toolbar_buttons[self.ID_TOOL_REDO] = redo_button
 
         self.image_indicator = tk.Label(self.toolbar, text="No Image Loaded")
         self.image_indicator.pack(side=RIGHT, padx=2, pady=2)
