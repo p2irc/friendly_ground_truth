@@ -119,7 +119,7 @@ jobs:
            #Copy-Item  "dist\friendly_gt.exe" -Destination "windows_app\friendly_gt.exe" #cp ./dist/friendly_gt.exe ./windows
            #Copy-Item "windows\dist\install_shortcut.exe" -Destination "windows_app\install_shortcut.exe"
            Compress-Archive -path ".\dist" -DestinationPath ".\friendly_gt-windows.zip"
-           shell: powershell
+        shell: powershell
         # Bundle and upload the macos app folder
       - name: Bundle Mac OS App
         if: matrix.os == 'macos-latest'
