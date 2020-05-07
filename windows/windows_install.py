@@ -13,6 +13,8 @@ import os
 import shutil
 import sys
 import tkinter as tk
+import requests
+
 from tkinter import messagebox
 
 
@@ -20,7 +22,8 @@ def exit():
     sys.exit(0)
 
 def install():
-    EXE = "./friendly_gt.exe"
+    folder = "./friendly_gt"
+    EXE = "./friendly_gt/friendly_gt.exe"
 
     if sys.platform != 'win32':
         sys.exit(0)
@@ -34,9 +37,8 @@ def install():
     if not os.path.exists(tools):
         os.mkdir(tools)
 
-    program_path = os.path.join(tools, 'friendly_gt.exe')
 
-    shutil.copy(EXE, program_path)
+    shutil.copytree(folder, tools)
 
     path = "AppData\Roaming\Microsoft\Windows\Start Menu\Programs"
 
@@ -48,7 +50,7 @@ def install():
         sys.exit(0)
 
     path = os.path.join(path, "Friendly Ground Truth.lnk")
-    target = program_path
+    target = os.path.joun(tools, "friendly_gt", "friendly_gt.exe")
     wDir = tools
     icon = program_path
 
@@ -63,16 +65,17 @@ def install():
 
     sys.exit(0)
 
+
 root = tk.Tk()
 
-label_text = "Would you like to install a\n start menu shortcut for Friendly Ground Truth?"
+label_text = "Would you like to install Friendly Ground Truth?"
 
 label = tk.Label(root, text=label_text)
 
 button_panel = tk.Frame(root)
 
 ok_button = tk.Button(button_panel, text="Yes", command=install)
-cancel_button = tk.Button(button_panel, text="Cancel", command=exit)
+cancel_button = tk.Button(button_panel, text="No", command=exit)
 
 ok_button.pack(side='right')
 cancel_button.pack(side='left')
