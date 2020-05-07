@@ -37,8 +37,8 @@ def install():
     if not os.path.exists(tools):
         os.mkdir(tools)
 
-
-    shutil.copytree(folder, tools)
+    destination = os.path.join(tools, "friendly_gt")
+    shutil.copytree(folder, destination)
 
     program_path = os.path.join(tools, "friendly_gt", "friendly_gt.exe")
     path = "AppData\Roaming\Microsoft\Windows\Start Menu\Programs"

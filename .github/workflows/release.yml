@@ -77,9 +77,9 @@ jobs:
           pip install tornado
           pip install pywin32
           if [ `echo ${{ github.ref }} | grep -c "d"` -eq 0 ]; then
-            pyinstaller -i icon.ico --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
-            #cd windows
-            #pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n install_shortcut
+            pyinstaller -i icon.ico --windowed --hidden-import='PIL._tkinter_finder' run.py -n friendly_gt
+            cd windows
+            pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n friendly_gt-installer
           else
             pyinstaller -i icon.ico --hidden-import='PIL._tkinter_finder' run.py -n friendly_gt
             cd windows
