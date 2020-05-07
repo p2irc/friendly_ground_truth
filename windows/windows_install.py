@@ -21,17 +21,8 @@ from tkinter import messagebox
 def exit():
     sys.exit(0)
 
-def copytree(src, dst, symlinks=False, ignore=None):
-     for item in os.listdir(src):
-        s = os.path.join(src, item)
-        d = os.path.join(dst, item)
-        if os.path.isdir(s):
-            shutil.copytree(s, d, symlinks, ignore)
-        else:
-            shutil.copy2(s, d)
-
 def install():
-    folder = "./friendly_gt"
+    folder = "./friendly_gt/"
     EXE = "./friendly_gt/friendly_gt.exe"
 
     if sys.platform != 'win32':
@@ -47,7 +38,7 @@ def install():
         os.mkdir(tools)
 
 
-    copytree(folder, tools)
+    shutil.copytree(folder, tools)
 
     program_path = os.path.join(tools, "friendly_gt", "friendly_gt.exe")
     path = "AppData\Roaming\Microsoft\Windows\Start Menu\Programs"
