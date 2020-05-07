@@ -1076,7 +1076,7 @@ class TestView():
 
         window.on_drag(event)
 
-        self.mock_controller.handle_motion.assert_called()
+        self.mock_controller.handle_mouse_wheel_motion.assert_called()
 
     def test_on_drag_ctrl(self, setup, mocker):
         """

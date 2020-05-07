@@ -113,6 +113,7 @@ class MainWindow(Frame):
 
         self.control_down = False
         self.alt_down = False
+        self.dragged = False
 
     def handle_focus(self, event):
         """
@@ -144,7 +145,7 @@ class MainWindow(Frame):
         elif platform == "win32":
             self.bind_all("<MouseWheel>", self.on_mousewheel)
 
-        self.bind_all("<B1-Motion>", self.on_drag)
+        self.canvas.bind("<B1-Motion>", self.on_drag)
 
         self.canvas.bind("<Button-1>", self.on_click)
         self.bind_all("<ButtonRelease-1>", self.on_click_release)
@@ -844,13 +845,14 @@ class MainWindow(Frame):
         :returns: none
         """
         state = event.state
-        ctrl = (state & 0x4) != 0
+        self.dragged = True
+        # ctrl = (state & 0x4) != 0
 
-        if not ctrl:
-            self.controller.handle_motion((event.x, event.y))
-        else:
-            self.canvas.config(cursor="hand2")
-            self.controller.handle_mouse_wheel_motion((event.x, event.y))
+        # if not ctrl:
+        #    self.controller.handle_motion((event.x, event.y))
+        # else:
+        self.canvas.config(cursor="hand2")
+        self.controller.handle_mouse_wheel_motion((event.x, event.y))
 
         self.previous_position = (event.x, event.y)
         self.on_motion(event)
@@ -931,8 +933,8 @@ class MainWindow(Frame):
 
         self.logger.debug("Click location: {}, {}".format(event.x, event.y))
 
-        if self.can_draw:
-            self.controller.handle_left_click((event.x, event.y))
+        #if self.can_draw:
+        #    self.controller.handle_left_click((event.x, event.y))
 
     def on_click_release(self, event):
         """
@@ -942,6 +944,11 @@ class MainWindow(Frame):
         :returns: None
         """
         self.on_enter_canvas(None)
+
+        if self.can_draw and not self.dragged:
+            self.controller.handle_left_click((event.x, event.y))
+
+        self.dragged = False
 
     def on_right_click(self, event):
         """
