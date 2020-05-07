@@ -507,7 +507,6 @@ class MainWindow(Frame):
 
         key = event.char
         s = event.state
-        print(key, s)
         ctrl = (s & 0x4) != 0
         alt = (s & 0x8) != 0 or (s & 0x80) != 0
         shift = (s & 0x1) != 0
@@ -522,7 +521,6 @@ class MainWindow(Frame):
             self.control_down = True
             key = 'ctrl+' + key
 
-        print(self.alt_down)
 
         if self.control_down:
             key = event.keysym
@@ -1575,9 +1573,7 @@ class AnnotationPreview(tk.Toplevel):
         canvas_w = self.canvas_size[1]
 
         size = (canvas_w, canvas_h)
-        print(size)
         image = image.resize(size)
-        print(image.size)
         self.display_img = itk.PhotoImage(image=image)
 
         x, y = 0, 0  # self.image_x, self.image_y
