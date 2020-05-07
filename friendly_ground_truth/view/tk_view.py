@@ -1467,8 +1467,8 @@ class KeyboardShortcutDialog(tk.Toplevel):
         next_label = tk.Label(self.base, text="Next Patch (Right-Arrow)")
         next_label.grid(row=3, column=4)
 
-        pan_label = tk.Label(self.base, text="Pan (CTRL-Drag or click and drag"
-                             " mousewheel)")
+        pan_label = tk.Label(self.base, text="Pan (Left click and drag or"
+                                             " click  and drag mousewheel)")
         pan_label.grid(row=4, column=1)
 
         zoom_label = tk.Label(self.base, text="Zoom (CTRL +/- or scroll"
