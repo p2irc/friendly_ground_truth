@@ -13,7 +13,6 @@ import os
 import shutil
 import sys
 import tkinter as tk
-import requests
 
 from tkinter import messagebox
 
@@ -21,9 +20,9 @@ from tkinter import messagebox
 def exit():
     sys.exit(0)
 
+
 def install():
     folder = "./friendly_gt/"
-    EXE = "./friendly_gt/friendly_gt.exe"
 
     if sys.platform != 'win32':
         sys.exit(0)
@@ -85,5 +84,3 @@ label.pack()
 button_panel.pack(fill='both')
 
 root.mainloop()
-
-

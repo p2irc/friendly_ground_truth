@@ -10,7 +10,6 @@ Description: The entry point for the application
 """
 
 from tkinter import Tk
-import tkinter as tk
 from PIL import ImageTk as itk
 from PIL import Image
 from io import BytesIO
@@ -18,10 +17,7 @@ from io import BytesIO
 import logging
 import sys
 import base64
-import os
-import shutil
 
-from tkinter import messagebox
 
 from friendly_ground_truth.controller.controller import Controller
 from friendly_ground_truth.view.icons.icon_strings import fgt_favicon
