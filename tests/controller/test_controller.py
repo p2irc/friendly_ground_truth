@@ -2994,7 +2994,9 @@ class TestController:
         """
         master = MagicMock()
         controller = Controller(master)
-
+        controller.main_window.toolbar_buttons = {controller.
+                                                  main_window.ID_TOOL_REDO:
+                                                  MagicMock()}
         controller.current_patch = 0
 
         mock_patch = MagicMock()
@@ -3038,7 +3040,9 @@ class TestController:
         controller = Controller(master)
 
         controller.current_patch = 0
-
+        controller.main_window.toolbar_buttons = {controller.
+                                                  main_window.ID_TOOL_REDO:
+                                                  MagicMock()}
         mock_patch = MagicMock()
         mock_patch.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
         mock_patch.patch_index = (2, 2)
@@ -3065,6 +3069,40 @@ class TestController:
         undo_manager.redo.assert_called()
         undo_manager.add_to_undo_stack.assert_called_with(mock_patch, 'test')
         assert controller.image.patches[0] == mock_patch2
+
+    def test_disable_redo_button(self, setup, mocker,
+                                 display_current_patch_mock):
+
+        master = MagicMock()
+        controller = Controller(master)
+
+        controller.current_patch = 0
+        controller.main_window.toolbar_buttons = {controller.
+                                                  main_window.ID_TOOL_REDO:
+                                                  MagicMock()}
+        mock_patch = MagicMock()
+        mock_patch.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch.patch_index = (2, 2)
+
+        mock_patch2 = MagicMock()
+        mock_patch2.overlay_image = np.ones((10, 10, 3), dtype=np.uint8)
+        mock_patch2.patch_index = (2, 2)
+
+        mock_image = MagicMock()
+        mock_image.NUM_PATCHES = 3
+        patches_mock = PropertyMock(return_value=[mock_patch])
+
+        type(mock_image).patches = patches_mock
+
+        controller.image = mock_image
+
+        spy = mocker.spy(controller.undo_manager, 'redo')
+
+        controller.undo_manager.redo_stack = [(MagicMock(), "test"),
+                                              (MagicMock(), "test")]
+
+        controller.redo()
+        spy.assert_called()
 
     def test_undo_none(self, setup, display_current_patch_mock):
         """
