@@ -104,6 +104,7 @@ class Controller:
         # Remember chosen directories
         self.last_load_dir = None
         self.last_save_dir = None
+        self.image = None
 
     def load_new_image(self):
         """
@@ -234,6 +235,8 @@ class Controller:
 
         :returns: None
         """
+        if self.image is None:
+            return
 
         patch = self.image.patches[self.current_patch]
         img = self.get_context_patches(patch)
