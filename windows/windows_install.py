@@ -30,7 +30,19 @@ EXE_NAME = "friendly_gt.exe"
 START_MENU = r"AppData\Roaming\Microsoft\Windows\Start Menu\Programs"
 START_MENU_PATH = os.path.join(HOME, START_MENU)
 
-DESKTOP_PATH = os.path.join(HOME, "Desktop")
+if sys.platform == 'win32':
+    from win32com.shell import shell, shellcon
+
+    try:
+        desktop = shell.SHGetFolderPath(0, shellcon.CSIDL_DESKTOP, 0, 0)
+
+        if not os.path.exists(desktop):
+            DESKTOP_PATH = os.path.join(HOME, "Desktop")
+        else:
+            DESKTOP_PATH = desktop
+    except Exception:
+        print("Could not get system desktop folder")
+        DESKTOP_PATH = os.path.join(HOME, "Desktop")
 
 LINK_NAME = "Friendly Ground Truth"
 
