@@ -109,7 +109,9 @@ jobs:
         run: |
            mv ./dist/friendly_gt ./ubuntu/friendly_gt_ubuntu-latest
            mv ./ubuntu ./friendly_gt_ubuntu
-           zip -r ./friendly_gt-ubuntu.zip ./friendly_gt_ubuntu
+           cp ./doc/changelog.txt ./friendly_gt_ubuntu/changelog.txt
+           cp ./README.md ./friendly_gt_ubuntu/README.md
+           zip -r ./friendly_gt-ubuntu-${{ github.ref }}.zip ./friendly_gt_ubuntu
            
       - name: Package Windows Assets
         if: matrix.os == 'windows-latest'
@@ -118,7 +120,9 @@ jobs:
            #New-Item -path "." -name "windows_app" -ItemType "directory"
            #Copy-Item  "dist\friendly_gt.exe" -Destination "windows_app\friendly_gt.exe" #cp ./dist/friendly_gt.exe ./windows
            Copy-Item "windows\dist\friendly_gt-installer.exe" -Destination "dist\friendly_gt_installer.exe"
-           Compress-Archive -path ".\dist\*" -DestinationPath ".\friendly_gt-windows.zip"
+           Copy-Item "doc\changelog.txt" -Destination "dist\changelog.txt"
+           Copy-Item "README.md" -Destination "dist\README.md"
+           Compress-Archive -path ".\dist\*" -DestinationPath ".\friendly_gt-windows-${{ github.ref }}.zip"
         shell: powershell
         # Bundle and upload the macos app folder
       - name: Bundle Mac OS App
