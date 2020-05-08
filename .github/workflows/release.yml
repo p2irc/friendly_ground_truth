@@ -64,7 +64,7 @@ jobs:
           pip install pyinstaller
       - name: Get Version
         id: get_version
-        run: echo ::set-output name=VERSION::${{ github.ref/refs\/tags\// }}        
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}       
       # BUILD
       # Build the mac binaries
       - name: Build project Mac
