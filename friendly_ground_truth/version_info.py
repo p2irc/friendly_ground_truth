@@ -21,7 +21,7 @@ class VersionInfo():
     def __init__(self):
         self.VERSION_MAJOR = 0
         self.VERSION_MINOR = 7
-        self.VERSION_PATCH = 4
+        self.VERSION_PATCH = 5
 
     def get_version_string(self):
         return "v" + str(self.VERSION_MAJOR) + '.' +\
