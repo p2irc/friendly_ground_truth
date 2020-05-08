@@ -97,6 +97,8 @@ class InstallDialog(tk.Frame):
         return install_dir
 
     def copy_install_files(self, install_dir):
+        if not os.path.exists(install_dir):
+            os.mkdir(install_dir)
 
         self.start_progressbar(len(os.listdir(FGT_FOLDER)))
         for item in os.listdir(FGT_FOLDER):
