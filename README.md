@@ -73,3 +73,29 @@ A user manual can be found [in the wiki](https://github.com/KyleS22/friendly_gro
 Please report any software bugs on the [issues page](https://github.com/KyleS22/friendly_ground_truth/issues).
 
 Thanks in advance for helping out!
+
+# Development
+Detailed information about development for this application can be found on the [Wiki](https://github.com/KyleS22/friendly_ground_truth/wiki)
+
+## Basic Setup
+This application is developed using python3 and virtualenv.  Dependencies are found in `requirements.txt`.  To get started:
+
+```
+python -m venv env
+source ./venv/bin/activate
+pip install -r requirements.txt
+``` 
+
+The main entrypoint for the application is `run.py`.  To run it, simply do `python run.py -debug`.  The `-debug` flag is optional and enables logging.
+
+## Tests
+Tests have been developed using pytest, with the mocker and coverage modules.  All tests can be found in the `tests/` directory.  To run tests, make sure you are in the main repository folder:
+
+```
+pytest --cov=friendly_ground_truth ./tests --cov-branch --cov-report=term-missing
+
+```
+
+This will run all tests and print a coverage report specifying any missed lines.  A coverage check is run as part of all pull-requests.
+
+Please refer to the [Wiki](https://github.com/KyleS22/friendly_ground_truth/wiki) for more details about the development process.
