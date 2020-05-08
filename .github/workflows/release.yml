@@ -16,7 +16,7 @@ jobs:
       - name: Get Release Notes
         id: get_release_notes
         run: |
-          cd doc
+          cd docs
           bash generate_release_changes.sh
           value=`cat changes.txt`
           value="${value//'%'/'%25'}"
@@ -111,7 +111,7 @@ jobs:
         run: |
            mv ./dist/friendly_gt ./ubuntu/friendly_gt_ubuntu-latest
            mv ./ubuntu ./friendly_gt_ubuntu
-           cp ./doc/changelog.txt ./friendly_gt_ubuntu/changelog.txt
+           cp ./docs/changelog.txt ./friendly_gt_ubuntu/changelog.txt
            cp ./README.md ./friendly_gt_ubuntu/README.md
            zip -r ./friendly_gt-ubuntu.zip ./friendly_gt_ubuntu
            
@@ -122,7 +122,7 @@ jobs:
            #New-Item -path "." -name "windows_app" -ItemType "directory"
            #Copy-Item  "dist\friendly_gt.exe" -Destination "windows_app\friendly_gt.exe" #cp ./dist/friendly_gt.exe ./windows
            Copy-Item "windows\dist\friendly_gt-installer.exe" -Destination "dist\friendly_gt_installer.exe"
-           Copy-Item "doc\changelog.txt" -Destination "dist\changelog.txt"
+           Copy-Item "docs\changelog.txt" -Destination "dist\changelog.txt"
            Copy-Item "README.md" -Destination "dist\README.md"
            Compress-Archive -path ".\dist\*" -DestinationPath ".\friendly_gt-windows.zip"
         shell: powershell
