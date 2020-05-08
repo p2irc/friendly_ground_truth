@@ -160,8 +160,8 @@ class MainWindow(Frame):
         self.bind_all("<Left>", self.on_left)
         self.bind_all("<Right>", self.on_right)
         self.bind_all("<KeyRelease-Control_L>", self.on_control_release)
-        self.bind_all("<Alt-equal>", self.on_key_increase_tool)
-        self.bind_all("<Alt-minus>", self.on_key_decrease_tool)
+        #self.bind_all("<Alt-equal>", self.on_key_increase_tool)
+        # self.bind_all("<Alt-minus>", self.on_key_decrease_tool)
 
     def on_key_increase_tool(self, event):
         self.controller.change_secondary_mode(self.ID_ADJUST_TOOL)
@@ -530,17 +530,12 @@ class MainWindow(Frame):
                 self.controller.undo()
             elif key == 'r':
                 self.controller.redo()
-            elif key == 'equal':
-                x = self.previous_position[0]
-                y = self.previous_position[1]
-
-                self.controller.handle_zoom(1, x, y)
+            elif key == 'equal' or key == "plus":
+                self.on_key_increase_tool(None)
 
             elif key == 'minus':
-                x = self.previous_position[0]
-                y = self.previous_position[1]
+                self.on_key_decrease_tool(None)
 
-                self.controller.handle_zoom(-1, x, y)
         else:
             if key == 'x':
                 self.on_no_root_tool()
@@ -559,6 +554,18 @@ class MainWindow(Frame):
 
             elif key == "l":
                 self.on_flood_remove_tool()
+
+            elif key == '=' or key =="+":
+                x = self.previous_position[0]
+                y = self.previous_position[1]
+
+                self.controller.handle_zoom(1, x, y)
+
+            elif key == '-':
+                x = self.previous_position[0]
+                y = self.previous_position[1]
+
+                self.controller.handle_zoom(-1, x, y)
 
             # elif key == "c":
             #    self.on_add_cross_tool()
@@ -829,9 +836,10 @@ class MainWindow(Frame):
         self.previous_position = event.x, event.y
         s = event.state
 
-        alt = (s & 0x8) != 0 or (s & 0x80) != 0
+        #alt = (s & 0x8) != 0 or (s & 0x80) != 0
+        ctrl = (s & 0x4) != 0
 
-        if alt:
+        if ctrl:
             self.controller.change_secondary_mode(self.ID_ADJUST_TOOL)
 
         self.controller.handle_mouse_wheel(rotation, event.x, event.y)
@@ -1471,12 +1479,12 @@ class KeyboardShortcutDialog(tk.Toplevel):
                                              " click  and drag mousewheel)")
         pan_label.grid(row=4, column=1)
 
-        zoom_label = tk.Label(self.base, text="Zoom (CTRL +/- or scroll"
+        zoom_label = tk.Label(self.base, text="Zoom (+/- or scroll"
                               " mousewheel)")
 
         zoom_label.grid(row=4, column=4)
 
-        adjust_label = tk.Label(self.base, text="Adjust Tool (ALT +/- or ALT"
+        adjust_label = tk.Label(self.base, text="Adjust Tool (CTRL +/- or CTRL"
                                 " scroll mousewheel)")
         adjust_label.grid(row=4, column=7)
         #  add_tip_data = Image.open(BytesIO(base64.b64decode(add_tip_icon)))
