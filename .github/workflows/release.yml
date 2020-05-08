@@ -62,7 +62,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
-        
+      - name: Get Version
+        id: get_version
+        run: echo ::set-output name=VERSION::${{ github.ref/refs\/tags\// }}        
       # BUILD
       # Build the mac binaries
       - name: Build project Mac
@@ -111,7 +113,7 @@ jobs:
            mv ./ubuntu ./friendly_gt_ubuntu
            cp ./doc/changelog.txt ./friendly_gt_ubuntu/changelog.txt
            cp ./README.md ./friendly_gt_ubuntu/README.md
-           zip -r ./friendly_gt-ubuntu-${{ github.ref }}.zip ./friendly_gt_ubuntu
+           zip -r ./friendly_gt-ubuntu-${{ steps.get_version.outputs.VERSION }}.zip ./friendly_gt_ubuntu
            
       - name: Package Windows Assets
         if: matrix.os == 'windows-latest'
@@ -122,7 +124,7 @@ jobs:
            Copy-Item "windows\dist\friendly_gt-installer.exe" -Destination "dist\friendly_gt_installer.exe"
            Copy-Item "doc\changelog.txt" -Destination "dist\changelog.txt"
            Copy-Item "README.md" -Destination "dist\README.md"
-           Compress-Archive -path ".\dist\*" -DestinationPath ".\friendly_gt-windows-${{ github.ref }}.zip"
+           Compress-Archive -path ".\dist\*" -DestinationPath ".\friendly_gt-windows-${{ steps.get_version.outputs.VERSION }}.zip"
         shell: powershell
         # Bundle and upload the macos app folder
       - name: Bundle Mac OS App
