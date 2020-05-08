@@ -1,0 +1,1803 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>friendly_ground_truth.model.model API documentation</title>
+<meta name="description" content="File Name: model.py …" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>friendly_ground_truth.model.model</code></h1>
+</header>
+<section id="section-intro">
+<p>File Name: model.py</p>
+<p>Authors: Kyle Seidenthal</p>
+<p>Date: 20-02-2020</p>
+<p>Description: Contains the model elements for the application</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+File Name: model.py
+
+Authors: Kyle Seidenthal
+
+Date: 20-02-2020
+
+Description: Contains the model elements for the application
+
+&#34;&#34;&#34;
+import logging
+import numpy as np
+import os
+
+from skimage import io, img_as_float, img_as_uint, img_as_ubyte
+from skimage.util.shape import view_as_blocks
+from skimage.filters import threshold_otsu
+from skimage import color
+from skimage.draw import circle
+
+
+module_logger = logging.getLogger(&#39;friendly_gt.model&#39;)
+
+
+class Image():
+    &#34;&#34;&#34;
+    Represents a loaded image
+    &#34;&#34;&#34;
+
+    BG_LABEL = 0
+    TIP_LABEL = 1
+    BRANCH_LABEL = 2
+    CROSS_LABEL = 3
+
+    NUM_PATCHES = 10
+
+    def __init__(self, path, progress_update_func=None):
+        &#34;&#34;&#34;
+        Initialize an image object
+
+        :param path: The path to the image to load
+        :returns: None
+        &#34;&#34;&#34;
+        self.logger = logging.getLogger(&#39;friendly_gt.model.Image&#39;)
+
+        self.path = path
+        self.num_patches = self.NUM_PATCHES
+        self.image = self.load_image(path)
+        self.mask = np.zeros(self.image.shape, dtype=bool)  # create empty mask
+        self.patches = self.create_patches(self.image, self.num_patches,
+                                           progress_update_func)
+        self.create_mask()
+
+    def load_image(self, path):
+        &#34;&#34;&#34;
+        Loads an image into a numpy array
+
+        :param path: The path to the image to load
+        :returns: An image in the form of a numpy array
+        :raises: FileNotFoundError if the image does not exist
+        &#34;&#34;&#34;
+
+        self.logger.debug(&#34;Loading image&#34;)
+        img = io.imread(path)
+        img = color.rgb2gray(img)
+        img = img_as_float(img)
+
+        return img
+
+    def create_patches(self, image, num_patches, progress_update_func=None):
+        &#34;&#34;&#34;
+        Create a list of patches from the image
+
+        :param image: The image to create patches from
+        :param num_patches: The number of patches to create ALONG ONE DIMENSION
+        :param progress_update_func: A function to update a visual progressbar
+        :returns: A list of patches made from the image
+        :raises: ValueError if the image is not a  single channel image
+        &#34;&#34;&#34;
+
+        if num_patches &lt;= 0:
+            raise ValueError(&#34;num_patches must be a positive non-zero&#34;
+                             &#34; integer.&#34;)
+
+        if type(image) is not np.ndarray:
+            raise ValueError(&#34;image must be of type np.ndarray&#34;)
+
+        if len(image.shape) != 2:
+            raise ValueError(&#34;image must be a single channel image&#34;)
+
+        self.logger.debug(&#34;Creating patches&#34;)
+
+        # Determine padding so we can use non-overlapping patches
+        pad_x = (0, 0)
+        pad_y = (0, 0)
+
+        self.logger.debug(image.shape)
+
+        if image.shape[0] % num_patches != 0:
+            pad_x = (0, (num_patches - (image.shape[0] % num_patches)))
+
+        if image.shape[1] % num_patches != 0:
+            pad_y = (0, (num_patches - (image.shape[1] % num_patches)))
+
+        image = np.pad(image, (pad_x, pad_y), &#39;constant&#39;,
+                       constant_values=(0, 0))
+
+        self.padded_shape = image.shape
+        # Get the size of each block
+        block_size = (image.shape[0]//num_patches,
+                      image.shape[1]//num_patches)
+
+        self.logger.debug(image.shape)
+        self.logger.debug(block_size)
+
+        # Make the blocks
+        blocks = view_as_blocks(image, block_shape=block_size)
+
+        self.logger.debug(blocks.shape)
+
+        patches = []
+
+        # Create a list of new patch objects for viewing
+        for i in range(num_patches):
+            for j in range(num_patches):
+                patch_data = blocks[i, j]
+                patches.append(Patch(patch_data, (i, j)))
+
+                if progress_update_func is not None:
+                    progress_update_func()
+
+        return patches
+
+    def create_mask(self):
+        &#34;&#34;&#34;
+        Take the masks from all the patches and combine them into the mask
+        for the whole image
+
+        :returns: None
+        &#34;&#34;&#34;
+
+        mask = np.zeros(self.padded_shape, dtype=bool)
+
+        col_num = 0
+        row_num = 0
+
+        for patch in self.patches:
+
+            r, c = patch.patch_index
+            r = r * patch.patch.shape[0]
+            c = c * patch.patch.shape[1]
+            mask[r:r+patch.patch.shape[0],
+                 c:c+patch.patch.shape[1]] += patch.mask
+
+            col_num += 1
+
+            if col_num == self.num_patches:
+                col_num = 0
+                row_num += 1
+
+        self.mask = mask[:self.image.shape[0], :self.image.shape[1]]
+
+    def create_labelling(self):
+        &#34;&#34;&#34;
+        Take the labellings from all patches and combine them into one matrix
+
+        :returns: None
+        &#34;&#34;&#34;
+
+        labels = np.zeros(self.padded_shape, dtype=np.uint8)
+
+        col_num = 0
+        row_num = 0
+
+        for patch in self.patches:
+
+            r, c = patch.patch_index
+            r = r * patch.patch.shape[0]
+            c = c * patch.patch.shape[1]
+            labels[r:r+patch.patch.shape[0],
+                   c:c+patch.patch.shape[1]] += patch.landmark_labels
+
+            col_num += 1
+
+            if col_num == self.num_patches:
+                col_num = 0
+                row_num += 1
+
+        self.landmark_matrix = labels[:self.image.shape[0],
+                                      :self.image.shape[1]]
+
+    def export_mask(self, pathname):
+        &#34;&#34;&#34;
+        Export the patch masks as a whole image mask
+
+        :param pathname: The path to the mask image file
+        :returns: None
+        &#34;&#34;&#34;
+        self.create_mask()
+
+        backup_path = os.path.splitext(pathname)[0]
+        backup_path += &#34;_bak.png&#34;
+        io.imsave(backup_path, img_as_uint(self.mask))
+
+        self.remove_small_components()
+        io.imsave(pathname, img_as_uint(self.mask))
+
+    def export_labels(self, pathname):
+        &#34;&#34;&#34;
+        Export the labelling matrix
+
+        :param pathname: The path to the labelling matrix file
+        :returns: None
+        &#34;&#34;&#34;
+
+        self.create_labelling()
+
+        np.save(pathname, self.landmark_matrix)
+
+    def remove_small_components(self):
+        &#34;&#34;&#34;
+        Remove components that are not connected to the main root
+
+        :returns: None
+        &#34;&#34;&#34;
+        from skimage.measure import label
+
+        labels = label(self.mask)
+        largestCC = labels == np.argmax(np.bincount(labels.flat)[1:])+1
+        self.mask = largestCC
+
+
+class Patch():
+    &#34;&#34;&#34;
+    Represents an image patch
+    &#34;&#34;&#34;
+
+    def __init__(self, patch, patch_index):
+        &#34;&#34;&#34;
+        Create a patch object
+
+        :param patch: The image patch to use
+        :returns: None
+        &#34;&#34;&#34;
+
+        # The max number of components to consider before determining that
+        # this patch has no roots in it
+        self.MAX_COMPONENTS = 500
+
+        # Whether or not to display this patch to the user
+        self.display = True
+
+        self.logger = logging.getLogger(&#39;friendly_gt.model.Patch&#39;)
+        self.patch = patch
+        self.mask = np.zeros(self.patch.shape, dtype=bool)  # create empty mask
+        self.landmark_labels = np.zeros(self.patch.shape, dtype=np.uint8)
+
+        self.patch_index = patch_index
+
+        try:
+            self.thresh = threshold_otsu(self.patch)
+        except ValueError:
+            self.thresh = 1
+
+        self.apply_threshold(self.thresh)
+
+        self.check_displayable()
+
+        self.overlay_image = None
+        self.overlay_mask()
+
+        self.old_flood_add_tolerance = 100
+        self.old_flood_add_position = None
+
+        self.old_flood_remove_position = None
+        self.old_flood_remove_tolerance = 100
+
+    def apply_threshold(self, value):
+        &#34;&#34;&#34;
+        Apply a threshold to the patch mask
+
+        :param value: The pixel value (floating point) to use as a threshold
+        :returns: None
+        :postcondition: The patch mask will be updated with the new threshold
+        :raises: ValueError if the value is not between 0 and 1
+        &#34;&#34;&#34;
+
+        if value &gt; 1 or value &lt; 0:
+            raise ValueError(&#34;Threshold values must be between 0 and 1&#34;)
+
+        binary = self.patch &gt; value
+        self.mask = binary
+
+    def overlay_mask(self):
+        &#34;&#34;&#34;
+        Overlay the current patch mask on the patch image
+
+        :returns: None
+        :postcondition: The overlay property will contain the image with the
+                        binary mask on top.
+        &#34;&#34;&#34;
+
+        labeling = np.copy(self.landmark_labels)
+        labeling += self.mask
+
+        c1 = &#39;red&#39;
+        c2 = &#39;green&#39;
+        c3 = &#39;orange&#39;
+        c4 = &#39;blue&#39;
+
+        colours = []
+        unique_labels = np.unique(labeling)
+
+        mapping = [(1, c1), (2, c2), (3, c3), (4, c4)]
+
+        for m in mapping:
+            if m[0] in unique_labels:
+                colours.append(m[1])
+
+        if len(colours) &lt;= 0:
+            colours = [&#39;purple&#39;]
+
+        color_mask = color.label2rgb(labeling, image=self.patch,
+                                     colors=colours, bg_label=0)
+
+        self.overlay_image = img_as_ubyte(color_mask)
+
+    def clear_mask(self):
+        &#34;&#34;&#34;
+        Set the mask for this patch to be empty (all 0&#39;s)
+
+        :returns: None
+        :postcondition: The mask property will contain all 0&#39;s
+        &#34;&#34;&#34;
+
+        self.mask = np.zeros(self.patch.shape, dtype=bool)
+        self.thresh = 1
+
+    def add_landmark(self, position, radius, label):
+        &#34;&#34;&#34;
+        Label an area with the given label
+
+        :param position: The position to add to the labelling
+        :param radius: The radius
+        :param label: The class label for the pixels to be given
+        :returns: None
+        &#34;&#34;&#34;
+        rr, cc = self.get_circle(position, radius)
+
+        self.landmark_labels[rr, cc] = label
+
+        self.landmark_labels[self.mask == 0] = 0
+
+        self.overlay_mask()
+
+    def remove_landmark(self, position, radius):
+        &#34;&#34;&#34;
+        Un-label (label as 0) the pixels in the given region
+
+        :param position: The position to un-label
+        :param radius: The radius to un-label pixels in
+        :returns: None
+        &#34;&#34;&#34;
+
+        rr, cc = self.get_circle(position, radius)
+
+        self.landmark_labels[rr, cc] = 0
+
+        self.overlay_mask()
+
+    def add_region(self, position, radius):
+        &#34;&#34;&#34;
+        Add a circular region to the mask at the given position
+
+        :param position: The position in the mask to add the region
+        :param radius: The radius of the region to add
+        :returns: None
+        :postcondition: The circular region in the mask will be set to 1&#39;s
+        &#34;&#34;&#34;
+        self.logger.debug(&#34;Add Region Position {}&#34;.format(position))
+        rr, cc = self.get_circle(position, radius)
+
+        self.mask[rr, cc] = 1
+
+        self.overlay_mask()
+
+    def remove_region(self, position, radius):
+        &#34;&#34;&#34;
+        Remove a circular region from the mask at the given position
+
+        :param position: The position in the mask to remove the region
+        :param radius: The radius of the region to remove
+        :returns: None
+        :postcondition: The region in the mask will be set to 0&#39;s
+        &#34;&#34;&#34;
+
+        rr, cc = self.get_circle(position, radius)
+
+        self.mask[rr, cc] = 0
+
+        self.overlay_mask()
+
+    def flood_add_region(self, position, tolerance):
+        &#34;&#34;&#34;
+        Add to the current mask a flood region at the given position with the
+        given tolerance
+
+        :param position: The position to start the flood fill
+        :param tolerance: The tolerance for pixels to be included
+        :returns: None
+        &#34;&#34;&#34;
+        self.logger.debug(&#34;Flood Position: {}&#34;.format(position))
+        self.logger.debug(&#34;Flood Tolerance: {}&#34;.format(tolerance))
+
+        self.logger.debug(&#34;Mask Shape {}&#34;.format(self.mask.shape))
+        self.logger.debug(&#34;Patch Shape {}&#34;.format(self.patch.shape))
+
+        from skimage.segmentation import flood
+
+        position = int(position[1]), int(position[0])
+
+        # If we are still editing the tolerance, we need to go back to the old
+        # mask
+        if position == self.old_flood_add_position:
+            self.logger.debug(&#34;Reverting mask &#34;)
+            self.mask = np.copy(self.old_mask)
+        else:
+            self.logger.debug(&#34;Storing old mask&#34;)
+            self.old_mask = np.copy(self.mask)
+
+        add_mask = flood(self.patch, position, tolerance=tolerance)
+
+        self.mask += add_mask
+
+        self.overlay_mask()
+
+        self.old_flood_add_tolerance = tolerance
+        self.old_flood_add_position = position
+
+    def flood_remove_region(self, position, tolerance):
+        &#34;&#34;&#34;
+        Remove from the current mask a flood region at the given position with
+        the given tolerance
+
+        :param position: The position to start the flood fill
+        :param tolerance: The tolerance for pixels to be included
+        :returns: None
+        &#34;&#34;&#34;
+
+        from skimage.segmentation import flood
+
+        position = int(position[1]), int(position[0])
+
+        # If we are still editing the tolerance, we need to go back to the old
+        # mask
+        if position == self.old_flood_remove_position:
+            self.logger.debug(&#34;Reverting mask &#34;)
+            self.mask = np.copy(self.old_mask)
+        else:
+            self.logger.debug(&#34;Storing old mask&#34;)
+            self.old_mask = np.copy(self.mask)
+
+        remove_mask = flood(self.patch, position, tolerance=tolerance)
+
+        self.mask[remove_mask] = 0
+
+        self.overlay_mask()
+
+        self.old_flood_remove_tolerance = tolerance
+        self.old_flood_remove_position = position
+
+    def check_displayable(self):
+        &#34;&#34;&#34;
+        Set patches as non-displayable if they are not likely to contain roots
+
+        :returns: None
+        &#34;&#34;&#34;
+
+        # Turns out this is causing more trouble than it is worth right now
+
+        self.display = True
+
+    def get_circle(self, position, radius):
+        &#34;&#34;&#34;
+        Create a cicular region that does not allow negative values
+
+        :param position: (x, y) coordinates
+        :param radius: The radius of the circle
+        :returns: Two lists, rr and cc that represent points of the circle
+        &#34;&#34;&#34;
+        # Note that the coordinates are automatically flipped to adhere to
+        # skimage indexing
+        rr, cc = circle(position[1], position[0], radius)
+
+        zipped = zip(rr, cc)
+
+        fixed_pairs = []
+
+        for pair in zipped:
+            if (pair[0] &gt;= 0 and pair[1] &gt;= 0 and pair[0] &lt; self.mask.shape[0]
+                    and pair[1] &lt; self.mask.shape[1]):
+                fixed_pairs.append(pair)
+
+        rr = []
+        cc = []
+
+        for p in fixed_pairs:
+            rr.append(p[0])
+            cc.append(p[1])
+
+        return rr, cc</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="friendly_ground_truth.model.model.Image"><code class="flex name class">
+<span>class <span class="ident">Image</span></span>
+<span>(</span><span>path, progress_update_func=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents a loaded image</p>
+<p>Initialize an image object</p>
+<p>:param path: The path to the image to load
+:returns: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Image():
+    &#34;&#34;&#34;
+    Represents a loaded image
+    &#34;&#34;&#34;
+
+    BG_LABEL = 0
+    TIP_LABEL = 1
+    BRANCH_LABEL = 2
+    CROSS_LABEL = 3
+
+    NUM_PATCHES = 10
+
+    def __init__(self, path, progress_update_func=None):
+        &#34;&#34;&#34;
+        Initialize an image object
+
+        :param path: The path to the image to load
+        :returns: None
+        &#34;&#34;&#34;
+        self.logger = logging.getLogger(&#39;friendly_gt.model.Image&#39;)
+
+        self.path = path
+        self.num_patches = self.NUM_PATCHES
+        self.image = self.load_image(path)
+        self.mask = np.zeros(self.image.shape, dtype=bool)  # create empty mask
+        self.patches = self.create_patches(self.image, self.num_patches,
+                                           progress_update_func)
+        self.create_mask()
+
+    def load_image(self, path):
+        &#34;&#34;&#34;
+        Loads an image into a numpy array
+
+        :param path: The path to the image to load
+        :returns: An image in the form of a numpy array
+        :raises: FileNotFoundError if the image does not exist
+        &#34;&#34;&#34;
+
+        self.logger.debug(&#34;Loading image&#34;)
+        img = io.imread(path)
+        img = color.rgb2gray(img)
+        img = img_as_float(img)
+
+        return img
+
+    def create_patches(self, image, num_patches, progress_update_func=None):
+        &#34;&#34;&#34;
+        Create a list of patches from the image
+
+        :param image: The image to create patches from
+        :param num_patches: The number of patches to create ALONG ONE DIMENSION
+        :param progress_update_func: A function to update a visual progressbar
+        :returns: A list of patches made from the image
+        :raises: ValueError if the image is not a  single channel image
+        &#34;&#34;&#34;
+
+        if num_patches &lt;= 0:
+            raise ValueError(&#34;num_patches must be a positive non-zero&#34;
+                             &#34; integer.&#34;)
+
+        if type(image) is not np.ndarray:
+            raise ValueError(&#34;image must be of type np.ndarray&#34;)
+
+        if len(image.shape) != 2:
+            raise ValueError(&#34;image must be a single channel image&#34;)
+
+        self.logger.debug(&#34;Creating patches&#34;)
+
+        # Determine padding so we can use non-overlapping patches
+        pad_x = (0, 0)
+        pad_y = (0, 0)
+
+        self.logger.debug(image.shape)
+
+        if image.shape[0] % num_patches != 0:
+            pad_x = (0, (num_patches - (image.shape[0] % num_patches)))
+
+        if image.shape[1] % num_patches != 0:
+            pad_y = (0, (num_patches - (image.shape[1] % num_patches)))
+
+        image = np.pad(image, (pad_x, pad_y), &#39;constant&#39;,
+                       constant_values=(0, 0))
+
+        self.padded_shape = image.shape
+        # Get the size of each block
+        block_size = (image.shape[0]//num_patches,
+                      image.shape[1]//num_patches)
+
+        self.logger.debug(image.shape)
+        self.logger.debug(block_size)
+
+        # Make the blocks
+        blocks = view_as_blocks(image, block_shape=block_size)
+
+        self.logger.debug(blocks.shape)
+
+        patches = []
+
+        # Create a list of new patch objects for viewing
+        for i in range(num_patches):
+            for j in range(num_patches):
+                patch_data = blocks[i, j]
+                patches.append(Patch(patch_data, (i, j)))
+
+                if progress_update_func is not None:
+                    progress_update_func()
+
+        return patches
+
+    def create_mask(self):
+        &#34;&#34;&#34;
+        Take the masks from all the patches and combine them into the mask
+        for the whole image
+
+        :returns: None
+        &#34;&#34;&#34;
+
+        mask = np.zeros(self.padded_shape, dtype=bool)
+
+        col_num = 0
+        row_num = 0
+
+        for patch in self.patches:
+
+            r, c = patch.patch_index
+            r = r * patch.patch.shape[0]
+            c = c * patch.patch.shape[1]
+            mask[r:r+patch.patch.shape[0],
+                 c:c+patch.patch.shape[1]] += patch.mask
+
+            col_num += 1
+
+            if col_num == self.num_patches:
+                col_num = 0
+                row_num += 1
+
+        self.mask = mask[:self.image.shape[0], :self.image.shape[1]]
+
+    def create_labelling(self):
+        &#34;&#34;&#34;
+        Take the labellings from all patches and combine them into one matrix
+
+        :returns: None
+        &#34;&#34;&#34;
+
+        labels = np.zeros(self.padded_shape, dtype=np.uint8)
+
+        col_num = 0
+        row_num = 0
+
+        for patch in self.patches:
+
+            r, c = patch.patch_index
+            r = r * patch.patch.shape[0]
+            c = c * patch.patch.shape[1]
+            labels[r:r+patch.patch.shape[0],
+                   c:c+patch.patch.shape[1]] += patch.landmark_labels
+
+            col_num += 1
+
+            if col_num == self.num_patches:
+                col_num = 0
+                row_num += 1
+
+        self.landmark_matrix = labels[:self.image.shape[0],
+                                      :self.image.shape[1]]
+
+    def export_mask(self, pathname):
+        &#34;&#34;&#34;
+        Export the patch masks as a whole image mask
+
+        :param pathname: The path to the mask image file
+        :returns: None
+        &#34;&#34;&#34;
+        self.create_mask()
+
+        backup_path = os.path.splitext(pathname)[0]
+        backup_path += &#34;_bak.png&#34;
+        io.imsave(backup_path, img_as_uint(self.mask))
+
+        self.remove_small_components()
+        io.imsave(pathname, img_as_uint(self.mask))
+
+    def export_labels(self, pathname):
+        &#34;&#34;&#34;
+        Export the labelling matrix
+
+        :param pathname: The path to the labelling matrix file
+        :returns: None
+        &#34;&#34;&#34;
+
+        self.create_labelling()
+
+        np.save(pathname, self.landmark_matrix)
+
+    def remove_small_components(self):
+        &#34;&#34;&#34;
+        Remove components that are not connected to the main root
+
+        :returns: None
+        &#34;&#34;&#34;
+        from skimage.measure import label
+
+        labels = label(self.mask)
+        largestCC = labels == np.argmax(np.bincount(labels.flat)[1:])+1
+        self.mask = largestCC</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="friendly_ground_truth.model.model.Image.BG_LABEL"><code class="name">var <span class="ident">BG_LABEL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="friendly_ground_truth.model.model.Image.BRANCH_LABEL"><code class="name">var <span class="ident">BRANCH_LABEL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="friendly_ground_truth.model.model.Image.CROSS_LABEL"><code class="name">var <span class="ident">CROSS_LABEL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="friendly_ground_truth.model.model.Image.NUM_PATCHES"><code class="name">var <span class="ident">NUM_PATCHES</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="friendly_ground_truth.model.model.Image.TIP_LABEL"><code class="name">var <span class="ident">TIP_LABEL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="friendly_ground_truth.model.model.Image.create_labelling"><code class="name flex">
+<span>def <span class="ident">create_labelling</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Take the labellings from all patches and combine them into one matrix</p>
+<p>:returns: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_labelling(self):
+    &#34;&#34;&#34;
+    Take the labellings from all patches and combine them into one matrix
+
+    :returns: None
+    &#34;&#34;&#34;
+
+    labels = np.zeros(self.padded_shape, dtype=np.uint8)
+
+    col_num = 0
+    row_num = 0
+
+    for patch in self.patches:
+
+        r, c = patch.patch_index
+        r = r * patch.patch.shape[0]
+        c = c * patch.patch.shape[1]
+        labels[r:r+patch.patch.shape[0],
+               c:c+patch.patch.shape[1]] += patch.landmark_labels
+
+        col_num += 1
+
+        if col_num == self.num_patches:
+            col_num = 0
+            row_num += 1
+
+    self.landmark_matrix = labels[:self.image.shape[0],
+                                  :self.image.shape[1]]</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Image.create_mask"><code class="name flex">
+<span>def <span class="ident">create_mask</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Take the masks from all the patches and combine them into the mask
+for the whole image</p>
+<p>:returns: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_mask(self):
+    &#34;&#34;&#34;
+    Take the masks from all the patches and combine them into the mask
+    for the whole image
+
+    :returns: None
+    &#34;&#34;&#34;
+
+    mask = np.zeros(self.padded_shape, dtype=bool)
+
+    col_num = 0
+    row_num = 0
+
+    for patch in self.patches:
+
+        r, c = patch.patch_index
+        r = r * patch.patch.shape[0]
+        c = c * patch.patch.shape[1]
+        mask[r:r+patch.patch.shape[0],
+             c:c+patch.patch.shape[1]] += patch.mask
+
+        col_num += 1
+
+        if col_num == self.num_patches:
+            col_num = 0
+            row_num += 1
+
+    self.mask = mask[:self.image.shape[0], :self.image.shape[1]]</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Image.create_patches"><code class="name flex">
+<span>def <span class="ident">create_patches</span></span>(<span>self, image, num_patches, progress_update_func=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a list of patches from the image</p>
+<p>:param image: The image to create patches from
+:param num_patches: The number of patches to create ALONG ONE DIMENSION
+:param progress_update_func: A function to update a visual progressbar
+:returns: A list of patches made from the image
+:raises: ValueError if the image is not a
+single channel image</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_patches(self, image, num_patches, progress_update_func=None):
+    &#34;&#34;&#34;
+    Create a list of patches from the image
+
+    :param image: The image to create patches from
+    :param num_patches: The number of patches to create ALONG ONE DIMENSION
+    :param progress_update_func: A function to update a visual progressbar
+    :returns: A list of patches made from the image
+    :raises: ValueError if the image is not a  single channel image
+    &#34;&#34;&#34;
+
+    if num_patches &lt;= 0:
+        raise ValueError(&#34;num_patches must be a positive non-zero&#34;
+                         &#34; integer.&#34;)
+
+    if type(image) is not np.ndarray:
+        raise ValueError(&#34;image must be of type np.ndarray&#34;)
+
+    if len(image.shape) != 2:
+        raise ValueError(&#34;image must be a single channel image&#34;)
+
+    self.logger.debug(&#34;Creating patches&#34;)
+
+    # Determine padding so we can use non-overlapping patches
+    pad_x = (0, 0)
+    pad_y = (0, 0)
+
+    self.logger.debug(image.shape)
+
+    if image.shape[0] % num_patches != 0:
+        pad_x = (0, (num_patches - (image.shape[0] % num_patches)))
+
+    if image.shape[1] % num_patches != 0:
+        pad_y = (0, (num_patches - (image.shape[1] % num_patches)))
+
+    image = np.pad(image, (pad_x, pad_y), &#39;constant&#39;,
+                   constant_values=(0, 0))
+
+    self.padded_shape = image.shape
+    # Get the size of each block
+    block_size = (image.shape[0]//num_patches,
+                  image.shape[1]//num_patches)
+
+    self.logger.debug(image.shape)
+    self.logger.debug(block_size)
+
+    # Make the blocks
+    blocks = view_as_blocks(image, block_shape=block_size)
+
+    self.logger.debug(blocks.shape)
+
+    patches = []
+
+    # Create a list of new patch objects for viewing
+    for i in range(num_patches):
+        for j in range(num_patches):
+            patch_data = blocks[i, j]
+            patches.append(Patch(patch_data, (i, j)))
+
+            if progress_update_func is not None:
+                progress_update_func()
+
+    return patches</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Image.export_labels"><code class="name flex">
+<span>def <span class="ident">export_labels</span></span>(<span>self, pathname)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Export the labelling matrix</p>
+<p>:param pathname: The path to the labelling matrix file
+:returns: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def export_labels(self, pathname):
+    &#34;&#34;&#34;
+    Export the labelling matrix
+
+    :param pathname: The path to the labelling matrix file
+    :returns: None
+    &#34;&#34;&#34;
+
+    self.create_labelling()
+
+    np.save(pathname, self.landmark_matrix)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Image.export_mask"><code class="name flex">
+<span>def <span class="ident">export_mask</span></span>(<span>self, pathname)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Export the patch masks as a whole image mask</p>
+<p>:param pathname: The path to the mask image file
+:returns: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def export_mask(self, pathname):
+    &#34;&#34;&#34;
+    Export the patch masks as a whole image mask
+
+    :param pathname: The path to the mask image file
+    :returns: None
+    &#34;&#34;&#34;
+    self.create_mask()
+
+    backup_path = os.path.splitext(pathname)[0]
+    backup_path += &#34;_bak.png&#34;
+    io.imsave(backup_path, img_as_uint(self.mask))
+
+    self.remove_small_components()
+    io.imsave(pathname, img_as_uint(self.mask))</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Image.load_image"><code class="name flex">
+<span>def <span class="ident">load_image</span></span>(<span>self, path)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Loads an image into a numpy array</p>
+<p>:param path: The path to the image to load
+:returns: An image in the form of a numpy array
+:raises: FileNotFoundError if the image does not exist</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_image(self, path):
+    &#34;&#34;&#34;
+    Loads an image into a numpy array
+
+    :param path: The path to the image to load
+    :returns: An image in the form of a numpy array
+    :raises: FileNotFoundError if the image does not exist
+    &#34;&#34;&#34;
+
+    self.logger.debug(&#34;Loading image&#34;)
+    img = io.imread(path)
+    img = color.rgb2gray(img)
+    img = img_as_float(img)
+
+    return img</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Image.remove_small_components"><code class="name flex">
+<span>def <span class="ident">remove_small_components</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Remove components that are not connected to the main root</p>
+<p>:returns: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def remove_small_components(self):
+    &#34;&#34;&#34;
+    Remove components that are not connected to the main root
+
+    :returns: None
+    &#34;&#34;&#34;
+    from skimage.measure import label
+
+    labels = label(self.mask)
+    largestCC = labels == np.argmax(np.bincount(labels.flat)[1:])+1
+    self.mask = largestCC</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="friendly_ground_truth.model.model.Patch"><code class="flex name class">
+<span>class <span class="ident">Patch</span></span>
+<span>(</span><span>patch, patch_index)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents an image patch</p>
+<p>Create a patch object</p>
+<p>:param patch: The image patch to use
+:returns: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Patch():
+    &#34;&#34;&#34;
+    Represents an image patch
+    &#34;&#34;&#34;
+
+    def __init__(self, patch, patch_index):
+        &#34;&#34;&#34;
+        Create a patch object
+
+        :param patch: The image patch to use
+        :returns: None
+        &#34;&#34;&#34;
+
+        # The max number of components to consider before determining that
+        # this patch has no roots in it
+        self.MAX_COMPONENTS = 500
+
+        # Whether or not to display this patch to the user
+        self.display = True
+
+        self.logger = logging.getLogger(&#39;friendly_gt.model.Patch&#39;)
+        self.patch = patch
+        self.mask = np.zeros(self.patch.shape, dtype=bool)  # create empty mask
+        self.landmark_labels = np.zeros(self.patch.shape, dtype=np.uint8)
+
+        self.patch_index = patch_index
+
+        try:
+            self.thresh = threshold_otsu(self.patch)
+        except ValueError:
+            self.thresh = 1
+
+        self.apply_threshold(self.thresh)
+
+        self.check_displayable()
+
+        self.overlay_image = None
+        self.overlay_mask()
+
+        self.old_flood_add_tolerance = 100
+        self.old_flood_add_position = None
+
+        self.old_flood_remove_position = None
+        self.old_flood_remove_tolerance = 100
+
+    def apply_threshold(self, value):
+        &#34;&#34;&#34;
+        Apply a threshold to the patch mask
+
+        :param value: The pixel value (floating point) to use as a threshold
+        :returns: None
+        :postcondition: The patch mask will be updated with the new threshold
+        :raises: ValueError if the value is not between 0 and 1
+        &#34;&#34;&#34;
+
+        if value &gt; 1 or value &lt; 0:
+            raise ValueError(&#34;Threshold values must be between 0 and 1&#34;)
+
+        binary = self.patch &gt; value
+        self.mask = binary
+
+    def overlay_mask(self):
+        &#34;&#34;&#34;
+        Overlay the current patch mask on the patch image
+
+        :returns: None
+        :postcondition: The overlay property will contain the image with the
+                        binary mask on top.
+        &#34;&#34;&#34;
+
+        labeling = np.copy(self.landmark_labels)
+        labeling += self.mask
+
+        c1 = &#39;red&#39;
+        c2 = &#39;green&#39;
+        c3 = &#39;orange&#39;
+        c4 = &#39;blue&#39;
+
+        colours = []
+        unique_labels = np.unique(labeling)
+
+        mapping = [(1, c1), (2, c2), (3, c3), (4, c4)]
+
+        for m in mapping:
+            if m[0] in unique_labels:
+                colours.append(m[1])
+
+        if len(colours) &lt;= 0:
+            colours = [&#39;purple&#39;]
+
+        color_mask = color.label2rgb(labeling, image=self.patch,
+                                     colors=colours, bg_label=0)
+
+        self.overlay_image = img_as_ubyte(color_mask)
+
+    def clear_mask(self):
+        &#34;&#34;&#34;
+        Set the mask for this patch to be empty (all 0&#39;s)
+
+        :returns: None
+        :postcondition: The mask property will contain all 0&#39;s
+        &#34;&#34;&#34;
+
+        self.mask = np.zeros(self.patch.shape, dtype=bool)
+        self.thresh = 1
+
+    def add_landmark(self, position, radius, label):
+        &#34;&#34;&#34;
+        Label an area with the given label
+
+        :param position: The position to add to the labelling
+        :param radius: The radius
+        :param label: The class label for the pixels to be given
+        :returns: None
+        &#34;&#34;&#34;
+        rr, cc = self.get_circle(position, radius)
+
+        self.landmark_labels[rr, cc] = label
+
+        self.landmark_labels[self.mask == 0] = 0
+
+        self.overlay_mask()
+
+    def remove_landmark(self, position, radius):
+        &#34;&#34;&#34;
+        Un-label (label as 0) the pixels in the given region
+
+        :param position: The position to un-label
+        :param radius: The radius to un-label pixels in
+        :returns: None
+        &#34;&#34;&#34;
+
+        rr, cc = self.get_circle(position, radius)
+
+        self.landmark_labels[rr, cc] = 0
+
+        self.overlay_mask()
+
+    def add_region(self, position, radius):
+        &#34;&#34;&#34;
+        Add a circular region to the mask at the given position
+
+        :param position: The position in the mask to add the region
+        :param radius: The radius of the region to add
+        :returns: None
+        :postcondition: The circular region in the mask will be set to 1&#39;s
+        &#34;&#34;&#34;
+        self.logger.debug(&#34;Add Region Position {}&#34;.format(position))
+        rr, cc = self.get_circle(position, radius)
+
+        self.mask[rr, cc] = 1
+
+        self.overlay_mask()
+
+    def remove_region(self, position, radius):
+        &#34;&#34;&#34;
+        Remove a circular region from the mask at the given position
+
+        :param position: The position in the mask to remove the region
+        :param radius: The radius of the region to remove
+        :returns: None
+        :postcondition: The region in the mask will be set to 0&#39;s
+        &#34;&#34;&#34;
+
+        rr, cc = self.get_circle(position, radius)
+
+        self.mask[rr, cc] = 0
+
+        self.overlay_mask()
+
+    def flood_add_region(self, position, tolerance):
+        &#34;&#34;&#34;
+        Add to the current mask a flood region at the given position with the
+        given tolerance
+
+        :param position: The position to start the flood fill
+        :param tolerance: The tolerance for pixels to be included
+        :returns: None
+        &#34;&#34;&#34;
+        self.logger.debug(&#34;Flood Position: {}&#34;.format(position))
+        self.logger.debug(&#34;Flood Tolerance: {}&#34;.format(tolerance))
+
+        self.logger.debug(&#34;Mask Shape {}&#34;.format(self.mask.shape))
+        self.logger.debug(&#34;Patch Shape {}&#34;.format(self.patch.shape))
+
+        from skimage.segmentation import flood
+
+        position = int(position[1]), int(position[0])
+
+        # If we are still editing the tolerance, we need to go back to the old
+        # mask
+        if position == self.old_flood_add_position:
+            self.logger.debug(&#34;Reverting mask &#34;)
+            self.mask = np.copy(self.old_mask)
+        else:
+            self.logger.debug(&#34;Storing old mask&#34;)
+            self.old_mask = np.copy(self.mask)
+
+        add_mask = flood(self.patch, position, tolerance=tolerance)
+
+        self.mask += add_mask
+
+        self.overlay_mask()
+
+        self.old_flood_add_tolerance = tolerance
+        self.old_flood_add_position = position
+
+    def flood_remove_region(self, position, tolerance):
+        &#34;&#34;&#34;
+        Remove from the current mask a flood region at the given position with
+        the given tolerance
+
+        :param position: The position to start the flood fill
+        :param tolerance: The tolerance for pixels to be included
+        :returns: None
+        &#34;&#34;&#34;
+
+        from skimage.segmentation import flood
+
+        position = int(position[1]), int(position[0])
+
+        # If we are still editing the tolerance, we need to go back to the old
+        # mask
+        if position == self.old_flood_remove_position:
+            self.logger.debug(&#34;Reverting mask &#34;)
+            self.mask = np.copy(self.old_mask)
+        else:
+            self.logger.debug(&#34;Storing old mask&#34;)
+            self.old_mask = np.copy(self.mask)
+
+        remove_mask = flood(self.patch, position, tolerance=tolerance)
+
+        self.mask[remove_mask] = 0
+
+        self.overlay_mask()
+
+        self.old_flood_remove_tolerance = tolerance
+        self.old_flood_remove_position = position
+
+    def check_displayable(self):
+        &#34;&#34;&#34;
+        Set patches as non-displayable if they are not likely to contain roots
+
+        :returns: None
+        &#34;&#34;&#34;
+
+        # Turns out this is causing more trouble than it is worth right now
+
+        self.display = True
+
+    def get_circle(self, position, radius):
+        &#34;&#34;&#34;
+        Create a cicular region that does not allow negative values
+
+        :param position: (x, y) coordinates
+        :param radius: The radius of the circle
+        :returns: Two lists, rr and cc that represent points of the circle
+        &#34;&#34;&#34;
+        # Note that the coordinates are automatically flipped to adhere to
+        # skimage indexing
+        rr, cc = circle(position[1], position[0], radius)
+
+        zipped = zip(rr, cc)
+
+        fixed_pairs = []
+
+        for pair in zipped:
+            if (pair[0] &gt;= 0 and pair[1] &gt;= 0 and pair[0] &lt; self.mask.shape[0]
+                    and pair[1] &lt; self.mask.shape[1]):
+                fixed_pairs.append(pair)
+
+        rr = []
+        cc = []
+
+        for p in fixed_pairs:
+            rr.append(p[0])
+            cc.append(p[1])
+
+        return rr, cc</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="friendly_ground_truth.model.model.Patch.add_landmark"><code class="name flex">
+<span>def <span class="ident">add_landmark</span></span>(<span>self, position, radius, label)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Label an area with the given label</p>
+<p>:param position: The position to add to the labelling
+:param radius: The radius
+:param label: The class label for the pixels to be given
+:returns: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_landmark(self, position, radius, label):
+    &#34;&#34;&#34;
+    Label an area with the given label
+
+    :param position: The position to add to the labelling
+    :param radius: The radius
+    :param label: The class label for the pixels to be given
+    :returns: None
+    &#34;&#34;&#34;
+    rr, cc = self.get_circle(position, radius)
+
+    self.landmark_labels[rr, cc] = label
+
+    self.landmark_labels[self.mask == 0] = 0
+
+    self.overlay_mask()</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Patch.add_region"><code class="name flex">
+<span>def <span class="ident">add_region</span></span>(<span>self, position, radius)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add a circular region to the mask at the given position</p>
+<p>:param position: The position in the mask to add the region
+:param radius: The radius of the region to add
+:returns: None
+:postcondition: The circular region in the mask will be set to 1's</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_region(self, position, radius):
+    &#34;&#34;&#34;
+    Add a circular region to the mask at the given position
+
+    :param position: The position in the mask to add the region
+    :param radius: The radius of the region to add
+    :returns: None
+    :postcondition: The circular region in the mask will be set to 1&#39;s
+    &#34;&#34;&#34;
+    self.logger.debug(&#34;Add Region Position {}&#34;.format(position))
+    rr, cc = self.get_circle(position, radius)
+
+    self.mask[rr, cc] = 1
+
+    self.overlay_mask()</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Patch.apply_threshold"><code class="name flex">
+<span>def <span class="ident">apply_threshold</span></span>(<span>self, value)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Apply a threshold to the patch mask</p>
+<p>:param value: The pixel value (floating point) to use as a threshold
+:returns: None
+:postcondition: The patch mask will be updated with the new threshold
+:raises: ValueError if the value is not between 0 and 1</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def apply_threshold(self, value):
+    &#34;&#34;&#34;
+    Apply a threshold to the patch mask
+
+    :param value: The pixel value (floating point) to use as a threshold
+    :returns: None
+    :postcondition: The patch mask will be updated with the new threshold
+    :raises: ValueError if the value is not between 0 and 1
+    &#34;&#34;&#34;
+
+    if value &gt; 1 or value &lt; 0:
+        raise ValueError(&#34;Threshold values must be between 0 and 1&#34;)
+
+    binary = self.patch &gt; value
+    self.mask = binary</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Patch.check_displayable"><code class="name flex">
+<span>def <span class="ident">check_displayable</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set patches as non-displayable if they are not likely to contain roots</p>
+<p>:returns: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_displayable(self):
+    &#34;&#34;&#34;
+    Set patches as non-displayable if they are not likely to contain roots
+
+    :returns: None
+    &#34;&#34;&#34;
+
+    # Turns out this is causing more trouble than it is worth right now
+
+    self.display = True</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Patch.clear_mask"><code class="name flex">
+<span>def <span class="ident">clear_mask</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the mask for this patch to be empty (all 0's)</p>
+<p>:returns: None
+:postcondition: The mask property will contain all 0's</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clear_mask(self):
+    &#34;&#34;&#34;
+    Set the mask for this patch to be empty (all 0&#39;s)
+
+    :returns: None
+    :postcondition: The mask property will contain all 0&#39;s
+    &#34;&#34;&#34;
+
+    self.mask = np.zeros(self.patch.shape, dtype=bool)
+    self.thresh = 1</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Patch.flood_add_region"><code class="name flex">
+<span>def <span class="ident">flood_add_region</span></span>(<span>self, position, tolerance)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add to the current mask a flood region at the given position with the
+given tolerance</p>
+<p>:param position: The position to start the flood fill
+:param tolerance: The tolerance for pixels to be included
+:returns: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def flood_add_region(self, position, tolerance):
+    &#34;&#34;&#34;
+    Add to the current mask a flood region at the given position with the
+    given tolerance
+
+    :param position: The position to start the flood fill
+    :param tolerance: The tolerance for pixels to be included
+    :returns: None
+    &#34;&#34;&#34;
+    self.logger.debug(&#34;Flood Position: {}&#34;.format(position))
+    self.logger.debug(&#34;Flood Tolerance: {}&#34;.format(tolerance))
+
+    self.logger.debug(&#34;Mask Shape {}&#34;.format(self.mask.shape))
+    self.logger.debug(&#34;Patch Shape {}&#34;.format(self.patch.shape))
+
+    from skimage.segmentation import flood
+
+    position = int(position[1]), int(position[0])
+
+    # If we are still editing the tolerance, we need to go back to the old
+    # mask
+    if position == self.old_flood_add_position:
+        self.logger.debug(&#34;Reverting mask &#34;)
+        self.mask = np.copy(self.old_mask)
+    else:
+        self.logger.debug(&#34;Storing old mask&#34;)
+        self.old_mask = np.copy(self.mask)
+
+    add_mask = flood(self.patch, position, tolerance=tolerance)
+
+    self.mask += add_mask
+
+    self.overlay_mask()
+
+    self.old_flood_add_tolerance = tolerance
+    self.old_flood_add_position = position</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Patch.flood_remove_region"><code class="name flex">
+<span>def <span class="ident">flood_remove_region</span></span>(<span>self, position, tolerance)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Remove from the current mask a flood region at the given position with
+the given tolerance</p>
+<p>:param position: The position to start the flood fill
+:param tolerance: The tolerance for pixels to be included
+:returns: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def flood_remove_region(self, position, tolerance):
+    &#34;&#34;&#34;
+    Remove from the current mask a flood region at the given position with
+    the given tolerance
+
+    :param position: The position to start the flood fill
+    :param tolerance: The tolerance for pixels to be included
+    :returns: None
+    &#34;&#34;&#34;
+
+    from skimage.segmentation import flood
+
+    position = int(position[1]), int(position[0])
+
+    # If we are still editing the tolerance, we need to go back to the old
+    # mask
+    if position == self.old_flood_remove_position:
+        self.logger.debug(&#34;Reverting mask &#34;)
+        self.mask = np.copy(self.old_mask)
+    else:
+        self.logger.debug(&#34;Storing old mask&#34;)
+        self.old_mask = np.copy(self.mask)
+
+    remove_mask = flood(self.patch, position, tolerance=tolerance)
+
+    self.mask[remove_mask] = 0
+
+    self.overlay_mask()
+
+    self.old_flood_remove_tolerance = tolerance
+    self.old_flood_remove_position = position</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Patch.get_circle"><code class="name flex">
+<span>def <span class="ident">get_circle</span></span>(<span>self, position, radius)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a cicular region that does not allow negative values</p>
+<p>:param position: (x, y) coordinates
+:param radius: The radius of the circle
+:returns: Two lists, rr and cc that represent points of the circle</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_circle(self, position, radius):
+    &#34;&#34;&#34;
+    Create a cicular region that does not allow negative values
+
+    :param position: (x, y) coordinates
+    :param radius: The radius of the circle
+    :returns: Two lists, rr and cc that represent points of the circle
+    &#34;&#34;&#34;
+    # Note that the coordinates are automatically flipped to adhere to
+    # skimage indexing
+    rr, cc = circle(position[1], position[0], radius)
+
+    zipped = zip(rr, cc)
+
+    fixed_pairs = []
+
+    for pair in zipped:
+        if (pair[0] &gt;= 0 and pair[1] &gt;= 0 and pair[0] &lt; self.mask.shape[0]
+                and pair[1] &lt; self.mask.shape[1]):
+            fixed_pairs.append(pair)
+
+    rr = []
+    cc = []
+
+    for p in fixed_pairs:
+        rr.append(p[0])
+        cc.append(p[1])
+
+    return rr, cc</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Patch.overlay_mask"><code class="name flex">
+<span>def <span class="ident">overlay_mask</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Overlay the current patch mask on the patch image</p>
+<p>:returns: None
+:postcondition: The overlay property will contain the image with the
+binary mask on top.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def overlay_mask(self):
+    &#34;&#34;&#34;
+    Overlay the current patch mask on the patch image
+
+    :returns: None
+    :postcondition: The overlay property will contain the image with the
+                    binary mask on top.
+    &#34;&#34;&#34;
+
+    labeling = np.copy(self.landmark_labels)
+    labeling += self.mask
+
+    c1 = &#39;red&#39;
+    c2 = &#39;green&#39;
+    c3 = &#39;orange&#39;
+    c4 = &#39;blue&#39;
+
+    colours = []
+    unique_labels = np.unique(labeling)
+
+    mapping = [(1, c1), (2, c2), (3, c3), (4, c4)]
+
+    for m in mapping:
+        if m[0] in unique_labels:
+            colours.append(m[1])
+
+    if len(colours) &lt;= 0:
+        colours = [&#39;purple&#39;]
+
+    color_mask = color.label2rgb(labeling, image=self.patch,
+                                 colors=colours, bg_label=0)
+
+    self.overlay_image = img_as_ubyte(color_mask)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Patch.remove_landmark"><code class="name flex">
+<span>def <span class="ident">remove_landmark</span></span>(<span>self, position, radius)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Un-label (label as 0) the pixels in the given region</p>
+<p>:param position: The position to un-label
+:param radius: The radius to un-label pixels in
+:returns: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def remove_landmark(self, position, radius):
+    &#34;&#34;&#34;
+    Un-label (label as 0) the pixels in the given region
+
+    :param position: The position to un-label
+    :param radius: The radius to un-label pixels in
+    :returns: None
+    &#34;&#34;&#34;
+
+    rr, cc = self.get_circle(position, radius)
+
+    self.landmark_labels[rr, cc] = 0
+
+    self.overlay_mask()</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.model.model.Patch.remove_region"><code class="name flex">
+<span>def <span class="ident">remove_region</span></span>(<span>self, position, radius)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Remove a circular region from the mask at the given position</p>
+<p>:param position: The position in the mask to remove the region
+:param radius: The radius of the region to remove
+:returns: None
+:postcondition: The region in the mask will be set to 0's</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def remove_region(self, position, radius):
+    &#34;&#34;&#34;
+    Remove a circular region from the mask at the given position
+
+    :param position: The position in the mask to remove the region
+    :param radius: The radius of the region to remove
+    :returns: None
+    :postcondition: The region in the mask will be set to 0&#39;s
+    &#34;&#34;&#34;
+
+    rr, cc = self.get_circle(position, radius)
+
+    self.mask[rr, cc] = 0
+
+    self.overlay_mask()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="friendly_ground_truth.model" href="index.html">friendly_ground_truth.model</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="friendly_ground_truth.model.model.Image" href="#friendly_ground_truth.model.model.Image">Image</a></code></h4>
+<ul class="">
+<li><code><a title="friendly_ground_truth.model.model.Image.BG_LABEL" href="#friendly_ground_truth.model.model.Image.BG_LABEL">BG_LABEL</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Image.BRANCH_LABEL" href="#friendly_ground_truth.model.model.Image.BRANCH_LABEL">BRANCH_LABEL</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Image.CROSS_LABEL" href="#friendly_ground_truth.model.model.Image.CROSS_LABEL">CROSS_LABEL</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Image.NUM_PATCHES" href="#friendly_ground_truth.model.model.Image.NUM_PATCHES">NUM_PATCHES</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Image.TIP_LABEL" href="#friendly_ground_truth.model.model.Image.TIP_LABEL">TIP_LABEL</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Image.create_labelling" href="#friendly_ground_truth.model.model.Image.create_labelling">create_labelling</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Image.create_mask" href="#friendly_ground_truth.model.model.Image.create_mask">create_mask</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Image.create_patches" href="#friendly_ground_truth.model.model.Image.create_patches">create_patches</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Image.export_labels" href="#friendly_ground_truth.model.model.Image.export_labels">export_labels</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Image.export_mask" href="#friendly_ground_truth.model.model.Image.export_mask">export_mask</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Image.load_image" href="#friendly_ground_truth.model.model.Image.load_image">load_image</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Image.remove_small_components" href="#friendly_ground_truth.model.model.Image.remove_small_components">remove_small_components</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="friendly_ground_truth.model.model.Patch" href="#friendly_ground_truth.model.model.Patch">Patch</a></code></h4>
+<ul class="two-column">
+<li><code><a title="friendly_ground_truth.model.model.Patch.add_landmark" href="#friendly_ground_truth.model.model.Patch.add_landmark">add_landmark</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Patch.add_region" href="#friendly_ground_truth.model.model.Patch.add_region">add_region</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Patch.apply_threshold" href="#friendly_ground_truth.model.model.Patch.apply_threshold">apply_threshold</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Patch.check_displayable" href="#friendly_ground_truth.model.model.Patch.check_displayable">check_displayable</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Patch.clear_mask" href="#friendly_ground_truth.model.model.Patch.clear_mask">clear_mask</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Patch.flood_add_region" href="#friendly_ground_truth.model.model.Patch.flood_add_region">flood_add_region</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Patch.flood_remove_region" href="#friendly_ground_truth.model.model.Patch.flood_remove_region">flood_remove_region</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Patch.get_circle" href="#friendly_ground_truth.model.model.Patch.get_circle">get_circle</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Patch.overlay_mask" href="#friendly_ground_truth.model.model.Patch.overlay_mask">overlay_mask</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Patch.remove_landmark" href="#friendly_ground_truth.model.model.Patch.remove_landmark">remove_landmark</a></code></li>
+<li><code><a title="friendly_ground_truth.model.model.Patch.remove_region" href="#friendly_ground_truth.model.model.Patch.remove_region">remove_region</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

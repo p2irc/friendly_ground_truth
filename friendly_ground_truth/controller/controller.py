@@ -33,6 +33,10 @@ module_logger = logging.getLogger('friendly_gt.controller')
 class Mode(Enum):
     """
     Class representing the possible modes for editing
+
+    Attributes:
+        THREHSOLD
+        ETC
     """
     THRESHOLD = 1
     ADD_REGION = 2
@@ -57,6 +61,9 @@ class SecondaryMode(Enum):
 class Controller:
     """
     The main controller object for the application
+
+    Attributes:
+        stuff
     """
     ZOOM_SCALE = 1.10
     CONTEXT_TRANSPARENCY = 100
@@ -161,8 +168,10 @@ class Controller:
         """
         Get the filename from the image to use for saving the mask
 
-        :param path: The path to the original image
-        :returns: The new filename for the mask
+        Args:
+            path: The path to the original image
+        Returns:
+            The new filename for the mask
         """
 
         if os.path.isdir(path):

@@ -99,3 +99,12 @@ pytest --cov=friendly_ground_truth ./tests --cov-branch --cov-report=term-missin
 This will run all tests and print a coverage report specifying any missed lines.  A coverage check is run as part of all pull-requests.
 
 Please refer to the [Wiki](https://github.com/KyleS22/friendly_ground_truth/wiki) for more details about the development process.
+
+## Documentation
+Documentation can be generated with pdoc.  Make sure to `pip install pdoc3`
+
+
+```
+cd doc
+pdoc --html ../friendly_ground_truth/
+```
