@@ -26,6 +26,7 @@ HOME = os.path.expanduser("~")
 TOOLS = os.path.join(HOME, "Tools")
 
 EXE_NAME = "friendly_gt.exe"
+UNINSTALLER_NAME = "friendly_gt_uninstaller.exe"
 
 START_MENU = r"AppData\Roaming\Microsoft\Windows\Start Menu\Programs"
 START_MENU_PATH = os.path.join(HOME, START_MENU)
@@ -157,6 +158,11 @@ class InstallDialog(tk.Frame):
         program_path = self.get_exe_path(install_dir)
         self.make_shortcut(LINK_NAME, START_MENU_PATH, program_path,
                            install_dir, program_path)
+
+        uninstaller_path = os.path.join(install_dir, UNINSTALLER_NAME)
+
+        self.make_shortcut("friendly_gt_unsintaller.lnk", START_MENU_PATH,
+                           uninstaller_path, install_dir, program_path)
 
         shortcut = tk.messagebox.askyesno(title="Create Desktop Shortcut?",
                                           message="Would you like to create a"
