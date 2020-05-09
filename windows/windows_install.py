@@ -161,7 +161,7 @@ class InstallDialog(tk.Frame):
 
         uninstaller_path = os.path.join(install_dir, UNINSTALLER_NAME)
 
-        self.make_shortcut("friendly_gt_unsintaller.lnk", START_MENU_PATH,
+        self.make_shortcut("Friendly Ground Truth Uninstaller", START_MENU_PATH,
                            uninstaller_path, install_dir, program_path)
 
         shortcut = tk.messagebox.askyesno(title="Create Desktop Shortcut?",
