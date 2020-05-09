@@ -510,7 +510,7 @@ class MainWindow(Frame):
         alt = (s & 0x8) != 0 or (s & 0x80) != 0
         shift = (s & 0x1) != 0
 
-        print(event.key, event.keysym)
+        print(event.char, event.keysym)
 
         if shift:
             key = 'shift+' + key
