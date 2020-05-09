@@ -118,6 +118,10 @@ class InstallDialog(tk.Frame):
             s = os.path.join(FGT_FOLDER, item)
             d = os.path.join(install_dir, item)
 
+            # Make sure we can overwrite
+            if os.path.exists(d):
+                os.remove(d)
+
             if os.path.isdir(s):
                 shutil.copytree(s, d)
             else:

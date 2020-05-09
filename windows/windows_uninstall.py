@@ -91,10 +91,16 @@ class UnInstallDialog(tk.Frame):
         for item in os.listdir(install_dir):
             d = os.path.join(install_dir, item)
 
-            try:
-                os.remove(d)
-            except OSError as e:
-                print(e)
+            if os.path.isdir(d):
+                try:
+                    os.removedirs(d)
+                except OSError as e:
+                    print("Could not remove directory: " + e)
+            else:
+                try:
+                    os.remove(d)
+                except OSError as e:
+                    print(e)
 
             self.update_progress_bar()
 
@@ -108,19 +114,20 @@ class UnInstallDialog(tk.Frame):
 
         self.remove_install_files(self.install_dir)
 
-        shortcut_path = os.path.join(START_MENU_PATH, LINK_NAME)
+        shortcut_path = os.path.join(START_MENU_PATH, LINK_NAME + ".lnk")
 
         try:
             os.remove(shortcut_path)
         except OSError as e:
             print("Could not remove start menu shortcut: " + e)
 
-        desktop_shortcut = os.path.join(DESKTOP_PATH, LINK_NAME)
+        desktop_shortcut = os.path.join(DESKTOP_PATH, LINK_NAME + ".lnk")
 
-        try:
-            os.remove(desktop_shortcut)
-        except OSError as e:
-            print("Could not remove desktop shortcut: " + e)
+        if os.path.exists(desktop_shortcut):
+            try:
+                os.remove(desktop_shortcut)
+            except OSError as e:
+                print("Could not remove desktop shortcut: " + e)
 
         messagebox.showinfo(title="Success!",
                             message="Application Uninstalled!")
@@ -137,7 +144,7 @@ class UnInstallDialog(tk.Frame):
         self.num_files = num_items
         self.prog_popup.geometry("100x50+500+400")
 
-        tk.Label(self.prog_popup, text="Installing").grid(row=0, column=0)
+        tk.Label(self.prog_popup, text="Uninstalling").grid(row=0, column=0)
 
         self.load_progress = 0
         self.load_prog_var = tk.DoubleVar()

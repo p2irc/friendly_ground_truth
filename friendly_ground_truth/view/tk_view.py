@@ -528,6 +528,7 @@ class MainWindow(Frame):
             elif key == 'r':
                 self.controller.redo()
             elif key == 'equal' or key == "plus":
+                print("Adjusting")
                 self.on_key_increase_tool(None)
 
             elif key == 'minus':
@@ -555,10 +556,11 @@ class MainWindow(Frame):
             elif key == 'equal' or key == "plus":
                 x = self.previous_position[0]
                 y = self.previous_position[1]
-
+                print("Zooming")
                 self.controller.handle_zoom(1, x, y)
 
             elif key == 'minus':
+                print("Zooming")
                 x = self.previous_position[0]
                 y = self.previous_position[1]
 
