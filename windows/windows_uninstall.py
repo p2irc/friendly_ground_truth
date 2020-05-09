@@ -55,7 +55,7 @@ class UnInstallDialog(tk.Frame):
         self.master.geometry("+700+400")
 
         label_text = "Are you sure you want to uninstall"\
-                     "Friendly Ground Truth?"
+                     " Friendly Ground Truth?"
 
         label = tk.Label(root, text=label_text)
 
@@ -87,7 +87,7 @@ class UnInstallDialog(tk.Frame):
             print(FGT_INSTALL_DIR + " not found. Aborting.")
             return
 
-        self.start_progressbar(len(os.listdir(FGT_FOLDER)))
+        self.start_progressbar(len(os.listdir(install_dir)))
         for item in os.listdir(install_dir):
             d = os.path.join(install_dir, item)
 
@@ -113,14 +113,14 @@ class UnInstallDialog(tk.Frame):
         try:
             os.remove(shortcut_path)
         except OSError as e:
-            print("Could no remove start menu shortcut: " + e)
+            print("Could not remove start menu shortcut: " + e)
 
         desktop_shortcut = os.path.join(DESKTOP_PATH, LINK_NAME)
 
         try:
             os.remove(desktop_shortcut)
         except OSError as e:
-            print("Could no remove desktop shortcut: " + e)
+            print("Could not remove desktop shortcut: " + e)
 
         messagebox.showinfo(title="Success!",
                             message="Application Uninstalled!")

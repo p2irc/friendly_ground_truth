@@ -166,7 +166,7 @@ class InstallDialog(tk.Frame):
 
         shortcut = tk.messagebox.askyesno(title="Create Desktop Shortcut?",
                                           message="Would you like to create a"
-                                          "desktop shortcut?")
+                                          " desktop shortcut?")
 
         # Ask about desktop shortcut
         if shortcut:
