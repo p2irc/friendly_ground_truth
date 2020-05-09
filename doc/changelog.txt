@@ -4,6 +4,10 @@ This file keeps a record of important changes to the project.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - <>
+### ADDED
+- Use windows console to get proper desktop path
+- Fix using plus and minus for zooming on windows
+- New uninstaller exe for removing program files
 
 ## [v0.7.6] - 2020-05-08
 ### Added

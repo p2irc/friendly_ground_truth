@@ -26,11 +26,24 @@ HOME = os.path.expanduser("~")
 TOOLS = os.path.join(HOME, "Tools")
 
 EXE_NAME = "friendly_gt.exe"
+UNINSTALLER_NAME = "friendly_gt_uninstaller.exe"
 
 START_MENU = r"AppData\Roaming\Microsoft\Windows\Start Menu\Programs"
 START_MENU_PATH = os.path.join(HOME, START_MENU)
 
-DESKTOP_PATH = os.path.join(HOME, "Desktop")
+if sys.platform == 'win32':
+    from win32com.shell import shell, shellcon
+
+    try:
+        desktop = shell.SHGetFolderPath(0, shellcon.CSIDL_DESKTOP, 0, 0)
+
+        if not os.path.exists(desktop):
+            DESKTOP_PATH = os.path.join(HOME, "Desktop")
+        else:
+            DESKTOP_PATH = desktop
+    except Exception:
+        print("Could not get system desktop folder")
+        DESKTOP_PATH = os.path.join(HOME, "Desktop")
 
 LINK_NAME = "Friendly Ground Truth"
 
@@ -108,7 +121,7 @@ class InstallDialog(tk.Frame):
             if os.path.isdir(s):
                 shutil.copytree(s, d)
             else:
-                shutil.copy2(s, d)
+                shutil.copy(s, d)
 
             self.update_progress_bar()
 
@@ -145,6 +158,11 @@ class InstallDialog(tk.Frame):
         program_path = self.get_exe_path(install_dir)
         self.make_shortcut(LINK_NAME, START_MENU_PATH, program_path,
                            install_dir, program_path)
+
+        uninstaller_path = os.path.join(install_dir, UNINSTALLER_NAME)
+
+        self.make_shortcut("friendly_gt_unsintaller.lnk", START_MENU_PATH,
+                           uninstaller_path, install_dir, program_path)
 
         shortcut = tk.messagebox.askyesno(title="Create Desktop Shortcut?",
                                           message="Would you like to create a"
