@@ -121,7 +121,7 @@ class InstallDialog(tk.Frame):
             if os.path.isdir(s):
                 shutil.copytree(s, d)
             else:
-                shutil.copy2(s, d)
+                shutil.copy(s, d)
 
             self.update_progress_bar()
 
