@@ -82,10 +82,12 @@ jobs:
             pyinstaller -i icon.ico --windowed --hidden-import='PIL._tkinter_finder' run.py -n friendly_gt
             cd windows
             pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n friendly_gt-installer
+            pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile windows_uninstall.py -n friendly_gt-uninstaller
           else
             pyinstaller -i icon.ico --hidden-import='PIL._tkinter_finder' run.py -n friendly_gt
             cd windows
             pyinstaller --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n friendly_gt-installer
+            pyinstaller --hidden-import='PIL._tkinter_finder' --onefile windows_uninstall.py -n friendly_gt-uninstaller
           fi
         shell: bash 
         
@@ -122,6 +124,7 @@ jobs:
            #New-Item -path "." -name "windows_app" -ItemType "directory"
            #Copy-Item  "dist\friendly_gt.exe" -Destination "windows_app\friendly_gt.exe" #cp ./dist/friendly_gt.exe ./windows
            Copy-Item "windows\dist\friendly_gt-installer.exe" -Destination "dist\friendly_gt_installer.exe"
+           Copy-Item "windows\dist\friendlt_gt-uninstaller.exe" -Destination "dist\friendly_gt\friendly_gt_uninstaller.exe"
            Copy-Item "doc\changelog.txt" -Destination "dist\changelog.txt"
            Copy-Item "README.md" -Destination "dist\README.md"
            Compress-Archive -path ".\dist\*" -DestinationPath ".\friendly_gt-windows.zip"
