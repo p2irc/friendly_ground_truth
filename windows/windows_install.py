@@ -120,7 +120,7 @@ class InstallDialog(tk.Frame):
 
             # Make sure we can overwrite
             if os.path.exists(d) and os.path.isdir(d):
-                os.removedirs(d)
+                shutil.rmtree(d)
             elif os.path.exists(d):
                 os.remove(d)
 
