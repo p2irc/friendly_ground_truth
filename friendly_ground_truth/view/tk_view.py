@@ -509,12 +509,9 @@ class MainWindow(Frame):
         s = event.state
         ctrl = (s & 0x4) != 0
 
-        print(event.char, event.keysym)
-
         if ctrl:
             self.control_down = True
 
-        print("Key: " + key)
         if self.control_down:
 
             if key == 'z':
@@ -522,7 +519,6 @@ class MainWindow(Frame):
             elif key == 'r':
                 self.controller.redo()
             elif key == 'equal' or key == 'plus' or key == '=' or key == '+':
-                print("Adjusting")
                 self.on_key_increase_tool(None)
 
             elif key == 'minus':
@@ -550,11 +546,9 @@ class MainWindow(Frame):
             elif key == 'equal' or key == 'plus' or key == '+' or key == '=':
                 x = self.previous_position[0]
                 y = self.previous_position[1]
-                print("Zooming")
                 self.controller.handle_zoom(1, x, y)
 
             elif key == 'minus' or key == '-':
-                print("Zooming")
                 x = self.previous_position[0]
                 y = self.previous_position[1]
 
