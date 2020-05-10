@@ -160,8 +160,6 @@ class MainWindow(Frame):
         self.bind_all("<Left>", self.on_left)
         self.bind_all("<Right>", self.on_right)
         self.bind_all("<KeyRelease-Control_L>", self.on_control_release)
-        #self.bind_all("<Alt-equal>", self.on_key_increase_tool)
-        # self.bind_all("<Alt-minus>", self.on_key_decrease_tool)
 
     def on_key_increase_tool(self, event):
         self.controller.change_secondary_mode(self.ID_ADJUST_TOOL)
@@ -506,31 +504,21 @@ class MainWindow(Frame):
         :returns: None
         """
 
-        key = event.char
+        key = event.keysym
+
         s = event.state
         ctrl = (s & 0x4) != 0
-        alt = (s & 0x8) != 0 or (s & 0x80) != 0
-        shift = (s & 0x1) != 0
-
-        if shift:
-            key = 'shift+' + key
-
-        if alt:
-            key = 'alt+' + key
 
         if ctrl:
             self.control_down = True
-            key = 'ctrl+' + key
-
 
         if self.control_down:
-            key = event.keysym
 
             if key == 'z':
                 self.controller.undo()
             elif key == 'r':
                 self.controller.redo()
-            elif key == 'equal' or key == "plus":
+            elif key == 'equal' or key == 'plus' or key == '=' or key == '+':
                 self.on_key_increase_tool(None)
 
             elif key == 'minus':
@@ -555,13 +543,12 @@ class MainWindow(Frame):
             elif key == "l":
                 self.on_flood_remove_tool()
 
-            elif key == '=' or key =="+":
+            elif key == 'equal' or key == 'plus' or key == '+' or key == '=':
                 x = self.previous_position[0]
                 y = self.previous_position[1]
-
                 self.controller.handle_zoom(1, x, y)
 
-            elif key == '-':
+            elif key == 'minus' or key == '-':
                 x = self.previous_position[0]
                 y = self.previous_position[1]
 
@@ -836,7 +823,6 @@ class MainWindow(Frame):
         self.previous_position = event.x, event.y
         s = event.state
 
-        #alt = (s & 0x8) != 0 or (s & 0x80) != 0
         ctrl = (s & 0x4) != 0
 
         if ctrl:
@@ -852,7 +838,7 @@ class MainWindow(Frame):
         :param event: the mouse event
         :returns: none
         """
-        state = event.state
+        # state = event.state
         self.dragged = True
         # ctrl = (state & 0x4) != 0
 
@@ -941,7 +927,7 @@ class MainWindow(Frame):
 
         self.logger.debug("Click location: {}, {}".format(event.x, event.y))
 
-        #if self.can_draw:
+        # if self.can_draw:
         #    self.controller.handle_left_click((event.x, event.y))
 
     def on_click_release(self, event):
