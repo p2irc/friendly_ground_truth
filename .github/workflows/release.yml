@@ -70,8 +70,10 @@ jobs:
       - name: Build project Mac
         if: matrix.os == 'macos-latest'
         run: |
+          cd application_icons
           python make_icns.py
-          pyinstaller -i icon.icns --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
+          cd ..
+          pyinstaller -i application_icons/icon.icns --windowed --hidden-import='PIL._tkinter_finder' --onefile run.py -n friendly_gt
       # Build the windows binaries
       - name: Build project Windows
         if: matrix.os == 'windows-latest'
@@ -79,12 +81,12 @@ jobs:
           pip install tornado
           pip install pywin32
           if [ `echo ${{ github.ref }} | grep -c "d"` -eq 0 ]; then
-            pyinstaller -i icon.ico --windowed --hidden-import='PIL._tkinter_finder' run.py -n friendly_gt
+            pyinstaller -i application_icons/icon.ico --windowed --hidden-import='PIL._tkinter_finder' run.py -n friendly_gt
             cd windows
             pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n friendly_gt-installer
             pyinstaller --windowed --hidden-import='PIL._tkinter_finder' --onefile windows_uninstall.py -n friendly_gt-uninstaller
           else
-            pyinstaller -i icon.ico --hidden-import='PIL._tkinter_finder' run.py -n friendly_gt
+            pyinstaller -i application_icons/icon.ico --hidden-import='PIL._tkinter_finder' run.py -n friendly_gt
             cd windows
             pyinstaller --hidden-import='PIL._tkinter_finder' --onefile windows_install.py -n friendly_gt-installer
             pyinstaller --hidden-import='PIL._tkinter_finder' --onefile windows_uninstall.py -n friendly_gt-uninstaller
