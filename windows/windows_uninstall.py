@@ -13,6 +13,7 @@ import os
 import sys
 import tkinter as tk
 import tkinter.filedialog
+import shutil
 
 from tkinter import ttk
 from tkinter import messagebox
@@ -93,7 +94,7 @@ class UnInstallDialog(tk.Frame):
 
             if os.path.isdir(d):
                 try:
-                    os.removedirs(d)
+                    shutil.rmtree(d)
                 except OSError as e:
                     print("Could not remove directory: " + e)
             else:

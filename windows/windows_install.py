@@ -119,7 +119,9 @@ class InstallDialog(tk.Frame):
             d = os.path.join(install_dir, item)
 
             # Make sure we can overwrite
-            if os.path.exists(d):
+            if os.path.exists(d) and os.path.isdir(d):
+                os.removedirs(d)
+            elif os.path.exists(d):
                 os.remove(d)
 
             if os.path.isdir(s):

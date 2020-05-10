@@ -505,29 +505,23 @@ class MainWindow(Frame):
         """
 
         key = event.keysym
+
         s = event.state
         ctrl = (s & 0x4) != 0
-        alt = (s & 0x8) != 0 or (s & 0x80) != 0
-        shift = (s & 0x1) != 0
 
         print(event.char, event.keysym)
-
-        if shift:
-            key = 'shift+' + key
-
-        if alt:
-            key = 'alt+' + key
 
         if ctrl:
             self.control_down = True
 
+        print("Key: " + key)
         if self.control_down:
 
             if key == 'z':
                 self.controller.undo()
             elif key == 'r':
                 self.controller.redo()
-            elif key == 'equal' or key == "plus":
+            elif key == 'equal' or key == 'plus' or key == '=' or key == '+':
                 print("Adjusting")
                 self.on_key_increase_tool(None)
 
@@ -553,13 +547,13 @@ class MainWindow(Frame):
             elif key == "l":
                 self.on_flood_remove_tool()
 
-            elif key == 'equal' or key == "plus":
+            elif key == 'equal' or key == 'plus' or key == '+' or key == '=':
                 x = self.previous_position[0]
                 y = self.previous_position[1]
                 print("Zooming")
                 self.controller.handle_zoom(1, x, y)
 
-            elif key == 'minus':
+            elif key == 'minus' or key == '-':
                 print("Zooming")
                 x = self.previous_position[0]
                 y = self.previous_position[1]
