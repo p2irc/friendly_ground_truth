@@ -16,21 +16,16 @@ from friendly_ground_truth.version_info import VersionInfo
 from mock import MagicMock
 
 
-class TestVersionString:
-    """
-    Tests for checking that version strings work properly
-
-    """
+class TestVersionInfo:
 
     def test_get_version_string(self):
         """
-        Test that the correct version string is returned
+        Test getting the version string
 
-        Test Conditiion:
-            The value from get_version_string() is the properly formatted
-            string from the VERSION_MAJOR, VERSION_MINOR, and VERSION_PATCH
-            attributes, in the form
-            "vVERSION_MAJOR.VERSION_MINOR.VERSION_PATCH".
+        :test_condition:  The version string matches a string version of the
+                          current version number
+
+        :returns: None
         """
         info = VersionInfo()
 
@@ -42,13 +37,14 @@ class TestVersionString:
 
     def test_check_newer_version_new_maj(self):
         """
-        Test checking for a newer version when there is a new version
-        available, and its major version is greater than the current major
-        version.
+        Test checking a newer version when the input strings v_maj > the
+        current VERSION_MAJOR
 
-        Test Condition:
-            check_newer_version returns True
+        :test_condition: Returns True
+
+        :returns: None
         """
+
         info = VersionInfo()
 
         v_maj = info.VERSION_MAJOR + 1
@@ -62,13 +58,12 @@ class TestVersionString:
 
     def test_check_newer_version_new_min(self):
         """
-        Test checking for a newer version when there is a new version
-        available, and its minor verison is greater than the current minor
-        version.
+        Test checking a newer version when the input strings v_maj == the
+        current VERSION_MAJOR and the input v_min > the current VERSION_MINOR
 
+        :test_condition: Returns True
 
-        Test Condition:
-            check_newer_version() returns True
+        :returns: None
         """
 
         info = VersionInfo()
@@ -84,14 +79,14 @@ class TestVersionString:
 
     def test_check_newer_version_new_min_less(self):
         """
-        Test checking for a newer version when there is not a new version
-        available, and its minor verison is less than the current minor
-        version.
+        Test checking a newer version when the input v_maj == VERSION_MAJOR and
+        v_min < VERSION_MINOR
 
+        :test_condition: Returns False
 
-        Test Condition:
-            check_newer_version() returns False
+        :returns: None
         """
+
         info = VersionInfo()
 
         if info.VERSION_MINOR == 0:
@@ -108,14 +103,15 @@ class TestVersionString:
 
     def test_check_newer_version_new_patch(self):
         """
-        Test checking for a newer version when there is a new version
-        available, and its patch verison is greater than the current patch
-        version.
+        Test checking a newer version when the input strings v_maj == the
+        current VERSION_MAJOR and the input v_min == the current VERSION_MINOR
+        and the input v_patch > the current VERSION_PATCH
 
+        :test_condition: Returns True
 
-        Test Condition:
-            check_newer_version() returns True
+        :returns: None
         """
+
         info = VersionInfo()
 
         v_maj = info.VERSION_MAJOR
@@ -129,14 +125,15 @@ class TestVersionString:
 
     def test_check_newer_version_no_new_patch(self):
         """
-        Test checking for a newer version when there is not a new version
-        available, and its patch verison is less than the current patch
-        version.
+        Test checking a newer version when the input strings v_maj == the
+        current VERSION_MAJOR and the input v_min == the current VERSION_MINOR
+        and the input v_patch < the current VERSION_PATCH
 
+        :test_condition: Returns False
 
-        Test Condition:
-            check_newer_version() returns False
+        :returns: None
         """
+
         info = VersionInfo()
 
         v_maj = info.VERSION_MAJOR
@@ -150,12 +147,14 @@ class TestVersionString:
 
     def test_check_newer_version_false(self):
         """
-        Test when there is not a new version
+        Test checking a newer version when the v_maj <  the current
+        VERSION_MAJOR
 
+        :test_condition: Returns False
 
-        Test Condition:
-            check_newer_version returns False
+        :returns: None
         """
+
         info = VersionInfo()
 
         if info.VERSION_MAJOR == 0:
@@ -172,12 +171,11 @@ class TestVersionString:
 
     def test_main_not_enough_args(self):
         """
-        Test calling the main function with fewer command line arguments than
-        are required.
+        Test main with less than 2 args
 
+        :test_condition: sys.exit(1)
 
-        Test Condition:
-            Exit with code 1
+        :returns: None
         """
 
         with pytest.raises(SystemExit) as e:
@@ -186,11 +184,11 @@ class TestVersionString:
 
     def test_main_invalid_version_string(self):
         """
-        Test calling the script with an invalid version string.
+        Test main with a version string not in format 'x.y.z'
 
+        :test_condition: sys.exit(1)
 
-        Test Condition:
-            Exit with code 1
+        :returns: None
         """
 
         with pytest.raises(SystemExit) as e:
@@ -208,13 +206,12 @@ class TestVersionString:
 
     def test_main_with_update(self):
         """
-        Test calling the script when an update is available
+        Test main when the given version number is newer
 
+        :test_condition: sys.exit(0)
 
-        Test Condition:
-            Exit with code 0
+        :returns: None
         """
-
         info = VersionInfo()
 
         v_maj = info.VERSION_MAJOR + 1
@@ -237,11 +234,11 @@ class TestVersionString:
 
     def test_main_no_update(self):
         """
-        Test calling the script when there is not an update.
+        Test main when the given version number is older
 
+        :test_condition: sys.exit(2)
 
-        Test Condition:
-            Exit code 2
+        :returns: None
         """
 
         info = VersionInfo()
@@ -267,73 +264,54 @@ class TestVersionString:
 
             assert e.value_code == 2
 
-
-class TestGithubRelease():
-    """
-    Tests related to getting the newest version from Github
-    """
-
-    @pytest.fixture
-    def response_mock(self, mocker):
+    def test_get_newest_release_info(self, mocker):
         """
-        A mock for the response module returning a version string from Github
+         Test getting the newest release info
 
-        Args:
-            mocker: The mock module
-        """
+         :test_condition: Returns the version string
+         :returns: None
+         """
+
         response_mock = MagicMock()
         response_mock.json.return_value = {"name": "Release v0.1.1"}
         mocker.patch('requests.get', return_value=response_mock)
-
-    def test_get_newest_release_info(self, response_mock):
-        """
-        Test getting the newest version string from Github
-
-        Args:
-            response_mock: Mock for the request to Github
-
-        Test Condition:
-            v0.1.1 is returned from get_newest_release_info()
-        """
 
         info = VersionInfo()
 
         assert "v0.1.1" == info.get_newest_release_info()
 
-    def test_check_for_update_true(self, response_mock, mocker):
+    def test_check_for_update_true(self, mocker):
         """
-        Test checking for an update when there is a new version.
+        Test checking for updates
 
-        Args:
-            response_mock: Mock for the request to Github
-            mocker: The mocker module interface
-
-        Test Condition:
-            check_for_update returns "There is a new version, v0.1.1"
+        :param mocker: Mocker
+        :returns: None
         """
+
+        response_mock = MagicMock()
+        response_mock.json.return_value = {"name": "Release v0.1.1"}
+        mocker.patch('requests.get', return_value=response_mock)
 
         info = VersionInfo()
-
         mocker.patch.object(info, "check_newer_version", return_value=True)
 
         result = info.check_for_update()
 
         assert result == "There is a new version, v0.1.1."
 
-    def test_check_for_update_false(self, response_mock, mocker):
+    def test_check_for_update_false(self, mocker):
         """
-        Test checking for an update when there is not a new version
+        Test checking for updates
 
-        Args:
-            response_mock: Mock for the request to GitHub
-            mocker: The mocker module interface
-
-        Test Condition:
-            check_for_update() return "There are no updates."
+        :param mocker: Mocker
+        :returns: None
         """
+
+        response_mock = MagicMock()
+        response_mock.json.return_value = {"name": "Release v0.1.1"}
+        mocker.patch('requests.get', return_value=response_mock)
 
         info = VersionInfo()
-
         mocker.patch.object(info, "check_newer_version", return_value=False)
 
         result = info.check_for_update()
