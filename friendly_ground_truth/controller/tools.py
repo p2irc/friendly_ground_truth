@@ -11,7 +11,6 @@ Description: Definitions of tools that can be used in Friendly Ground Truth
 import logging
 
 from friendly_ground_truth.view.icons.icon_strings import (threshold_icon)
-from friendly_ground_truth.model.model import Patch
 
 module_logger = logging.getLogger('friendly_gt.controller.tools')
 
@@ -77,7 +76,8 @@ class ThresholdTool(FGTTool):
 
     def __init__(self):
 
-        super.__init__("Threshold Tool", threshold_icon, 1, 'arrow')
+        super(ThresholdTool, self)\
+            .__init__("Threshold Tool", threshold_icon, 1, 'arrow')
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.ThresholdTool')
@@ -98,12 +98,11 @@ class ThresholdTool(FGTTool):
 
     @property
     def increment(self):
-        return self.increment
+        return self._increment
 
     @increment.setter
     def increment(self, value):
-        if value >= 0 and value <= 1:
-            self._increment = value
+        self._increment = value
 
     @property
     def patch(self):
@@ -111,11 +110,8 @@ class ThresholdTool(FGTTool):
 
     @patch.setter
     def patch(self, patch):
-        if isinstance(patch, Patch):
-            self._patch = patch
-            self._threshold = patch.threshold
-        else:
-            raise TypeError("patch must be of type Patch")
+        self._patch = patch
+        self._threshold = patch.threshold
 
     def adjust_threshold(self, direction):
         """

@@ -48,3 +48,16 @@ class TestFGTTool():
         tool.icon_string = 'xyz'
 
         assert tool.icon_string == 'xyz'
+
+    def test_set_cursor(self):
+        """
+        Test setting the cursor.
+
+
+        Test Condition:
+            The cursor is set.
+        """
+
+        tool = FGTTool("test tool", 'abc', 123, cursor='hand')
+
+        assert tool.cursor == 'hand'
