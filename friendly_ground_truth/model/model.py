@@ -67,22 +67,57 @@ class Image():
 
     @property
     def path(self):
+        """
+        Represents the path to the image file.
+
+
+        Returns:
+            The path to the image file.
+        """
         return self._path
 
     @property
     def num_patches(self):
+        """
+        The number of patches to split each row into.
+
+
+        Returns:
+            The number of patches each row should be split into.
+        """
         return self._num_patches
 
     @property
     def image(self):
+        """
+        The image data.
+
+
+        Returns:
+            The image data, a numpy array.
+        """
         return self._image
 
     @property
     def mask(self):
+        """
+        The mask for the whole image.
+
+
+        Returns:
+            A boolean numpy array representing the image mask.
+        """
         return self._mask
 
     @property
     def patches(self):
+        """
+        A list of the patches for this image.
+
+
+        Returns:
+            A list of Patch objects.
+        """
         return self._patches
 
     def _load_image(self):
@@ -90,7 +125,10 @@ class Image():
         Load the image associated with this instance
 
         Returns:
-            None, self._image and self_mask will be initialized
+            None
+
+        Postconditions:
+            self._image and self_mask will be initialized
         """
         self.logger.debug("Loading image.")
 
@@ -106,7 +144,10 @@ class Image():
         Create a list of patches from the image
 
         Returns:
-            None, self._patches will be set to a list of Patch objects
+            None
+
+        Postconditions:
+            self._patches will be set to a list of Patch objects
         """
 
         self.logger.debug("Creating patches.")
@@ -152,13 +193,15 @@ class Image():
 
 
         Returns:
-            None, self._mask will be set to the combined mask
+            None
+
+        Postconditions:
+            self._mask will be set to the combined mask
         """
 
-        mask = np.zeros(self.image._padded_shape, dtype=bool)
+        mask = np.zeros(self._padded_shape, dtype=bool)
 
         for patch in self.patches:
-
             r, c = patch.patch_index
             r = r * patch.patch.shape[0]
             c = c * patch.patch.shape[1]
@@ -174,16 +217,19 @@ class Image():
 
 
         Returns:
-            None, self._landmark_matrix will be set
+            None
+
+        Postconditions:
+            self._landmark_matrix will be set
         """
 
         labels = np.zeros(self._padded_shape, dtype=np.uint8)
 
         for patch in self.patches:
-
             r, c = patch.patch_index
             r = r * patch.patch.shape[0]
-            c = r * patch.patch.shape[1]
+            c = c * patch.patch.shape[1]
+
             labels[r:r+patch.patch.shape[0],
                    c:c+patch.patch.shape[1]] += patch.landmark_labels
 
@@ -198,7 +244,10 @@ class Image():
             pathname: The path to the mask image file to save as.
 
         Returns:
-            None, a PNG image representing the mask will be saved at the
+            None
+
+        Postconditions:
+            A PNG image representing the mask will be saved at the
             specified path.
         """
         self._create_mask()
@@ -218,19 +267,25 @@ class Image():
             pathname: The path to the labelling matrix file
 
         Returns:
-            None, a .npy file will be saved at the specified path
+            None
+
+        Postconditions:
+            a .npy file will be saved at the specified path
         """
 
         self._create_labelling()
         np.save(pathname, self._landmark_matrix)
 
-    def _remove_small_comonents(self):
+    def _remove_small_components(self):
         """
         Remove components that are not connected to the main root.
 
 
         Returns:
-            None, self._mask will be updated with the cleaned mask
+            None
+
+        Postconditions:
+            self._mask will be updated with the cleaned mask
         """
         from skimage.measure import label
 
@@ -267,7 +322,7 @@ class Patch():
 
         self._patch = patch
         self._mask = np.zeros(self._patch.shape, dtype=bool)
-        self._landmark_labels = np.zeros(self.patch.shape, dtype=np.uint8)
+        self._landmark_labels = np.zeros(self._patch.shape, dtype=np.uint8)
 
         self._patch_index = patch_index
 
@@ -289,36 +344,103 @@ class Patch():
 
     @property
     def threshold(self):
+        """
+        The current threshold value for the patch.
+
+
+        Returns:
+            The value of the current threshold.
+        """
         return self._threshold
 
     @threshold.setter
     def threshold(self, value):
+        """
+        Set the threshold for this patch.
+
+        Args:
+            value: The value to set the threshold to.
+
+        Returns:
+            None
+
+        Postconditions:
+            The threshold will be applied to the mask.
+            The overlay_image property will be updated to show the new mask.
+        """
 
         if value >= 0 and value <= 1:
 
             self._threshold = value
-
             self._apply_threshold(value)
             self._overlay_mask()
 
     @property
     def patch(self):
+        """
+        The patch data for this patch.
+
+
+        Returns:
+            A numpy array representing the image data for this patch.
+        """
         return self._patch
 
     @property
     def mask(self):
+        """
+        The current mask for this patch.
+
+
+        Returns:
+            A numpy array representing the mask for this patch.
+        """
         return self._mask
 
     @mask.setter
     def mask(self, mask):
+        """
+        Set the mask.
+
+        Args:
+            mask: The new mask, a boolean numpy array.
+
+        Returns:
+            None
+        """
         self._mask = mask
 
     @property
+    def landmark_labels(self):
+        """
+        The landmark label matrix for this patch.
+
+
+        Returns:
+            A numpy array containing class labellings for pixels in this patch.
+        """
+        return self._landmark_labels
+
+    @property
     def patch_index(self):
+        """
+        The index of this patch in the larger parent image matrix.
+
+
+        Returns:
+            A tuple (i, j), the row and column index for this patch.
+        """
         return self._patch_index
 
     @property
     def overlay_image(self):
+        """
+        The overlay image displaying the mask on top of the patch image data.
+
+
+        Returns:
+            A numpy array colour image.
+        """
         return self._overlay_image
 
     def _apply_threshold(self, value):
@@ -329,7 +451,10 @@ class Patch():
             value: The value for the threshold
 
         Returns:
-            None, the _mask property will be updated with the new threshold
+            None
+
+        Postconditions:
+            The _mask property will be updated with the new threshold
             applied
 
         Raises:
@@ -348,7 +473,10 @@ class Patch():
 
 
         Returns:
-            None, the _overlay_image property will contain the image with the
+            None
+
+        Postconditions:
+            The _overlay_image property will contain the image with the
             binary mask over top.
         """
 
@@ -383,7 +511,10 @@ class Patch():
 
 
         Returns:
-            None, the mask property will be reset to all 0's
+            None
+
+        Postconditions:
+            The mask property will be reset to all 0's
         """
         self._mask = np.zeros(self.patch.shape, dtype=bool)
         self.thresh = 1
@@ -398,7 +529,10 @@ class Patch():
             label: The class label for the pixels to be given
 
         Returns:
-            None, the _landmark_labels property will be udpated with the new
+            None
+
+        Postconditions:
+            The _landmark_labels property will be udpated with the new
             landmark annotation.
         """
         rr, cc = self._get_circle(position, radius)
@@ -407,7 +541,6 @@ class Patch():
 
         # Don't mark anything that isn't foreground
         self._landmark_labels[self.mask == 0] = 0
-
         self._overlay_mask()
 
     def remove_landmark(self, position, radius):
@@ -420,7 +553,10 @@ class Patch():
             radius: The radius of a circle to un-label
 
         Returns:
-            None, the _landmark_labels property will be updated with the new
+            None
+
+        Postconditions:
+            The _landmark_labels property will be updated with the new
             annotation.
         """
 
@@ -439,7 +575,10 @@ class Patch():
             radius: The radius of the circular region
 
         Returns:
-            None, the _mask will be updated with the circular region set to 1's
+            None
+
+        Postconditions:
+            The _mask will be updated with the circular region set to 1's
         """
         rr, cc = self._get_circle(position, radius)
 
@@ -456,7 +595,10 @@ class Patch():
             radius: The radius of the circular region
 
         Returns:
-            None, the _mask will be updated with the circular region set to 0's
+            None
+
+        Postconditions:
+            The _mask will be updated with the circular region set to 0's
         """
         rr, cc = self._get_circle(position, radius)
 
@@ -475,12 +617,15 @@ class Patch():
             tolerance: The tolerance for pixels to be included
 
         Returns:
-            None, the _mask will be updated with the new region.
+            None
+
+        Postconditions:
+            The _mask will be updated with the new region.
         """
 
         from skimage.segmentation import flood
 
-        position = int(position[0], int(position[1]))
+        position = int(position[0]), int(position[1])
 
         # If we are still editing the tolerance, we need to go back to the old
         # mask.
@@ -508,11 +653,14 @@ class Patch():
             tolerance: The tolerance for pixels to be included
 
         Returns:
-            None, the _mask will be updated with the new region
+            None
+
+        Postconditions:
+            The _mask will be updated with the new region
         """
         from skimage.segmentation import flood
 
-        position = int(position[0], position[1])
+        position = int(position[0]), int(position[1])
 
         # If we are still editing the tolerance, we need to go back to the old
         # mask.
