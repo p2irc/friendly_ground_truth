@@ -84,7 +84,9 @@ class MainWindow(ttk.Frame):
             self._canvas.destroy()
 
         self._canvas = FGTCanvas(self.master, image)
-        self._canvas.grid(row=0, column=0)
+        self._canvas.grid(row=1, column=0, sticky="NSEW")
+        self._master.grid_rowconfigure(0, weight=0)
+        self._master.grid_rowconfigure(1, weight=1)
 
     def update_canvas_image(self, image):
         """
@@ -115,34 +117,14 @@ class MainWindow(ttk.Frame):
         """
         self._key_mappings = {}
 
-        for tool_id in self._contoller.image_tools.keys():
+        for tool_id in self._controller.image_tools.keys():
             tool = self._controller.image_tools[tool_id]
-
-            if tool.name == "Threshold Tool":
-                self._key_mappings[tool.id] = 'T'
-            elif tool.name == "Add Region Tool":
-                self._key_mappings[tool.id] = 'A'
-            elif tool.name == "Remove Region Tool":
-                self._key_mappings[tool.id] = 'R'
-            elif tool.name == "No Root Tool":
-                self._key_mappings[tool.id] = 'X'
-            elif tool.name == "Flood Add Tool":
-                self._key_mappings[tool.id] = 'F'
-            elif tool.name == "Flood Remove Tool":
-                self._key_mappings[tool.id] = 'L'
-            elif tool.name == "Next Patch":
-                self._key_mappings[tool.id] = 'Right Arrow'
-            elif tool.name == "Previous Patch":
-                self._key_mappings[tool.id] = 'Left Arrow'
-            elif tool.name == "Undo":
-                self._key_mappings[tool.id] = "CTRL+Z"
-            elif tool.name == "Redo":
-                self._key_mappings[tool.id] = "CTRL+R"
+            self._key_mappings[tool_id] = tool.key_mapping
 
         self._reverse_key_mappings = {}
 
         for tool_id in self._key_mappings.keys():
-            key = self._reverse_key_mappings[tool_id]
+            key = self._key_mappings[tool_id]
 
             self._reverse_key_mappings[key] = tool_id
 
@@ -260,19 +242,28 @@ class MainWindow(ttk.Frame):
         # Create image interaction tools
         image_tools = self._controller.image_tools
 
+        column = 0
         for tool_id in image_tools.keys():
             tool = image_tools[tool_id]
 
-            icon = self._load_icon_from_string(tool.icon)
+            icon = self._load_icon_from_string(tool.icon_string)
             button = tk.Button(self._toolbar, image=icon, relief='flat',
                                command=lambda: self._on_tool_selected(tool.id))
 
             button.image = icon
             button.pack(side="left", padx=2, pady=2)
+            # button.grid(column=column, row=0, sticky='EW')
+            column += 1
 
             self._create_tool_tip(button, tool.id, tool.name)
             self._toolbar_buttons[tool.id] = button
             self._orig_button_colour = button.cget("background")
+
+        self._image_indicator = tk.Label(self._toolbar, text="No Image Loaded")
+        self._image_indicator.pack(side='right', padx=2, pady=2)
+        # self._image_indicator.grid(column=column, row=0, sticky='W')
+        #self._toolbar.pack(side='top', fill='x')
+        self._toolbar.grid(column=0, row=0, sticky='NEW')
 
     def _on_tool_selected(self, id):
         """
@@ -348,6 +339,103 @@ class MainWindow(ttk.Frame):
 
         return img
 
+    def _on_load_image(self):
+        """
+        Called when the load image button is chosen
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The controllers Image property is set
+        """
+        self._controller.load_new_image()
+        self._old_img = None
+
+    def _on_save_mask(self):
+        """
+        Called when the save mask button is chosen
+
+        Returns:
+            None
+
+        Postcondition:
+            The controller will be called to save the mask.
+
+        Returns:
+            None
+        """
+        self._controller.save_mask()
+
+    def _on_about(self):
+        """
+        Called when the about button is chosen.
+
+
+        Returns:
+            None
+        """
+        # TODO: start the about window
+        pass
+
+    def _on_keyboard_shortcuts(self):
+        """
+        Called when the keyboard shortcuts button is chosen/
+
+
+        Returns:
+            None
+        """
+        # TODO: Open keyboard shortcuts window
+        pass
+
+    def start_progressbar(self, num_patches):
+        """
+        Start displaying a progressbar.
+
+        Args:
+            num_patches: The number of patches that are being loaded.
+
+        Returns:
+            None
+
+        Postconditions:
+            A progressbar window is opened and initialized
+        """
+        self.progress_popup = tk.Toplevel()
+        self.progress_popup.geometry("100x50+500+400")
+
+        tk.Label(self.progress_popup, text="Image Loading.").grid(row=0, column=0)
+
+        self.load_progress = 0
+        self.load_progress_var = tk.DoubleVar()
+        self.load_progress_bar = ttk.Progressbar(self.progress_popup,
+                                              variable=self.load_progress_var,
+                                              maximum=100)
+
+        self.load_progress_bar.grid(row=1, column=0)
+
+        self.progress_step = float(100.0/num_patches)
+        self.progress_popup.pack_slaves()
+
+    def show_image(self, img):
+        """
+        Display the given image on the canvas.
+
+        Args:
+            img: The image to display, a numpy array
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas's image will be set to the image.
+        """
+
+        if self._canvas is None:
+            self.create_canvas(img)
+            return
 
 class CreateToolTip(object):
     """

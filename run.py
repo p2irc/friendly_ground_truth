@@ -19,7 +19,7 @@ import sys
 import base64
 
 
-#from friendly_ground_truth.controller.controller import Controller
+from friendly_ground_truth.controller.controller import Controller
 from friendly_ground_truth.view.icons.icon_strings import fgt_favicon
 
 debug = False

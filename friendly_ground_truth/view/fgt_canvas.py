@@ -7,6 +7,8 @@ Date: 13-05-2020
 
 Description: Canvas widget for displaying and interacting with images.
 
+
+Code largely adapted from https://stackoverflow.com/a/48137257
 """
 import math
 import warnings

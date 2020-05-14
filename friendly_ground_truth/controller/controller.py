@@ -1,0 +1,431 @@
+"""
+File Name: controller.py
+
+Authors: Kyle Seidenthal
+
+Date: 13-05-2020
+
+Description: Main controller for the application
+
+"""
+
+import os
+
+import tkinter.filedialog
+import tkinter.messagebox
+import numpy as np
+import logging
+module_logger = logging.getLogger('friendly_gt.controller.controller')
+
+from friendly_ground_truth.view.main_window import MainWindow
+from friendly_ground_truth.controller.tools import (ThresholdTool,
+                                                    AddRegionTool,
+                                                    RemoveRegionTool,
+                                                    NoRootTool,
+                                                    FloodAddTool,
+                                                    FloodRemoveTool,
+                                                    PreviousPatchTool,
+                                                    NextPatchTool,
+                                                    UndoTool,
+                                                    RedoTool)
+
+from friendly_ground_truth.controller.undo_manager import UndoManager
+from friendly_ground_truth.model.model import Image, Patch
+
+
+class Controller():
+    """
+    Main controller for the application.
+
+    Attributes:
+        {% An Attribute %}: {% Description %}
+    """
+    CONTEXT_TRANSPARENCY = 100
+    NUM_PATCHES = 10
+    def __init__(self, root):
+        """
+        Create a Controller object
+
+        Args:
+            root: The tk Root
+
+        Returns:
+            A controller object
+
+        Postconditions:
+            The main application window is started
+        """
+
+        self._root = root
+        self._logger = logging.getLogger('friendly_gt.controller.'
+                                         'controller.Controller')
+        # The last directory used to load an image
+        self._last_load_dir = None
+        # The last directory used to save an image
+        self._last_save_dir = None
+
+        # Image containing neighbouring patches
+        self._context_img = None
+
+        self._undo_manager = UndoManager()
+
+        self._init_tools()
+
+        self._main_window = MainWindow(self._root, self)
+
+    @property
+    def image_tools(self):
+        return self._image_tools
+
+    def _init_tools(self):
+        """
+        Create all the required tools.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            self._image_tools will be created as a dictionary of id, tool pairs
+        """
+
+        image_tools = {}
+
+        thresh_tool = ThresholdTool(self._undo_manager)
+        image_tools[thresh_tool.id] = thresh_tool
+
+        add_reg_tool = AddRegionTool(self._undo_manager)
+        image_tools[add_reg_tool.id] = add_reg_tool
+
+        rem_reg_tool = RemoveRegionTool(self._undo_manager)
+        image_tools[rem_reg_tool.id] = rem_reg_tool
+
+        flood_add_tool = FloodAddTool(self._undo_manager)
+        image_tools[flood_add_tool.id] = flood_add_tool
+
+        flood_rem_tool = FloodRemoveTool(self._undo_manager)
+        image_tools[flood_rem_tool.id] = flood_rem_tool
+
+        no_root_tool = NoRootTool(self._undo_manager,
+                                  self._next_patch_callback)
+        image_tools[no_root_tool.id] = no_root_tool
+
+        prev_patch_tool = PreviousPatchTool(self._undo_manager,
+                                            self._prev_patch_callback)
+        image_tools[prev_patch_tool.id] = prev_patch_tool
+
+        next_patch_tool = NextPatchTool(self._undo_manager,
+                                        self._next_patch_callback)
+        image_tools[next_patch_tool.id] = next_patch_tool
+
+        undo_tool = UndoTool(self._undo_manager,
+                             self._undo_callback)
+        image_tools[undo_tool.id] = undo_tool
+
+        redo_tool = RedoTool(self._undo_manager,
+                             self._redo_callback)
+        image_tools[redo_tool.id] = redo_tool
+
+        self._image_tools = image_tools
+
+    def _next_patch_callback(self, patch, index):
+        """
+        Called when the next patch is determined.
+
+        Args:
+            patch: The next patch.
+            index: The index in the patches list of the patch.
+
+        Returns:
+            None
+        """
+
+        self._current_patch = patch
+        self._current_patch_index = index
+
+    def _prev_patch_callback(self, patch, index):
+        """
+        Called when the previous patch is determined.
+
+        Args:
+            patch: The previous patch
+            index: The index of that patch in the list of patches.
+
+        Returns:
+            None
+        """
+
+        self._current_patch = patch
+        self._current_patch_index = index
+
+    def _undo_callback(self, patch, string):
+        """
+        Called when undo is done.
+
+        Args:
+            patch: The patch returned from the undo stack.
+            string: The string for that patch.
+
+        Returns:
+            None
+        """
+
+        if patch is None:
+            return
+
+        self._undo_manager.add_to_redo_stack(patch, string)
+
+        # TODO: Enable redo button here
+
+        self._current_patch = patch
+        self._image.patches[self._current_patch_index] = patch
+
+    def _redo_callback(self, patch, string):
+        """
+        Called when redo is done.
+
+        Args:
+            patch: The patch returned from the redo stack.
+            string: The string for that patch.
+
+        Returns:
+            None
+        """
+
+        if patch is None:
+            return
+
+        self._undo_manager.add_to_undo_stack(patch, string)
+
+        if len(self._undo_manager.redo_stack) == 0:
+            pass
+            # TODO Disable redo button here
+
+        self._current_patch = patch
+        self._image.patches[self._current_patch_index] = patch
+
+    def load_new_image(self):
+        """
+        Load a new image with a file dialog.
+
+
+        Returns:
+            None
+        """
+
+        self._context_img = None
+        filetypes = [("TIF Files", "*.tif"), ("TIFF Files", "*.tiff"),
+                     ("PNG Files", "*.png"), ("JPEG Files", "*.jpg")]
+
+        if self._last_load_dir is None:
+            initial_dir = os.path.expanduser("~")
+        else:
+            initial_dir = self._last_load_dir
+
+        file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
+                                                       initialdir=initial_dir)
+
+        if file_name is None:
+            return
+
+        self._last_load_dir = os.path.split(file_name)[0]
+
+        self._image_path = file_name
+
+        try:
+            self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
+            self._image = Image(file_name, 10, self._update_progressbar)
+
+        except FileNotFoundError:
+            self._logger.debug("There was a problem loading the image.")
+            return
+
+        self._current_patch_index = 0
+
+        self._display_current_patch()
+
+    def _display_current_patch(self):
+        """
+        Display the current patch.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The main window's canvas will display the given image.
+        """
+
+        if self._image is None:
+            return
+
+        patch = self._image.patches[self._current_patch_index]
+        img = self._get_context_patches(patch)
+
+        # TODO: Update info panels
+
+        self._main_window.show_image(img)
+
+    def _get_context_patches(self, patch):
+        """
+        Get the patches immediately surrounding the current patch and place
+        them in a larger image.
+
+        Args:
+            patch: The cirrent patch
+
+        Returns:
+            An image for display.
+        """
+
+        # Find the neighbouring patches
+        index = patch.patch_index
+
+        if self._context_img is not None:
+            patch = self._image.patches[self._current_patch_index]
+            r_start = self._patch_offset[0]
+            r_end = r_start + patch.overlay_image.shape[0]
+            c_start = self._patch_offset[1]
+            c_end = c_start + patch.overlay_image.shape[1]
+
+            o_img = patch.overlay_image
+            o_img = np.dstack((o_img, np.full(o_img.shape[0:-1],
+                               255, dtype=o_img.dtype)))
+            self._logger.debug("Using cached context image")
+
+            self._context_img[r_start:r_end, c_start:c_end] = o_img
+            return self._context_img
+
+        neighbouring_indices = []
+
+        start_i = index[0] - 1
+        start_j = index[1] - 1
+
+        num_rows = 0
+        num_cols = 0
+
+        for i in range(start_i, start_i + 3):
+
+            if i < 0 or i >= self._image.num_patches:
+                self._logger.debug("Patch Out Of Bounds")
+                continue
+            for j in range(start_j, start_j + 3):
+                if j < 0 or j >= self._image.num_patches:
+                    self._logger.debug("Patch Out Of Bounds")
+                    continue
+
+                neighbouring_indices.append((i, j))
+
+                if num_rows == 0:
+                    num_cols += 1
+            num_rows += 1
+
+        neighbouring_patches = []
+        drawable_patch_index = None  # Index of our patch in this list
+
+        # TODO: This could be more efficient I'm sure
+        for i in neighbouring_indices:
+            for patch in self._image.patches:
+                if patch.patch_index == i:
+                    o_img = patch.overlay_image
+
+                    if i == index:
+                        o_img = np.dstack((o_img, np.full(o_img.shape[0:-1],
+                                           255,
+                                           dtype=o_img.dtype)))
+                        drawable_patch_index = neighbouring_indices.index(i)
+                    else:
+                        o_img = np.dstack((o_img, np.full(o_img.shape[0:-1],
+                                           self.CONTEXT_TRANSPARENCY,
+                                           dtype=o_img.dtype)))
+
+                    neighbouring_patches.append(o_img)
+
+        # Layer them into a numpy array
+        img_shape = (patch.overlay_image.shape[0] * num_rows,
+                     patch.overlay_image.shape[1] * num_cols, 4)
+        img = np.zeros(img_shape, dtype=np.ubyte)
+
+        col_num = 0
+        row_num = 0
+
+        i = 0
+        for patch in neighbouring_patches:
+            r, c = row_num, col_num
+            r = r * patch.shape[0]
+            c = c * patch.shape[1]
+            img[r:r+patch.shape[0],
+                c:c+patch.shape[1]] += patch
+            if i == drawable_patch_index:
+                self.patch_offset = (r, c)
+
+            col_num += 1
+
+            if col_num == num_cols:
+                col_num = 0
+                row_num += 1
+
+            i += 1
+
+        self._context_img = img
+        return img
+
+
+    def _update_progressbar(self):
+        """
+        Update the progressbar popup
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The progressbar will be incremented.
+        """
+        self._main_window.progress_popup.update()
+        self._main_window.load_progress += self._main_window.progress_step
+        self._main_window.load_progress_var.set(self._main_window.load_progress)
+
+        if self._main_window.load_progress >= self.NUM_PATCHES ** 2:
+            self._main_window.progress_popup.destroy()
+
+    def save_mask(self):
+        """
+        Save the finished image mask.
+
+
+        Returns:
+            None
+        """
+
+        if not self._previewed:
+            self._show_saved_preview()
+            return
+
+        self._mask_saved = True
+
+        if self._last_save_dir is None:
+            initial_dir = os.path.expanduser("~")
+        else:
+            initial_dir = self._last_save_dir
+
+        dir_path = tkinter.filedialog.askdirectory(initialdir=initial_dir)
+
+        if dir_path is None:
+            return
+
+        image_name = self._get_image_name_from_path(self._image_path)
+        # labels_name = self._get_landmark_name_from_path(self._image_path)
+
+        mask_pathname = os.path.join(dir_path, image_name)
+        # label_pathname = os.path.join(dir_path, labels_name)
+
+        try:
+            self._image.export_mask(mask_pathname)
+            # self._image.export_labels(label_pathname)
+
+            tkinter.messagebox.showinfo("Image Mask Saved!",
+                                        "Image Mask Saved!")
+
+        except IOError:
+            self._logger.error("Could not save file!")
