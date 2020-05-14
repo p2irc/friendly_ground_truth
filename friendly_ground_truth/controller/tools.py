@@ -15,7 +15,11 @@ from friendly_ground_truth.view.icons.icon_strings import (threshold_icon,
                                                            remove_region_icon,
                                                            no_root_icon,
                                                            flood_add_icon,
-                                                           flood_remove_icon)
+                                                           flood_remove_icon,
+                                                           prev_patch_icon,
+                                                           next_patch_icon,
+                                                           undo_icon,
+                                                           redo_icon)
 
 module_logger = logging.getLogger('friendly_gt.controller.tools')
 
@@ -337,3 +341,180 @@ class FloodRemoveTool(FGTTool):
         """
 
         self.patch.flood_remove(position, self.tolerance)
+
+
+class PreviousPatchTool(FGTTool):
+    """
+    A Tool that moves to the previous patch for the current image.
+
+    Attributes:
+        image: The image to operate on
+    """
+
+    def __init__(self, image):
+        """
+        Create the tool.
+
+        Args:
+            image: The image that is being operated on.
+
+        Returns:
+            A tool object
+        """
+        super(PreviousPatchTool, self)\
+            .__init__("Previous Patch", prev_patch_icon, 7, 'none')
+
+        self._image = image
+
+    @property
+    def image(self):
+        return self._image
+
+    @image.setter
+    def image(self, image):
+        self._image = image
+
+    def prev_patch(self, current_patch_num):
+        """
+        Move to the previous patch in the image.
+
+        Args:
+            current_patch_num: The index of the current patch.
+
+        Returns:
+            (patch, current_patch_index) if there is a previous patch
+            (None, -1) if there is not a previous patch
+        """
+
+        patches = self._image.patches
+
+        prev_index = current_patch_num - 1
+
+        if prev_index >= 0:
+            return patches[prev_index], prev_index
+
+        else:
+            return None, -1
+
+class NextPatchTool(FGTTool):
+    """
+    A Tool that moves to the next patch for the current image.
+
+    Attributes:
+        image: The image to operate on
+    """
+
+    def __init__(self, image):
+        """
+        Create the tool.
+
+        Args:
+            image: The image that is being operated on.
+
+        Returns:
+            A tool object
+        """
+        super(NextPatchTool, self)\
+            .__init__("Next Patch", next_patch_icon, 8, 'none')
+
+        self._image = image
+
+    @property
+    def image(self):
+        return self._image
+
+    @image.setter
+    def image(self, image):
+        self._image = image
+
+    def next_patch(self, current_patch_num):
+        """
+        Move to the next patch in the image.
+
+        Args:
+            current_patch_num: The index of the current patch.
+
+        Returns:
+            (patch, current_patch_index) if there is a next patch
+            (None, -1) if there is not a next patch
+        """
+
+        patches = self._image.patches
+
+        next_index = current_patch_num + 1
+
+        if next_index < len(patches):
+            return patches[next_index], next_index
+
+        else:
+            return None, -1
+
+
+class UndoTool(FGTTool):
+    """
+    A tool for undoing mistakes.
+
+    Attributes:
+        undo_manager: A manager for undo operations
+    """
+
+    def __init__(self, undo_manager):
+        """
+        Initialize the tool
+
+        Args:
+            undo_manager: The manager for undo and redo operations
+
+        Returns:
+            A tool object
+        """
+        super(UndoTool, self)\
+            .__init__("Undo", undo_icon, 9, 'none')
+
+        self._undo_manager = undo_manager
+
+    def undo(self):
+        """
+        Undo the last operation.
+
+
+        Returns:
+            The patch data and the operation string
+        """
+
+        return self.undo_manager.undo()
+
+
+class RedoTool(FGTTool):
+    """
+    A tool for redoing undid mistakes.
+
+    Attributes:
+        undo_manager: A manager for undo operations
+    """
+
+    def __init__(self, undo_manager):
+        """
+        Initialize the tool
+
+        Args:
+            undo_manager: The manager for undo and redo operations
+
+        Returns:
+            A tool object
+        """
+        super(RedoTool, self)\
+            .__init__("Redo", redo_icon, 10, 'none')
+
+        self._undo_manager = undo_manager
+
+    def redo(self):
+        """
+        Redo the undone last operation.
+
+
+        Returns:
+            The patch data and the operation string
+        """
+
+        return self.undo_manager.redo()
