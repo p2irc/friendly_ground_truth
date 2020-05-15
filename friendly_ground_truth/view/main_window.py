@@ -19,7 +19,11 @@ from PIL import Image
 from PIL import ImageTk as itk
 
 from friendly_ground_truth.view.fgt_canvas import FGTCanvas
+from friendly_ground_truth.view.info_panel import InfoPanel
+
 from sys import platform
+
+from functools import partial
 
 import logging
 module_logger = logging.getLogger('friendly_gt.view')
@@ -47,25 +51,73 @@ class MainWindow(ttk.Frame):
 
         ttk.Frame.__init__(self, master=master)
 
+        # --------------------------------------
+        # Private Attributes
+        # --------------------------------------
+
+        # The parent tkinter object
         self._master = master
+        # The controller for this window
         self._controller = controller
 
+        # For logging
         self._logger = logging.getLogger('friendly_gt.view.MainWindow')
 
+        # The canvas used to display and interact with images
+        self._canvas = None
+
+        # The previous state of the keyboard
+        self._previous_state = 0
+
+        # Mappings from tool id to keyboard shortcut
+        self._key_mappings = {}
+        # Mappings from keyboard shortcut to tool id
+        self._reverse_key_mappings = {}
+
+        # Tkinter menu objects
+        self._menubar = None
+        self._filemenu = None
+        self._helpmenu = None
+
+        # Toolbar
+        self._toolbar = None
+        # id -> button mapping
+        self._toolbar_buttons = {}
+        # The colour of a default button
+        self._orig_button_colour = None
+        # The label displaying the path to the current image
+        self._image_indicator = None
+
+        # The previous image
+        self._old_img = None
+        # --------------------------------------
+
         self._master.title("Friendly Ground Truth")
-        self._master.geometry('800x600')
         self._master.rowconfigure(0, weight=1)
         self._master.columnconfigure(0, weight=1)
-
-        self._canvas = None
 
         self._register_key_mappings()
 
         self._create_menubar()
 
         # Interactions
-        self._previous_state = 0
-        self.bind('<Key>', self._keystroke)
+        self.bind_all('<Key>', self._keystroke)
+        # Mousewheel for Windows and Mac
+        self.bind_all("<MouseWheel>", self._on_mousewheel)
+
+        # Mousewheel for Linux
+        self.bind_all("<Button-5>", self._on_mousewheel)
+        self.bind_all("<Button-4>", self._on_mousewheel)
+
+        self._info_panel = InfoPanel(self.master)
+        self._info_panel.config(borderwidth=5)
+        self._info_panel.config(relief='ridge')
+
+        self._info_panel.grid(row=2, column=0, sticky='ew')
+
+    # ==========================================================
+    # PUBLIC FUNCTIONS
+    # ==========================================================
 
     def create_canvas(self, image):
         """
@@ -88,6 +140,57 @@ class MainWindow(ttk.Frame):
         self._master.grid_rowconfigure(0, weight=0)
         self._master.grid_rowconfigure(1, weight=1)
 
+    def start_progressbar(self, num_patches):
+        """
+        Start displaying a progressbar.
+
+        Args:
+            num_patches: The number of patches that are being loaded.
+
+        Returns:
+            None
+
+        Postconditions:
+            A progressbar window is opened and initialized
+        """
+        self.progress_popup = tk.Toplevel()
+        self.progress_popup.geometry("100x50+500+400")
+
+        tk.Label(self.progress_popup, text="Image Loading.")\
+            .grid(row=0, column=0)
+
+        self.load_progress = 0
+        self.load_progress_var = tk.DoubleVar()
+        self.load_progress_bar = ttk.Progressbar(self.progress_popup,
+                                                 variable=self.
+                                                 load_progress_var,
+                                                 maximum=100)
+
+        self.load_progress_bar.grid(row=1, column=0)
+
+        self.progress_step = float(100.0/num_patches)
+        self.progress_popup.pack_slaves()
+
+    def show_image(self, img):
+        """
+        Display the given image on the canvas.
+
+        Args:
+            img: The image to display, a numpy array
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas's image will be set to the image.
+        """
+
+        if self._canvas is None:
+            self.create_canvas(img)
+            return
+        else:
+            self._canvas.set_image(img)
+
     def update_canvas_image(self, image):
         """
         Set the current image in the canvas.
@@ -104,60 +207,26 @@ class MainWindow(ttk.Frame):
         if self._canvas is not None:
             self._canvas.img = image
 
-    def _register_key_mappings(self):
+    def update_info_panel(self, tool):
         """
-        Register a mapping of tool ids to keys.
-
-
-        Returns:
-            None
-
-        Postconditions:
-            self._key_mappings will contain a dictionary of id -> key mappings
-        """
-        self._key_mappings = {}
-
-        for tool_id in self._controller.image_tools.keys():
-            tool = self._controller.image_tools[tool_id]
-            self._key_mappings[tool_id] = tool.key_mapping
-
-        self._reverse_key_mappings = {}
-
-        for tool_id in self._key_mappings.keys():
-            key = self._key_mappings[tool_id]
-
-            self._reverse_key_mappings[key] = tool_id
-
-    def _keystroke(self, event):
-        """
-        Called when the keybord is used.
+        Update the info panel with the activated tool's widget.
 
         Args:
-            event: The keyboard event.
+            tool: The tool that the info panel should represent.
 
         Returns:
             None
 
         Postconditions:
-            The canvas is modified according to the key pressed.
+            The info panel will display the widget defined by the tool.
         """
-        key = ''
-        # means that the Control key is pressed
-        if event.state - self._previous_state == 4:
-            key = "CTRL+"
-        else:
-            # remember the last keystroke state
-            self._previous_state = event.state
+        self._info_panel.set_info_widget(tool.
+                                         get_info_widget(self._info_panel),
+                                         tool.name)
 
-        key += event.keysym
-
-        print("KEY: " + key)
-
-        try:
-            tool_id = self._reverse_key_mappings[key]
-            self._on_tool_selected(tool_id)
-        except KeyError:
-            print("{} is not a valid key code".format(key))
+    # ==========================================================
+    # PRIVATE FUNCTIONS
+    # ==========================================================
 
     def _create_menubar(self):
         """
@@ -224,86 +293,6 @@ class MainWindow(ttk.Frame):
 
         self._menubar.add_cascade(label="Help", menu=self._helpmenu)
 
-    def _create_toolbar(self):
-        """
-        Create the toolbar.
-
-
-        Returns:
-            None
-
-        Postconditions:
-            The toolbar is created.
-        """
-
-        self._toolbar = tk.Frame(self._master, bd=1, relief='raised')
-        self._toolbar_buttons = {}
-
-        # Create image interaction tools
-        image_tools = self._controller.image_tools
-
-        column = 0
-        for tool_id in image_tools.keys():
-            tool = image_tools[tool_id]
-
-            icon = self._load_icon_from_string(tool.icon_string)
-            button = tk.Button(self._toolbar, image=icon, relief='flat',
-                               command=lambda: self._on_tool_selected(tool.id))
-
-            button.image = icon
-            button.pack(side="left", padx=2, pady=2)
-            # button.grid(column=column, row=0, sticky='EW')
-            column += 1
-
-            self._create_tool_tip(button, tool.id, tool.name)
-            self._toolbar_buttons[tool.id] = button
-            self._orig_button_colour = button.cget("background")
-
-        self._image_indicator = tk.Label(self._toolbar, text="No Image Loaded")
-        self._image_indicator.pack(side='right', padx=2, pady=2)
-        # self._image_indicator.grid(column=column, row=0, sticky='W')
-        #self._toolbar.pack(side='top', fill='x')
-        self._toolbar.grid(column=0, row=0, sticky='NEW')
-
-    def _on_tool_selected(self, id):
-        """
-        Called when a tool is selected in the menubar
-
-        Args:
-            id: The id of the tool.
-
-        Returns:
-            None
-
-        Postconditions:
-            The controller is updated to reflect the current chosen tool.
-        """
-        self._controller.activate_tool(id)
-
-    def _update_toolbar_state(self, tool_id):
-        """
-        Change the state of the buttons in the toolbar based on the button that
-        has been chosen.
-
-        Args:
-            tool_id: The id of the tool that was chosen
-
-        Returns:
-            None
-
-        Postconditions:
-            The toolbar button matching the given id will be activated.
-        """
-        for id, button in self._toolbar_buttons.items():
-            if id == tool_id:
-                if platform != "darwin":
-                    button.config(relief="sunken")
-                button.config(bg="yellow")
-            else:
-                if platform != "darwin":
-                    button.config(relief="raised")
-                button.config(bg=self._orig_button_colour)
-
     def _create_tool_tip(self, button, id, name):
         """
         Create a tool tip for the given button.
@@ -323,6 +312,82 @@ class MainWindow(ttk.Frame):
         tip = name + "(" + key + ")"
 
         CreateToolTip(button, tip)
+
+    def _create_toolbar(self):
+        """
+        Create the toolbar.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The toolbar is created.
+        """
+
+        self._toolbar = tk.Frame(self._master, bd=1, relief='raised')
+
+        # Create image interaction tools
+        image_tools = self._controller.image_tools
+
+        column = 0
+        for tool_id in image_tools.keys():
+            tool = image_tools[tool_id]
+
+            icon = self._load_icon_from_string(tool.icon_string)
+            command = partial(self._on_tool_selected, tool.id)
+            button = tk.Button(self._toolbar, image=icon, relief='flat',
+                               command=command)
+
+            button.image = icon
+            button.pack(side="left", padx=2, pady=2)
+            # button.grid(column=column, row=0, sticky='EW')
+            column += 1
+
+            self._create_tool_tip(button, tool.id, tool.name)
+            self._toolbar_buttons[tool.id] = button
+            self._orig_button_colour = button.cget("background")
+
+        self._image_indicator = tk.Label(self._toolbar, text="No Image Loaded")
+        self._image_indicator.pack(side='right', padx=2, pady=2)
+        self._toolbar.grid(column=0, row=0, sticky='NEW')
+
+    def _keystroke(self, event):
+        """
+        Called when the keybord is used.
+
+        Args:
+            event: The keyboard event.
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas is modified according to the key pressed.
+        """
+        key = ''
+
+        # means that the Control key is pressed
+        if event.state - self._previous_state == 4:
+            key = "CTRL+"
+        else:
+            # remember the last keystroke state
+            self._previous_state = event.state
+
+        key += event.keysym
+
+        self._logger.debug("KEY: " + key)
+
+        if key == "CTRL+equal":
+            self._controller.adjust_tool(1)
+        elif key == "CTRL+minus":
+            self._controller.adjust_tool(-1)
+        else:
+            try:
+                tool_id = self._reverse_key_mappings[key]
+                self._on_tool_selected(tool_id)
+            except KeyError:
+                self._logger.error("{} is not a valid key code".format(key))
 
     def _load_icon_from_string(self, icon_string):
         """
@@ -390,52 +455,91 @@ class MainWindow(ttk.Frame):
         # TODO: Open keyboard shortcuts window
         pass
 
-    def start_progressbar(self, num_patches):
+    def _on_tool_selected(self, id):
         """
-        Start displaying a progressbar.
+        Called when a tool is selected in the menubar
 
         Args:
-            num_patches: The number of patches that are being loaded.
+            id: The id of the tool.
 
         Returns:
             None
 
         Postconditions:
-            A progressbar window is opened and initialized
+            The controller is updated to reflect the current chosen tool.
         """
-        self.progress_popup = tk.Toplevel()
-        self.progress_popup.geometry("100x50+500+400")
+        self._controller.activate_tool(id)
+        self._update_toolbar_state(id)
 
-        tk.Label(self.progress_popup, text="Image Loading.").grid(row=0, column=0)
-
-        self.load_progress = 0
-        self.load_progress_var = tk.DoubleVar()
-        self.load_progress_bar = ttk.Progressbar(self.progress_popup,
-                                              variable=self.load_progress_var,
-                                              maximum=100)
-
-        self.load_progress_bar.grid(row=1, column=0)
-
-        self.progress_step = float(100.0/num_patches)
-        self.progress_popup.pack_slaves()
-
-    def show_image(self, img):
+    def _register_key_mappings(self):
         """
-        Display the given image on the canvas.
+        Register a mapping of tool ids to keys.
 
-        Args:
-            img: The image to display, a numpy array
 
         Returns:
             None
 
         Postconditions:
-            The canvas's image will be set to the image.
+            self._key_mappings will contain a dictionary of id -> key mappings
+        """
+        for tool_id in self._controller.image_tools.keys():
+            tool = self._controller.image_tools[tool_id]
+            self._key_mappings[tool_id] = tool.key_mapping
+
+        for tool_id in self._key_mappings.keys():
+            key = self._key_mappings[tool_id]
+
+            self._reverse_key_mappings[key] = tool_id
+
+    def _update_toolbar_state(self, tool_id):
+        """
+        Change the state of the buttons in the toolbar based on the button that
+        has been chosen.
+
+        Args:
+            tool_id: The id of the tool that was chosen
+
+        Returns:
+            None
+
+        Postconditions:
+            The toolbar button matching the given id will be activated.
+        """
+        for id, button in self._toolbar_buttons.items():
+            if id == tool_id and self._controller.image_tools[id].persistant:
+                if platform != "darwin":
+                    button.config(relief="sunken")
+                button.config(bg="yellow")
+            else:
+                if platform != "darwin":
+                    button.config(relief="raised")
+                button.config(bg=self._orig_button_colour)
+
+    def _on_mousewheel(self, event):
+        """
+        Called when the mousewheel is scrolled.
+
+        Args:
+            event: The mouse event
+
+        Returns:
+            None
         """
 
-        if self._canvas is None:
-            self.create_canvas(img)
-            return
+        # On Linux, the events are different
+        if event.num == 4:
+            rotation = 120
+        elif event.num == 5:
+            rotation = -120
+
+        # For Windows and Mac
+        if event.delta != 0:
+            rotation = event.delta
+
+        # If control is down)
+        if event.state - self._previous_state == 4:
+            self._controller.adjust_tool(rotation)
+
 
 class CreateToolTip(object):
     """

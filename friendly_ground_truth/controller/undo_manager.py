@@ -44,7 +44,7 @@ class UndoManager():
             The patch data and operation are added to the undo stack.
         """
 
-        if "threshold_adjust" == operation and len(self.undo_stack) > 0:
+        if "threshold_adjust" == operation and len(self._undo_stack) > 0:
             if self._undo_stack[-1][1] == operation:
                 return
         elif "adjust" in operation and len(self._undo_stack) > 0:

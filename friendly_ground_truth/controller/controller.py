@@ -8,15 +8,6 @@ Date: 13-05-2020
 Description: Main controller for the application
 
 """
-
-import os
-
-import tkinter.filedialog
-import tkinter.messagebox
-import numpy as np
-import logging
-module_logger = logging.getLogger('friendly_gt.controller.controller')
-
 from friendly_ground_truth.view.main_window import MainWindow
 from friendly_ground_truth.controller.tools import (ThresholdTool,
                                                     AddRegionTool,
@@ -30,7 +21,16 @@ from friendly_ground_truth.controller.tools import (ThresholdTool,
                                                     RedoTool)
 
 from friendly_ground_truth.controller.undo_manager import UndoManager
-from friendly_ground_truth.model.model import Image, Patch
+from friendly_ground_truth.model.model import Image
+
+
+import os
+
+import tkinter.filedialog
+import tkinter.messagebox
+import numpy as np
+import logging
+module_logger = logging.getLogger('friendly_gt.controller.controller')
 
 
 class Controller():
@@ -42,6 +42,7 @@ class Controller():
     """
     CONTEXT_TRANSPARENCY = 100
     NUM_PATCHES = 10
+
     def __init__(self, root):
         """
         Create a Controller object
@@ -55,8 +56,13 @@ class Controller():
         Postconditions:
             The main application window is started
         """
+        # ------------------------------------
+        # Private Attributes
+        # -----------------------------------
 
+        # The root tkinter object
         self._root = root
+        # For logging
         self._logger = logging.getLogger('friendly_gt.controller.'
                                          'controller.Controller')
         # The last directory used to load an image
@@ -67,15 +73,162 @@ class Controller():
         # Image containing neighbouring patches
         self._context_img = None
 
+        # For managing undo operations
         self._undo_manager = UndoManager()
-
+        # A dictionary of image tools
+        self._image_tools = {}
         self._init_tools()
 
+        # Initialize the main window
         self._main_window = MainWindow(self._root, self)
+
+        # The path to the current image
+        self._image_path = None
+
+        # The current image
+        self._image = None
+
+        # The index of the current patch in _image.patches
+        self._current_patch_index = 0
+
+        # Whether the mask has been saved
+        self._mask_saved = False
+
+        # The current tool in use
+        self._current_tool = None
+
+        # The offset of the current patch within the context image
+        self._patch_offset = (0, 0)
 
     @property
     def image_tools(self):
         return self._image_tools
+
+    # ===================================================
+    # PUBLIC FUNCTIONS
+    # ===================================================
+    def load_new_image(self):
+        """
+        Load a new image with a file dialog.
+
+
+        Returns:
+            None
+        """
+
+        self._context_img = None
+        filetypes = [("TIF Files", "*.tif"), ("TIFF Files", "*.tiff"),
+                     ("PNG Files", "*.png"), ("JPEG Files", "*.jpg")]
+
+        if self._last_load_dir is None:
+            initial_dir = os.path.expanduser("~")
+        else:
+            initial_dir = self._last_load_dir
+
+        file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
+                                                       initialdir=initial_dir)
+
+        if file_name is None:
+            return
+
+        self._last_load_dir = os.path.split(file_name)[0]
+
+        self._image_path = file_name
+
+        try:
+            self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
+            self._image = Image(file_name, 10, self._update_progressbar)
+
+        except FileNotFoundError:
+            self._logger.debug("There was a problem loading the image.")
+            return
+
+        self._current_patch_index = 0
+
+        self._display_current_patch()
+
+    def save_mask(self):
+        """
+        Save the finished image mask.
+
+
+        Returns:
+            None
+        """
+
+        if not self._previewed:
+            self._show_saved_preview()
+            return
+
+        self._mask_saved = True
+
+        if self._last_save_dir is None:
+            initial_dir = os.path.expanduser("~")
+        else:
+            initial_dir = self._last_save_dir
+
+        dir_path = tkinter.filedialog.askdirectory(initialdir=initial_dir)
+
+        if dir_path is None:
+            return
+
+        image_name = self._get_image_name_from_path(self._image_path)
+        # labels_name = self._get_landmark_name_from_path(self._image_path)
+
+        mask_pathname = os.path.join(dir_path, image_name)
+        # label_pathname = os.path.join(dir_path, labels_name)
+
+        try:
+            self._image.export_mask(mask_pathname)
+            # self._image.export_labels(label_pathname)
+
+            tkinter.messagebox.showinfo("Image Mask Saved!",
+                                        "Image Mask Saved!")
+
+        except IOError:
+            self._logger.error("Could not save file!")
+
+    def activate_tool(self, id):
+        """
+        Activate the given tool id.
+
+        Args:
+            id: The id of the tool.
+
+        Returns:
+            None
+
+        Postcondition:
+            The current tool is set to the tool matching the id
+            Any activation functionality of the tool is performed.
+        """
+        tool = self.image_tools[id]
+        tool.image = self._image
+        tool.patch = self._image.patches[self._current_patch_index]
+
+        self._current_tool = tool
+
+        tool.on_activate(self._current_patch_index)
+
+        # self._display_current_patch()
+        self._main_window.update_info_panel(tool)
+
+    def adjust_tool(self, direction):
+        """
+        Adjust the current tool.
+
+        Args:
+            direction: An integer, positive is up, negative is down.
+
+        Returns:
+            None
+        """
+        self._current_tool.on_adjust(direction)
+        # self._display_current_patch()
+
+    # ===================================================
+    # Private Functions
+    # ===================================================
 
     def _init_tools(self):
         """
@@ -126,6 +279,9 @@ class Controller():
                              self._redo_callback)
         image_tools[redo_tool.id] = redo_tool
 
+        for id in image_tools.keys():
+            image_tools[id].bind_to(self._display_current_patch)
+
         self._image_tools = image_tools
 
     def _next_patch_callback(self, patch, index):
@@ -140,7 +296,6 @@ class Controller():
             None
         """
 
-        self._current_patch = patch
         self._current_patch_index = index
 
     def _prev_patch_callback(self, patch, index):
@@ -155,7 +310,6 @@ class Controller():
             None
         """
 
-        self._current_patch = patch
         self._current_patch_index = index
 
     def _undo_callback(self, patch, string):
@@ -177,7 +331,6 @@ class Controller():
 
         # TODO: Enable redo button here
 
-        self._current_patch = patch
         self._image.patches[self._current_patch_index] = patch
 
     def _redo_callback(self, patch, string):
@@ -201,48 +354,7 @@ class Controller():
             pass
             # TODO Disable redo button here
 
-        self._current_patch = patch
         self._image.patches[self._current_patch_index] = patch
-
-    def load_new_image(self):
-        """
-        Load a new image with a file dialog.
-
-
-        Returns:
-            None
-        """
-
-        self._context_img = None
-        filetypes = [("TIF Files", "*.tif"), ("TIFF Files", "*.tiff"),
-                     ("PNG Files", "*.png"), ("JPEG Files", "*.jpg")]
-
-        if self._last_load_dir is None:
-            initial_dir = os.path.expanduser("~")
-        else:
-            initial_dir = self._last_load_dir
-
-        file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
-                                                       initialdir=initial_dir)
-
-        if file_name is None:
-            return
-
-        self._last_load_dir = os.path.split(file_name)[0]
-
-        self._image_path = file_name
-
-        try:
-            self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
-            self._image = Image(file_name, 10, self._update_progressbar)
-
-        except FileNotFoundError:
-            self._logger.debug("There was a problem loading the image.")
-            return
-
-        self._current_patch_index = 0
-
-        self._display_current_patch()
 
     def _display_current_patch(self):
         """
@@ -357,7 +469,7 @@ class Controller():
             img[r:r+patch.shape[0],
                 c:c+patch.shape[1]] += patch
             if i == drawable_patch_index:
-                self.patch_offset = (r, c)
+                self._patch_offset = (r, c)
 
             col_num += 1
 
@@ -369,7 +481,6 @@ class Controller():
 
         self._context_img = img
         return img
-
 
     def _update_progressbar(self):
         """
@@ -384,48 +495,8 @@ class Controller():
         """
         self._main_window.progress_popup.update()
         self._main_window.load_progress += self._main_window.progress_step
-        self._main_window.load_progress_var.set(self._main_window.load_progress)
+        self._main_window.load_progress_var\
+            .set(self._main_window.load_progress)
 
         if self._main_window.load_progress >= self.NUM_PATCHES ** 2:
             self._main_window.progress_popup.destroy()
-
-    def save_mask(self):
-        """
-        Save the finished image mask.
-
-
-        Returns:
-            None
-        """
-
-        if not self._previewed:
-            self._show_saved_preview()
-            return
-
-        self._mask_saved = True
-
-        if self._last_save_dir is None:
-            initial_dir = os.path.expanduser("~")
-        else:
-            initial_dir = self._last_save_dir
-
-        dir_path = tkinter.filedialog.askdirectory(initialdir=initial_dir)
-
-        if dir_path is None:
-            return
-
-        image_name = self._get_image_name_from_path(self._image_path)
-        # labels_name = self._get_landmark_name_from_path(self._image_path)
-
-        mask_pathname = os.path.join(dir_path, image_name)
-        # label_pathname = os.path.join(dir_path, labels_name)
-
-        try:
-            self._image.export_mask(mask_pathname)
-            # self._image.export_labels(label_pathname)
-
-            tkinter.messagebox.showinfo("Image Mask Saved!",
-                                        "Image Mask Saved!")
-
-        except IOError:
-            self._logger.error("Could not save file!")

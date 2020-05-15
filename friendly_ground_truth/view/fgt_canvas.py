@@ -148,6 +148,11 @@ class FGTCanvas:
         self.__show_image()
         self.canvas.focus_set()
 
+    def set_image(self, img):
+        self.img = img
+        self.__show_image()
+        self.canvas.focus_set()
+
     def smaller(self):
         """
         Resize the image to be smaller.
@@ -433,6 +438,11 @@ class FGTCanvas:
         y = self.canvas.canvasy(event.y)
         if self.outside(x, y):
             return  # zoom only inside image area
+
+        # Don't scroll if control is down
+        if event.state - self.__previous_state == 4:
+            return
+
         scale = 1.0
         # Respond to Linux (event.num) or Windows (event.delta) wheel event
         if event.num == 5 or event.delta == -120:  # scroll down, smaller
@@ -476,17 +486,6 @@ class FGTCanvas:
         else:
             # remember the last keystroke state
             self.__previous_state = event.state
-            #if event.keycode in [68, 39, 102]:
-            #    self.__scroll_x('scroll',  1, 'unit', event=event)
-            ## scroll left, keys 'a' or 'Left'
-            #elif event.keycode in [65, 37, 100]:
-            #    self.__scroll_x('scroll', -1, 'unit', event=event)
-            ## scroll up, keys 'w' or 'Up'
-            #elif event.keycode in [87, 38, 104]:
-            #    self.__scroll_y('scroll', -1, 'unit', event=event)
-            ## scroll down, keys 's' or 'Down'
-            #elif event.keycode in [83, 40, 98]:
-            #    self.__scroll_y('scroll',  1, 'unit', event=event)
 
     def crop(self, bbox):
         """

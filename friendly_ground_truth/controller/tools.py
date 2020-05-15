@@ -10,6 +10,7 @@ Description: Definitions of tools that can be used in Friendly Ground Truth
 """
 import logging
 import copy
+import tkinter as tk
 
 from friendly_ground_truth.view.icons.icon_strings import (threshold_icon,
                                                            add_region_icon,
@@ -37,6 +38,8 @@ class FGTTool():
         key_mapping: The keyboard shortcut string for this tool
         activation_callback: A function to call when the activate functiion is
                              finished
+        info_widget: A tkinter widget for controlling this tool from an info
+                     panel
     """
 
     def __init__(self, name, icon_string, id,  undo_manager,
@@ -65,6 +68,9 @@ class FGTTool():
         self._undo_manager = undo_manager
         self._key_mapping = key_mapping
         self._activation_callback = activation_callback
+        self._persistant = persistant
+
+        self._observers = []
 
     @property
     def name(self):
@@ -109,6 +115,19 @@ class FGTTool():
     @property
     def key_mapping(self):
         return self._key_mapping
+
+    def get_info_widget(self, parent):
+        """
+        Get the widget that controls this tool in the UI.
+
+        Args:
+            parent: The parent for the widget.
+
+        Returns:
+            The tkinter Frame widget for this tool.
+        """
+        self._info_widget = tk.Frame(parent, padx=0, pady=15)
+        return self._info_widget
 
     def on_adjust(self, direction):
         """
@@ -161,6 +180,35 @@ class FGTTool():
         """
         pass
 
+    def bind_to(self, callback):
+        """
+        Add the callback to the list of observers for updates.
+
+        Args:
+            callback: The function to call when things change.
+                        It should have no parameters, it just says that
+                        something about the image has changed.
+        Returns:
+            None
+
+        Postconditions:
+            The callback is added to the list of observers.
+        """
+        self._observers.append(callback)
+
+    def _notify_observers(self):
+        """
+        Notify observers of changes made.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            Observer callbacks are called.
+        """
+        for ob in self._observers:
+            ob()
 
 class ThresholdTool(FGTTool):
     """
@@ -175,7 +223,7 @@ class ThresholdTool(FGTTool):
 
         super(ThresholdTool, self)\
             .__init__("Threshold Tool", threshold_icon, 1,
-                      undo_manager, "T", cursor='arrow', persistant=False,
+                      undo_manager, "t", cursor='arrow', persistant=True,
                       activation_callback=None)
 
         self._logger = logging\
@@ -184,6 +232,9 @@ class ThresholdTool(FGTTool):
         self._threshold = 0
         self._increment = 0.01
         self._patch = None
+
+        self._threshold_slider_var = None
+        self._threshold_slider = None
 
     @property
     def threshold(self):
@@ -196,6 +247,12 @@ class ThresholdTool(FGTTool):
                                                  'threshold_adjust')
             self._threshold = value
             self._patch.threshold = value
+
+            if self._threshold_slider is not None:
+                self._threshold_slider_var = value
+                self._threshold_slider.set(value)
+
+            self._notify_observers()
 
     @property
     def increment(self):
@@ -210,6 +267,39 @@ class ThresholdTool(FGTTool):
         self._patch = patch
         self._threshold = patch.threshold
 
+    def get_info_widget(self, parent):
+        super().get_info_widget(parent)
+
+        self._threshold_slider_var = tk.DoubleVar()
+
+        self._threshold_slider = tk.Scale(self._info_widget,
+                                          from_=0.00,
+                                          to=1.00,
+                                          tickinterval=0.50,
+                                          resolution=0.01,
+                                          length=200,
+                                          variable=self._threshold_slider_var,
+                                          orient='horizontal',
+                                          command=self._on_threshold_slider)
+        self._threshold_slider.pack(side='top')
+
+        return self._info_widget
+
+    def _on_threshold_slider(self, value):
+        """
+        Called when the threshold slider is moved.
+
+        Args:
+            value: The value of the slider
+
+        Returns:
+            None
+
+        Postconditions:
+            The threshold for the patch is udpated accordingly.
+        """
+        self.threshold = float(value)
+
     def _adjust_threshold(self, direction):
         """
         Adjust the current threshold
@@ -221,8 +311,9 @@ class ThresholdTool(FGTTool):
         Returns:
             None, the patch threshold will be set accordingly
         """
-
-        if direction > 0:
+        # Note inverted direction, it is more intuitive to increase the region,
+        # than to increase the threshold
+        if direction < 0:
             self.threshold += self.increment
         else:
             self.threshold -= self.increment
@@ -254,7 +345,7 @@ class AddRegionTool(FGTTool):
     def __init__(self, undo_manager):
         super(AddRegionTool, self)\
             .__init__("Add Region Tool", add_region_icon, 2,
-                      undo_manager, "A", cursor='brush', persistant=True)
+                      undo_manager, "a", cursor='brush', persistant=True)
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.AddRegionTool')
@@ -328,7 +419,7 @@ class AddRegionTool(FGTTool):
             The mask at the given position will be filled in.
         """
         self.patch.add_region(position, self.brush_radius)
-
+        self._notify_observers()
 
 class RemoveRegionTool(FGTTool):
     """
@@ -341,7 +432,7 @@ class RemoveRegionTool(FGTTool):
     def __init__(self, undo_manager):
         super(RemoveRegionTool, self)\
             .__init__("Remove Region Tool", remove_region_icon, 3,
-                      undo_manager, "R", cursor="brush", persistant=True)
+                      undo_manager, "r", cursor="brush", persistant=True)
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.RemoveRegionTool')
@@ -416,6 +507,7 @@ class RemoveRegionTool(FGTTool):
         """
 
         self.patch.remove_region(position, self.brush_radius)
+        self._notify_observers()
 
 
 class NoRootTool(FGTTool):
@@ -437,7 +529,7 @@ class NoRootTool(FGTTool):
         """
         super(NoRootTool, self)\
             .__init__("No Root Tool", no_root_icon, 4,
-                      undo_manager, "X", cursor='none', persistant=False,
+                      undo_manager, "x", cursor='none', persistant=False,
                       activation_callback=next_patch_function)
 
         self._logger = logging\
@@ -515,7 +607,7 @@ class FloodAddTool(FGTTool):
     def __init__(self, undo_manager):
         super(FloodAddTool, self)\
             .__init__("Flood Add Tool", flood_add_icon, 5,
-                      undo_manager, "F", cursor='cross', persistant=True)
+                      undo_manager, "f", cursor='cross', persistant=True)
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.FloodAddTool')
@@ -590,6 +682,7 @@ class FloodAddTool(FGTTool):
         """
 
         self.patch.flood_add(position, self.tolerance)
+        self._notify_observers()
 
 
 class FloodRemoveTool(FGTTool):
@@ -603,7 +696,7 @@ class FloodRemoveTool(FGTTool):
     def __init__(self, undo_manager):
         super(FloodRemoveTool, self)\
             .__init__("Flood Remove Tool", flood_remove_icon, 6,
-                      undo_manager, "L", cursor='cross', persistant=True)
+                      undo_manager, "l", cursor='cross', persistant=True)
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.FloodRemoveTool')
@@ -677,6 +770,7 @@ class FloodRemoveTool(FGTTool):
         """
 
         self.patch.flood_remove(position, self.tolerance)
+        self._notify_observers()
 
 
 class PreviousPatchTool(FGTTool):
@@ -701,7 +795,7 @@ class PreviousPatchTool(FGTTool):
         """
         super(PreviousPatchTool, self)\
             .__init__("Previous Patch", prev_patch_icon, 7,
-                      undo_manager, "Left Arrow", cursor='none',
+                      undo_manager, "Left", cursor='none',
                       persistant=False,
                       activation_callback=prev_patch_function)
 
@@ -760,7 +854,7 @@ class NextPatchTool(FGTTool):
         """
         super(NextPatchTool, self)\
             .__init__("Next Patch", next_patch_icon, 8,
-                      undo_manager, "Right Arrow", cursor='none',
+                      undo_manager, "Right", cursor='none',
                       persistant=False,
                       activation_callback=next_patch_function)
 
@@ -819,7 +913,7 @@ class UndoTool(FGTTool):
         """
         super(UndoTool, self)\
             .__init__("Undo", undo_icon, 9, undo_manager,
-                      "CTRL+Z", cursor='none', persistant=False,
+                      "CTRL+z", cursor='none', persistant=False,
                       activation_callback=undo_callback)
 
     def on_activate(self, current_patch_num):
@@ -868,7 +962,7 @@ class RedoTool(FGTTool):
             A tool object
         """
         super(RedoTool, self)\
-            .__init__("Redo", redo_icon, 10, undo_manager, "CTRL+R",
+            .__init__("Redo", redo_icon, 10, undo_manager, "CTRL+r",
                       cursor='none', persistant=False,
                       activation_callback=redo_callback)
 
