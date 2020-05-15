@@ -135,7 +135,7 @@ class MainWindow(ttk.Frame):
         if self._canvas is not None:
             self._canvas.destroy()
 
-        self._canvas = FGTCanvas(self.master, image)
+        self._canvas = FGTCanvas(self.master, image, self)
         self._canvas.grid(row=1, column=0, sticky="NSEW")
         self._master.grid_rowconfigure(0, weight=0)
         self._master.grid_rowconfigure(1, weight=1)
@@ -190,6 +190,60 @@ class MainWindow(ttk.Frame):
             return
         else:
             self._canvas.set_image(img)
+
+    def on_canvas_click(self, pos):
+        """
+        Called when the canvas has a click event.
+
+        Args:
+            pos: The position of the event.
+
+        Returns:
+            None
+        """
+        self._controller.click_event(pos)
+
+    def on_canvas_drag(self, pos):
+        """
+        Called when the canvas has a drag event.
+
+        Args:
+            pos: The position of the drag.
+
+        Returns:
+            None
+        """
+        self._controller.drag_event(pos)
+
+    def set_canvas_cursor(self, cursor):
+        """
+        Set the cursor for the canvas.
+
+        Args:
+            cursor: The cursor string.
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas' cursor will be set.
+        """
+        self._canvas.cursor = cursor
+
+    def set_canvas_brush_size(self, radius):
+        """
+        Set the size of the brush in the canvas.
+
+        Args:
+            radius: The radius to draw the brush.
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas' brush size is changed.
+        """
+        self._canvas.brush_radius = radius
 
     def update_canvas_image(self, image):
         """

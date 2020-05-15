@@ -210,6 +210,7 @@ class FGTTool():
         for ob in self._observers:
             ob()
 
+
 class ThresholdTool(FGTTool):
     """
     Tool representing a threshold action.
@@ -268,6 +269,15 @@ class ThresholdTool(FGTTool):
         self._threshold = patch.threshold
 
     def get_info_widget(self, parent):
+        """
+        Get the widget that controls this tool in the info panel.
+
+        Args:
+            parent: The parent tkinter object.
+
+        Returns:
+            The widget.
+        """
         super().get_info_widget(parent)
 
         self._threshold_slider_var = tk.DoubleVar()
@@ -351,6 +361,8 @@ class AddRegionTool(FGTTool):
             .getLogger('friendly_gt.controller.tools.AddRegionTool')
 
         self._brush_radius = 15
+        self._brush_observers = []
+        self._brush_sizer = None
 
     @property
     def brush_radius(self):
@@ -360,6 +372,64 @@ class AddRegionTool(FGTTool):
     def brush_radius(self, value):
         if value >= 0:
             self._brush_radius = value
+
+            for ob in self._brush_observers:
+                ob(self._brush_radius)
+
+            if self._brush_sizer is not None:
+                self._brush_sizer_var.set(value)
+
+    def get_info_widget(self, parent):
+        """
+        Get the widget that controls this tool in the info panel.
+
+        Args:
+            parent: The parent tkinter object.
+
+        Returns:
+            The widget.
+        """
+        super().get_info_widget(parent)
+
+        self._brush_size_panel = tk.Frame(self._info_widget,
+                                          padx=0, pady=15)
+
+        self._brush_size_label = tk.Label(self._brush_size_panel,
+                                          text="Brush Size")
+
+        self._brush_sizer_var = tk.IntVar()
+        self._brush_sizer_var.set(self._brush_radius)
+        self._brush_sizer_var.trace('w', self._on_brush_sizer)
+
+        self._brush_sizer = tk.Spinbox(self._brush_size_panel,
+                                       from_=0,
+                                       to=64,
+                                       width=17,
+                                       textvariable=self._brush_sizer_var)
+
+        self._brush_size_label.pack(side='left')
+        self._brush_sizer.pack(side='left')
+
+        self._brush_size_panel.pack(side='top')
+
+        return self._info_widget
+
+    def _on_brush_sizer(self, a, b, c):
+        """
+        Called when the brush sizer is updated.
+
+        Args:
+            value: The value of the sizer.
+
+        Returns:
+            None
+
+        Postconditions:
+            The brush radius is udpated accordingly.
+        """
+
+        val = self._brush_sizer_var.get()
+        self.brush_radius = val
 
     def on_adjust(self, direction):
         """
@@ -375,6 +445,18 @@ class AddRegionTool(FGTTool):
             self.brush_radius += 1
         else:
             self.brush_radius -= 1
+
+    def bind_brush(self, callback):
+        """
+        Subscribe to brush radius notifications.
+
+        Args:
+            callback: The function to call when the brush radius changes.
+
+        Returns:
+            None
+        """
+        self._brush_observers.append(callback)
 
     def on_click(self, position):
         """
@@ -421,6 +503,7 @@ class AddRegionTool(FGTTool):
         self.patch.add_region(position, self.brush_radius)
         self._notify_observers()
 
+
 class RemoveRegionTool(FGTTool):
     """
     A tool acting as a paint brush for removing regions from the mask
@@ -438,6 +521,8 @@ class RemoveRegionTool(FGTTool):
             .getLogger('friendly_gt.controller.tools.RemoveRegionTool')
 
         self._brush_radius = 15
+        self._brush_observers = []
+        self._brush_sizer = None
 
     @property
     def brush_radius(self):
@@ -447,6 +532,64 @@ class RemoveRegionTool(FGTTool):
     def brush_radius(self, value):
         if value >= 0:
             self._brush_radius = value
+
+            for ob in self._brush_observers:
+                ob(self._brush_radius)
+
+            if self._brush_sizer is not None:
+                self._brush_sizer_var.set(value)
+
+    def get_info_widget(self, parent):
+        """
+        Get the widget that controls this tool in the info panel.
+
+        Args:
+            parent: The parent tkinter object.
+
+        Returns:
+            The widget.
+        """
+        super().get_info_widget(parent)
+
+        self._brush_size_panel = tk.Frame(self._info_widget,
+                                          padx=0, pady=15)
+
+        self._brush_size_label = tk.Label(self._brush_size_panel,
+                                          text="Brush Size")
+
+        self._brush_sizer_var = tk.IntVar()
+        self._brush_sizer_var.set(self._brush_radius)
+        self._brush_sizer_var.trace('w', self._on_brush_sizer)
+
+        self._brush_sizer = tk.Spinbox(self._brush_size_panel,
+                                       from_=0,
+                                       to=64,
+                                       width=17,
+                                       textvariable=self._brush_sizer_var)
+
+        self._brush_size_label.pack(side='left')
+        self._brush_sizer.pack(side='left')
+
+        self._brush_size_panel.pack(side='top')
+
+        return self._info_widget
+
+    def _on_brush_sizer(self, a, b, c):
+        """
+        Called when the brush sizer is updated.
+
+        Args:
+            value: The value of the sizer.
+
+        Returns:
+            None
+
+        Postconditions:
+            The brush radius is udpated accordingly.
+        """
+
+        val = self._brush_sizer_var.get()
+        self.brush_radius = val
 
     def on_adjust(self, direction):
         """
@@ -462,6 +605,18 @@ class RemoveRegionTool(FGTTool):
             self.brush_radius += 1
         else:
             self.brush_radius -= 1
+
+    def bind_brush(self, callback):
+        """
+        Subscribe to brush radius notifications.
+
+        Args:
+            callback: The function to call when the brush radius changes.
+
+        Returns:
+            None
+        """
+        self._brush_observers.append(callback)
 
     def on_click(self, position):
         """
@@ -607,7 +762,7 @@ class FloodAddTool(FGTTool):
     def __init__(self, undo_manager):
         super(FloodAddTool, self)\
             .__init__("Flood Add Tool", flood_add_icon, 5,
-                      undo_manager, "f", cursor='cross', persistant=True)
+                      undo_manager, "f", cursor='crosshair', persistant=True)
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.FloodAddTool')
@@ -696,7 +851,7 @@ class FloodRemoveTool(FGTTool):
     def __init__(self, undo_manager):
         super(FloodRemoveTool, self)\
             .__init__("Flood Remove Tool", flood_remove_icon, 6,
-                      undo_manager, "l", cursor='cross', persistant=True)
+                      undo_manager, "l", cursor='crosshair', persistant=True)
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.FloodRemoveTool')

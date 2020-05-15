@@ -212,6 +212,7 @@ class Controller():
 
         # self._display_current_patch()
         self._main_window.update_info_panel(tool)
+        self._main_window.set_canvas_cursor(tool.cursor)
 
     def adjust_tool(self, direction):
         """
@@ -225,6 +226,36 @@ class Controller():
         """
         self._current_tool.on_adjust(direction)
         # self._display_current_patch()
+
+    def click_event(self, pos):
+        """
+        A click event in the main window has occured.
+
+        Args:
+            pos: The position of the event.
+
+        Returns:
+            None
+        """
+        # Need to invert the position, because tkinter coords are backward from
+        # skimage
+        pos = pos[1], pos[0]
+        self._current_tool.on_click(pos)
+
+    def drag_event(self, pos):
+        """
+        A click event in the main window has occured/
+
+        Args:
+            pos: The position of the event.
+
+        Returns:
+            None
+        """
+        # Need to invert the position, because tkinter coords are backward from
+        # skimage
+        pos = pos[1], pos[0]
+        self._current_tool.on_drag(pos)
 
     # ===================================================
     # Private Functions
@@ -248,9 +279,11 @@ class Controller():
         image_tools[thresh_tool.id] = thresh_tool
 
         add_reg_tool = AddRegionTool(self._undo_manager)
+        add_reg_tool.bind_brush(self._brush_size_callback)
         image_tools[add_reg_tool.id] = add_reg_tool
 
         rem_reg_tool = RemoveRegionTool(self._undo_manager)
+        rem_reg_tool.bind_brush(self._brush_size_callback)
         image_tools[rem_reg_tool.id] = rem_reg_tool
 
         flood_add_tool = FloodAddTool(self._undo_manager)
@@ -377,6 +410,18 @@ class Controller():
         # TODO: Update info panels
 
         self._main_window.show_image(img)
+
+    def _brush_size_callback(self, radius):
+        """
+        Called when a brush tool is updated.
+
+        Args:
+            radius: The new brush radius.
+
+        Returns:
+            None
+        """
+        self._main_window.set_canvas_brush_size(radius)
 
     def _get_context_patches(self, patch):
         """

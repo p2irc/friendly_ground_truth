@@ -46,11 +46,16 @@ class FGTCanvas:
 
     Attributes:
         imscale: The current scale of the image
+        cursor: The current cursor to use on the image
     """
 
-    def __init__(self, placeholder, img):
+    def __init__(self, placeholder, img, main_window):
 
+        self._previous_position = (0, 0)
+        self._coord_scale = 1
         self.imscale = 1.0  # Scale of the image
+
+        self._main_window = main_window
 
         self.__delta = 1.3  # Zoom magnitude
         self.__filter = Image.ANTIALIAS
@@ -93,6 +98,13 @@ class FGTCanvas:
         # Deal with keystrokes in idle mode
         self.canvas.bind('<Key>', lambda event:
                          self.canvas.after_idle(self.__keystroke, event))
+
+        # Cursor stuff
+        self.canvas.bind('<Motion>', self._on_motion)
+        self.canvas.bind('<Enter>', self._set_cursor)
+        self.canvas.bind('<Leave>', self._default_cursor)
+        self.canvas.bind('<FocusOut>', self._default_cursor)
+        self.canvas.bind('<FocusIn>', self._set_cursor)
 
         # Decide if the image is too big
         self.__huge = False
@@ -145,8 +157,114 @@ class FGTCanvas:
         # Put image into rectangle for setting corrdinates
         self.container = self.canvas.create_rectangle((0, 0, self.imwidth,
                                                       self.imheight), width=0)
+        self._cursor = "arrow"
+        self._brush_cursor = None
+        self._brush_radius = None
+
         self.__show_image()
         self.canvas.focus_set()
+
+    @property
+    def cursor(self):
+        return self._cursor
+
+    @cursor.setter
+    def cursor(self, value):
+        self._cursor = value
+
+    @property
+    def brush_radius(self):
+        return self._brush_radius
+
+    @brush_radius.setter
+    def brush_radius(self, value):
+        self._brush_radius = value
+        self.draw_brush()
+
+    def _on_motion(self, event):
+        """
+        Called when the mouse is moved.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+
+        Postconditions:
+            The mouse cursor is drawn.
+            Previous position is set.
+        """
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
+        pos = (x, y)
+
+        if self._cursor == "brush":
+            self.draw_brush(pos)
+
+        self._previous_position = pos
+
+    def _set_cursor(self, event):
+        """
+        Set the cursor to the current specified icon/
+
+        Args:
+            event: Event
+
+        Returns:
+            None
+        """
+        if self._cursor == "brush":
+            self.canvas.config(cursor="none")
+            self.draw_brush()
+        else:
+            self.canvas.config(cursor=self._cursor)
+            if self._brush_cursor is not None:
+                self.canvas.delete(self._brush_cursor)
+
+    def _default_cursor(self, event):
+        """
+        Set the cursor back to the default.
+
+        Args:
+            event: The event
+
+        Returns:
+            None
+        """
+        self.canvas.config(cursor="arrow")
+        self._previous_position = (50, 50)
+
+    def draw_brush(self, pos=None):
+        """
+        Draw the paintbrush cursor
+
+        Args:
+            pos: The position to draw the brush at.  The default value is None.
+
+        Returns:
+            None
+
+        Postcondition:
+            The brush is drawn on the canvas/
+        """
+        if self._brush_cursor is not None:
+            self.canvas.delete(self._brush_cursor)
+
+        if self._brush_radius is None:
+            self._brush_radius = 15
+
+        if pos is None:
+            pos = self._previous_position
+
+        x_max = pos[0] + (self._brush_radius * self._coord_scale)
+        x_min = pos[0] - (self._brush_radius * self._coord_scale)
+        y_max = pos[1] + (self._brush_radius * self._coord_scale)
+        y_min = pos[1] - (self._brush_radius * self._coord_scale)
+
+        self._brush_cursor = self.canvas.create_oval(x_max, y_max, x_min,
+                                                     y_min,
+                                                     outline='white')
 
     def set_image(self, img):
         self.img = img
@@ -308,6 +426,8 @@ class FGTCanvas:
         Postconditions:
             The image is drawn on the canvas.
         """
+        if self._cursor == "brush":
+            self.draw_brush()
         box_image = self.canvas.coords(self.container)  # get image area
         box_canvas = (self.canvas.canvasx(0),  # get visible area of the canvas
                       self.canvas.canvasy(0),
@@ -316,6 +436,13 @@ class FGTCanvas:
 
         # convert to integer or it will not work properly
         box_img_int = tuple(map(int, box_image))  # Get scroll region box
+
+        box_img_width = box_img_int[2] - box_img_int[0]
+
+        xscale = box_img_width/self.img.shape[1]
+
+        self._coord_scale = xscale
+
         box_scroll = [min(box_img_int[0], box_canvas[0]),
                       min(box_img_int[1], box_canvas[1]),
                       max(box_img_int[2], box_canvas[2]),
@@ -362,6 +489,7 @@ class FGTCanvas:
             #
             imagetk = ImageTk.PhotoImage(image.resize((int(x2 - x1),
                                          int(y2 - y1)), self.__filter))
+
             imageid = self.canvas.create_image(max(box_canvas[0],
                                                box_img_int[0]),
                                                max(box_canvas[1],
@@ -384,7 +512,15 @@ class FGTCanvas:
         Postconditions:
             The canvas will have a scan mark at the event position.
         """
-        self.canvas.scan_mark(event.x, event.y)
+        if self._cursor != "brush":
+            self.canvas.scan_mark(event.x, event.y)
+
+        pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+        container_coords = self.canvas.coords(self.container)
+        pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
+        pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
+
+        self._main_window.on_canvas_click(pos)
 
     def __move_to(self, event):
         """
@@ -399,7 +535,20 @@ class FGTCanvas:
         Postconditions:
             The canvas is moved to the event position.
         """
-        self.canvas.scan_dragto(event.x, event.y, gain=1)
+        if self._cursor != "brush":
+
+            self.canvas.scan_dragto(event.x, event.y, gain=1)
+
+        if self._cursor == "brush":
+            pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+            self._previous_position = pos
+            container_coords = self.canvas.coords(self.container)
+            pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
+            pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
+
+            self._main_window.on_canvas_drag(pos)
+            self.draw_brush(pos)
+
         self.__show_image()  # zoom tile and show it on the canvas
 
     def outside(self, x, y):
