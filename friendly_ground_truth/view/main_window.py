@@ -88,6 +88,7 @@ class MainWindow(ttk.Frame):
         # The label displaying the path to the current image
         self._image_indicator = None
 
+        self._old_tool_id = None
         # The previous image
         self._old_img = None
         # --------------------------------------
@@ -209,6 +210,7 @@ class MainWindow(ttk.Frame):
 
         Args:
             pos: The position of the drag.
+
 
         Returns:
             None
@@ -559,15 +561,26 @@ class MainWindow(ttk.Frame):
         Postconditions:
             The toolbar button matching the given id will be activated.
         """
+
+        keep_old = False
         for id, button in self._toolbar_buttons.items():
             if id == tool_id and self._controller.image_tools[id].persistant:
                 if platform != "darwin":
                     button.config(relief="sunken")
                 button.config(bg="yellow")
+                self._old_tool_id = id
+            elif id == tool_id:  # Not persistant
+                keep_old = True
             else:
                 if platform != "darwin":
                     button.config(relief="raised")
                 button.config(bg=self._orig_button_colour)
+
+        if keep_old:
+            button = self._toolbar_buttons[self._old_tool_id]
+            if platform != "darwin":
+                button.config(relief="sunken")
+            button.config(bg="yellow")
 
     def _on_mousewheel(self, event):
         """

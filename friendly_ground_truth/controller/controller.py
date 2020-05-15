@@ -206,9 +206,18 @@ class Controller():
         tool.image = self._image
         tool.patch = self._image.patches[self._current_patch_index]
 
+        old_tool = None
+
+        if not tool.persistant:
+            old_tool = self._current_tool
+
         self._current_tool = tool
 
         tool.on_activate(self._current_patch_index)
+
+        if old_tool is not None:
+            self._current_tool = old_tool
+            tool = old_tool
 
         # self._display_current_patch()
         self._main_window.update_info_panel(tool)
@@ -328,8 +337,13 @@ class Controller():
         Returns:
             None
         """
-
+        self._logger.debug("Next patch {}.".format(index))
         self._current_patch_index = index
+
+        for key in self._image_tools.keys():
+            self._image_tools[key].patch = patch
+
+        self._display_current_patch()
 
     def _prev_patch_callback(self, patch, index):
         """

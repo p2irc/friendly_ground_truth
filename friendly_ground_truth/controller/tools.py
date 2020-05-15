@@ -263,10 +263,14 @@ class ThresholdTool(FGTTool):
     def increment(self, value):
         self._increment = value
 
-    @FGTTool.patch.setter
+    @property
+    def patch(self):
+        return self._patch
+
+    @patch.setter
     def patch(self, patch):
         self._patch = patch
-        self._threshold = patch.threshold
+        self.threshold = patch.threshold
 
     def get_info_widget(self, parent):
         """
@@ -291,6 +295,8 @@ class ThresholdTool(FGTTool):
                                           variable=self._threshold_slider_var,
                                           orient='horizontal',
                                           command=self._on_threshold_slider)
+
+        self._threshold_slider.set(self._threshold)
         self._threshold_slider.pack(side='top')
 
         return self._info_widget
@@ -771,6 +777,8 @@ class FloodAddTool(FGTTool):
         self._increment = 0.01
 
         self._prev_position = None
+        self._flood_slider = None
+        self._flood_slider_var = None
 
     @property
     def tolerance(self):
@@ -781,6 +789,13 @@ class FloodAddTool(FGTTool):
         if value >= 0:
             self._tolerance = value
 
+            if self._flood_slider is not None:
+                self._flood_slider_var = value
+                self._flood_slider.set(value)
+
+            self._add_region(self._prev_position)
+            self._notify_observers()
+
     @property
     def increment(self):
         return self._increment
@@ -788,6 +803,16 @@ class FloodAddTool(FGTTool):
     @increment.setter
     def increment(self, value):
         self._increment = value
+
+    @property
+    def patch(self):
+        return self._patch
+
+    @patch.setter
+    def patch(self, patch):
+        self._patch = patch
+        self._tolerance = 0.05
+        self._prev_position = None
 
     def on_click(self, position):
         """
@@ -835,9 +860,56 @@ class FloodAddTool(FGTTool):
         Postconditions:
             A region will be added to the mask that matches the flooded region.
         """
+        if position is None:
+            return
 
-        self.patch.flood_add(position, self.tolerance)
+        self.patch.flood_add_region(position, self.tolerance)
         self._notify_observers()
+
+    def get_info_widget(self, parent):
+        """
+        Get the widget that controls this tool in the info panel.
+
+        Args:
+            parent: The parent tkinter object.
+
+        Returns:
+            The widget.
+        """
+        super().get_info_widget(parent)
+
+        self._flood_slider_var = tk.DoubleVar()
+
+        self._flood_slider = tk.Scale(self._info_widget,
+                                      from_=0.00,
+                                      to=1.00,
+                                      tickinterval=0.50,
+                                      resolution=0.01,
+                                      length=200,
+                                      variable=self.
+                                      _flood_slider_var,
+                                      orient='horizontal',
+                                      command=self._on_flood_slider)
+
+        self._flood_slider.set(self._tolerance)
+        self._flood_slider.pack(side='top')
+
+        return self._info_widget
+
+    def _on_flood_slider(self, value):
+        """
+        Called when the flood slider is moved.
+
+        Args:
+            value: The value of the slider
+
+        Returns:
+            None
+
+        Postconditions:
+            The tolerance for the patch is udpated accordingly.
+        """
+        self.tolerance = float(value)
 
 
 class FloodRemoveTool(FGTTool):
@@ -859,6 +931,10 @@ class FloodRemoveTool(FGTTool):
         self._tolerance = 0.05
         self._increment = 0.01
 
+        self._prev_position = None
+        self._flood_slider = None
+        self._flood_slider_var = None
+
     @property
     def tolerance(self):
         return self._tolerance
@@ -868,6 +944,13 @@ class FloodRemoveTool(FGTTool):
         if value > 0:
             self._tolerance = value
 
+            if self._flood_slider is not None:
+                self._flood_slider_var = value
+                self._flood_slider.set(value)
+
+            self._remove_region(self._prev_position)
+            self._notify_observers()
+
     @property
     def increment(self):
         return self._increment
@@ -875,6 +958,16 @@ class FloodRemoveTool(FGTTool):
     @increment.setter
     def increment(self, value):
         self._increment = value
+
+    @property
+    def patch(self):
+        return self._patch
+
+    @patch.setter
+    def patch(self, patch):
+        self._patch = patch
+        self._tolerance = 0.05
+        self._prev_position = None
 
     def on_click(self, position):
         """
@@ -924,8 +1017,53 @@ class FloodRemoveTool(FGTTool):
                 flooded region.
         """
 
-        self.patch.flood_remove(position, self.tolerance)
+        self.patch.flood_remove_region(position, self.tolerance)
         self._notify_observers()
+
+    def get_info_widget(self, parent):
+        """
+        Get the widget that controls this tool in the info panel.
+
+        Args:
+            parent: The parent tkinter object.
+
+        Returns:
+            The widget.
+        """
+        super().get_info_widget(parent)
+
+        self._flood_slider_var = tk.DoubleVar()
+
+        self._flood_slider = tk.Scale(self._info_widget,
+                                      from_=0.00,
+                                      to=1.00,
+                                      tickinterval=0.50,
+                                      resolution=0.01,
+                                      length=200,
+                                      variable=self.
+                                      _flood_slider_var,
+                                      orient='horizontal',
+                                      command=self._on_flood_slider)
+
+        self._flood_slider.set(self._tolerance)
+        self._flood_slider.pack(side='top')
+
+        return self._info_widget
+
+    def _on_flood_slider(self, value):
+        """
+        Called when the flood slider is moved.
+
+        Args:
+            value: The value of the slider
+
+        Returns:
+            None
+
+        Postconditions:
+            The tolerance for the patch is udpated accordingly.
+        """
+        self.tolerance = float(value)
 
 
 class PreviousPatchTool(FGTTool):

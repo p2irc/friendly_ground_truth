@@ -53,6 +53,8 @@ class FGTCanvas:
 
         self._previous_position = (0, 0)
         self._coord_scale = 1
+        self._dragged = False
+
         self.imscale = 1.0  # Scale of the image
 
         self._main_window = main_window
@@ -86,6 +88,8 @@ class FGTCanvas:
         self.canvas.bind('<Configure>', lambda event: self.__show_image())
         # Remember the canvas position
         self.canvas.bind('<ButtonPress-1>', self.__move_from)
+
+        self.canvas.bind('<ButtonRelease-1>', self._on_click_release)
         # Move the canvas
         self.canvas.bind('<B1-Motion>', self.__move_to)
         # Zoom for Windows and MacOs
@@ -515,6 +519,21 @@ class FGTCanvas:
         if self._cursor != "brush":
             self.canvas.scan_mark(event.x, event.y)
 
+    def _on_click_release(self, event):
+        """
+        Called when the left mouse button is released.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+        """
+
+        if self._dragged:
+            self._dragged = False
+            return
+
         pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
         container_coords = self.canvas.coords(self.container)
         pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
@@ -535,6 +554,7 @@ class FGTCanvas:
         Postconditions:
             The canvas is moved to the event position.
         """
+        self._dragged = True
         if self._cursor != "brush":
 
             self.canvas.scan_dragto(event.x, event.y, gain=1)
