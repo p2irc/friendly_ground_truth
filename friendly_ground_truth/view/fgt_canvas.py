@@ -77,6 +77,7 @@ class FGTCanvas:
         self.canvas = tk.Canvas(self.__imframe, highlightthickness=0,
                                 xscrollcommand=hbar.set,
                                 yscrollcommand=vbar.set)
+
         self.canvas.grid(row=0, column=0, sticky='nswe')
         self.canvas.update()  # Make sure the canvas updates
 
@@ -502,6 +503,7 @@ class FGTCanvas:
             self.canvas.lower(imageid)  # set image into background
             # keep an extra reference to prevent garbage-collection
             self.canvas.imagetk = imagetk
+            self._image_id = imageid
 
     def __move_from(self, event):
         """

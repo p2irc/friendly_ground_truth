@@ -129,6 +129,16 @@ class FGTTool():
         self._info_widget = tk.Frame(parent, padx=0, pady=15)
         return self._info_widget
 
+    def destroy_info_widget(self):
+        """
+        Set info widget attributes to none to avoid tkinter errors.
+
+
+        Returns:
+            None
+        """
+        pass
+
     def on_adjust(self, direction):
         """
         What happens when the tool is adjusted.
@@ -236,6 +246,7 @@ class ThresholdTool(FGTTool):
 
         self._threshold_slider_var = None
         self._threshold_slider = None
+        self._new_patch = False
 
     @property
     def threshold(self):
@@ -247,13 +258,18 @@ class ThresholdTool(FGTTool):
             self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
                                                  'threshold_adjust')
             self._threshold = value
-            self._patch.threshold = value
+            if not self._new_patch:
+                self._patch.threshold = value
+
+                self._logger.debug("Setting threshold {}".
+                    format(self._patch.patch_index))
 
             if self._threshold_slider is not None:
                 self._threshold_slider_var = value
                 self._threshold_slider.set(value)
 
             self._notify_observers()
+            self._new_patch = False
 
     @property
     def increment(self):
@@ -269,6 +285,7 @@ class ThresholdTool(FGTTool):
 
     @patch.setter
     def patch(self, patch):
+        self._new_patch = True
         self._patch = patch
         self.threshold = patch.threshold
 
@@ -300,6 +317,20 @@ class ThresholdTool(FGTTool):
         self._threshold_slider.pack(side='top')
 
         return self._info_widget
+
+    def destroy_info_widget(self):
+        """
+        Destroy the info widget.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The info widget properties are set to None.
+        """
+        self._threshold_slider = None
+        self._threshold_slider_var = None
 
     def _on_threshold_slider(self, value):
         """
@@ -690,7 +721,7 @@ class NoRootTool(FGTTool):
         """
         super(NoRootTool, self)\
             .__init__("No Root Tool", no_root_icon, 4,
-                      undo_manager, "x", cursor='none', persistant=False,
+                      undo_manager, "x", cursor='arrow', persistant=False,
                       activation_callback=next_patch_function)
 
         self._logger = logging\
@@ -744,6 +775,8 @@ class NoRootTool(FGTTool):
             (None, -1) if there is not a next patch
         """
         patches = self._image.patches
+
+        print(self.patch.threshold)
 
         next_index = current_patch_num + 1
 
@@ -1017,6 +1050,9 @@ class FloodRemoveTool(FGTTool):
                 flooded region.
         """
 
+        if position is None:
+            return
+
         self.patch.flood_remove_region(position, self.tolerance)
         self._notify_observers()
 
@@ -1088,7 +1124,7 @@ class PreviousPatchTool(FGTTool):
         """
         super(PreviousPatchTool, self)\
             .__init__("Previous Patch", prev_patch_icon, 7,
-                      undo_manager, "Left", cursor='none',
+                      undo_manager, "Left", cursor='arrow',
                       persistant=False,
                       activation_callback=prev_patch_function)
 
@@ -1147,7 +1183,7 @@ class NextPatchTool(FGTTool):
         """
         super(NextPatchTool, self)\
             .__init__("Next Patch", next_patch_icon, 8,
-                      undo_manager, "Right", cursor='none',
+                      undo_manager, "Right", cursor='arrow',
                       persistant=False,
                       activation_callback=next_patch_function)
 
@@ -1162,7 +1198,7 @@ class NextPatchTool(FGTTool):
         Returns:
             None
         """
-        patch, index = self._prev_patch(current_patch_num)
+        patch, index = self._next_patch(current_patch_num)
         self._activation_callback(patch, index)
 
     def _next_patch(self, current_patch_num):
@@ -1206,7 +1242,7 @@ class UndoTool(FGTTool):
         """
         super(UndoTool, self)\
             .__init__("Undo", undo_icon, 9, undo_manager,
-                      "CTRL+z", cursor='none', persistant=False,
+                      "CTRL+z", cursor='arrow', persistant=False,
                       activation_callback=undo_callback)
 
     def on_activate(self, current_patch_num):
@@ -1256,7 +1292,7 @@ class RedoTool(FGTTool):
         """
         super(RedoTool, self)\
             .__init__("Redo", redo_icon, 10, undo_manager, "CTRL+r",
-                      cursor='none', persistant=False,
+                      cursor='arrow', persistant=False,
                       activation_callback=redo_callback)
 
     def on_activate(self, current_patch_num):

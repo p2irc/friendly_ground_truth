@@ -91,6 +91,8 @@ class MainWindow(ttk.Frame):
         self._old_tool_id = None
         # The previous image
         self._old_img = None
+
+        self._old_tool = None
         # --------------------------------------
 
         self._master.title("Friendly Ground Truth")
@@ -172,13 +174,13 @@ class MainWindow(ttk.Frame):
         self.progress_step = float(100.0/num_patches)
         self.progress_popup.pack_slaves()
 
-    def show_image(self, img):
+    def show_image(self, img, new=False):
         """
         Display the given image on the canvas.
 
         Args:
             img: The image to display, a numpy array
-
+            new: Whether to reset the canvas for a new image
         Returns:
             None
 
@@ -186,6 +188,10 @@ class MainWindow(ttk.Frame):
             The canvas's image will be set to the image.
         """
 
+        if new:
+            self._canvas.destroy()
+            self._canvas = None
+            self.create_canvas(img)
         if self._canvas is None:
             self.create_canvas(img)
             return
@@ -276,10 +282,13 @@ class MainWindow(ttk.Frame):
         Postconditions:
             The info panel will display the widget defined by the tool.
         """
+        if self._old_tool is not None:
+            self._old_tool.destroy_info_widget()
+
         self._info_panel.set_info_widget(tool.
                                          get_info_widget(self._info_panel),
                                          tool.name)
-
+        self._old_tool = tool
     # ==========================================================
     # PRIVATE FUNCTIONS
     # ==========================================================
@@ -576,7 +585,7 @@ class MainWindow(ttk.Frame):
                     button.config(relief="raised")
                 button.config(bg=self._orig_button_colour)
 
-        if keep_old:
+        if keep_old and self._old_tool_id is not None:
             button = self._toolbar_buttons[self._old_tool_id]
             if platform != "darwin":
                 button.config(relief="sunken")

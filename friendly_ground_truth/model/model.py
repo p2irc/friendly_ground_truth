@@ -517,7 +517,7 @@ class Patch():
             The mask property will be reset to all 0's
         """
         self._mask = np.zeros(self.patch.shape, dtype=bool)
-        self.thresh = 1
+        self.threshold = 1
 
     def add_landmark(self, position, radius, label):
         """

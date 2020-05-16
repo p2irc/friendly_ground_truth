@@ -246,6 +246,8 @@ class Controller():
         Returns:
             None
         """
+        # Correct for offset in context image
+        pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
         # Need to invert the position, because tkinter coords are backward from
         # skimage
         pos = pos[1], pos[0]
@@ -261,6 +263,9 @@ class Controller():
         Returns:
             None
         """
+        # Correct for offset in context image
+        pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
+
         # Need to invert the position, because tkinter coords are backward from
         # skimage
         pos = pos[1], pos[0]
@@ -338,12 +343,18 @@ class Controller():
             None
         """
         self._logger.debug("Next patch {}.".format(index))
+
+        if patch is None or index == -1:
+            # TODO: Save the mask
+            return
+
+        self._context_img = None
         self._current_patch_index = index
 
         for key in self._image_tools.keys():
             self._image_tools[key].patch = patch
 
-        self._display_current_patch()
+        self._display_current_patch(new=True)
 
     def _prev_patch_callback(self, patch, index):
         """
@@ -357,7 +368,16 @@ class Controller():
             None
         """
 
+        if patch is None or index == -1:
+            return
+
+        self._context_img = None
         self._current_patch_index = index
+
+        for key in self._image_tools.keys():
+            self._image_tools[key].patch = patch
+
+        self._display_current_patch(new=True)
 
     def _undo_callback(self, patch, string):
         """
@@ -403,7 +423,7 @@ class Controller():
 
         self._image.patches[self._current_patch_index] = patch
 
-    def _display_current_patch(self):
+    def _display_current_patch(self, new=False):
         """
         Display the current patch.
 
@@ -421,9 +441,7 @@ class Controller():
         patch = self._image.patches[self._current_patch_index]
         img = self._get_context_patches(patch)
 
-        # TODO: Update info panels
-
-        self._main_window.show_image(img)
+        self._main_window.show_image(img, new=new)
 
     def _brush_size_callback(self, radius):
         """
@@ -443,7 +461,7 @@ class Controller():
         them in a larger image.
 
         Args:
-            patch: The cirrent patch
+            patch: The current patch
 
         Returns:
             An image for display.
