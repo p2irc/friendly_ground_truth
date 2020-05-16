@@ -25,6 +25,7 @@ from friendly_ground_truth.model.model import Image
 
 
 import os
+import copy
 
 import tkinter.filedialog
 import tkinter.messagebox
@@ -219,9 +220,11 @@ class Controller():
             self._current_tool = old_tool
             tool = old_tool
 
+        tool.lock_undos()
         # self._display_current_patch()
         self._main_window.update_info_panel(tool)
         self._main_window.set_canvas_cursor(tool.cursor)
+        tool.unlock_undos()
 
     def adjust_tool(self, direction):
         """
@@ -354,6 +357,8 @@ class Controller():
         for key in self._image_tools.keys():
             self._image_tools[key].patch = patch
 
+        self._undo_manager.clear_undos()
+
         self._display_current_patch(new=True)
 
     def _prev_patch_callback(self, patch, index):
@@ -377,6 +382,7 @@ class Controller():
         for key in self._image_tools.keys():
             self._image_tools[key].patch = patch
 
+        self._undo_manager.clear_undos()
         self._display_current_patch(new=True)
 
     def _undo_callback(self, patch, string):
@@ -390,15 +396,17 @@ class Controller():
         Returns:
             None
         """
-
         if patch is None:
             return
-
-        self._undo_manager.add_to_redo_stack(patch, string)
+        self._undo_manager.add_to_redo_stack(copy.deepcopy(patch), string)
 
         # TODO: Enable redo button here
 
-        self._image.patches[self._current_patch_index] = patch
+        self._image.patches[self._current_patch_index] = copy.deepcopy(patch)
+
+        for key in self._image_tools.keys():
+            self._image_tools[key].lock_undos()
+            self._image_tools[key].patch = patch
 
     def _redo_callback(self, patch, string):
         """
@@ -414,14 +422,18 @@ class Controller():
 
         if patch is None:
             return
+        print(string)
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(patch), string)
 
-        self._undo_manager.add_to_undo_stack(patch, string)
-
-        if len(self._undo_manager.redo_stack) == 0:
+        if len(self._undo_manager._redo_stack) == 0:
             pass
             # TODO Disable redo button here
 
-        self._image.patches[self._current_patch_index] = patch
+        self._image.patches[self._current_patch_index] = copy.deepcopy(patch)
+
+        for key in self._image_tools.keys():
+            self._image_tools[key].lock_undos()
+            self._image_tools[key].patch = patch
 
     def _display_current_patch(self, new=False):
         """
@@ -434,7 +446,6 @@ class Controller():
         Postconditions:
             The main window's canvas will display the given image.
         """
-
         if self._image is None:
             return
 
@@ -443,6 +454,8 @@ class Controller():
 
         self._main_window.show_image(img, new=new)
 
+        if self._current_tool is not None:
+            self._current_tool.unlock_undos()
     def _brush_size_callback(self, radius):
         """
         Called when a brush tool is updated.

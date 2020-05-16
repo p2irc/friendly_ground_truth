@@ -282,13 +282,16 @@ class MainWindow(ttk.Frame):
         Postconditions:
             The info panel will display the widget defined by the tool.
         """
+        tool.lock_undos()
         if self._old_tool is not None:
             self._old_tool.destroy_info_widget()
 
         self._info_panel.set_info_widget(tool.
                                          get_info_widget(self._info_panel),
                                          tool.name)
+
         self._old_tool = tool
+
     # ==========================================================
     # PRIVATE FUNCTIONS
     # ==========================================================

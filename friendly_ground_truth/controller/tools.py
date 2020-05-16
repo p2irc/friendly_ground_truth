@@ -69,7 +69,7 @@ class FGTTool():
         self._key_mapping = key_mapping
         self._activation_callback = activation_callback
         self._persistant = persistant
-
+        self._can_undo = True
         self._observers = []
 
     @property
@@ -128,6 +128,33 @@ class FGTTool():
         """
         self._info_widget = tk.Frame(parent, padx=0, pady=15)
         return self._info_widget
+
+    def lock_undos(self):
+        """
+        Make sure that undoing this action does not accidentally add it to the
+        undo stack again.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The _can_undo variable is set to False
+        """
+        self._can_undo = False
+
+    def unlock_undos(self):
+        """
+        Unlock undos so operations can be added to the undo stack.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The _can_undo variable is set to True
+        """
+        self._can_undo = True
 
     def destroy_info_widget(self):
         """
@@ -255,14 +282,15 @@ class ThresholdTool(FGTTool):
     @threshold.setter
     def threshold(self, value):
         if value <= 1 and value >= 0:
-            self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
-                                                 'threshold_adjust')
+
             self._threshold = value
             if not self._new_patch:
                 self._patch.threshold = value
 
-                self._logger.debug("Setting threshold {}".
-                    format(self._patch.patch_index))
+                if self._can_undo:
+                    self._undo_manager.\
+                        add_to_undo_stack(copy.deepcopy(self.patch),
+                                          'threshold_adjust')
 
             if self._threshold_slider is not None:
                 self._threshold_slider_var = value
@@ -285,8 +313,14 @@ class ThresholdTool(FGTTool):
 
     @patch.setter
     def patch(self, patch):
-        self._new_patch = True
+
+        if self.patch is None or patch.patch_index != self.patch.patch_index:
+            print("Its a new patch")
+            self._new_patch = True
+
         self._patch = patch
+        self._slider_init = False
+
         self.threshold = patch.threshold
 
     def get_info_widget(self, parent):
@@ -299,6 +333,7 @@ class ThresholdTool(FGTTool):
         Returns:
             The widget.
         """
+        self.lock_undos()
         super().get_info_widget(parent)
 
         self._threshold_slider_var = tk.DoubleVar()
@@ -315,6 +350,8 @@ class ThresholdTool(FGTTool):
 
         self._threshold_slider.set(self._threshold)
         self._threshold_slider.pack(side='top')
+
+        self.unlock_undos()
 
         return self._info_widget
 
@@ -345,7 +382,10 @@ class ThresholdTool(FGTTool):
         Postconditions:
             The threshold for the patch is udpated accordingly.
         """
-        self.threshold = float(value)
+        if self._slider_init:
+            self.threshold = float(value)
+
+        self._slider_init = True
 
     def _adjust_threshold(self, direction):
         """
@@ -376,9 +416,9 @@ class ThresholdTool(FGTTool):
         Returns:
             None
         """
-        self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
-                                             "threshold_adjust")
+        print("On Adjuyst")
         self._adjust_threshold(direction)
+        print("Endf  on adjust")
 
 
 class AddRegionTool(FGTTool):
@@ -1258,9 +1298,9 @@ class UndoTool(FGTTool):
         Postconditions:
             The last action is undone and put on the redo stack.
         """
-
         patch, string = self._undo()
         self._activation_callback(patch, string)
+        self._notify_observers()
 
     def _undo(self):
         """
@@ -1271,7 +1311,7 @@ class UndoTool(FGTTool):
             The patch data and the operation string
         """
 
-        return self.undo_manager.undo()
+        return self._undo_manager.undo()
 
 
 class RedoTool(FGTTool):
@@ -1311,6 +1351,7 @@ class RedoTool(FGTTool):
 
         patch, string = self._redo()
         self._activation_callback(patch, string)
+        self._notify_observers()
 
     def _redo(self):
         """
@@ -1321,4 +1362,4 @@ class RedoTool(FGTTool):
             The patch data and the operation string
         """
 
-        return self.undo_manager.redo()
+        return self._undo_manager.redo()
