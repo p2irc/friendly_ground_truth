@@ -107,6 +107,7 @@ class Image():
         Returns:
             A boolean numpy array representing the image mask.
         """
+        self._create_mask()
         return self._mask
 
     @property
@@ -252,11 +253,11 @@ class Image():
         """
         self._create_mask()
 
-        backup_path = os.path.splitext(pathname)[0]
-        backup_path += "_bak.png"
-        io.imsave(backup_path, img_as_uint(self.mask))
+        # backup_path = os.path.splitext(pathname)[0]
+        # backup_path += "_bak.png"
+        # io.imsave(backup_path, img_as_uint(self.mask))
 
-        self._remove_small_components()
+        # self._remove_small_components()
         io.imsave(pathname, img_as_uint(self.mask))
 
     def export_labels(self, pathname):

@@ -9,6 +9,7 @@ Description: Main controller for the application
 
 """
 from friendly_ground_truth.view.main_window import MainWindow
+from friendly_ground_truth.view.preview_window import PreviewWindow
 from friendly_ground_truth.controller.tools import (ThresholdTool,
                                                     AddRegionTool,
                                                     RemoveRegionTool,
@@ -23,13 +24,16 @@ from friendly_ground_truth.controller.tools import (ThresholdTool,
 from friendly_ground_truth.controller.undo_manager import UndoManager
 from friendly_ground_truth.model.model import Image
 
+from skimage import segmentation, img_as_ubyte
 
 import os
 import copy
 
 import tkinter.filedialog
 import tkinter.messagebox
+
 import numpy as np
+
 import logging
 module_logger = logging.getLogger('friendly_gt.controller.controller')
 
@@ -39,7 +43,7 @@ class Controller():
     Main controller for the application.
 
     Attributes:
-        {% An Attribute %}: {% Description %}
+        image_tools: A dictionary of tools keyed by their id
     """
     CONTEXT_TRANSPARENCY = 100
     NUM_PATCHES = 10
@@ -101,6 +105,9 @@ class Controller():
         # The offset of the current patch within the context image
         self._patch_offset = (0, 0)
 
+        # Whether the mask preview has been shown or not
+        self._previewed = False
+
     @property
     def image_tools(self):
         return self._image_tools
@@ -141,7 +148,7 @@ class Controller():
             self._image = Image(file_name, 10, self._update_progressbar)
 
         except FileNotFoundError:
-            self._logger.debug("There was a problem loading the image.")
+            self._logger.exception("There was a problem loading the image.")
             return
 
         self._current_patch_index = 0
@@ -436,7 +443,6 @@ class Controller():
             self._image_tools[key].lock_undos()
             self._image_tools[key].patch = patch
 
-
     def _display_current_patch(self, new=False):
         """
         Display the current patch.
@@ -458,7 +464,6 @@ class Controller():
 
         if self._current_tool is not None:
             self._current_tool.unlock_undos()
-
 
     def _brush_size_callback(self, radius):
         """
@@ -591,3 +596,50 @@ class Controller():
 
         if self._main_window.load_progress >= self.NUM_PATCHES ** 2:
             self._main_window.progress_popup.destroy()
+
+    def _show_saved_preview(self):
+        """
+        Display a preview of the saved mask overlaid with the image.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            A window displaying the image and mask is shown.
+        """
+
+        self._previewed = True
+
+        img = self._image.image
+        mask = self._image.mask
+
+        overlay = segmentation.mark_boundaries(img, mask)
+
+        overlay = img_as_ubyte(overlay)
+
+        rows = np.any(mask, axis=1)
+        cols = np.any(mask, axis=0)
+        rmin, rmax = np.where(rows)[0][[0, -1]]
+        cmin, cmax = np.where(cols)[0][[0, -1]]
+
+        overlay = overlay[rmin:rmax, cmin:cmax]
+
+        PreviewWindow(overlay, self)
+
+    def _get_image_name_from_path(self, path):
+        """
+        Get the name of the image from its original path.
+
+        Args:
+            path: The path to the original image.
+
+        Returns:
+            The name to save the image mask as.
+        """
+        if os.path.isdir(path):
+            raise ValueError("Cannot get image name from a directory.")
+
+        basename = os.path.basename(path)
+
+        return os.path.splitext(basename)[0] + '_mask.png'
