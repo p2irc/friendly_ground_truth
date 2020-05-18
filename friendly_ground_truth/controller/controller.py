@@ -108,6 +108,9 @@ class Controller():
         # Whether the mask preview has been shown or not
         self._previewed = False
 
+        # Disable the redo button for now
+        self._main_window.disable_button(self._redo_id)
+
     @property
     def image_tools(self):
         return self._image_tools
@@ -335,6 +338,7 @@ class Controller():
         redo_tool = RedoTool(self._undo_manager,
                              self._redo_callback)
         image_tools[redo_tool.id] = redo_tool
+        self._redo_id = redo_tool.id
 
         for id in image_tools.keys():
             image_tools[id].bind_to(self._display_current_patch)
@@ -355,7 +359,8 @@ class Controller():
         self._logger.debug("Next patch {}.".format(index))
 
         if patch is None or index == -1:
-            # TODO: Save the mask
+            self._display_current_patch()
+            self.save_mask()
             return
 
         self._context_img = None
@@ -405,11 +410,12 @@ class Controller():
         """
         if patch is None:
             return
+
         current_patch = self._image.patches[self._current_patch_index]
         self._undo_manager.add_to_redo_stack(copy.deepcopy(current_patch),
                                              string)
 
-        # TODO: Enable redo button here
+        self._main_window.enable_button(self._redo_id)
 
         self._image.patches[self._current_patch_index] = patch
 
@@ -434,8 +440,7 @@ class Controller():
         self._undo_manager.add_to_undo_stack(copy.deepcopy(patch), string)
 
         if len(self._undo_manager._redo_stack) == 0:
-            pass
-            # TODO Disable redo button here
+            self._main_window.disable_button(self._redo_id)
 
         self._image.patches[self._current_patch_index] = patch
 

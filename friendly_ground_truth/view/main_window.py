@@ -291,6 +291,36 @@ class MainWindow(ttk.Frame):
 
         self._old_tool = tool
 
+    def enable_button(self, id):
+        """
+        Enable the button with the given id.
+
+        Args:
+            id: The id of the tool whose button to enable.
+
+        Returns:
+            None
+
+        Postconditions:
+            The button will be in the enabled state.
+        """
+        self._toolbar_buttons[id].config(state='normal')
+
+    def disable_button(self, id):
+        """
+        Disable the button with the given id.
+
+        Args:
+            id: The id of the tool whose button to disable.
+
+        Returns:
+            None
+
+        Postconditions:
+            The button will be in the disabled state.
+        """
+        self._toolbar_buttons[id].config(state='disabled')
+
     # ==========================================================
     # PRIVATE FUNCTIONS
     # ==========================================================
@@ -397,23 +427,49 @@ class MainWindow(ttk.Frame):
         # Create image interaction tools
         image_tools = self._controller.image_tools
 
-        column = 0
+        group_priorities = [(0, "Markups"), (1, "Navigation"), (2, "Undo")]
+
+        groups = [[] for _ in group_priorities]
+        groups.append([])
+
         for tool_id in image_tools.keys():
             tool = image_tools[tool_id]
 
-            icon = self._load_icon_from_string(tool.icon_string)
-            command = partial(self._on_tool_selected, tool.id)
-            button = tk.Button(self._toolbar, image=icon, relief='flat',
-                               command=command)
+            tool_group = tool.group
 
-            button.image = icon
-            button.pack(side="left", padx=2, pady=2)
-            # button.grid(column=column, row=0, sticky='EW')
-            column += 1
+            in_priors = False
 
-            self._create_tool_tip(button, tool.id, tool.name)
-            self._toolbar_buttons[tool.id] = button
-            self._orig_button_colour = button.cget("background")
+            for p in group_priorities:
+                if tool_group == p[1]:
+                    groups[p[0]].append(tool)
+                    in_priors = True
+                    continue
+
+            if not in_priors:
+                groups[-1].append(tool)
+
+        if len(groups[-1]) == 0:
+            groups.pop()
+
+        column = 0
+        for group in groups:
+            for tool in group:
+                icon = self._load_icon_from_string(tool.icon_string)
+                command = partial(self._on_tool_selected, tool.id)
+                button = tk.Button(self._toolbar, image=icon, relief='flat',
+                                   command=command)
+
+                button.image = icon
+                button.pack(side="left", padx=2, pady=2)
+                # button.grid(column=column, row=0, sticky='EW')
+                column += 1
+
+                self._create_tool_tip(button, tool.id, tool.name)
+                self._toolbar_buttons[tool.id] = button
+                self._orig_button_colour = button.cget("background")
+
+            sep = tk.ttk.Separator(self._toolbar, orient="vertical")
+            sep.pack(side='left', padx=5, fill='both')
 
         self._image_indicator = tk.Label(self._toolbar, text="No Image Loaded")
         self._image_indicator.pack(side='right', padx=2, pady=2)

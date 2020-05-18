@@ -44,7 +44,7 @@ class FGTTool():
 
     def __init__(self, name, icon_string, id,  undo_manager,
                  key_mapping, cursor='none', persistant=True,
-                 activation_callback=None):
+                 activation_callback=None, group=None):
         """
         Initialize the object
 
@@ -57,6 +57,8 @@ class FGTTool():
             key_mapping: The keyboard shortcut string for this tool
             activation_callback: A function to call when the activate function
                                  is finished
+            group: If this tool should be grouped with other tools, this string
+                   identifies what group it is a part of.
         """
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.FGTTool')
@@ -71,6 +73,7 @@ class FGTTool():
         self._persistant = persistant
         self._can_undo = True
         self._observers = []
+        self._group = group
 
     @property
     def name(self):
@@ -115,6 +118,10 @@ class FGTTool():
     @property
     def key_mapping(self):
         return self._key_mapping
+
+    @property
+    def group(self):
+        return self._group
 
     def get_info_widget(self, parent):
         """
@@ -262,7 +269,7 @@ class ThresholdTool(FGTTool):
         super(ThresholdTool, self)\
             .__init__("Threshold Tool", threshold_icon, 1,
                       undo_manager, "t", cursor='arrow', persistant=True,
-                      activation_callback=None)
+                      activation_callback=None, group="Markups")
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.ThresholdTool')
@@ -430,7 +437,8 @@ class AddRegionTool(FGTTool):
     def __init__(self, undo_manager):
         super(AddRegionTool, self)\
             .__init__("Add Region Tool", add_region_icon, 2,
-                      undo_manager, "a", cursor='brush', persistant=True)
+                      undo_manager, "a", cursor='brush', persistant=True,
+                      group="Markups")
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.AddRegionTool')
@@ -590,7 +598,8 @@ class RemoveRegionTool(FGTTool):
     def __init__(self, undo_manager):
         super(RemoveRegionTool, self)\
             .__init__("Remove Region Tool", remove_region_icon, 3,
-                      undo_manager, "r", cursor="brush", persistant=True)
+                      undo_manager, "r", cursor="brush", persistant=True,
+                      group="Markups")
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.RemoveRegionTool')
@@ -760,7 +769,8 @@ class NoRootTool(FGTTool):
         super(NoRootTool, self)\
             .__init__("No Root Tool", no_root_icon, 4,
                       undo_manager, "x", cursor='arrow', persistant=False,
-                      activation_callback=next_patch_function)
+                      activation_callback=next_patch_function,
+                      group="Navigation")
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.NoRootTool')
@@ -837,7 +847,8 @@ class FloodAddTool(FGTTool):
     def __init__(self, undo_manager):
         super(FloodAddTool, self)\
             .__init__("Flood Add Tool", flood_add_icon, 5,
-                      undo_manager, "f", cursor='crosshair', persistant=True)
+                      undo_manager, "f", cursor='crosshair', persistant=True,
+                      group="Markups")
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.FloodAddTool')
@@ -992,7 +1003,8 @@ class FloodRemoveTool(FGTTool):
     def __init__(self, undo_manager):
         super(FloodRemoveTool, self)\
             .__init__("Flood Remove Tool", flood_remove_icon, 6,
-                      undo_manager, "l", cursor='crosshair', persistant=True)
+                      undo_manager, "l", cursor='crosshair', persistant=True,
+                      group="Markups")
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.FloodRemoveTool')
@@ -1162,7 +1174,8 @@ class PreviousPatchTool(FGTTool):
             .__init__("Previous Patch", prev_patch_icon, 7,
                       undo_manager, "Left", cursor='arrow',
                       persistant=False,
-                      activation_callback=prev_patch_function)
+                      activation_callback=prev_patch_function,
+                      group="Navigation")
 
     def on_activate(self, current_patch_num):
         """
@@ -1221,7 +1234,8 @@ class NextPatchTool(FGTTool):
             .__init__("Next Patch", next_patch_icon, 8,
                       undo_manager, "Right", cursor='arrow',
                       persistant=False,
-                      activation_callback=next_patch_function)
+                      activation_callback=next_patch_function,
+                      group="Navigation")
 
     def on_activate(self, current_patch_num):
         """
@@ -1279,7 +1293,7 @@ class UndoTool(FGTTool):
         super(UndoTool, self)\
             .__init__("Undo", undo_icon, 9, undo_manager,
                       "CTRL+z", cursor='arrow', persistant=False,
-                      activation_callback=undo_callback)
+                      activation_callback=undo_callback, group="Undo")
 
     def on_activate(self, current_patch_num):
         """
@@ -1329,7 +1343,7 @@ class RedoTool(FGTTool):
         super(RedoTool, self)\
             .__init__("Redo", redo_icon, 10, undo_manager, "CTRL+r",
                       cursor='arrow', persistant=False,
-                      activation_callback=redo_callback)
+                      activation_callback=redo_callback, group="Undo")
 
     def on_activate(self, current_patch_num):
         """

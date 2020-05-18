@@ -187,6 +187,15 @@ class FGTCanvas:
         self.draw_brush()
 
     def new_image(self, image):
+        """
+        Reset the image and all properties of the image on the canvas.
+
+        Args:
+            image: The image, a numpy array.
+
+        Returns:
+            None
+        """
 
         self.canvas.scan_mark(0, 0)
         self.canvas.scan_dragto(0, 0, gain=1)
