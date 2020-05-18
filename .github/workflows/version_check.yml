@@ -1,0 +1,23 @@
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Check Conflicting Versions
+
+jobs:
+  check_version:
+    name: check_version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1
+      - name: Get Version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}   
+      - name: Check Versions
+        id: check_versions
+        run: |
+          cd docs
+          bash check_version_consistency.bash ${{ steps.get_version.outputs.VERSION }}
