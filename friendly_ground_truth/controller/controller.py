@@ -110,6 +110,7 @@ class Controller():
 
         # Disable the redo button for now
         self._main_window.disable_button(self._redo_id)
+        self._main_window.disable_button(self._undo_id)
 
     @property
     def image_tools(self):
@@ -236,6 +237,9 @@ class Controller():
         self._main_window.set_canvas_cursor(tool.cursor)
         tool.unlock_undos()
 
+        if not self._undo_manager.undo_empty:
+            self._main_window.enable_button(self._undo_id)
+
     def adjust_tool(self, direction):
         """
         Adjust the current tool.
@@ -248,6 +252,9 @@ class Controller():
         """
         self._current_tool.on_adjust(direction)
         # self._display_current_patch()
+
+        if not self._undo_manager.undo_empty:
+            self._main_window.enable_button(self._undo_id)
 
     def click_event(self, pos):
         """
@@ -266,6 +273,9 @@ class Controller():
         pos = pos[1], pos[0]
         self._current_tool.on_click(pos)
 
+        if not self._undo_manager.undo_empty:
+            self._main_window.enable_button(self._undo_id)
+
     def drag_event(self, pos):
         """
         A click event in the main window has occured/
@@ -283,6 +293,9 @@ class Controller():
         # skimage
         pos = pos[1], pos[0]
         self._current_tool.on_drag(pos)
+
+        if not self._undo_manager.undo_empty:
+            self._main_window.enable_button(self._undo_id)
 
     # ===================================================
     # Private Functions
@@ -334,6 +347,7 @@ class Controller():
         undo_tool = UndoTool(self._undo_manager,
                              self._undo_callback)
         image_tools[undo_tool.id] = undo_tool
+        self._undo_id = undo_tool.id
 
         redo_tool = RedoTool(self._undo_manager,
                              self._redo_callback)
@@ -373,6 +387,9 @@ class Controller():
 
         self._display_current_patch(new=True)
 
+        self._main_window.disable_button(self._undo_id)
+        self._main_window.disable_button(self._redo_id)
+
     def _prev_patch_callback(self, patch, index):
         """
         Called when the previous patch is determined.
@@ -397,6 +414,9 @@ class Controller():
         self._undo_manager.clear_undos()
         self._display_current_patch(new=True)
 
+        self._main_window.disable_button(self._undo_id)
+        self._main_window.disable_button(self._redo_id)
+
     def _undo_callback(self, patch, string):
         """
         Called when undo is done.
@@ -412,10 +432,14 @@ class Controller():
             return
 
         current_patch = self._image.patches[self._current_patch_index]
+
         self._undo_manager.add_to_redo_stack(copy.deepcopy(current_patch),
                                              string)
 
         self._main_window.enable_button(self._redo_id)
+
+        if self._undo_manager.undo_empty:
+            self._main_window.disable_button(self._undo_id)
 
         self._image.patches[self._current_patch_index] = patch
 
@@ -437,10 +461,15 @@ class Controller():
         if patch is None:
             return
 
-        self._undo_manager.add_to_undo_stack(copy.deepcopy(patch), string)
+        current_patch = self._image.patches[self._current_patch_index]
 
-        if len(self._undo_manager._redo_stack) == 0:
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(current_patch),
+                                             string)
+
+        if self._undo_manager.redo_empty:
             self._main_window.disable_button(self._redo_id)
+
+        self._main_window.enable_button(self._undo_id)
 
         self._image.patches[self._current_patch_index] = patch
 
@@ -469,6 +498,10 @@ class Controller():
 
         if self._current_tool is not None:
             self._current_tool.unlock_undos()
+        if self._undo_manager.undo_empty:
+            self._main_window.disable_button(self._undo_id)
+        else:
+            self._main_window.enable_button(self._undo_id)
 
     def _brush_size_callback(self, radius):
         """

@@ -14,6 +14,9 @@ class UndoManager():
     """
     Manager for undo and redo operations
 
+    Attributes:
+        undo_empty: True if the undo stack is empty
+        redo_empty: True if the redo stack is empty
     """
 
     MAX_SIZE = 20
@@ -22,6 +25,14 @@ class UndoManager():
 
         self._undo_stack = []
         self._redo_stack = []
+
+    @property
+    def undo_empty(self):
+        return len(self._undo_stack) == 0
+
+    @property
+    def redo_empty(self):
+        return len(self._redo_stack) == 0
 
     def add_to_undo_stack(self, patch, operation):
         """
@@ -49,7 +60,7 @@ class UndoManager():
                 return
         elif "adjust" in operation and len(self._undo_stack) > 0:
             if self._undo_stack[-1][1] == operation:
-                self._undo_stack.pop()
+                patch, _ = self._undo_stack.pop()
 
         self._undo_stack.append((patch, operation))
 

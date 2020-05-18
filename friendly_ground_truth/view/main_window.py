@@ -502,9 +502,9 @@ class MainWindow(ttk.Frame):
 
         self._logger.debug("KEY: " + key)
 
-        if key == "CTRL+equal":
+        if key == "CTRL+equal" or key == "CTRL+=":
             self._controller.adjust_tool(1)
-        elif key == "CTRL+minus":
+        elif key == "CTRL+minus" or key == "CTRL+-":
             self._controller.adjust_tool(-1)
         else:
             try:

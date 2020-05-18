@@ -1320,7 +1320,6 @@ class UndoTool(FGTTool):
         Returns:
             The patch data and the operation string
         """
-
         return self._undo_manager.undo()
 
 
@@ -1370,5 +1369,4 @@ class RedoTool(FGTTool):
         Returns:
             The patch data and the operation string
         """
-
         return self._undo_manager.redo()
