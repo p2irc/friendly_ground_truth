@@ -10,7 +10,6 @@ Description: Model Classes
 """
 import logging
 import numpy as np
-import os
 
 from skimage import io, img_as_float, img_as_uint, img_as_ubyte
 from skimage.util.shape import view_as_blocks

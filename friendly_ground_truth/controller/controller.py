@@ -139,7 +139,7 @@ class Controller():
         file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
                                                        initialdir=initial_dir)
 
-        if file_name is None:
+        if file_name is None or file_name == ():
             return
 
         self._last_load_dir = os.path.split(file_name)[0]
