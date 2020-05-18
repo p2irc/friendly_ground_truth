@@ -20,7 +20,8 @@ from PIL import ImageTk as itk
 
 from friendly_ground_truth.view.fgt_canvas import FGTCanvas
 from friendly_ground_truth.view.info_panel import InfoPanel
-
+from friendly_ground_truth.view.help_dialogs import (AboutDialog,
+                                                     KeyboardShortcutDialog)
 from sys import platform
 
 from functools import partial
@@ -564,8 +565,7 @@ class MainWindow(ttk.Frame):
         Returns:
             None
         """
-        # TODO: start the about window
-        pass
+        AboutDialog()
 
     def _on_keyboard_shortcuts(self):
         """
@@ -575,8 +575,7 @@ class MainWindow(ttk.Frame):
         Returns:
             None
         """
-        # TODO: Open keyboard shortcuts window
-        pass
+        KeyboardShortcutDialog(self._controller.image_tools)
 
     def _on_tool_selected(self, id):
         """

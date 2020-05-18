@@ -59,6 +59,9 @@ class VersionInfo():
         """
         version_string = version_string.strip('v')
         parts = version_string.split(".")
+        if 'd' in parts[2]:
+            parts[2] = parts[2].strip('d')
+
         v_maj = int(parts[0])
         v_min = int(parts[1])
         v_patch = int(parts[2])
