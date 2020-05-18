@@ -189,9 +189,7 @@ class MainWindow(ttk.Frame):
         """
 
         if new:
-            self._canvas.destroy()
-            self._canvas = None
-            self.create_canvas(img)
+            self._canvas.new_image(img)
 
         if self._canvas is None:
             self.create_canvas(img)

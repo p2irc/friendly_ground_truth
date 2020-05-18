@@ -186,6 +186,63 @@ class FGTCanvas:
         self._brush_radius = value
         self.draw_brush()
 
+    def new_image(self, image):
+
+        self.canvas.scan_mark(0, 0)
+        self.canvas.scan_dragto(0, 0, gain=1)
+        self.canvas.scale('all', 0, 0, 1, 1)
+        self.imscale = 1.0
+
+        self.canvas.delete("all")
+        self.img = image
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            self.__image = Image.fromarray(self.img)
+
+        self.imwidth, self.imheight = self.__image.size
+
+        if (self.imwidth * self.imheight > self.__huge_size * self.__huge_size
+           and self.__image.tile[0][0] == 'raw'):
+
+            self.__huge = True
+            self.__offset = self.__image.tile[0][2]
+            self.__tile = [self.__image.tile[0][0],
+                           [0, 0, self.imwidth, 0],
+                           self.__offset,
+                           self.__image.tile[0][3]]
+
+        self.__min_side = min(self.imwidth, self.imheight)
+
+        # Image Pyramid
+        if self.__huge:
+            self.__pyramid = [self.smaller()]
+        else:
+            self.__pyramid = [Image.fromarray(self.img)]
+
+        # Set ratio coefficeint for pyramid
+        if self.__huge:
+            self.__ratio = max(self.imwidth, self.imheight) / self.__huge_size
+        else:
+            self.__ratio = 1.0
+
+        self.__curr_img = 0  # The current image from the pyramid
+        self.__scale = self.imscale * self.__ratio
+        self.__reduction = 2  # Reduction degree of pyramid
+
+        w, h, = self.__pyramid[-1].size
+        while w > 512 and h > 512:
+            w /= self.__reduction
+            h /= self.__reduction
+            self.__pyramid.append(self.__pyramid[-1].resize((int(w), int(h)),
+                                  self.__filter))
+
+        # Put image into rectangle for setting corrdinates
+        self.container = self.canvas.create_rectangle((0, 0, self.imwidth,
+                                                      self.imheight), width=0)
+        self.__show_image()
+        self.canvas.focus_set()
+
     def _on_motion(self, event):
         """
         Called when the mouse is moved.
