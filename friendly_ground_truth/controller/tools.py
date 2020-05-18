@@ -296,6 +296,7 @@ class ThresholdTool(FGTTool):
                 self._threshold_slider_var = value
                 self._threshold_slider.set(value)
 
+            self._logger.debug('Threshold drawing image')
             self._notify_observers()
             self._new_patch = False
 
@@ -315,13 +316,12 @@ class ThresholdTool(FGTTool):
     def patch(self, patch):
 
         if self.patch is None or patch.patch_index != self.patch.patch_index:
-            print("Its a new patch")
             self._new_patch = True
 
         self._patch = patch
         self._slider_init = False
 
-        self.threshold = patch.threshold
+        self._threshold = patch.threshold
 
     def get_info_widget(self, parent):
         """
@@ -416,9 +416,7 @@ class ThresholdTool(FGTTool):
         Returns:
             None
         """
-        print("On Adjuyst")
         self._adjust_threshold(direction)
-        print("Endf  on adjust")
 
 
 class AddRegionTool(FGTTool):
@@ -815,8 +813,6 @@ class NoRootTool(FGTTool):
             (None, -1) if there is not a next patch
         """
         patches = self._image.patches
-
-        print(self.patch.threshold)
 
         next_index = current_patch_num + 1
 
@@ -1348,7 +1344,6 @@ class RedoTool(FGTTool):
         Postconditions:
             The last undone action is redone and put on the undo stack.
         """
-
         patch, string = self._redo()
         self._activation_callback(patch, string)
         self._notify_observers()

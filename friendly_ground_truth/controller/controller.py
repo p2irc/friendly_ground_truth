@@ -398,11 +398,13 @@ class Controller():
         """
         if patch is None:
             return
-        self._undo_manager.add_to_redo_stack(copy.deepcopy(patch), string)
+        current_patch = self._image.patches[self._current_patch_index]
+        self._undo_manager.add_to_redo_stack(copy.deepcopy(current_patch),
+                                             string)
 
         # TODO: Enable redo button here
 
-        self._image.patches[self._current_patch_index] = copy.deepcopy(patch)
+        self._image.patches[self._current_patch_index] = patch
 
         for key in self._image_tools.keys():
             self._image_tools[key].lock_undos()
@@ -419,21 +421,21 @@ class Controller():
         Returns:
             None
         """
-
         if patch is None:
             return
-        print(string)
+
         self._undo_manager.add_to_undo_stack(copy.deepcopy(patch), string)
 
         if len(self._undo_manager._redo_stack) == 0:
             pass
             # TODO Disable redo button here
 
-        self._image.patches[self._current_patch_index] = copy.deepcopy(patch)
+        self._image.patches[self._current_patch_index] = patch
 
         for key in self._image_tools.keys():
             self._image_tools[key].lock_undos()
             self._image_tools[key].patch = patch
+
 
     def _display_current_patch(self, new=False):
         """
@@ -456,6 +458,8 @@ class Controller():
 
         if self._current_tool is not None:
             self._current_tool.unlock_undos()
+
+
     def _brush_size_callback(self, radius):
         """
         Called when a brush tool is updated.
@@ -493,7 +497,6 @@ class Controller():
             o_img = patch.overlay_image
             o_img = np.dstack((o_img, np.full(o_img.shape[0:-1],
                                255, dtype=o_img.dtype)))
-            self._logger.debug("Using cached context image")
 
             self._context_img[r_start:r_end, c_start:c_end] = o_img
             return self._context_img
@@ -509,11 +512,9 @@ class Controller():
         for i in range(start_i, start_i + 3):
 
             if i < 0 or i >= self._image.num_patches:
-                self._logger.debug("Patch Out Of Bounds")
                 continue
             for j in range(start_j, start_j + 3):
                 if j < 0 or j >= self._image.num_patches:
-                    self._logger.debug("Patch Out Of Bounds")
                     continue
 
                 neighbouring_indices.append((i, j))
