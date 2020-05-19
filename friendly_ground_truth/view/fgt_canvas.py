@@ -94,7 +94,7 @@ class FGTCanvas:
         # Move the canvas
         self.canvas.bind('<B1-Motion>', self.__move_to)
         # Zoom for Windows and MacOs
-        self.canvas.bind('MouseWheel', self.__wheel)
+        self.canvas.bind('<MouseWheel>', self.__wheel)
         # Zoom for Linux, scroll down
         self.canvas.bind('<Button-5>', self.__wheel)
         # Zoom for Linux, scroll up
