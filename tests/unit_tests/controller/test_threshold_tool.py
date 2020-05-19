@@ -37,9 +37,13 @@ class TestThresholdTool():
             The threshold value for the patch is set to the same value
         """
 
-        thresh_tool = ThresholdTool()
-        thresh_tool.patch = MagicMock()
+        thresh_tool = ThresholdTool(MagicMock())
 
+        mock_patch = MagicMock()
+        mock_patch.threshold = -1
+
+        thresh_tool.patch = mock_patch
+        thresh_tool._new_patch = False
         thresh_tool.threshold = 0.5
 
         assert thresh_tool.threshold == 0.5
@@ -62,7 +66,7 @@ class TestThresholdTool():
             The patch threshold is still 0
         """
 
-        thresh_tool = ThresholdTool()
+        thresh_tool = ThresholdTool(MagicMock())
 
         patch_mock = MagicMock()
         patch_mock.threshold = 0
@@ -88,7 +92,7 @@ class TestThresholdTool():
             The increment is set.
         """
 
-        thresh_tool = ThresholdTool()
+        thresh_tool = ThresholdTool(MagicMock())
 
         thresh_tool.increment = 76
 
@@ -104,7 +108,7 @@ class TestThresholdTool():
             The threshold is set to the patches threshold
         """
 
-        thresh_tool = ThresholdTool()
+        thresh_tool = ThresholdTool(MagicMock())
 
         mock_patch = MagicMock()
         mock_patch.threshold = 0.5
@@ -120,18 +124,20 @@ class TestThresholdTool():
 
 
         Test Condition:
-            The threshold is incremented by the increment value.
+            The threshold is decremented by the increment value.
         """
 
-        thresh_tool = ThresholdTool()
+        thresh_tool = ThresholdTool(MagicMock())
         thresh_tool._patch = MagicMock()
         thresh_tool._patch.mock_patch.threshold.return_value = 0.5
 
+        thresh_tool.threshold = 0.5
+
         old_thresh = thresh_tool.threshold
 
-        thresh_tool.adjust_threshold(1)
+        thresh_tool._adjust_threshold(1)
 
-        assert thresh_tool.threshold == (old_thresh + thresh_tool.increment)
+        assert thresh_tool.threshold == (old_thresh - thresh_tool.increment)
 
     def test_adjust_threshold_down(self):
         """
@@ -139,10 +145,10 @@ class TestThresholdTool():
 
 
         Test Condition:
-            The threshold is decremented by the increment value.
+            The threshold is incremented by the increment value.
         """
 
-        thresh_tool = ThresholdTool()
+        thresh_tool = ThresholdTool(MagicMock())
         thresh_tool._patch = MagicMock()
         thresh_tool._patch.mock_patch.threshold.return_value = 0.5
 
@@ -150,6 +156,6 @@ class TestThresholdTool():
 
         old_thresh = thresh_tool.threshold
 
-        thresh_tool.adjust_threshold(-1)
+        thresh_tool._adjust_threshold(-1)
 
-        assert thresh_tool.threshold == (old_thresh - thresh_tool.increment)
+        assert thresh_tool.threshold == (old_thresh + thresh_tool.increment)
