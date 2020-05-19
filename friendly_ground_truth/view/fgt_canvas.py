@@ -81,6 +81,9 @@ class FGTCanvas:
         self.canvas.grid(row=0, column=0, sticky='nswe')
         self.canvas.update()  # Make sure the canvas updates
 
+        self._orig_canvas_x = self.canvas.xview()[0]
+        self._orig_canvas_y = self.canvas.yview()[0]
+
         hbar.configure(command=self.__scroll_x)
         vbar.configure(command=self.__scroll_y)
 
@@ -196,11 +199,13 @@ class FGTCanvas:
         Returns:
             None
         """
-
-        self.canvas.scan_mark(0, 0)
-        self.canvas.scan_dragto(0, 0, gain=1)
-        self.canvas.scale('all', 0, 0, 1, 1)
         self.imscale = 1.0
+
+        anchorx = -self.canvas.canvasx(0)
+        anchory = -self.canvas.canvasy(0)
+
+        self.canvas.scan_mark(int(anchorx), int(anchory))
+        self.canvas.scan_dragto(0, 0, gain=1)
 
         self.canvas.delete("all")
         self.img = image
@@ -249,6 +254,7 @@ class FGTCanvas:
         # Put image into rectangle for setting corrdinates
         self.container = self.canvas.create_rectangle((0, 0, self.imwidth,
                                                       self.imheight), width=0)
+
         self.__show_image()
         self.canvas.focus_set()
 
@@ -518,6 +524,7 @@ class FGTCanvas:
                       min(box_img_int[1], box_canvas[1]),
                       max(box_img_int[2], box_canvas[2]),
                       max(box_img_int[3], box_canvas[3])]
+
         # Horizontal part of the image is in the visible area
         if box_scroll[0] == box_canvas[0] and box_scroll[2] == box_canvas[2]:
             box_scroll[0] = box_img_int[0]

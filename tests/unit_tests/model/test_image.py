@@ -390,7 +390,7 @@ class TestImageExports(TestImage):
 
         image._remove_small_components()
 
-        unique = np.unique(morphology.label(image.mask))
+        unique = np.unique(morphology.label(image._mask))
 
         num_components = len(unique)
 
