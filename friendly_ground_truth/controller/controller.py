@@ -158,6 +158,7 @@ class Controller():
         self._current_patch_index = 0
 
         self._display_current_patch()
+        self._main_window.update_image_indicator(self._image_path)
 
     def save_mask(self):
         """
@@ -271,7 +272,9 @@ class Controller():
         # Need to invert the position, because tkinter coords are backward from
         # skimage
         pos = pos[1], pos[0]
-        self._current_tool.on_click(pos)
+
+        if self._current_tool is not None:
+            self._current_tool.on_click(pos)
 
         if not self._undo_manager.undo_empty:
             self._main_window.enable_button(self._undo_id)

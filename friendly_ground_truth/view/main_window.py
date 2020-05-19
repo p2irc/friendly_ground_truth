@@ -322,6 +322,21 @@ class MainWindow(ttk.Frame):
         """
         self._toolbar_buttons[id].config(state='disabled')
 
+    def update_image_indicator(self, text):
+        """
+        Update the image indicator in the toolbar with the given text.
+
+        Args:
+            text: The text to display in the toolbar.
+
+        Returns:
+            None
+
+        Postconditions:
+            The text in the toolbar will display the given text.
+        """
+        self._image_indicator.config(text=text)
+
     # ==========================================================
     # PRIVATE FUNCTIONS
     # ==========================================================
@@ -647,6 +662,7 @@ class MainWindow(ttk.Frame):
             if platform != "darwin":
                 button.config(relief="sunken")
             button.config(bg="yellow")
+
 
     def _on_mousewheel(self, event):
         """
