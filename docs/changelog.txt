@@ -4,9 +4,13 @@ This file keeps a record of important changes to the project.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - <>
+### Added
 - Improved Pan and Zoom Performance
 - Auto centering of current patch when moving to the next patch
+
+### Changed
 - No Root Tool now automatically moves to the next patch
+- Flood tools now retain their settings across patches
 
 ## [v0.7.7] - 2020-05-09
 ### ADDED

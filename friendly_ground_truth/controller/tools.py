@@ -891,7 +891,6 @@ class FloodAddTool(FGTTool):
     @patch.setter
     def patch(self, patch):
         self._patch = patch
-        self._tolerance = 0.05
         self._prev_position = None
 
     def on_click(self, position):
@@ -1047,7 +1046,6 @@ class FloodRemoveTool(FGTTool):
     @patch.setter
     def patch(self, patch):
         self._patch = patch
-        self._tolerance = 0.05
         self._prev_position = None
 
     def on_click(self, position):
