@@ -54,6 +54,7 @@ class FGTCanvas:
         self._previous_position = (0, 0)
         self._coord_scale = 1
         self._dragged = False
+        self._prev_offset = (0, 0)
 
         self.imscale = 1.0  # Scale of the image
 
@@ -189,23 +190,18 @@ class FGTCanvas:
         self._brush_radius = value
         self.draw_brush()
 
-    def new_image(self, image):
+    def new_image(self, image, patch_offset=(0, 0)):
         """
         Reset the image and all properties of the image on the canvas.
 
         Args:
             image: The image, a numpy array.
+            patch_offset: The offset of the current patch within the image
 
         Returns:
             None
         """
         self.imscale = 1.0
-
-        anchorx = -self.canvas.canvasx(0)
-        anchory = -self.canvas.canvasy(0)
-
-        self.canvas.scan_mark(int(anchorx), int(anchory))
-        self.canvas.scan_dragto(0, 0, gain=1)
 
         self.canvas.delete("all")
         self.img = image
@@ -256,6 +252,22 @@ class FGTCanvas:
                                                       self.imheight), width=0)
 
         self.__show_image()
+
+        # Deal with 0 offsets in the y coordinate
+        if patch_offset[1] == 0 and patch_offset[0] != 0:
+            patch_offset = patch_offset[0], self._prev_offset[1]
+
+        self._prev_offset = patch_offset
+
+        # The anchor point will be moved to (0, 0) in the window
+        # We want to account for the patch offset, but not put the current
+        # patch right in the corner
+        anchorx = -self.canvas.canvasx(0 - (patch_offset[1]/2))
+        anchory = -self.canvas.canvasy(0 - (patch_offset[0]/2))
+
+        self.canvas.scan_mark(int(anchorx), int(anchory))
+        self.canvas.scan_dragto(0, 0, gain=1)
+
         self.canvas.focus_set()
 
     def _on_motion(self, event):
