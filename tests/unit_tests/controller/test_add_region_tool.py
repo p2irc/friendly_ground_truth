@@ -34,7 +34,7 @@ class TestAddRegionTool():
         Test Condition:
             The brush radius can be set to any positive number.
         """
-        tool = AddRegionTool()
+        tool = AddRegionTool(MagicMock())
 
         tool.brush_radius = 36
 
@@ -76,9 +76,9 @@ class TestAddRegionTool():
 
         mock_patch = MagicMock()
 
-        tool = AddRegionTool()
+        tool = AddRegionTool(MagicMock())
         tool.patch = mock_patch
 
-        tool.draw((10, 10))
+        tool._draw((10, 10))
 
         mock_patch.add_region.assert_called()

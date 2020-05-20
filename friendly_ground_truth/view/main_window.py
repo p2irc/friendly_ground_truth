@@ -175,13 +175,14 @@ class MainWindow(ttk.Frame):
         self.progress_step = float(100.0/num_patches)
         self.progress_popup.pack_slaves()
 
-    def show_image(self, img, new=False):
+    def show_image(self, img, new=False, patch_offset=(0, 0)):
         """
         Display the given image on the canvas.
 
         Args:
             img: The image to display, a numpy array
             new: Whether to reset the canvas for a new image
+            patch_offset: The offset of the current patch in the context image
         Returns:
             None
 
@@ -190,7 +191,7 @@ class MainWindow(ttk.Frame):
         """
 
         if new:
-            self._canvas.new_image(img)
+            self._canvas.new_image(img, patch_offset=patch_offset)
 
         if self._canvas is None:
             self.create_canvas(img)

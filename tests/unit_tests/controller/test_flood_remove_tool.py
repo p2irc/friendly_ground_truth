@@ -37,7 +37,7 @@ class TestFloodRemoveTool():
             Setting to a negatve value should fail.
         """
 
-        tool = FloodRemoveTool()
+        tool = FloodRemoveTool(MagicMock())
 
         tool.tolerance = 7
 
@@ -66,9 +66,10 @@ class TestFloodRemoveTool():
 
         mock_patch = MagicMock()
 
-        tool = FloodRemoveTool()
+        tool = FloodRemoveTool(MagicMock())
         tool.patch = mock_patch
 
-        tool.remove_region((6, 6))
+        tool._remove_region((6, 6))
 
-        mock_patch.flood_remove.assert_called_with((6, 6), tool.tolerance)
+        mock_patch.flood_remove_region.assert_called_with((6, 6),
+                                                          tool.tolerance)

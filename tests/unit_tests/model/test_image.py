@@ -131,7 +131,7 @@ class TestImageLoading(TestImage):
         with pytest.raises(ValueError):
             Image(valid_rgb_image_path, num_patches=-1)
 
-    def test_image_get_mask(self, setup, valid_rgb_image_path):
+    def test_image_get_mask(self, setup, valid_rgb_image_path, mocker):
         """
         Test getting the image mask
 
@@ -144,7 +144,10 @@ class TestImageLoading(TestImage):
 
         image = Image(valid_rgb_image_path)
 
+        mock_create_patches = mocker.patch.object(image, '_create_mask')
+
         assert type(image.mask) == np.ndarray
+        mock_create_patches.assert_called()
 
 
 class TestImageCreatePatches(TestImage):

@@ -37,7 +37,7 @@ class TestFloodAddTool():
             Setting to a negatve value should fail.
         """
 
-        tool = FloodAddTool()
+        tool = FloodAddTool(MagicMock())
 
         tool.tolerance = 7
 
@@ -66,9 +66,9 @@ class TestFloodAddTool():
 
         mock_patch = MagicMock()
 
-        tool = FloodAddTool()
+        tool = FloodAddTool(MagicMock())
         tool.patch = mock_patch
 
-        tool.add_region((6, 6))
+        tool._add_region((6, 6))
 
-        mock_patch.flood_add.assert_called_with((6, 6), tool.tolerance)
+        mock_patch.flood_add_region.assert_called_with((6, 6), tool.tolerance)

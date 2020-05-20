@@ -497,7 +497,8 @@ class Controller():
         patch = self._image.patches[self._current_patch_index]
         img = self._get_context_patches(patch)
 
-        self._main_window.show_image(img, new=new)
+        self._main_window.show_image(img, new=new,
+                                     patch_offset=self._patch_offset)
 
         if self._current_tool is not None:
             self._current_tool.unlock_undos()
