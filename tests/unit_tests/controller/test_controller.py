@@ -16,6 +16,7 @@ from friendly_ground_truth.controller.controller import Controller
 
 from mock import MagicMock
 
+
 class TestController():
     """
     Base test class for the controller.
@@ -26,24 +27,13 @@ class TestController():
         mocker.patch('friendly_ground_truth.view.main_window.MainWindow')
         mocker.patch('friendly_ground_truth.view.preview_window.PreviewWindow')
         mocker.patch('friendly_ground_truth.controller.tools.FGTTool')
-        #mocker.patch('friendly_ground_truth.controller.tools.ThresholdTool')
-        #mocker.patch('friendly_ground_truth.controller.tools.AddRegionTool')
-        #mocker.patch('friendly_ground_truth.controller.tools.RemoveRegionTool')
-        #mocker.patch('friendly_ground_truth.controller.tools.NoRootTool')
-        #mocker.patch('friendly_ground_truth.controller.tools.FloodAddTool')
-        #mocker.patch('friendly_ground_truth.controller.tools.FloodRemoveTool')
-        #mocker.patch('friendly_ground_truth.controller.tools.NextPatchTool')
-        #mocker.patch('friendly_ground_truth.controller.tools.'
-        #             'PreviousPatchTool')
-        #mocker.patch('friendly_ground_truth.controller.tools.UndoTool')
-        #mocker.patch('friendly_ground_truth.controller.tools.RedoTool')
         mocker.patch('friendly_ground_truth.controller.undo_manager')
         mocker.patch('friendly_ground_truth.model.model.Image')
         mocker.patch('tkinter.filedialog')
         mocker.patch('tkinter.messagebox')
         mocker.patch('PIL.ImageTk')
         mocker.patch('tkinter.PhotoImage')
-
+        mocker.patch('tkinter.Toplevel')
     @pytest.fixture
     def dcp_mock(self, mocker):
         """
@@ -60,6 +50,11 @@ class TestController():
     def valid_rgb_image_path(self):
         return os.path.abspath('tests/data/KyleS22.jpg')
 
+    @pytest.fixture
+    def controller(self):
+        controller = Controller(MagicMock())
+        controller._main_window = MagicMock()
+        return controller
 
 class TestIo(TestController):
     """
@@ -69,6 +64,7 @@ class TestIo(TestController):
 
     def test_load_new_image_no_load_dir(self, setup,
                                         dcp_mock, valid_rgb_image_path,
+                                        controller,
                                         mocker):
         """
         Test loading a new image when there is no previous load directory.
@@ -94,8 +90,6 @@ class TestIo(TestController):
                      "_update_progressbar")
 
         file_dir = os.path.split(valid_rgb_image_path)[0]
-
-        controller = Controller(MagicMock())
 
         controller.load_new_image()
 
