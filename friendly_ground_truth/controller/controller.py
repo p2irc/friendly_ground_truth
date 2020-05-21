@@ -269,9 +269,12 @@ class Controller():
         """
         # Correct for offset in context image
         pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
+
         # Need to invert the position, because tkinter coords are backward from
         # skimage
-        pos = pos[1], pos[0]
+        pos = round(pos[1]-1), round(pos[0]-1)
+
+        self._logger.debug("Click Event: {}".format(pos))
 
         if self._current_tool is not None:
             self._current_tool.on_click(pos)
@@ -294,7 +297,8 @@ class Controller():
 
         # Need to invert the position, because tkinter coords are backward from
         # skimage
-        pos = pos[1], pos[0]
+        pos = round(pos[1]-1), round(pos[0]-1)
+
         self._current_tool.on_drag(pos)
 
         if not self._undo_manager.undo_empty:
