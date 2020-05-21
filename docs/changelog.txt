@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Auto centering of current patch when moving to the next patch
 - Each patch now keeps track of it's own undo history, meaning you can go back
 to a patch and undo any operation.
+- Improved brush drawing latency.
 
 ### Changed
 - No Root Tool now automatically moves to the next patch
