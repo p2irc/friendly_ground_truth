@@ -387,18 +387,34 @@ class Controller():
             self.save_mask()
             return
 
+        cur_patch = self._image.patches[self._current_patch_index]
+        cur_patch.undo_history = copy.deepcopy(self._undo_manager)
+
         self._context_img = None
         self._current_patch_index = index
 
+        cur_patch = self._image.patches[self._current_patch_index]
+
+        if cur_patch.undo_history is None:
+            self._undo_manager = UndoManager()
+        else:
+            self._undo_manager = copy.deepcopy(cur_patch.undo_history)
+
         for key in self._image_tools.keys():
             self._image_tools[key].patch = patch
-
-        self._undo_manager.clear_undos()
+            self._image_tools[key].undo_manager = self._undo_manager
 
         self._display_current_patch(new=True)
 
-        self._main_window.disable_button(self._undo_id)
-        self._main_window.disable_button(self._redo_id)
+        if self._undo_manager.undo_empty:
+            self._main_window.disable_button(self._undo_id)
+        else:
+            self._main_window.enable_button(self._undo_id)
+
+        if self._undo_manager.redo_empty:
+            self._main_window.disable_button(self._redo_id)
+        else:
+            self._main_window.enable_button(self._redo_id)
 
     def _prev_patch_callback(self, patch, index):
         """
@@ -415,13 +431,23 @@ class Controller():
         if patch is None or index == -1:
             return
 
+        cur_patch = self._image.patches[self._current_patch_index]
+        cur_patch.undo_history = copy.deepcopy(self._undo_manager)
+
         self._context_img = None
         self._current_patch_index = index
 
+        cur_patch = self._image.patches[self._current_patch_index]
+
+        if cur_patch.undo_history is None:
+            self._undo_manager = UndoManager()
+        else:
+            self._undo_manager = copy.deepcopy(cur_patch.undo_history)
+
         for key in self._image_tools.keys():
             self._image_tools[key].patch = patch
+            self._image_tools[key].undo_manager = self._undo_manager
 
-        self._undo_manager.clear_undos()
         self._display_current_patch(new=True)
 
         self._main_window.disable_button(self._undo_id)

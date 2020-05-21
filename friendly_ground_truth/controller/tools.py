@@ -40,6 +40,7 @@ class FGTTool():
                              finished
         info_widget: A tkinter widget for controlling this tool from an info
                      panel
+        undo_manager: The manager for undos for this tool
     """
 
     def __init__(self, name, icon_string, id,  undo_manager,
@@ -122,6 +123,14 @@ class FGTTool():
     @property
     def group(self):
         return self._group
+
+    @property
+    def undo_manager(self):
+        return self._undo_manager
+
+    @undo_manager.setter
+    def undo_manager(self, manager):
+        self._undo_manager = manager
 
     def get_info_widget(self, parent):
         """
@@ -827,7 +836,6 @@ class NoRootTool(FGTTool):
         next_index = current_patch_num + 1
 
         if next_index < len(patches):
-            self._undo_manager.clear_undos()
             return patches[next_index], next_index
 
         else:
@@ -1170,7 +1178,7 @@ class PreviousPatchTool(FGTTool):
         """
         super(PreviousPatchTool, self)\
             .__init__("Previous Patch", prev_patch_icon, 7,
-                      undo_manager, "Left", cursor='arrow',
+                      undo_manager, "left", cursor='arrow',
                       persistant=False,
                       activation_callback=prev_patch_function,
                       group="Navigation")
@@ -1230,7 +1238,7 @@ class NextPatchTool(FGTTool):
         """
         super(NextPatchTool, self)\
             .__init__("Next Patch", next_patch_icon, 8,
-                      undo_manager, "Right", cursor='arrow',
+                      undo_manager, "right", cursor='arrow',
                       persistant=False,
                       activation_callback=next_patch_function,
                       group="Navigation")

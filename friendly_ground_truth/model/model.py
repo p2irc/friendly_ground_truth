@@ -304,6 +304,7 @@ class Patch():
         mask: The mask for the patch
         patch_index: The index of this patch in the original image
         overlay_image: The patch image with the mask overlaid on top
+        undo_history: The undo history for this patch
     """
 
     def __init__(self, patch, patch_index):
@@ -341,6 +342,8 @@ class Patch():
 
         self._old_flood_remove_tolerance = 100
         self._old_flood_remove_position = None
+
+        self._undo_history = None
 
     @property
     def threshold(self):
@@ -442,6 +445,14 @@ class Patch():
             A numpy array colour image.
         """
         return self._overlay_image
+
+    @property
+    def undo_history(self):
+        return self._undo_history
+
+    @undo_history.setter
+    def undo_history(self, history):
+        self._undo_history = history
 
     def _apply_threshold(self, value):
         """
