@@ -514,7 +514,7 @@ class MainWindow(ttk.Frame):
             # remember the last keystroke state
             self._previous_state = event.state
 
-        key += event.keysym
+        key += event.keysym.lower()
 
         self._logger.debug("KEY: " + key)
 

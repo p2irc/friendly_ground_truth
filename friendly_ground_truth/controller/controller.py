@@ -215,6 +215,9 @@ class Controller():
             The current tool is set to the tool matching the id
             Any activation functionality of the tool is performed.
         """
+        if self._image is None:
+            return
+
         tool = self.image_tools[id]
         tool.image = self._image
         tool.patch = self._image.patches[self._current_patch_index]

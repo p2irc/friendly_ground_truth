@@ -185,6 +185,7 @@ class FGTCanvas:
     @cursor.setter
     def cursor(self, value):
         self._cursor = value
+        self._set_cursor(None)
 
     @property
     def brush_radius(self):
@@ -300,7 +301,7 @@ class FGTCanvas:
 
     def _set_cursor(self, event):
         """
-        Set the cursor to the current specified icon/
+        Set the cursor to the current specified icon.
 
         Args:
             event: Event

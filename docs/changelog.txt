@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - No Root Tool now automatically moves to the next patch
 - Flood tools now retain their settings across patches
 - Improved accuracy of click locations
+- Caps lock no longer affects keyboard shortcuts
 
 ## [v0.7.7] - 2020-05-09
 ### ADDED
