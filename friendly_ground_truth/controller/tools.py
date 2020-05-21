@@ -11,6 +11,7 @@ Description: Definitions of tools that can be used in Friendly Ground Truth
 import logging
 import copy
 import tkinter as tk
+import threading
 
 from friendly_ground_truth.view.icons.icon_strings import (threshold_icon,
                                                            add_region_icon,
@@ -577,7 +578,10 @@ class AddRegionTool(FGTTool):
         """
         self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
                                              "add_region_adjust")
-        self._draw(position)
+
+        t = threading.Thread(target=self._draw, name="draw", args=(position, ))
+        t.daemon = True
+        t.start()
 
     def _draw(self, position):
         """
@@ -738,7 +742,10 @@ class RemoveRegionTool(FGTTool):
         """
         self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
                                              "remove_region_adjust")
-        self._draw(position)
+
+        t = threading.Thread(target=self._draw, name="draw", args=(position, ))
+        t.daemon = True
+        t.start()
 
     def _draw(self, position):
         """

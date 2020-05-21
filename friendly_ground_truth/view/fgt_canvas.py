@@ -359,7 +359,8 @@ class FGTCanvas:
 
         self._brush_cursor = self.canvas.create_oval(x_max, y_max, x_min,
                                                      y_min,
-                                                     outline='white')
+                                                     outline='white',
+                                                     tag='brush')
 
     def set_image(self, img):
         self.img = img
@@ -521,8 +522,9 @@ class FGTCanvas:
         Postconditions:
             The image is drawn on the canvas.
         """
-        if self._cursor == "brush":
-            self.draw_brush()
+        #if self._cursor == "brush":
+            #self.draw_brush()
+
         box_image = self.canvas.coords(self.container)  # get image area
         box_canvas = (self.canvas.canvasx(0),  # get visible area of the canvas
                       self.canvas.canvasy(0),
@@ -661,7 +663,11 @@ class FGTCanvas:
             pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
 
             self._main_window.on_canvas_drag(pos)
-            self.draw_brush(pos)
+
+            brush_pos = (self.canvas.canvasx(event.x),
+                         self.canvas.canvasy(event.y))
+
+            self.draw_brush(brush_pos)
 
         self.__show_image()  # zoom tile and show it on the canvas
 
