@@ -318,7 +318,7 @@ class Patch():
             A Patch object
         """
 
-        self.logger = logging.getLogger('friendly_gt.model.Patch')
+        self._logger = logging.getLogger('friendly_gt.model.Patch')
 
         self._patch = patch
         self._mask = np.zeros(self._patch.shape, dtype=bool)
@@ -580,6 +580,10 @@ class Patch():
         Postconditions:
             The _mask will be updated with the circular region set to 1's
         """
+
+        position = round(position[0]), round(position[1])
+
+        self._logger.debug("Add Position: {}".format(position))
         rr, cc = self._get_circle(position, radius)
 
         self._mask[rr, cc] = 1

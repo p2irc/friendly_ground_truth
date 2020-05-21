@@ -17,6 +17,9 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 
+import logging
+module_logger = logging.getLogger('friendly_gt.viewi.fgt_canvas')
+
 
 class AutoScrollbar(ttk.Scrollbar):
     """
@@ -50,6 +53,8 @@ class FGTCanvas:
     """
 
     def __init__(self, placeholder, img, main_window):
+
+        self._logger = logging.getLogger('friendly_gt.view.FGTCanvas')
 
         self._previous_position = (0, 0)
         self._coord_scale = 1
@@ -622,10 +627,11 @@ class FGTCanvas:
             return
 
         pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+
         container_coords = self.canvas.coords(self.container)
         pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
-        pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
 
+        pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
         self._main_window.on_canvas_click(pos)
 
     def __move_to(self, event):
