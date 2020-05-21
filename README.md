@@ -15,6 +15,7 @@ The latest release of the project can be downloaded [here](https://github.com/Ky
 
 [MacOs](#MacOs)
 
+
 ## Windows
 A windows executable can be downloaded [here](https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt-windows.exe).
 
