@@ -22,6 +22,7 @@ from friendly_ground_truth.view.fgt_canvas import FGTCanvas
 from friendly_ground_truth.view.info_panel import InfoPanel
 from friendly_ground_truth.view.help_dialogs import (AboutDialog,
                                                      KeyboardShortcutDialog)
+
 from sys import platform
 
 from functools import partial
@@ -49,6 +50,17 @@ class MainWindow(ttk.Frame):
         Returns:
             A main window object.
         """
+
+        self._darkmode = True
+
+        if self._darkmode:
+            from friendly_ground_truth.view import dark_theme
+
+            dark_theme.style.theme_use("dark_theme")
+
+        else:
+            from friendly_ground_truth.view import light_theme
+            light_theme.style.theme_use("light_theme")
 
         ttk.Frame.__init__(self, master=master)
 
@@ -119,6 +131,8 @@ class MainWindow(ttk.Frame):
 
         self._info_panel.grid(row=2, column=0, sticky='ew')
 
+        if self._darkmode:
+            self._enable_darkmode_buttons()
     # ==========================================================
     # PUBLIC FUNCTIONS
     # ==========================================================
@@ -439,7 +453,7 @@ class MainWindow(ttk.Frame):
             The toolbar is created.
         """
 
-        self._toolbar = tk.Frame(self._master, bd=1, relief='raised')
+        self._toolbar = ttk.Frame(self._master, style="Toolbar.TFrame")
 
         # Create image interaction tools
         image_tools = self._controller.image_tools
@@ -473,8 +487,15 @@ class MainWindow(ttk.Frame):
             for tool in group:
                 icon = self._load_icon_from_string(tool.icon_string)
                 command = partial(self._on_tool_selected, tool.id)
-                button = tk.Button(self._toolbar, image=icon, relief='flat',
-                                   command=command)
+
+                if tool.persistant:
+                    button_style = "PersistantToolbar.TButton"
+                else:
+                    button_style = "Toolbar.TButton"
+
+                button = ttk.Button(self._toolbar, image=icon,
+                                    style=button_style,
+                                    command=command)
 
                 button.image = icon
                 button.pack(side="left", padx=2, pady=2)
@@ -483,7 +504,6 @@ class MainWindow(ttk.Frame):
 
                 self._create_tool_tip(button, tool.id, tool.name)
                 self._toolbar_buttons[tool.id] = button
-                self._orig_button_colour = button.cget("background")
 
             sep = tk.ttk.Separator(self._toolbar, orient="vertical")
             sep.pack(side='left', padx=5, fill='both')
@@ -491,6 +511,23 @@ class MainWindow(ttk.Frame):
         self._image_indicator = tk.Label(self._toolbar, text="No Image Loaded")
         self._image_indicator.pack(side='right', padx=2, pady=2)
         self._toolbar.grid(column=0, row=0, sticky='NEW')
+
+    def _enable_darkmode_buttons(self):
+        """
+        Switch the icons for the buttons to dark mode.
+
+
+        Returns:
+            None
+        """
+        for key in self._toolbar_buttons:
+            tool = self._controller.image_tools[key]
+            button = self._toolbar_buttons[key]
+
+            icon = self._load_icon_from_string(tool.darkmode_icon_string)
+
+            button.config(image=icon)
+            button.image = icon
 
     def _keystroke(self, event):
         """
@@ -643,27 +680,11 @@ class MainWindow(ttk.Frame):
         Postconditions:
             The toolbar button matching the given id will be activated.
         """
-
-        keep_old = False
         for id, button in self._toolbar_buttons.items():
             if id == tool_id and self._controller.image_tools[id].persistant:
-                if platform != "darwin":
-                    button.config(relief="sunken")
-                button.config(bg="yellow")
-                self._old_tool_id = id
-            elif id == tool_id:  # Not persistant
-                keep_old = True
+                button.state(['disabled'])
             else:
-                if platform != "darwin":
-                    button.config(relief="raised")
-                button.config(bg=self._orig_button_colour)
-
-        if keep_old and self._old_tool_id is not None:
-            button = self._toolbar_buttons[self._old_tool_id]
-            if platform != "darwin":
-                button.config(relief="sunken")
-            button.config(bg="yellow")
-
+                button.state(['!disabled'])
 
     def _on_mousewheel(self, event):
         """
