@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>friendly_ground_truth.view.preview_window API documentation</title>
+<meta name="description" content="File Name: preview_window.py …" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>friendly_ground_truth.view.preview_window</code></h1>
+</header>
+<section id="section-intro">
+<p>File Name: preview_window.py</p>
+<p>Authors: Kyle Seidenthal</p>
+<p>Date: 18-05-2020</p>
+<p>Description: An image mask preview window.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+File Name: preview_window.py
+
+Authors: Kyle Seidenthal
+
+Date: 18-05-2020
+
+Description: An image mask preview window.
+
+&#34;&#34;&#34;
+
+import tkinter as tk
+from tkinter import ttk
+
+from PIL import Image, ImageTk as itk
+
+
+class PreviewWindow(tk.Toplevel):
+    &#34;&#34;&#34;
+    A window for previewing an image.
+
+    Attributes:
+        img: The image for previewing
+    &#34;&#34;&#34;
+
+    def __init__(self, img, controller, style):
+        self._base = tk.Toplevel()
+        self._base.title(&#34;Preview&#34;)
+
+        self._frame = ttk.Frame(self._base)
+
+        self._canvas_size = img.shape[0]//2, img.shape[1]//2
+
+        self._base.minsize(width=self._canvas_size[1] + 50,
+                           height=self._canvas_size[0] + 50)
+        self.img = img
+        self.controller = controller
+
+        self._button_panel = ttk.Frame(self._frame, borderwidth=5,
+                                       style=&#34;ButtonPanel.TFrame&#34;)
+
+        self._save_button = ttk.Button(self._button_panel, text=&#34;Save&#34;,
+                                       command=self._on_save)
+
+        self._save_button.pack(side=&#39;right&#39;)
+
+        self._cancel_button = ttk.Button(self._button_panel, text=&#34;Cancel&#34;,
+                                         command=self._on_cancel)
+
+        self._cancel_button.pack(side=&#39;left&#39;)
+
+        self._button_panel.pack(side=&#39;top&#39;, fill=&#39;both&#39;)
+
+        self._canvas = tk.Canvas(self._frame)
+
+        background = style.lookup(&#34;Canvas.TFrame&#34;, &#34;background&#34;)
+        self._canvas.config(background=background)
+
+        self._canvas.pack(fill=&#39;both&#39;, expand=&#39;yes&#39;)
+        self._frame.pack(fill=&#39;both&#39;, expand=True)
+        self._show_image()
+
+    def _on_save(self):
+        &#34;&#34;&#34;
+        Called when the save button is pressed.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The mask is saved and the window is destroyed.
+        &#34;&#34;&#34;
+        self._base.withdraw()
+        self.controller.save_mask()
+        self._base.destroy()
+
+    def _on_cancel(self):
+        &#34;&#34;&#34;
+        Called when the cancel button is pressed.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The window is destroyed.
+        &#34;&#34;&#34;
+        self._base.destroy()
+
+    def _show_image(self):
+        &#34;&#34;&#34;
+        Display the image on the canvas.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The image is displayed on the canvas.
+        &#34;&#34;&#34;
+        image = Image.fromarray(self.img)
+
+        canvas_h = self._canvas_size[0]
+        canvas_w = self._canvas_size[1]
+
+        size = (canvas_w, canvas_h)
+        image = image.resize(size)
+        self._display_img = itk.PhotoImage(image=image)
+
+        x, y = 0, 0  # self.image_x, self.image_y
+
+        self._image_id = self._canvas.create_image(x, y, anchor=&#34;nw&#34;,
+                                                   image=self._display_img)
+        self._canvas.image = self._display_img
+        self._canvas.pack()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="friendly_ground_truth.view.preview_window.PreviewWindow"><code class="flex name class">
+<span>class <span class="ident">PreviewWindow</span></span>
+<span>(</span><span>img, controller, style)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A window for previewing an image.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>img</code></strong></dt>
+<dd>The image for previewing</dd>
+</dl>
+<p>Construct a toplevel widget with the parent MASTER.</p>
+<p>Valid resource names: background, bd, bg, borderwidth, class,
+colormap, container, cursor, height, highlightbackground,
+highlightcolor, highlightthickness, menu, relief, screen, takefocus,
+use, visual, width.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PreviewWindow(tk.Toplevel):
+    &#34;&#34;&#34;
+    A window for previewing an image.
+
+    Attributes:
+        img: The image for previewing
+    &#34;&#34;&#34;
+
+    def __init__(self, img, controller, style):
+        self._base = tk.Toplevel()
+        self._base.title(&#34;Preview&#34;)
+
+        self._frame = ttk.Frame(self._base)
+
+        self._canvas_size = img.shape[0]//2, img.shape[1]//2
+
+        self._base.minsize(width=self._canvas_size[1] + 50,
+                           height=self._canvas_size[0] + 50)
+        self.img = img
+        self.controller = controller
+
+        self._button_panel = ttk.Frame(self._frame, borderwidth=5,
+                                       style=&#34;ButtonPanel.TFrame&#34;)
+
+        self._save_button = ttk.Button(self._button_panel, text=&#34;Save&#34;,
+                                       command=self._on_save)
+
+        self._save_button.pack(side=&#39;right&#39;)
+
+        self._cancel_button = ttk.Button(self._button_panel, text=&#34;Cancel&#34;,
+                                         command=self._on_cancel)
+
+        self._cancel_button.pack(side=&#39;left&#39;)
+
+        self._button_panel.pack(side=&#39;top&#39;, fill=&#39;both&#39;)
+
+        self._canvas = tk.Canvas(self._frame)
+
+        background = style.lookup(&#34;Canvas.TFrame&#34;, &#34;background&#34;)
+        self._canvas.config(background=background)
+
+        self._canvas.pack(fill=&#39;both&#39;, expand=&#39;yes&#39;)
+        self._frame.pack(fill=&#39;both&#39;, expand=True)
+        self._show_image()
+
+    def _on_save(self):
+        &#34;&#34;&#34;
+        Called when the save button is pressed.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The mask is saved and the window is destroyed.
+        &#34;&#34;&#34;
+        self._base.withdraw()
+        self.controller.save_mask()
+        self._base.destroy()
+
+    def _on_cancel(self):
+        &#34;&#34;&#34;
+        Called when the cancel button is pressed.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The window is destroyed.
+        &#34;&#34;&#34;
+        self._base.destroy()
+
+    def _show_image(self):
+        &#34;&#34;&#34;
+        Display the image on the canvas.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The image is displayed on the canvas.
+        &#34;&#34;&#34;
+        image = Image.fromarray(self.img)
+
+        canvas_h = self._canvas_size[0]
+        canvas_w = self._canvas_size[1]
+
+        size = (canvas_w, canvas_h)
+        image = image.resize(size)
+        self._display_img = itk.PhotoImage(image=image)
+
+        x, y = 0, 0  # self.image_x, self.image_y
+
+        self._image_id = self._canvas.create_image(x, y, anchor=&#34;nw&#34;,
+                                                   image=self._display_img)
+        self._canvas.image = self._display_img
+        self._canvas.pack()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>tkinter.Toplevel</li>
+<li>tkinter.BaseWidget</li>
+<li>tkinter.Misc</li>
+<li>tkinter.Wm</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="friendly_ground_truth.view" href="index.html">friendly_ground_truth.view</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="friendly_ground_truth.view.preview_window.PreviewWindow" href="#friendly_ground_truth.view.preview_window.PreviewWindow">PreviewWindow</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

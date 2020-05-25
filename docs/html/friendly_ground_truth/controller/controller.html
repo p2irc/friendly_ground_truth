@@ -22,8 +22,8 @@
 <section id="section-intro">
 <p>File Name: controller.py</p>
 <p>Authors: Kyle Seidenthal</p>
-<p>Date: 20-02-2020</p>
-<p>Description: The main controller for the application</p>
+<p>Date: 13-05-2020</p>
+<p>Description: Main controller for the application</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -33,290 +33,631 @@ File Name: controller.py
 
 Authors: Kyle Seidenthal
 
-Date: 20-02-2020
+Date: 13-05-2020
 
-Description: The main controller for the application
+Description: Main controller for the application
 
 &#34;&#34;&#34;
+from friendly_ground_truth.view.main_window import MainWindow
+from friendly_ground_truth.view.preview_window import PreviewWindow
+from friendly_ground_truth.controller.tools import (ThresholdTool,
+                                                    AddRegionTool,
+                                                    RemoveRegionTool,
+                                                    NoRootTool,
+                                                    FloodAddTool,
+                                                    FloodRemoveTool,
+                                                    PreviousPatchTool,
+                                                    NextPatchTool,
+                                                    UndoTool,
+                                                    RedoTool)
+
+from friendly_ground_truth.controller.undo_manager import UndoManager
+from friendly_ground_truth.model.model import Image
+
+from skimage import segmentation, img_as_ubyte
+
+import os
+import copy
+import json
 
 import tkinter.filedialog
 import tkinter.messagebox
-import logging
-import os
-import copy
 
-# import matplotlib.pyplot as plt
-# import skimage.io as io
-import skimage.segmentation as segmentation
-# import skimage.color as colour
 import numpy as np
 
-from skimage import img_as_ubyte
-from friendly_ground_truth.view.tk_view import MainWindow
-from friendly_ground_truth.model.model import Image
+import logging
+module_logger = logging.getLogger(&#39;friendly_gt.controller.controller&#39;)
 
-from enum import Enum
-
-module_logger = logging.getLogger(&#39;friendly_gt.controller&#39;)
+PREFERENCES_PATH = &#34;./user_preferences.json&#34;
+DEFAULT_PREFS = {&#39;theme&#39;: &#39;Light&#39;}
 
 
-class Mode(Enum):
+class Controller():
     &#34;&#34;&#34;
-    Class representing the possible modes for editing
+    Main controller for the application.
 
     Attributes:
-        THREHSOLD
-        ETC
+        image_tools: A dictionary of tools keyed by their id
     &#34;&#34;&#34;
-    THRESHOLD = 1
-    ADD_REGION = 2
-    REMOVE_REGION = 3
-    NO_ROOT = 4
-    FLOOD_ADD = 6
-    FLOOD_REMOVE = 7
-    ADD_TIP = 8
-    ADD_BRANCH = 9
-    ADD_CROSSING = 10
-    REMOVE_LANDMARK = 11
-
-
-class SecondaryMode(Enum):
-    &#34;&#34;&#34;
-    Class representing secondary adjustment modes
-    &#34;&#34;&#34;
-    ZOOM = 1
-    ADJUST_TOOL = 2
-
-
-class Controller:
-    &#34;&#34;&#34;
-    The main controller object for the application
-
-    Attributes:
-        stuff
-    &#34;&#34;&#34;
-    ZOOM_SCALE = 1.10
     CONTEXT_TRANSPARENCY = 100
+    NUM_PATCHES = 10
 
-    def __init__(self, master):
+    def __init__(self, root):
         &#34;&#34;&#34;
-        Initialize the controller module
+        Create a Controller object
 
-        :returns: None
+        Args:
+            root: The tk Root
+
+        Returns:
+            A controller object
+
+        Postconditions:
+            The main application window is started
         &#34;&#34;&#34;
-        self.logger = logging.getLogger(&#39;friendly_gt.controller.Controller&#39;)
-        self.logger.debug(&#34;Creating controller instance&#34;)
+        # ------------------------------------
+        # Private Attributes
+        # -----------------------------------
 
-        self.current_patch = 0
-        self.mask_saved = False
+        # The root tkinter object
+        self._root = root
+        # For logging
+        self._logger = logging.getLogger(&#39;friendly_gt.controller.&#39;
+                                         &#39;controller.Controller&#39;)
+        # The last directory used to load an image
+        self._last_load_dir = None
+        # The last directory used to save an image
+        self._last_save_dir = None
 
-        # Set up the current mode
-        self.current_mode = Mode.THRESHOLD
-        self.current_secondary_mode = SecondaryMode.ZOOM
+        # Image containing neighbouring patches
+        self._context_img = None
 
-        # Whether the preview has been shown
-        self.previewed = False
+        # For managing undo operations
+        self._undo_manager = UndoManager()
+        # A dictionary of image tools
+        self._image_tools = {}
+        self._init_tools()
 
-        # Brush radii
-        self.add_region_radius = 15
-        self.remove_region_radius = 15
-        self.add_tip_radius = 2.5
-        self.add_branch_radius = 2.5
-        self.add_cross_radius = 2.5
-        self.remove_landmark_radius = 15
+        # Initialize the main window
+        self._main_window = MainWindow(self._root, self)
 
-        # Flood Tolerances
-        self.flood_add_tolerance = 0.05
-        self.flood_remove_tolerance = 0.05
+        # The path to the current image
+        self._image_path = None
 
-        # Set up the main window
-        self.main_window = MainWindow(self, master)
+        # The current image
+        self._image = None
 
-        # Offset of the patch within the context image
-        self.patch_offset = (0, 0)
+        # The index of the current patch in _image.patches
+        self._current_patch_index = 0
 
-        # Undo Management
-        self.undo_manager = UndoManager()
+        # Whether the mask has been saved
+        self._mask_saved = False
 
-        # Remember chosen directories
-        self.last_load_dir = None
-        self.last_save_dir = None
-        self.image = None
+        # The current tool in use
+        self._current_tool = None
 
+        # The offset of the current patch within the context image
+        self._patch_offset = (0, 0)
+
+        # Whether the mask preview has been shown or not
+        self._previewed = False
+
+        # Disable the redo button for now
+        self._main_window.disable_button(self._redo_id)
+        self._main_window.disable_button(self._undo_id)
+
+    @property
+    def image_tools(self):
+        return self._image_tools
+
+    # ===================================================
+    # PUBLIC FUNCTIONS
+    # ===================================================
     def load_new_image(self):
         &#34;&#34;&#34;
-        Called when the user wants to load a new image to open a file
-        browser dialogue and get the image path
+        Load a new image with a file dialog.
 
-        :returns: None
+
+        Returns:
+            None
         &#34;&#34;&#34;
-        self.context_img = None
-        self.logger.debug(&#34;Opening load file dialog&#34;)
-        filetypes = [(&#34;TIF Files&#34;, &#34;*.tif&#34;), (&#34;TIFF Files&#34;, &#34;*.tiff&#34;),
-                     (&#34;PNG Files&#34;, &#34;*.png&#34;)]
 
-        if self.last_load_dir is None:
-            initial_dir = os.path.expanduser(&#39;~&#39;)
+        self._context_img = None
+        filetypes = [(&#34;TIF Files&#34;, &#34;*.tif&#34;), (&#34;TIFF Files&#34;, &#34;*.tiff&#34;),
+                     (&#34;PNG Files&#34;, &#34;*.png&#34;), (&#34;JPEG Files&#34;, &#34;*.jpg&#34;)]
+
+        if self._last_load_dir is None:
+            initial_dir = os.path.expanduser(&#34;~&#34;)
         else:
-            initial_dir = self.last_load_dir
+            initial_dir = self._last_load_dir
 
         file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
                                                        initialdir=initial_dir)
-        if file_name is None:
+
+        if file_name is None or file_name == ():
             return
 
-        self.last_load_dir = os.path.split(file_name)[0]
+        self._last_load_dir = os.path.split(file_name)[0]
 
-        self.image_path = file_name
-        self.logger.debug(&#34;File: {}&#34;.format(self.image_path))
+        self._image_path = file_name
+
         try:
-            self.main_window.start_progressbar(Image.NUM_PATCHES ** 2)
-            self.image = Image(file_name, self.update_progress_bar)
+            self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
+            self._image = Image(file_name, 10, self._update_progressbar)
 
         except FileNotFoundError:
-            self.logger.debug(&#34;There was a problem loading the image&#34;)
+            self._logger.exception(&#34;There was a problem loading the image.&#34;)
             return
 
-        self.current_patch = 0
-        self.display_current_patch()
+        self._current_patch_index = 0
 
-    def update_progress_bar(self):
-        &#34;&#34;&#34;
-        Update the progress bar popup
-
-        :returns: None
-        &#34;&#34;&#34;
-
-        self.main_window.prog_popup.update()
-        self.main_window.load_progress += self.main_window.progress_step
-        self.main_window.load_prog_var.set(self.main_window.load_progress)
-
-        if self.main_window.load_progress &gt;= Image.NUM_PATCHES ** 2:
-            self.main_window.prog_popup.destroy()
-
-    def get_image_name_from_path(self, path):
-        &#34;&#34;&#34;
-        Get the filename from the image to use for saving the mask
-
-        Args:
-            path: The path to the original image
-        Returns:
-            The new filename for the mask
-        &#34;&#34;&#34;
-
-        if os.path.isdir(path):
-            raise ValueError(&#34;Cannot get image name from a directory.&#34;)
-
-        basename = os.path.basename(path)
-        return os.path.splitext(basename)[0] + &#39;_mask.png&#39;
-
-    def get_landmark_name_from_path(self, path):
-        &#34;&#34;&#34;
-        Get the name of the landmark matrix to use for saving
-
-        :param path: The path to the original image
-        :returns: The new filename for the mask
-        &#34;&#34;&#34;
-
-        if os.path.isdir(path):
-            raise ValueError(&#34;Cannot get image name from a directory&#34;)
-
-        basename = os.path.basename(path)
-        return os.path.splitext(basename)[0] + &#39;_labels.npy&#39;
+        self._display_current_patch()
+        self._main_window.update_image_indicator(self._image_path)
 
     def save_mask(self):
         &#34;&#34;&#34;
-        Save the finished image mask
+        Save the finished image mask.
 
-        :returns: None
+
+        Returns:
+            None
         &#34;&#34;&#34;
 
-        if not self.previewed:
-            self.show_saved_preview()
+        if not self._previewed:
+            self._show_saved_preview()
             return
 
-        self.mask_saved = True
+        self._mask_saved = True
 
-        if self.last_save_dir is None:
-            initial_dir = os.path.expanduser(&#39;~&#39;)
+        if self._last_save_dir is None:
+            initial_dir = os.path.expanduser(&#34;~&#34;)
         else:
-            initial_dir = self.last_save_dir
+            initial_dir = self._last_save_dir
 
         dir_path = tkinter.filedialog.askdirectory(initialdir=initial_dir)
-
-        self.last_save_dir = dir_path
-
-        self.logger.debug(dir_path)
 
         if dir_path is None:
             return
 
-        image_name = self.get_image_name_from_path(self.image_path)
-        labels_name = self.get_landmark_name_from_path(self.image_path)
+        image_name = self._get_image_name_from_path(self._image_path)
+        # labels_name = self._get_landmark_name_from_path(self._image_path)
 
-        self.mask_pathname = os.path.join(dir_path, image_name)
-        self.label_pathname = os.path.join(dir_path, labels_name)
+        mask_pathname = os.path.join(dir_path, image_name)
+        # label_pathname = os.path.join(dir_path, labels_name)
 
         try:
-            self.logger.debug(&#34;Saving mask to {}&#34;.format(self.mask_pathname))
-            self.image.export_mask(self.mask_pathname)
-            # self.image.export_labels(self.label_pathname)
-            tkinter.messagebox.showinfo(&#34;Image Mask Saved!&#34;, &#34;Image Mask&#34;
-                                        &#34; Saved!&#34;)
+            self._image.export_mask(mask_pathname)
+            # self._image.export_labels(label_pathname)
+
+            tkinter.messagebox.showinfo(&#34;Image Mask Saved!&#34;,
+                                        &#34;Image Mask Saved!&#34;)
 
         except IOError:
-            self.logger.error(&#34;Could not save file!&#34;)
-            # TODO: display dialog
+            self._logger.error(&#34;Could not save file!&#34;)
 
-    def display_current_patch(self):
+    def set_preferences(self, preferences):
         &#34;&#34;&#34;
-        Display the current patch to be displayed
+        Set the current preferences for the application.
 
-        :returns: None
+        Args:
+            preferences: A dictionary of preferences and their values.
+
+        Returns:
+            None
         &#34;&#34;&#34;
-        if self.image is None:
+        theme = preferences[&#39;theme&#39;]
+
+        self._main_window.set_theme(theme)
+
+    def load_preferences(self):
+        &#34;&#34;&#34;
+        Load the preferences saved in the preferences file.
+
+
+        Returns:
+            A dictionary containing the user&#39;s preferences.
+        &#34;&#34;&#34;
+        if not os.path.exists(PREFERENCES_PATH):
+            return DEFAULT_PREFS
+
+        with open(PREFERENCES_PATH, &#39;r&#39;) as fin:
+            preferences = json.load(fin)
+
+        return preferences
+
+    def save_preferences(self, preferences):
+        &#34;&#34;&#34;
+        Save the user preferences.
+
+        Args:
+            preferences: A dictionary containing the user preferences.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        with open(PREFERENCES_PATH, &#39;w&#39;) as fout:
+            json.dump(preferences, fout)
+
+    def activate_tool(self, id):
+        &#34;&#34;&#34;
+        Activate the given tool id.
+
+        Args:
+            id: The id of the tool.
+
+        Returns:
+            None
+
+        Postcondition:
+            The current tool is set to the tool matching the id
+            Any activation functionality of the tool is performed.
+        &#34;&#34;&#34;
+        if self._image is None:
             return
 
-        patch = self.image.patches[self.current_patch]
-        img = self.get_context_patches(patch)
+        tool = self.image_tools[id]
+        tool.image = self._image
+        tool.patch = self._image.patches[self._current_patch_index]
 
-        self.main_window.update_tool = False
-        self.main_window.update_thresh_slider_value(patch.thresh)
-        self.main_window.update_add_brush_sizer(self.add_region_radius)
-        self.main_window.update_remove_brush_sizer(self.remove_region_radius)
-        self.main_window.\
-            update_flood_add_slider_value(self.flood_add_tolerance)
-        self.main_window.\
-            update_flood_remove_slider_value(self.flood_remove_tolerance)
-        self.main_window.set_brush_radius
-        self.main_window.show_image(img)
+        old_tool = None
 
-    def get_context_patches(self, patch):
+        if not tool.persistant:
+            old_tool = self._current_tool
+
+        self._current_tool = tool
+
+        tool.on_activate(self._current_patch_index)
+
+        if old_tool is not None:
+            self._current_tool = old_tool
+            tool = old_tool
+
+        tool.lock_undos()
+        # self._display_current_patch()
+        self._main_window.update_info_panel(tool)
+        self._main_window.set_canvas_cursor(tool.cursor)
+        tool.unlock_undos()
+
+        if not self._undo_manager.undo_empty:
+            self._main_window.enable_button(self._undo_id)
+
+    def adjust_tool(self, direction):
+        &#34;&#34;&#34;
+        Adjust the current tool.
+
+        Args:
+            direction: An integer, positive is up, negative is down.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._current_tool.on_adjust(direction)
+        # self._display_current_patch()
+
+        if not self._undo_manager.undo_empty:
+            self._main_window.enable_button(self._undo_id)
+
+    def click_event(self, pos):
+        &#34;&#34;&#34;
+        A click event in the main window has occured.
+
+        Args:
+            pos: The position of the event.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        # Correct for offset in context image
+        pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
+
+        # Need to invert the position, because tkinter coords are backward from
+        # skimage
+        pos = round(pos[1]-1), round(pos[0]-1)
+
+        self._logger.debug(&#34;Click Event: {}&#34;.format(pos))
+
+        if self._current_tool is not None:
+            self._current_tool.on_click(pos)
+
+        if not self._undo_manager.undo_empty:
+            self._main_window.enable_button(self._undo_id)
+
+    def drag_event(self, pos):
+        &#34;&#34;&#34;
+        A click event in the main window has occured/
+
+        Args:
+            pos: The position of the event.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        # Correct for offset in context image
+        pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
+
+        # Need to invert the position, because tkinter coords are backward from
+        # skimage
+        pos = round(pos[1]-1), round(pos[0]-1)
+
+        self._current_tool.on_drag(pos)
+
+        if not self._undo_manager.undo_empty:
+            self._main_window.enable_button(self._undo_id)
+
+    # ===================================================
+    # Private Functions
+    # ===================================================
+
+    def _init_tools(self):
+        &#34;&#34;&#34;
+        Create all the required tools.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            self._image_tools will be created as a dictionary of id, tool pairs
+        &#34;&#34;&#34;
+
+        image_tools = {}
+
+        thresh_tool = ThresholdTool(self._undo_manager)
+        image_tools[thresh_tool.id] = thresh_tool
+
+        add_reg_tool = AddRegionTool(self._undo_manager)
+        add_reg_tool.bind_brush(self._brush_size_callback)
+        image_tools[add_reg_tool.id] = add_reg_tool
+
+        rem_reg_tool = RemoveRegionTool(self._undo_manager)
+        rem_reg_tool.bind_brush(self._brush_size_callback)
+        image_tools[rem_reg_tool.id] = rem_reg_tool
+
+        flood_add_tool = FloodAddTool(self._undo_manager)
+        image_tools[flood_add_tool.id] = flood_add_tool
+
+        flood_rem_tool = FloodRemoveTool(self._undo_manager)
+        image_tools[flood_rem_tool.id] = flood_rem_tool
+
+        no_root_tool = NoRootTool(self._undo_manager,
+                                  self._next_patch_callback)
+        image_tools[no_root_tool.id] = no_root_tool
+
+        prev_patch_tool = PreviousPatchTool(self._undo_manager,
+                                            self._prev_patch_callback)
+        image_tools[prev_patch_tool.id] = prev_patch_tool
+
+        next_patch_tool = NextPatchTool(self._undo_manager,
+                                        self._next_patch_callback)
+        image_tools[next_patch_tool.id] = next_patch_tool
+
+        undo_tool = UndoTool(self._undo_manager,
+                             self._undo_callback)
+        image_tools[undo_tool.id] = undo_tool
+        self._undo_id = undo_tool.id
+
+        redo_tool = RedoTool(self._undo_manager,
+                             self._redo_callback)
+        image_tools[redo_tool.id] = redo_tool
+        self._redo_id = redo_tool.id
+
+        for id in image_tools.keys():
+            image_tools[id].bind_to(self._display_current_patch)
+
+        self._image_tools = image_tools
+
+    def _next_patch_callback(self, patch, index):
+        &#34;&#34;&#34;
+        Called when the next patch is determined.
+
+        Args:
+            patch: The next patch.
+            index: The index in the patches list of the patch.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._logger.debug(&#34;Next patch {}.&#34;.format(index))
+
+        if patch is None or index == -1:
+            self._display_current_patch()
+            self.save_mask()
+            return
+
+        cur_patch = self._image.patches[self._current_patch_index]
+        cur_patch.undo_history = copy.deepcopy(self._undo_manager)
+
+        self._context_img = None
+        self._current_patch_index = index
+
+        cur_patch = self._image.patches[self._current_patch_index]
+
+        if cur_patch.undo_history is None:
+            self._undo_manager = UndoManager()
+        else:
+            self._undo_manager = copy.deepcopy(cur_patch.undo_history)
+
+        for key in self._image_tools.keys():
+            self._image_tools[key].patch = patch
+            self._image_tools[key].undo_manager = self._undo_manager
+
+        self._display_current_patch(new=True)
+
+        if self._undo_manager.undo_empty:
+            self._main_window.disable_button(self._undo_id)
+        else:
+            self._main_window.enable_button(self._undo_id)
+
+        if self._undo_manager.redo_empty:
+            self._main_window.disable_button(self._redo_id)
+        else:
+            self._main_window.enable_button(self._redo_id)
+
+    def _prev_patch_callback(self, patch, index):
+        &#34;&#34;&#34;
+        Called when the previous patch is determined.
+
+        Args:
+            patch: The previous patch
+            index: The index of that patch in the list of patches.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        if patch is None or index == -1:
+            return
+
+        cur_patch = self._image.patches[self._current_patch_index]
+        cur_patch.undo_history = copy.deepcopy(self._undo_manager)
+
+        self._context_img = None
+        self._current_patch_index = index
+
+        cur_patch = self._image.patches[self._current_patch_index]
+
+        if cur_patch.undo_history is None:
+            self._undo_manager = UndoManager()
+        else:
+            self._undo_manager = copy.deepcopy(cur_patch.undo_history)
+
+        for key in self._image_tools.keys():
+            self._image_tools[key].patch = patch
+            self._image_tools[key].undo_manager = self._undo_manager
+
+        self._display_current_patch(new=True)
+
+        self._main_window.disable_button(self._undo_id)
+        self._main_window.disable_button(self._redo_id)
+
+    def _undo_callback(self, patch, string):
+        &#34;&#34;&#34;
+        Called when undo is done.
+
+        Args:
+            patch: The patch returned from the undo stack.
+            string: The string for that patch.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        if patch is None:
+            return
+
+        current_patch = self._image.patches[self._current_patch_index]
+
+        self._undo_manager.add_to_redo_stack(copy.deepcopy(current_patch),
+                                             string)
+
+        self._main_window.enable_button(self._redo_id)
+
+        if self._undo_manager.undo_empty:
+            self._main_window.disable_button(self._undo_id)
+
+        self._image.patches[self._current_patch_index] = patch
+
+        for key in self._image_tools.keys():
+            self._image_tools[key].lock_undos()
+            self._image_tools[key].patch = patch
+
+    def _redo_callback(self, patch, string):
+        &#34;&#34;&#34;
+        Called when redo is done.
+
+        Args:
+            patch: The patch returned from the redo stack.
+            string: The string for that patch.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        if patch is None:
+            return
+
+        current_patch = self._image.patches[self._current_patch_index]
+
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(current_patch),
+                                             string)
+
+        if self._undo_manager.redo_empty:
+            self._main_window.disable_button(self._redo_id)
+
+        self._main_window.enable_button(self._undo_id)
+
+        self._image.patches[self._current_patch_index] = patch
+
+        for key in self._image_tools.keys():
+            self._image_tools[key].lock_undos()
+            self._image_tools[key].patch = patch
+
+    def _display_current_patch(self, new=False):
+        &#34;&#34;&#34;
+        Display the current patch.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The main window&#39;s canvas will display the given image.
+        &#34;&#34;&#34;
+        if self._image is None:
+            return
+
+        patch = self._image.patches[self._current_patch_index]
+        img = self._get_context_patches(patch)
+
+        self._main_window.show_image(img, new=new,
+                                     patch_offset=self._patch_offset)
+
+        if self._current_tool is not None:
+            self._current_tool.unlock_undos()
+        if self._undo_manager.undo_empty:
+            self._main_window.disable_button(self._undo_id)
+        else:
+            self._main_window.enable_button(self._undo_id)
+
+    def _brush_size_callback(self, radius):
+        &#34;&#34;&#34;
+        Called when a brush tool is updated.
+
+        Args:
+            radius: The new brush radius.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._main_window.set_canvas_brush_size(radius)
+
+    def _get_context_patches(self, patch):
         &#34;&#34;&#34;
         Get the patches immediately surrounding the current patch and place
-        them in a larger image
+        them in a larger image.
 
-        :param patch: The current patch
-        :returns: A matrix of patches for display
+        Args:
+            patch: The current patch
+
+        Returns:
+            An image for display.
         &#34;&#34;&#34;
 
         # Find the neighbouring patches
         index = patch.patch_index
 
-        if self.context_img is not None:
-            patch = self.image.patches[self.current_patch]
-            r_start = self.patch_offset[0]
+        if self._context_img is not None:
+            patch = self._image.patches[self._current_patch_index]
+            r_start = self._patch_offset[0]
             r_end = r_start + patch.overlay_image.shape[0]
-            c_start = self.patch_offset[1]
+            c_start = self._patch_offset[1]
             c_end = c_start + patch.overlay_image.shape[1]
 
             o_img = patch.overlay_image
             o_img = np.dstack((o_img, np.full(o_img.shape[0:-1],
                                255, dtype=o_img.dtype)))
-            self.logger.debug(&#34;Using cached context image&#34;)
 
-            self.context_img[r_start:r_end, c_start:c_end] = o_img
-            return self.context_img
+            self._context_img[r_start:r_end, c_start:c_end] = o_img
+            return self._context_img
 
         neighbouring_indices = []
 
@@ -328,12 +669,10 @@ class Controller:
 
         for i in range(start_i, start_i + 3):
 
-            if i &lt; 0 or i &gt;= self.image.NUM_PATCHES:
-                self.logger.debug(&#34;Patch Out Of Bounds&#34;)
+            if i &lt; 0 or i &gt;= self._image.num_patches:
                 continue
             for j in range(start_j, start_j + 3):
-                if j &lt; 0 or j &gt;= self.image.NUM_PATCHES:
-                    self.logger.debug(&#34;Patch Out Of Bounds&#34;)
+                if j &lt; 0 or j &gt;= self._image.num_patches:
                     continue
 
                 neighbouring_indices.append((i, j))
@@ -347,7 +686,7 @@ class Controller:
 
         # TODO: This could be more efficient I&#39;m sure
         for i in neighbouring_indices:
-            for patch in self.image.patches:
+            for patch in self._image.patches:
                 if patch.patch_index == i:
                     o_img = patch.overlay_image
 
@@ -379,7 +718,7 @@ class Controller:
             img[r:r+patch.shape[0],
                 c:c+patch.shape[1]] += patch
             if i == drawable_patch_index:
-                self.patch_offset = (r, c)
+                self._patch_offset = (r, c)
 
             col_num += 1
 
@@ -389,75 +728,44 @@ class Controller:
 
             i += 1
 
-        self.context_img = img
+        self._context_img = img
         return img
 
-    def convert_click_to_image_position(self, click_location):
+    def _update_progressbar(self):
         &#34;&#34;&#34;
-        Convert a click location to coordinates in the image
+        Update the progressbar popup
 
-        :param click_location: (x, y) coords of the click
-        :returns: The corresponding coordinates in the image
+
+        Returns:
+            None
+
+        Postconditions:
+            The progressbar will be incremented.
         &#34;&#34;&#34;
-        click_location = (click_location[0] - self.main_window.image_x,
-                          click_location[1] - self.main_window.image_y)
+        self._main_window.progress_popup.update()
+        self._main_window.load_progress += self._main_window.progress_step
+        self._main_window.load_progress_var\
+            .set(self._main_window.load_progress)
 
-        click_location = (click_location[0] / self.main_window.image_scale,
-                          click_location[1] / self.main_window.image_scale)
+        if self._main_window.load_progress &gt;= self.NUM_PATCHES ** 2:
+            self._main_window.progress_popup.destroy()
 
-        click_location = (click_location[0] - self.patch_offset[1],
-                          click_location[1] - self.patch_offset[0])
-
-        # Make sure we are clicking on the image
-        if click_location[0] &lt; 0 or click_location[1] &lt; 0:
-            return None
-
-        return click_location
-
-    def next_patch(self):
+    def _show_saved_preview(self):
         &#34;&#34;&#34;
-        Increment the current patch and display it
+        Display a preview of the saved mask overlaid with the image.
 
-        :returns: None
+
+        Returns:
+            None
+
+        Postconditions:
+            A window displaying the image and mask is shown.
         &#34;&#34;&#34;
-        self.context_img = None
-        self.undo_manager.clear_undos()
 
-        if self.current_patch &lt; len(self.image.patches)-1:
+        self._previewed = True
 
-            self.current_patch += 1
-            while self.image.patches[self.current_patch].display is False:
-                self.current_patch += 1
-
-            self.display_current_patch()
-        else:
-
-            if self.mask_saved:
-                return
-
-            self.logger.error(&#34;No More Patches&#34;)
-
-            dialog_message = &#34;No More Patches - Would you like to save the&#34; \
-                             &#34; mask?&#34;
-
-            dialog_title = &#34;No More Patches&#34;
-
-            result = tkinter.messagebox.askyesno(title=dialog_title,
-                                                 message=dialog_message)
-            self.logger.debug(result)
-            if result:
-                self.show_saved_preview()
-
-    def show_saved_preview(self):
-        &#34;&#34;&#34;
-        Display a preview of the saved mask
-
-        :returns: None
-        &#34;&#34;&#34;
-        self.previewed = True
-        img = self.image.image
-        self.image.create_mask()
-        mask = self.image.mask
+        img = self._image.image
+        mask = self._image.mask
 
         overlay = segmentation.mark_boundaries(img, mask)
 
@@ -470,739 +778,24 @@ class Controller:
 
         overlay = overlay[rmin:rmax, cmin:cmax]
 
-        self.main_window.create_annotation_preview(overlay)
+        PreviewWindow(overlay, self, self._main_window.style)
 
-    def prev_patch(self):
+    def _get_image_name_from_path(self, path):
         &#34;&#34;&#34;
-        Decrement the current patch and display it
+        Get the name of the image from its original path.
 
-        :returns: None
+        Args:
+            path: The path to the original image.
+
+        Returns:
+            The name to save the image mask as.
         &#34;&#34;&#34;
-        self.context_img = None
-        self.undo_manager.clear_undos()
+        if os.path.isdir(path):
+            raise ValueError(&#34;Cannot get image name from a directory.&#34;)
 
-        if self.current_patch &gt; 0:
+        basename = os.path.basename(path)
 
-            self.current_patch -= 1
-            while self.image.patches[self.current_patch].display is False:
-                self.current_patch -= 1
-
-            self.display_current_patch()
-
-        else:
-            self.logger.error(&#34;No Previous patches&#34;)
-
-    def change_mode(self, new_mode_id):
-        &#34;&#34;&#34;
-        Change the current editing mode
-
-        :param new_mode_id: The ID of the mode button in the Main Window
-        :returns: None
-        &#34;&#34;&#34;
-        if new_mode_id != self.main_window.ID_TOOL_NO_ROOT:
-            self.main_window.zoom_cursor = False
-            self.main_window.flood_cursor = False
-
-        if new_mode_id == self.main_window.ID_TOOL_THRESH:
-            self.current_mode = Mode.THRESHOLD
-            self.main_window.set_brush_radius(0)
-            patch = self.image.patches[self.current_patch]
-            self.main_window.update_thresh_slider_value(patch.thresh)
-
-        elif new_mode_id == self.main_window.ID_TOOL_ADD:
-            self.current_mode = Mode.ADD_REGION
-            self.main_window.set_brush_radius(self.add_region_radius)
-            self.main_window.update_add_brush_sizer(self.add_region_radius)
-
-        elif new_mode_id == self.main_window.ID_TOOL_REMOVE:
-            self.current_mode = Mode.REMOVE_REGION
-            self.main_window.set_brush_radius(self.remove_region_radius)
-            self.main_window.\
-                update_remove_brush_sizer(self.remove_region_radius)
-
-        elif new_mode_id == self.main_window.ID_TOOL_NO_ROOT:
-            self.no_root_activate()
-
-        elif new_mode_id == self.main_window.ID_TOOL_FLOOD_ADD:
-            self.current_mode = Mode.FLOOD_ADD
-            self.main_window.flood_cursor = True
-            self.flood_add_position = None
-            # self.flood_add_tolerance = 0.05
-            self.main_window.\
-                update_flood_add_slider_value(self.flood_add_tolerance)
-
-        elif new_mode_id == self.main_window.ID_TOOL_FLOOD_REMOVE:
-            self.current_mode = Mode.FLOOD_REMOVE
-            self.main_window.flood_cursor = True
-            self.flood_remove_position = None
-            # self.flood_remove_tolerance = 0.05
-            self.main_window.\
-                update_flood_remove_slider_value(self.flood_remove_tolerance)
-
-        elif new_mode_id == self.main_window.ID_TOOL_ADD_TIP:
-            self.current_mode = Mode.ADD_TIP
-            self.main_window.flood_cursor = True
-
-        elif new_mode_id == self.main_window.ID_TOOL_ADD_BRANCH:
-            self.current_mode = Mode.ADD_BRANCH
-            self.main_window.flood_cursor = True
-
-        elif new_mode_id == self.main_window.ID_TOOL_ADD_CROSS:
-            self.current_mode = Mode.ADD_CROSSING
-            self.main_window.flood_cursor = True
-
-        elif new_mode_id == self.main_window.ID_TOOL_REMOVE_LANDMARK:
-            self.current_mode = Mode.REMOVE_LANDMARK
-            self.main_window.set_brush_radius(self.remove_landmark_radius)
-
-        else:
-            self.logger.error(&#34;Invalid mode change&#34;)
-
-            return False
-
-    def change_secondary_mode(self, new_mode_id):
-        &#34;&#34;&#34;
-        Change the secondary mode (for mouse wheel tool adjustments)
-
-        :param new_mode_id: The id of the new mode
-        :returns: None
-        &#34;&#34;&#34;
-
-        if new_mode_id == self.main_window.ID_TOOL_ZOOM:
-            self.current_secondary_mode = SecondaryMode.ZOOM
-
-        elif new_mode_id == self.main_window.ID_ADJUST_TOOL:
-            self.current_secondary_mode = SecondaryMode.ADJUST_TOOL
-
-    def no_root_activate(self):
-        &#34;&#34;&#34;
-        Set the mask for the patch to zero, there is no root here
-
-        :returns: None
-        &#34;&#34;&#34;
-        patch = self.image.patches[self.current_patch]
-
-        self.undo_manager.add_to_undo_stack(copy.deepcopy(patch), &#39;no_root&#39;)
-
-        patch.clear_mask()
-        patch.overlay_mask()
-
-        self.display_current_patch()
-
-    def handle_mouse_wheel(self, wheel_rotation, x, y):
-        &#34;&#34;&#34;
-        Handle wheel rotation coming from the mouse
-
-        :param wheel_rotation: The wheel rotation
-        :param x: The x-position of the mouse event
-        :param y: The y-position of the mouse event
-        :returns: True on success, False otherwise
-        &#34;&#34;&#34;
-
-        if self.current_secondary_mode == SecondaryMode.ADJUST_TOOL:
-            if self.current_mode == Mode.THRESHOLD:
-
-                self.adjust_threshold(wheel_rotation)
-
-            elif self.current_mode == Mode.ADD_REGION:
-                self.adjust_add_region_brush(wheel_rotation)
-
-            elif self.current_mode == Mode.REMOVE_REGION:
-                self.adjust_remove_region_brush(wheel_rotation)
-
-            elif self.current_mode == Mode.REMOVE_LANDMARK:
-                self.adjust_remove_landmark_brush(wheel_rotation)
-
-            elif self.current_mode == Mode.FLOOD_ADD:
-                self.handle_flood_add_tolerance(wheel_rotation)
-
-            elif self.current_mode == Mode.FLOOD_REMOVE:
-                self.handle_flood_remove_tolerance(wheel_rotation)
-            else:
-                return False
-
-        elif self.current_secondary_mode == SecondaryMode.ZOOM:
-            self.handle_zoom(wheel_rotation, x, y)
-
-        else:
-            self.logger.error(&#34;Invalid mouse wheel rotation&#34;)
-            return False
-
-        return True
-
-    def handle_flood_add_tolerance(self, wheel_rotation):
-        &#34;&#34;&#34;
-        Adjust the current tolerance of the flood_add tool
-
-        :param wheel_rotation: The rotation of the mouse wheel
-        :returns: None
-        &#34;&#34;&#34;
-
-        if self.flood_add_position is None:
-            return
-
-        if wheel_rotation &gt; 0:
-            self.flood_add_tolerance += 0.01
-        elif wheel_rotation &lt; 0:
-            self.flood_add_tolerance -= 0.01
-
-        patch = self.image.patches[self.current_patch]
-
-        patch.flood_add_region(self.flood_add_position,
-                               self.flood_add_tolerance)
-
-        patch.overlay_mask()
-        self.display_current_patch()
-
-    def set_flood_add_tolerance(self, value):
-        &#34;&#34;&#34;
-        Set the current flood add tolerance
-
-        :param value: The value to set it to
-        :returns: None
-        &#34;&#34;&#34;
-
-        if self.flood_add_position is None:
-            return
-
-        self.flood_add_tolerance = value
-
-        patch = self.image.patches[self.current_patch]
-
-        patch.flood_add_region(self.flood_add_position,
-                               self.flood_add_tolerance)
-
-        patch.overlay_mask()
-        self.display_current_patch()
-
-    def handle_flood_remove_tolerance(self, wheel_rotation):
-        &#34;&#34;&#34;
-        Adjust the current tolerance of the flood_remove tool
-
-        :param wheel_rotation: The rotation of the mouse wheel
-        :returns: None
-        &#34;&#34;&#34;
-
-        if self.flood_remove_position is None:
-            return
-
-        if wheel_rotation &gt; 0:
-            self.flood_remove_tolerance += 0.01
-        elif wheel_rotation &lt; 0:
-            self.flood_remove_tolerance -= 0.01
-
-        patch = self.image.patches[self.current_patch]
-
-        patch.flood_remove_region(self.flood_remove_position,
-                                  self.flood_remove_tolerance)
-
-        patch.overlay_mask()
-        self.display_current_patch()
-
-    def set_flood_remove_tolerance(self, value):
-        &#34;&#34;&#34;
-        Set the current flood remove tolerance
-
-        :param value: The value to set it to
-        :returns: None
-        &#34;&#34;&#34;
-
-        if self.flood_remove_position is None:
-            return
-
-        self.flood_remove_tolerance = value
-
-        patch = self.image.patches[self.current_patch]
-
-        patch.flood_remove_region(self.flood_remove_position,
-                                  self.flood_remove_tolerance)
-
-        patch.overlay_mask()
-        self.display_current_patch()
-
-    def handle_zoom(self, wheel_rotation, x, y):
-        &#34;&#34;&#34;
-        Handle zooming with the mouse wheel
-
-        :param wheel_rotation: The roation of the mouse wheel
-        :param x: The x-cooridinate
-        :param y: The y-coordinate
-        :returns: True on success, False otherwise
-        &#34;&#34;&#34;
-
-        old_scale = self.main_window.image_scale
-
-        img_point = (x - self.main_window.image_x,
-                     y - self.main_window.image_y)
-
-        img_point = (img_point[0] / self.main_window.image_scale,
-                     img_point[1] / self.main_window.image_scale)
-
-        if wheel_rotation &gt; 0 and old_scale &lt; self.main_window.MAX_SCALE:
-            self.main_window.image_scale *= self.ZOOM_SCALE
-            new_img_point = (img_point[0] * self.ZOOM_SCALE, img_point[1] *
-                             self.ZOOM_SCALE)
-
-            translation = (new_img_point[0] - img_point[0],
-                           new_img_point[1] - img_point[1])
-
-            self.main_window.image_x -= translation[0]
-            self.main_window.image_y -= translation[1]
-
-        elif wheel_rotation &lt; 0 and old_scale &gt; self.main_window.MIN_SCALE:
-            self.main_window.image_scale /= self.ZOOM_SCALE
-            new_img_point = (img_point[0] / self.ZOOM_SCALE, img_point[1] /
-                             self.ZOOM_SCALE)
-
-            translation = (new_img_point[0] - img_point[0],
-                           new_img_point[1] - img_point[1])
-
-            self.main_window.image_x -= translation[0]
-            self.main_window.image_y -= translation[1]
-
-        else:
-            return False
-
-        self.logger.debug(&#34;Image Scale: {}&#34;.
-                          format(self.main_window.image_scale))
-        self.display_current_patch()
-        return True
-
-    def handle_left_click(self, click_location):
-        &#34;&#34;&#34;
-        Handle a left mouse click at the given location
-
-        :param click_location: The location (x, y) of the click
-        :returns: True on success, False otherwise
-        &#34;&#34;&#34;
-
-        click_location = self.convert_click_to_image_position(click_location)
-
-        if click_location is None:
-            return False
-
-        if self.current_mode == Mode.ADD_REGION:
-            self.logger.debug(&#34;Add region click {}&#34;.format(click_location))
-
-            draw_radius = self.add_region_radius / self.main_window.image_scale
-
-            patch = self.image.patches[self.current_patch]
-
-            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                                &#39;add_region&#39;)
-
-            patch.add_region(click_location, draw_radius)
-
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.REMOVE_REGION:
-            self.logger.debug(&#34;Remove region click&#34;)
-
-            draw_radius = (self.remove_region_radius /
-                           self.main_window.image_scale)
-
-            patch = self.image.patches[self.current_patch]
-
-            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                                &#39;remove_region&#39;)
-
-            patch.remove_region(click_location, draw_radius)
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.ADD_TIP:
-
-            patch = self.image.patches[self.current_patch]
-            patch.add_landmark(click_location, self.add_tip_radius,
-                               self.image.TIP_LABEL)
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.ADD_CROSSING:
-            patch = self.image.patches[self.current_patch]
-            patch.add_landmark(click_location, self.add_cross_radius,
-                               self.image.CROSS_LABEL)
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.ADD_BRANCH:
-            patch = self.image.patches[self.current_patch]
-            patch.add_landmark(click_location, self.add_branch_radius,
-                               self.image.BRANCH_LABEL)
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.REMOVE_LANDMARK:
-            draw_radius = (self.remove_landmark_radius /
-                           self.main_window.image_scale)
-
-            patch = self.image.patches[self.current_patch]
-            patch.remove_landmark(click_location, draw_radius)
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.FLOOD_ADD:
-
-            patch = self.image.patches[self.current_patch]
-
-            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                                &#39;flood_add&#39;)
-
-            patch.flood_add_region(click_location, self.flood_add_tolerance)
-
-            self.flood_add_position = click_location
-
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.FLOOD_REMOVE:
-            patch = self.image.patches[self.current_patch]
-
-            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                                &#39;flood_remove&#39;)
-
-            patch.flood_remove_region(click_location,
-                                      self.flood_remove_tolerance)
-
-            self.flood_remove_position = click_location
-
-            self.display_current_patch()
-
-        else:
-            return False
-
-        return True
-
-    def handle_right_click(self):
-        &#34;&#34;&#34;
-        Called when the right mouse button is clickd
-
-        :returns: None
-        &#34;&#34;&#34;
-        self.logger.debug(&#34;Right click&#34;)
-
-    def handle_left_release(self):
-        &#34;&#34;&#34;
-        Handle the release of the left mouse button
-
-        :returns: True on success, False otherwise
-        &#34;&#34;&#34;
-
-        if self.current_mode == Mode.ADD_REGION:
-            self.logger.debug(&#34;Add region release&#34;)
-            return True
-
-        elif self.current_mode == Mode.REMOVE_REGION:
-            self.logger.debug(&#34;Remove region release&#34;)
-            return True
-        else:
-            return False
-
-    def handle_motion(self, position):
-        &#34;&#34;&#34;
-        Handle motion events of the mouse at the given position
-
-        :param position: The position (x, y) of the mouse during the event
-        :returns: True on success, False otherwise
-        &#34;&#34;&#34;
-        position = self.convert_click_to_image_position(position)
-
-        if position is None:
-            return False
-
-        if self.current_mode == Mode.ADD_REGION:
-            self.logger.debug(&#34;Adding region&#34;)
-
-            draw_radius = self.add_region_radius / self.main_window.image_scale
-
-            patch = self.image.patches[self.current_patch]
-
-            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                                &#39;add_region_adjust&#39;)
-
-            patch.add_region(position, draw_radius)
-
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.REMOVE_REGION:
-            self.logger.debug(&#34;Removing Region&#34;)
-
-            draw_radius = (self.remove_region_radius /
-                           self.main_window.image_scale)
-
-            patch = self.image.patches[self.current_patch]
-
-            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                                &#39;remove_region_adjust&#39;)
-
-            patch.remove_region(position, draw_radius)
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.REMOVE_LANDMARK:
-            draw_radius = (self.remove_landmark_radius /
-                           self.main_window.image_scale)
-
-            patch = self.image.patches[self.current_patch]
-            patch.remove_landmark(position, draw_radius)
-            self.display_current_patch()
-
-        else:
-            return False
-
-        return True
-
-    def handle_mouse_wheel_motion(self, position):
-        &#34;&#34;&#34;
-        Handle when the mouse wheel is clicked and the mouse is dragged
-
-        :param position: The position of the mouse
-        :returns: None
-        &#34;&#34;&#34;
-
-        if self.current_secondary_mode == SecondaryMode.ZOOM:
-            self.main_window.image_x += (position[0] -
-                                         self.main_window.previous_position[0])
-
-            self.main_window.image_y += (position[1] -
-                                         self.main_window.previous_position[1])
-
-            self.display_current_patch()
-
-    def adjust_threshold(self, wheel_rotation):
-        &#34;&#34;&#34;
-        Adjust the current threshold of the patch mask
-
-        :param wheel_rotation: The rotation of the mouse wheel
-        :returns: None
-        &#34;&#34;&#34;
-
-        patch = self.image.patches[self.current_patch]
-
-        self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                            &#39;threshold_adjust&#39;)
-
-        # Adjust the threshold.  Note that it is inverted, because it feels
-        # more natural to scroll down to &#39;reduce&#39; the region, rather than
-        # reducing the threshold
-        if wheel_rotation &gt; 0 and patch.thresh &gt; 0:
-            patch.thresh -= 0.01
-
-        elif wheel_rotation &lt; 0 and patch.thresh &lt; 1:
-
-            patch.thresh += 0.01
-
-        self.main_window.update_thresh_slider_value(patch.thresh)
-        self.main_window.update_add_brush_sizer(self.add_region_radius)
-        patch.apply_threshold(patch.thresh)
-        patch.overlay_mask()
-
-        self.logger.debug(&#34;Threshold value: {}&#34;.format(patch.thresh))
-        self.display_current_patch()
-
-    def set_threshold(self, value):
-        &#34;&#34;&#34;
-        Set the value of the threshold
-
-        :param value: Value for the threshold
-        :returns: Nonw
-        &#34;&#34;&#34;
-
-        patch = self.image.patches[self.current_patch]
-
-        self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                            &#39;threshold_adjust&#39;)
-
-        patch.thresh = value
-        patch.apply_threshold(patch.thresh)
-        patch.overlay_mask()
-
-        self.display_current_patch()
-
-    def adjust_add_region_brush(self, wheel_rotation):
-        &#34;&#34;&#34;
-        Adjust the size of the region brush
-
-        :param wheel_rotation: The rotation of the mouse wheel
-        :returns: None
-        &#34;&#34;&#34;
-
-        self.logger.debug(&#34;Adjusting add region brush&#34;)
-        if wheel_rotation &gt; 0:
-            self.add_region_radius += 1
-        else:
-            self.add_region_radius -= 1
-
-        self.main_window.update_add_brush_sizer(self.add_region_radius)
-        self.main_window.set_brush_radius(self.add_region_radius)
-        self.main_window.draw_brush()
-
-    def set_add_region_brush(self, value):
-        &#34;&#34;&#34;
-        Set the value of the add region brush size
-
-        :param value: The size
-        :returns: None
-        &#34;&#34;&#34;
-
-        self.add_region_radius = value
-
-        self.main_window.set_brush_radius(self.add_region_radius)
-        self.main_window.draw_brush()
-
-    def adjust_remove_landmark_brush(self, wheel_rotation):
-        &#34;&#34;&#34;
-        Adjust the size of the remove landmark brush
-
-        :param wheel_rotation: The rotation of the mouse wheel
-        :returns: None
-        &#34;&#34;&#34;
-
-        if wheel_rotation &gt; 0:
-            self.remove_landmark_radius += 1
-        else:
-            self.remove_landmark_radius -= 1
-
-        self.main_window.set_brush_radius(self.remove_landmark_radius)
-        self.main_window.draw_brush()
-
-    def adjust_remove_region_brush(self, wheel_rotation):
-        &#34;&#34;&#34;
-        Adjust the size of the remove region brush
-
-        :param wheel_rotation: the rotation of the mouse wheel
-        :returns: None
-        &#34;&#34;&#34;
-
-        self.logger.debug(&#34;Adjusting the remove region brush&#34;)
-        if wheel_rotation &gt; 0:
-            self.remove_region_radius += 1
-        else:
-            self.remove_region_radius -= 1
-
-        self.main_window.update_remove_brush_sizer(self.remove_region_radius)
-        self.main_window.set_brush_radius(self.remove_region_radius)
-        self.main_window.draw_brush()
-
-    def set_remove_region_brush(self, value):
-        &#34;&#34;&#34;
-        Set the value of the remove region brush size
-
-        :param value: The value
-        :returns: None
-        &#34;&#34;&#34;
-        self.remove_region_radius = value
-
-        self.main_window.set_brush_radius(self.remove_region_radius)
-        self.main_window.draw_brush()
-
-    def undo(self):
-
-        patch = self.image.patches[self.current_patch]
-
-        redo_patch, operation = self.undo_manager.undo()
-
-        if redo_patch is None:
-            return
-
-        self.undo_manager.add_to_redo_stack(patch, operation)
-        self.main_window.toolbar_buttons[self.main_window.ID_TOOL_REDO]\
-            .config(state=&#34;normal&#34;)
-
-        self.image.patches[self.current_patch] = redo_patch
-
-        self.display_current_patch()
-
-    def redo(self):
-
-        patch = self.image.patches[self.current_patch]
-
-        undo_patch, operation = self.undo_manager.redo()
-
-        if undo_patch is None:
-            return
-
-        self.undo_manager.add_to_undo_stack(patch, operation)
-        if len(self.undo_manager.redo_stack) == 0:
-            self.main_window.toolbar_buttons[self.main_window.ID_TOOL_REDO]\
-                .config(state=&#34;disabled&#34;)
-
-        self.image.patches[self.current_patch] = undo_patch
-
-        self.display_current_patch()
-
-
-class UndoManager():
-    &#34;&#34;&#34;
-    Manages Undo Stuff
-    &#34;&#34;&#34;
-
-    MAX_SIZE = 20
-
-    def __init__(self):
-        &#34;&#34;&#34;
-        Initialize the Undo Manager
-
-        :returns: None
-        &#34;&#34;&#34;
-
-        self.undo_stack = []
-        self.redo_stack = []
-
-    def add_to_undo_stack(self, patch, operation):
-        &#34;&#34;&#34;
-        Add the given operation to the undo stack
-
-        :returns: None
-        &#34;&#34;&#34;
-
-        if &#34;threshold_adjust&#34; == operation and len(self.undo_stack) &gt; 0:
-            if self.undo_stack[-1][1] == operation:
-                return
-        elif &#34;adjust&#34; in operation and len(self.undo_stack) &gt; 0:
-            if self.undo_stack[-1][1] == operation:
-                self.undo_stack.pop()
-
-        self.undo_stack.append((patch, operation))
-
-        if len(self.undo_stack) &gt; self.MAX_SIZE:
-            self.undo_stack.pop(0)
-
-    def undo(self):
-        &#34;&#34;&#34;
-        Undo the last operation added to the stack
-
-        :returns: The function and its parameters
-        &#34;&#34;&#34;
-        try:
-            patch, operation = self.undo_stack.pop()
-            return patch, operation
-
-        except IndexError:
-            return None, None
-
-    def add_to_redo_stack(self, patch, operation):
-        &#34;&#34;&#34;
-        Add the given operation to the redo stack
-
-        :returns: None
-        &#34;&#34;&#34;
-
-        self.redo_stack.append((patch, operation))
-
-        if len(self.redo_stack) &gt; self.MAX_SIZE:
-            self.redo_stack.pop(0)
-
-    def redo(self):
-        &#34;&#34;&#34;
-        Redo the last undone operation
-
-        :returns: The function and its parameters
-        &#34;&#34;&#34;
-
-        try:
-            patch, operation = self.redo_stack.pop()
-            return patch, operation
-        except IndexError:
-            return None, None
-
-    def clear_undos(self):
-
-        self.undo_stack = []
-        self.redo_stack = []</code></pre>
+        return os.path.splitext(basename)[0] + &#39;_mask.png&#39;</code></pre>
 </details>
 </section>
 <section>
@@ -1216,250 +809,618 @@ class UndoManager():
 <dl>
 <dt id="friendly_ground_truth.controller.controller.Controller"><code class="flex name class">
 <span>class <span class="ident">Controller</span></span>
-<span>(</span><span>master)</span>
+<span>(</span><span>root)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>The main controller object for the application</p>
+<div class="desc"><p>Main controller for the application.</p>
 <h2 id="attributes">Attributes</h2>
 <dl>
-<dt><strong><code>stuff</code></strong></dt>
+<dt><strong><code>image_tools</code></strong></dt>
+<dd>A dictionary of tools keyed by their id</dd>
+</dl>
+<p>Create a Controller object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>root</code></strong></dt>
+<dd>The tk Root</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A controller object</code></dt>
 <dd>&nbsp;</dd>
 </dl>
-<p>Initialize the controller module</p>
-<p>:returns: None</p></div>
+<h2 id="postconditions">Postconditions</h2>
+<p>The main application window is started</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Controller:
+<pre><code class="python">class Controller():
     &#34;&#34;&#34;
-    The main controller object for the application
+    Main controller for the application.
 
     Attributes:
-        stuff
+        image_tools: A dictionary of tools keyed by their id
     &#34;&#34;&#34;
-    ZOOM_SCALE = 1.10
     CONTEXT_TRANSPARENCY = 100
+    NUM_PATCHES = 10
 
-    def __init__(self, master):
+    def __init__(self, root):
         &#34;&#34;&#34;
-        Initialize the controller module
+        Create a Controller object
 
-        :returns: None
+        Args:
+            root: The tk Root
+
+        Returns:
+            A controller object
+
+        Postconditions:
+            The main application window is started
         &#34;&#34;&#34;
-        self.logger = logging.getLogger(&#39;friendly_gt.controller.Controller&#39;)
-        self.logger.debug(&#34;Creating controller instance&#34;)
+        # ------------------------------------
+        # Private Attributes
+        # -----------------------------------
 
-        self.current_patch = 0
-        self.mask_saved = False
+        # The root tkinter object
+        self._root = root
+        # For logging
+        self._logger = logging.getLogger(&#39;friendly_gt.controller.&#39;
+                                         &#39;controller.Controller&#39;)
+        # The last directory used to load an image
+        self._last_load_dir = None
+        # The last directory used to save an image
+        self._last_save_dir = None
 
-        # Set up the current mode
-        self.current_mode = Mode.THRESHOLD
-        self.current_secondary_mode = SecondaryMode.ZOOM
+        # Image containing neighbouring patches
+        self._context_img = None
 
-        # Whether the preview has been shown
-        self.previewed = False
+        # For managing undo operations
+        self._undo_manager = UndoManager()
+        # A dictionary of image tools
+        self._image_tools = {}
+        self._init_tools()
 
-        # Brush radii
-        self.add_region_radius = 15
-        self.remove_region_radius = 15
-        self.add_tip_radius = 2.5
-        self.add_branch_radius = 2.5
-        self.add_cross_radius = 2.5
-        self.remove_landmark_radius = 15
+        # Initialize the main window
+        self._main_window = MainWindow(self._root, self)
 
-        # Flood Tolerances
-        self.flood_add_tolerance = 0.05
-        self.flood_remove_tolerance = 0.05
+        # The path to the current image
+        self._image_path = None
 
-        # Set up the main window
-        self.main_window = MainWindow(self, master)
+        # The current image
+        self._image = None
 
-        # Offset of the patch within the context image
-        self.patch_offset = (0, 0)
+        # The index of the current patch in _image.patches
+        self._current_patch_index = 0
 
-        # Undo Management
-        self.undo_manager = UndoManager()
+        # Whether the mask has been saved
+        self._mask_saved = False
 
-        # Remember chosen directories
-        self.last_load_dir = None
-        self.last_save_dir = None
-        self.image = None
+        # The current tool in use
+        self._current_tool = None
 
+        # The offset of the current patch within the context image
+        self._patch_offset = (0, 0)
+
+        # Whether the mask preview has been shown or not
+        self._previewed = False
+
+        # Disable the redo button for now
+        self._main_window.disable_button(self._redo_id)
+        self._main_window.disable_button(self._undo_id)
+
+    @property
+    def image_tools(self):
+        return self._image_tools
+
+    # ===================================================
+    # PUBLIC FUNCTIONS
+    # ===================================================
     def load_new_image(self):
         &#34;&#34;&#34;
-        Called when the user wants to load a new image to open a file
-        browser dialogue and get the image path
+        Load a new image with a file dialog.
 
-        :returns: None
+
+        Returns:
+            None
         &#34;&#34;&#34;
-        self.context_img = None
-        self.logger.debug(&#34;Opening load file dialog&#34;)
-        filetypes = [(&#34;TIF Files&#34;, &#34;*.tif&#34;), (&#34;TIFF Files&#34;, &#34;*.tiff&#34;),
-                     (&#34;PNG Files&#34;, &#34;*.png&#34;)]
 
-        if self.last_load_dir is None:
-            initial_dir = os.path.expanduser(&#39;~&#39;)
+        self._context_img = None
+        filetypes = [(&#34;TIF Files&#34;, &#34;*.tif&#34;), (&#34;TIFF Files&#34;, &#34;*.tiff&#34;),
+                     (&#34;PNG Files&#34;, &#34;*.png&#34;), (&#34;JPEG Files&#34;, &#34;*.jpg&#34;)]
+
+        if self._last_load_dir is None:
+            initial_dir = os.path.expanduser(&#34;~&#34;)
         else:
-            initial_dir = self.last_load_dir
+            initial_dir = self._last_load_dir
 
         file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
                                                        initialdir=initial_dir)
-        if file_name is None:
+
+        if file_name is None or file_name == ():
             return
 
-        self.last_load_dir = os.path.split(file_name)[0]
+        self._last_load_dir = os.path.split(file_name)[0]
 
-        self.image_path = file_name
-        self.logger.debug(&#34;File: {}&#34;.format(self.image_path))
+        self._image_path = file_name
+
         try:
-            self.main_window.start_progressbar(Image.NUM_PATCHES ** 2)
-            self.image = Image(file_name, self.update_progress_bar)
+            self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
+            self._image = Image(file_name, 10, self._update_progressbar)
 
         except FileNotFoundError:
-            self.logger.debug(&#34;There was a problem loading the image&#34;)
+            self._logger.exception(&#34;There was a problem loading the image.&#34;)
             return
 
-        self.current_patch = 0
-        self.display_current_patch()
+        self._current_patch_index = 0
 
-    def update_progress_bar(self):
-        &#34;&#34;&#34;
-        Update the progress bar popup
-
-        :returns: None
-        &#34;&#34;&#34;
-
-        self.main_window.prog_popup.update()
-        self.main_window.load_progress += self.main_window.progress_step
-        self.main_window.load_prog_var.set(self.main_window.load_progress)
-
-        if self.main_window.load_progress &gt;= Image.NUM_PATCHES ** 2:
-            self.main_window.prog_popup.destroy()
-
-    def get_image_name_from_path(self, path):
-        &#34;&#34;&#34;
-        Get the filename from the image to use for saving the mask
-
-        Args:
-            path: The path to the original image
-        Returns:
-            The new filename for the mask
-        &#34;&#34;&#34;
-
-        if os.path.isdir(path):
-            raise ValueError(&#34;Cannot get image name from a directory.&#34;)
-
-        basename = os.path.basename(path)
-        return os.path.splitext(basename)[0] + &#39;_mask.png&#39;
-
-    def get_landmark_name_from_path(self, path):
-        &#34;&#34;&#34;
-        Get the name of the landmark matrix to use for saving
-
-        :param path: The path to the original image
-        :returns: The new filename for the mask
-        &#34;&#34;&#34;
-
-        if os.path.isdir(path):
-            raise ValueError(&#34;Cannot get image name from a directory&#34;)
-
-        basename = os.path.basename(path)
-        return os.path.splitext(basename)[0] + &#39;_labels.npy&#39;
+        self._display_current_patch()
+        self._main_window.update_image_indicator(self._image_path)
 
     def save_mask(self):
         &#34;&#34;&#34;
-        Save the finished image mask
+        Save the finished image mask.
 
-        :returns: None
+
+        Returns:
+            None
         &#34;&#34;&#34;
 
-        if not self.previewed:
-            self.show_saved_preview()
+        if not self._previewed:
+            self._show_saved_preview()
             return
 
-        self.mask_saved = True
+        self._mask_saved = True
 
-        if self.last_save_dir is None:
-            initial_dir = os.path.expanduser(&#39;~&#39;)
+        if self._last_save_dir is None:
+            initial_dir = os.path.expanduser(&#34;~&#34;)
         else:
-            initial_dir = self.last_save_dir
+            initial_dir = self._last_save_dir
 
         dir_path = tkinter.filedialog.askdirectory(initialdir=initial_dir)
-
-        self.last_save_dir = dir_path
-
-        self.logger.debug(dir_path)
 
         if dir_path is None:
             return
 
-        image_name = self.get_image_name_from_path(self.image_path)
-        labels_name = self.get_landmark_name_from_path(self.image_path)
+        image_name = self._get_image_name_from_path(self._image_path)
+        # labels_name = self._get_landmark_name_from_path(self._image_path)
 
-        self.mask_pathname = os.path.join(dir_path, image_name)
-        self.label_pathname = os.path.join(dir_path, labels_name)
+        mask_pathname = os.path.join(dir_path, image_name)
+        # label_pathname = os.path.join(dir_path, labels_name)
 
         try:
-            self.logger.debug(&#34;Saving mask to {}&#34;.format(self.mask_pathname))
-            self.image.export_mask(self.mask_pathname)
-            # self.image.export_labels(self.label_pathname)
-            tkinter.messagebox.showinfo(&#34;Image Mask Saved!&#34;, &#34;Image Mask&#34;
-                                        &#34; Saved!&#34;)
+            self._image.export_mask(mask_pathname)
+            # self._image.export_labels(label_pathname)
+
+            tkinter.messagebox.showinfo(&#34;Image Mask Saved!&#34;,
+                                        &#34;Image Mask Saved!&#34;)
 
         except IOError:
-            self.logger.error(&#34;Could not save file!&#34;)
-            # TODO: display dialog
+            self._logger.error(&#34;Could not save file!&#34;)
 
-    def display_current_patch(self):
+    def set_preferences(self, preferences):
         &#34;&#34;&#34;
-        Display the current patch to be displayed
+        Set the current preferences for the application.
 
-        :returns: None
+        Args:
+            preferences: A dictionary of preferences and their values.
+
+        Returns:
+            None
         &#34;&#34;&#34;
-        if self.image is None:
+        theme = preferences[&#39;theme&#39;]
+
+        self._main_window.set_theme(theme)
+
+    def load_preferences(self):
+        &#34;&#34;&#34;
+        Load the preferences saved in the preferences file.
+
+
+        Returns:
+            A dictionary containing the user&#39;s preferences.
+        &#34;&#34;&#34;
+        if not os.path.exists(PREFERENCES_PATH):
+            return DEFAULT_PREFS
+
+        with open(PREFERENCES_PATH, &#39;r&#39;) as fin:
+            preferences = json.load(fin)
+
+        return preferences
+
+    def save_preferences(self, preferences):
+        &#34;&#34;&#34;
+        Save the user preferences.
+
+        Args:
+            preferences: A dictionary containing the user preferences.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        with open(PREFERENCES_PATH, &#39;w&#39;) as fout:
+            json.dump(preferences, fout)
+
+    def activate_tool(self, id):
+        &#34;&#34;&#34;
+        Activate the given tool id.
+
+        Args:
+            id: The id of the tool.
+
+        Returns:
+            None
+
+        Postcondition:
+            The current tool is set to the tool matching the id
+            Any activation functionality of the tool is performed.
+        &#34;&#34;&#34;
+        if self._image is None:
             return
 
-        patch = self.image.patches[self.current_patch]
-        img = self.get_context_patches(patch)
+        tool = self.image_tools[id]
+        tool.image = self._image
+        tool.patch = self._image.patches[self._current_patch_index]
 
-        self.main_window.update_tool = False
-        self.main_window.update_thresh_slider_value(patch.thresh)
-        self.main_window.update_add_brush_sizer(self.add_region_radius)
-        self.main_window.update_remove_brush_sizer(self.remove_region_radius)
-        self.main_window.\
-            update_flood_add_slider_value(self.flood_add_tolerance)
-        self.main_window.\
-            update_flood_remove_slider_value(self.flood_remove_tolerance)
-        self.main_window.set_brush_radius
-        self.main_window.show_image(img)
+        old_tool = None
 
-    def get_context_patches(self, patch):
+        if not tool.persistant:
+            old_tool = self._current_tool
+
+        self._current_tool = tool
+
+        tool.on_activate(self._current_patch_index)
+
+        if old_tool is not None:
+            self._current_tool = old_tool
+            tool = old_tool
+
+        tool.lock_undos()
+        # self._display_current_patch()
+        self._main_window.update_info_panel(tool)
+        self._main_window.set_canvas_cursor(tool.cursor)
+        tool.unlock_undos()
+
+        if not self._undo_manager.undo_empty:
+            self._main_window.enable_button(self._undo_id)
+
+    def adjust_tool(self, direction):
+        &#34;&#34;&#34;
+        Adjust the current tool.
+
+        Args:
+            direction: An integer, positive is up, negative is down.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._current_tool.on_adjust(direction)
+        # self._display_current_patch()
+
+        if not self._undo_manager.undo_empty:
+            self._main_window.enable_button(self._undo_id)
+
+    def click_event(self, pos):
+        &#34;&#34;&#34;
+        A click event in the main window has occured.
+
+        Args:
+            pos: The position of the event.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        # Correct for offset in context image
+        pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
+
+        # Need to invert the position, because tkinter coords are backward from
+        # skimage
+        pos = round(pos[1]-1), round(pos[0]-1)
+
+        self._logger.debug(&#34;Click Event: {}&#34;.format(pos))
+
+        if self._current_tool is not None:
+            self._current_tool.on_click(pos)
+
+        if not self._undo_manager.undo_empty:
+            self._main_window.enable_button(self._undo_id)
+
+    def drag_event(self, pos):
+        &#34;&#34;&#34;
+        A click event in the main window has occured/
+
+        Args:
+            pos: The position of the event.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        # Correct for offset in context image
+        pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
+
+        # Need to invert the position, because tkinter coords are backward from
+        # skimage
+        pos = round(pos[1]-1), round(pos[0]-1)
+
+        self._current_tool.on_drag(pos)
+
+        if not self._undo_manager.undo_empty:
+            self._main_window.enable_button(self._undo_id)
+
+    # ===================================================
+    # Private Functions
+    # ===================================================
+
+    def _init_tools(self):
+        &#34;&#34;&#34;
+        Create all the required tools.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            self._image_tools will be created as a dictionary of id, tool pairs
+        &#34;&#34;&#34;
+
+        image_tools = {}
+
+        thresh_tool = ThresholdTool(self._undo_manager)
+        image_tools[thresh_tool.id] = thresh_tool
+
+        add_reg_tool = AddRegionTool(self._undo_manager)
+        add_reg_tool.bind_brush(self._brush_size_callback)
+        image_tools[add_reg_tool.id] = add_reg_tool
+
+        rem_reg_tool = RemoveRegionTool(self._undo_manager)
+        rem_reg_tool.bind_brush(self._brush_size_callback)
+        image_tools[rem_reg_tool.id] = rem_reg_tool
+
+        flood_add_tool = FloodAddTool(self._undo_manager)
+        image_tools[flood_add_tool.id] = flood_add_tool
+
+        flood_rem_tool = FloodRemoveTool(self._undo_manager)
+        image_tools[flood_rem_tool.id] = flood_rem_tool
+
+        no_root_tool = NoRootTool(self._undo_manager,
+                                  self._next_patch_callback)
+        image_tools[no_root_tool.id] = no_root_tool
+
+        prev_patch_tool = PreviousPatchTool(self._undo_manager,
+                                            self._prev_patch_callback)
+        image_tools[prev_patch_tool.id] = prev_patch_tool
+
+        next_patch_tool = NextPatchTool(self._undo_manager,
+                                        self._next_patch_callback)
+        image_tools[next_patch_tool.id] = next_patch_tool
+
+        undo_tool = UndoTool(self._undo_manager,
+                             self._undo_callback)
+        image_tools[undo_tool.id] = undo_tool
+        self._undo_id = undo_tool.id
+
+        redo_tool = RedoTool(self._undo_manager,
+                             self._redo_callback)
+        image_tools[redo_tool.id] = redo_tool
+        self._redo_id = redo_tool.id
+
+        for id in image_tools.keys():
+            image_tools[id].bind_to(self._display_current_patch)
+
+        self._image_tools = image_tools
+
+    def _next_patch_callback(self, patch, index):
+        &#34;&#34;&#34;
+        Called when the next patch is determined.
+
+        Args:
+            patch: The next patch.
+            index: The index in the patches list of the patch.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._logger.debug(&#34;Next patch {}.&#34;.format(index))
+
+        if patch is None or index == -1:
+            self._display_current_patch()
+            self.save_mask()
+            return
+
+        cur_patch = self._image.patches[self._current_patch_index]
+        cur_patch.undo_history = copy.deepcopy(self._undo_manager)
+
+        self._context_img = None
+        self._current_patch_index = index
+
+        cur_patch = self._image.patches[self._current_patch_index]
+
+        if cur_patch.undo_history is None:
+            self._undo_manager = UndoManager()
+        else:
+            self._undo_manager = copy.deepcopy(cur_patch.undo_history)
+
+        for key in self._image_tools.keys():
+            self._image_tools[key].patch = patch
+            self._image_tools[key].undo_manager = self._undo_manager
+
+        self._display_current_patch(new=True)
+
+        if self._undo_manager.undo_empty:
+            self._main_window.disable_button(self._undo_id)
+        else:
+            self._main_window.enable_button(self._undo_id)
+
+        if self._undo_manager.redo_empty:
+            self._main_window.disable_button(self._redo_id)
+        else:
+            self._main_window.enable_button(self._redo_id)
+
+    def _prev_patch_callback(self, patch, index):
+        &#34;&#34;&#34;
+        Called when the previous patch is determined.
+
+        Args:
+            patch: The previous patch
+            index: The index of that patch in the list of patches.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        if patch is None or index == -1:
+            return
+
+        cur_patch = self._image.patches[self._current_patch_index]
+        cur_patch.undo_history = copy.deepcopy(self._undo_manager)
+
+        self._context_img = None
+        self._current_patch_index = index
+
+        cur_patch = self._image.patches[self._current_patch_index]
+
+        if cur_patch.undo_history is None:
+            self._undo_manager = UndoManager()
+        else:
+            self._undo_manager = copy.deepcopy(cur_patch.undo_history)
+
+        for key in self._image_tools.keys():
+            self._image_tools[key].patch = patch
+            self._image_tools[key].undo_manager = self._undo_manager
+
+        self._display_current_patch(new=True)
+
+        self._main_window.disable_button(self._undo_id)
+        self._main_window.disable_button(self._redo_id)
+
+    def _undo_callback(self, patch, string):
+        &#34;&#34;&#34;
+        Called when undo is done.
+
+        Args:
+            patch: The patch returned from the undo stack.
+            string: The string for that patch.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        if patch is None:
+            return
+
+        current_patch = self._image.patches[self._current_patch_index]
+
+        self._undo_manager.add_to_redo_stack(copy.deepcopy(current_patch),
+                                             string)
+
+        self._main_window.enable_button(self._redo_id)
+
+        if self._undo_manager.undo_empty:
+            self._main_window.disable_button(self._undo_id)
+
+        self._image.patches[self._current_patch_index] = patch
+
+        for key in self._image_tools.keys():
+            self._image_tools[key].lock_undos()
+            self._image_tools[key].patch = patch
+
+    def _redo_callback(self, patch, string):
+        &#34;&#34;&#34;
+        Called when redo is done.
+
+        Args:
+            patch: The patch returned from the redo stack.
+            string: The string for that patch.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        if patch is None:
+            return
+
+        current_patch = self._image.patches[self._current_patch_index]
+
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(current_patch),
+                                             string)
+
+        if self._undo_manager.redo_empty:
+            self._main_window.disable_button(self._redo_id)
+
+        self._main_window.enable_button(self._undo_id)
+
+        self._image.patches[self._current_patch_index] = patch
+
+        for key in self._image_tools.keys():
+            self._image_tools[key].lock_undos()
+            self._image_tools[key].patch = patch
+
+    def _display_current_patch(self, new=False):
+        &#34;&#34;&#34;
+        Display the current patch.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The main window&#39;s canvas will display the given image.
+        &#34;&#34;&#34;
+        if self._image is None:
+            return
+
+        patch = self._image.patches[self._current_patch_index]
+        img = self._get_context_patches(patch)
+
+        self._main_window.show_image(img, new=new,
+                                     patch_offset=self._patch_offset)
+
+        if self._current_tool is not None:
+            self._current_tool.unlock_undos()
+        if self._undo_manager.undo_empty:
+            self._main_window.disable_button(self._undo_id)
+        else:
+            self._main_window.enable_button(self._undo_id)
+
+    def _brush_size_callback(self, radius):
+        &#34;&#34;&#34;
+        Called when a brush tool is updated.
+
+        Args:
+            radius: The new brush radius.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._main_window.set_canvas_brush_size(radius)
+
+    def _get_context_patches(self, patch):
         &#34;&#34;&#34;
         Get the patches immediately surrounding the current patch and place
-        them in a larger image
+        them in a larger image.
 
-        :param patch: The current patch
-        :returns: A matrix of patches for display
+        Args:
+            patch: The current patch
+
+        Returns:
+            An image for display.
         &#34;&#34;&#34;
 
         # Find the neighbouring patches
         index = patch.patch_index
 
-        if self.context_img is not None:
-            patch = self.image.patches[self.current_patch]
-            r_start = self.patch_offset[0]
+        if self._context_img is not None:
+            patch = self._image.patches[self._current_patch_index]
+            r_start = self._patch_offset[0]
             r_end = r_start + patch.overlay_image.shape[0]
-            c_start = self.patch_offset[1]
+            c_start = self._patch_offset[1]
             c_end = c_start + patch.overlay_image.shape[1]
 
             o_img = patch.overlay_image
             o_img = np.dstack((o_img, np.full(o_img.shape[0:-1],
                                255, dtype=o_img.dtype)))
-            self.logger.debug(&#34;Using cached context image&#34;)
 
-            self.context_img[r_start:r_end, c_start:c_end] = o_img
-            return self.context_img
+            self._context_img[r_start:r_end, c_start:c_end] = o_img
+            return self._context_img
 
         neighbouring_indices = []
 
@@ -1471,12 +1432,10 @@ class UndoManager():
 
         for i in range(start_i, start_i + 3):
 
-            if i &lt; 0 or i &gt;= self.image.NUM_PATCHES:
-                self.logger.debug(&#34;Patch Out Of Bounds&#34;)
+            if i &lt; 0 or i &gt;= self._image.num_patches:
                 continue
             for j in range(start_j, start_j + 3):
-                if j &lt; 0 or j &gt;= self.image.NUM_PATCHES:
-                    self.logger.debug(&#34;Patch Out Of Bounds&#34;)
+                if j &lt; 0 or j &gt;= self._image.num_patches:
                     continue
 
                 neighbouring_indices.append((i, j))
@@ -1490,7 +1449,7 @@ class UndoManager():
 
         # TODO: This could be more efficient I&#39;m sure
         for i in neighbouring_indices:
-            for patch in self.image.patches:
+            for patch in self._image.patches:
                 if patch.patch_index == i:
                     o_img = patch.overlay_image
 
@@ -1522,7 +1481,7 @@ class UndoManager():
             img[r:r+patch.shape[0],
                 c:c+patch.shape[1]] += patch
             if i == drawable_patch_index:
-                self.patch_offset = (r, c)
+                self._patch_offset = (r, c)
 
             col_num += 1
 
@@ -1532,75 +1491,44 @@ class UndoManager():
 
             i += 1
 
-        self.context_img = img
+        self._context_img = img
         return img
 
-    def convert_click_to_image_position(self, click_location):
+    def _update_progressbar(self):
         &#34;&#34;&#34;
-        Convert a click location to coordinates in the image
+        Update the progressbar popup
 
-        :param click_location: (x, y) coords of the click
-        :returns: The corresponding coordinates in the image
+
+        Returns:
+            None
+
+        Postconditions:
+            The progressbar will be incremented.
         &#34;&#34;&#34;
-        click_location = (click_location[0] - self.main_window.image_x,
-                          click_location[1] - self.main_window.image_y)
+        self._main_window.progress_popup.update()
+        self._main_window.load_progress += self._main_window.progress_step
+        self._main_window.load_progress_var\
+            .set(self._main_window.load_progress)
 
-        click_location = (click_location[0] / self.main_window.image_scale,
-                          click_location[1] / self.main_window.image_scale)
+        if self._main_window.load_progress &gt;= self.NUM_PATCHES ** 2:
+            self._main_window.progress_popup.destroy()
 
-        click_location = (click_location[0] - self.patch_offset[1],
-                          click_location[1] - self.patch_offset[0])
-
-        # Make sure we are clicking on the image
-        if click_location[0] &lt; 0 or click_location[1] &lt; 0:
-            return None
-
-        return click_location
-
-    def next_patch(self):
+    def _show_saved_preview(self):
         &#34;&#34;&#34;
-        Increment the current patch and display it
+        Display a preview of the saved mask overlaid with the image.
 
-        :returns: None
+
+        Returns:
+            None
+
+        Postconditions:
+            A window displaying the image and mask is shown.
         &#34;&#34;&#34;
-        self.context_img = None
-        self.undo_manager.clear_undos()
 
-        if self.current_patch &lt; len(self.image.patches)-1:
+        self._previewed = True
 
-            self.current_patch += 1
-            while self.image.patches[self.current_patch].display is False:
-                self.current_patch += 1
-
-            self.display_current_patch()
-        else:
-
-            if self.mask_saved:
-                return
-
-            self.logger.error(&#34;No More Patches&#34;)
-
-            dialog_message = &#34;No More Patches - Would you like to save the&#34; \
-                             &#34; mask?&#34;
-
-            dialog_title = &#34;No More Patches&#34;
-
-            result = tkinter.messagebox.askyesno(title=dialog_title,
-                                                 message=dialog_message)
-            self.logger.debug(result)
-            if result:
-                self.show_saved_preview()
-
-    def show_saved_preview(self):
-        &#34;&#34;&#34;
-        Display a preview of the saved mask
-
-        :returns: None
-        &#34;&#34;&#34;
-        self.previewed = True
-        img = self.image.image
-        self.image.create_mask()
-        mask = self.image.mask
+        img = self._image.image
+        mask = self._image.mask
 
         overlay = segmentation.mark_boundaries(img, mask)
 
@@ -1613,659 +1541,24 @@ class UndoManager():
 
         overlay = overlay[rmin:rmax, cmin:cmax]
 
-        self.main_window.create_annotation_preview(overlay)
+        PreviewWindow(overlay, self, self._main_window.style)
 
-    def prev_patch(self):
+    def _get_image_name_from_path(self, path):
         &#34;&#34;&#34;
-        Decrement the current patch and display it
+        Get the name of the image from its original path.
 
-        :returns: None
+        Args:
+            path: The path to the original image.
+
+        Returns:
+            The name to save the image mask as.
         &#34;&#34;&#34;
-        self.context_img = None
-        self.undo_manager.clear_undos()
+        if os.path.isdir(path):
+            raise ValueError(&#34;Cannot get image name from a directory.&#34;)
 
-        if self.current_patch &gt; 0:
+        basename = os.path.basename(path)
 
-            self.current_patch -= 1
-            while self.image.patches[self.current_patch].display is False:
-                self.current_patch -= 1
-
-            self.display_current_patch()
-
-        else:
-            self.logger.error(&#34;No Previous patches&#34;)
-
-    def change_mode(self, new_mode_id):
-        &#34;&#34;&#34;
-        Change the current editing mode
-
-        :param new_mode_id: The ID of the mode button in the Main Window
-        :returns: None
-        &#34;&#34;&#34;
-        if new_mode_id != self.main_window.ID_TOOL_NO_ROOT:
-            self.main_window.zoom_cursor = False
-            self.main_window.flood_cursor = False
-
-        if new_mode_id == self.main_window.ID_TOOL_THRESH:
-            self.current_mode = Mode.THRESHOLD
-            self.main_window.set_brush_radius(0)
-            patch = self.image.patches[self.current_patch]
-            self.main_window.update_thresh_slider_value(patch.thresh)
-
-        elif new_mode_id == self.main_window.ID_TOOL_ADD:
-            self.current_mode = Mode.ADD_REGION
-            self.main_window.set_brush_radius(self.add_region_radius)
-            self.main_window.update_add_brush_sizer(self.add_region_radius)
-
-        elif new_mode_id == self.main_window.ID_TOOL_REMOVE:
-            self.current_mode = Mode.REMOVE_REGION
-            self.main_window.set_brush_radius(self.remove_region_radius)
-            self.main_window.\
-                update_remove_brush_sizer(self.remove_region_radius)
-
-        elif new_mode_id == self.main_window.ID_TOOL_NO_ROOT:
-            self.no_root_activate()
-
-        elif new_mode_id == self.main_window.ID_TOOL_FLOOD_ADD:
-            self.current_mode = Mode.FLOOD_ADD
-            self.main_window.flood_cursor = True
-            self.flood_add_position = None
-            # self.flood_add_tolerance = 0.05
-            self.main_window.\
-                update_flood_add_slider_value(self.flood_add_tolerance)
-
-        elif new_mode_id == self.main_window.ID_TOOL_FLOOD_REMOVE:
-            self.current_mode = Mode.FLOOD_REMOVE
-            self.main_window.flood_cursor = True
-            self.flood_remove_position = None
-            # self.flood_remove_tolerance = 0.05
-            self.main_window.\
-                update_flood_remove_slider_value(self.flood_remove_tolerance)
-
-        elif new_mode_id == self.main_window.ID_TOOL_ADD_TIP:
-            self.current_mode = Mode.ADD_TIP
-            self.main_window.flood_cursor = True
-
-        elif new_mode_id == self.main_window.ID_TOOL_ADD_BRANCH:
-            self.current_mode = Mode.ADD_BRANCH
-            self.main_window.flood_cursor = True
-
-        elif new_mode_id == self.main_window.ID_TOOL_ADD_CROSS:
-            self.current_mode = Mode.ADD_CROSSING
-            self.main_window.flood_cursor = True
-
-        elif new_mode_id == self.main_window.ID_TOOL_REMOVE_LANDMARK:
-            self.current_mode = Mode.REMOVE_LANDMARK
-            self.main_window.set_brush_radius(self.remove_landmark_radius)
-
-        else:
-            self.logger.error(&#34;Invalid mode change&#34;)
-
-            return False
-
-    def change_secondary_mode(self, new_mode_id):
-        &#34;&#34;&#34;
-        Change the secondary mode (for mouse wheel tool adjustments)
-
-        :param new_mode_id: The id of the new mode
-        :returns: None
-        &#34;&#34;&#34;
-
-        if new_mode_id == self.main_window.ID_TOOL_ZOOM:
-            self.current_secondary_mode = SecondaryMode.ZOOM
-
-        elif new_mode_id == self.main_window.ID_ADJUST_TOOL:
-            self.current_secondary_mode = SecondaryMode.ADJUST_TOOL
-
-    def no_root_activate(self):
-        &#34;&#34;&#34;
-        Set the mask for the patch to zero, there is no root here
-
-        :returns: None
-        &#34;&#34;&#34;
-        patch = self.image.patches[self.current_patch]
-
-        self.undo_manager.add_to_undo_stack(copy.deepcopy(patch), &#39;no_root&#39;)
-
-        patch.clear_mask()
-        patch.overlay_mask()
-
-        self.display_current_patch()
-
-    def handle_mouse_wheel(self, wheel_rotation, x, y):
-        &#34;&#34;&#34;
-        Handle wheel rotation coming from the mouse
-
-        :param wheel_rotation: The wheel rotation
-        :param x: The x-position of the mouse event
-        :param y: The y-position of the mouse event
-        :returns: True on success, False otherwise
-        &#34;&#34;&#34;
-
-        if self.current_secondary_mode == SecondaryMode.ADJUST_TOOL:
-            if self.current_mode == Mode.THRESHOLD:
-
-                self.adjust_threshold(wheel_rotation)
-
-            elif self.current_mode == Mode.ADD_REGION:
-                self.adjust_add_region_brush(wheel_rotation)
-
-            elif self.current_mode == Mode.REMOVE_REGION:
-                self.adjust_remove_region_brush(wheel_rotation)
-
-            elif self.current_mode == Mode.REMOVE_LANDMARK:
-                self.adjust_remove_landmark_brush(wheel_rotation)
-
-            elif self.current_mode == Mode.FLOOD_ADD:
-                self.handle_flood_add_tolerance(wheel_rotation)
-
-            elif self.current_mode == Mode.FLOOD_REMOVE:
-                self.handle_flood_remove_tolerance(wheel_rotation)
-            else:
-                return False
-
-        elif self.current_secondary_mode == SecondaryMode.ZOOM:
-            self.handle_zoom(wheel_rotation, x, y)
-
-        else:
-            self.logger.error(&#34;Invalid mouse wheel rotation&#34;)
-            return False
-
-        return True
-
-    def handle_flood_add_tolerance(self, wheel_rotation):
-        &#34;&#34;&#34;
-        Adjust the current tolerance of the flood_add tool
-
-        :param wheel_rotation: The rotation of the mouse wheel
-        :returns: None
-        &#34;&#34;&#34;
-
-        if self.flood_add_position is None:
-            return
-
-        if wheel_rotation &gt; 0:
-            self.flood_add_tolerance += 0.01
-        elif wheel_rotation &lt; 0:
-            self.flood_add_tolerance -= 0.01
-
-        patch = self.image.patches[self.current_patch]
-
-        patch.flood_add_region(self.flood_add_position,
-                               self.flood_add_tolerance)
-
-        patch.overlay_mask()
-        self.display_current_patch()
-
-    def set_flood_add_tolerance(self, value):
-        &#34;&#34;&#34;
-        Set the current flood add tolerance
-
-        :param value: The value to set it to
-        :returns: None
-        &#34;&#34;&#34;
-
-        if self.flood_add_position is None:
-            return
-
-        self.flood_add_tolerance = value
-
-        patch = self.image.patches[self.current_patch]
-
-        patch.flood_add_region(self.flood_add_position,
-                               self.flood_add_tolerance)
-
-        patch.overlay_mask()
-        self.display_current_patch()
-
-    def handle_flood_remove_tolerance(self, wheel_rotation):
-        &#34;&#34;&#34;
-        Adjust the current tolerance of the flood_remove tool
-
-        :param wheel_rotation: The rotation of the mouse wheel
-        :returns: None
-        &#34;&#34;&#34;
-
-        if self.flood_remove_position is None:
-            return
-
-        if wheel_rotation &gt; 0:
-            self.flood_remove_tolerance += 0.01
-        elif wheel_rotation &lt; 0:
-            self.flood_remove_tolerance -= 0.01
-
-        patch = self.image.patches[self.current_patch]
-
-        patch.flood_remove_region(self.flood_remove_position,
-                                  self.flood_remove_tolerance)
-
-        patch.overlay_mask()
-        self.display_current_patch()
-
-    def set_flood_remove_tolerance(self, value):
-        &#34;&#34;&#34;
-        Set the current flood remove tolerance
-
-        :param value: The value to set it to
-        :returns: None
-        &#34;&#34;&#34;
-
-        if self.flood_remove_position is None:
-            return
-
-        self.flood_remove_tolerance = value
-
-        patch = self.image.patches[self.current_patch]
-
-        patch.flood_remove_region(self.flood_remove_position,
-                                  self.flood_remove_tolerance)
-
-        patch.overlay_mask()
-        self.display_current_patch()
-
-    def handle_zoom(self, wheel_rotation, x, y):
-        &#34;&#34;&#34;
-        Handle zooming with the mouse wheel
-
-        :param wheel_rotation: The roation of the mouse wheel
-        :param x: The x-cooridinate
-        :param y: The y-coordinate
-        :returns: True on success, False otherwise
-        &#34;&#34;&#34;
-
-        old_scale = self.main_window.image_scale
-
-        img_point = (x - self.main_window.image_x,
-                     y - self.main_window.image_y)
-
-        img_point = (img_point[0] / self.main_window.image_scale,
-                     img_point[1] / self.main_window.image_scale)
-
-        if wheel_rotation &gt; 0 and old_scale &lt; self.main_window.MAX_SCALE:
-            self.main_window.image_scale *= self.ZOOM_SCALE
-            new_img_point = (img_point[0] * self.ZOOM_SCALE, img_point[1] *
-                             self.ZOOM_SCALE)
-
-            translation = (new_img_point[0] - img_point[0],
-                           new_img_point[1] - img_point[1])
-
-            self.main_window.image_x -= translation[0]
-            self.main_window.image_y -= translation[1]
-
-        elif wheel_rotation &lt; 0 and old_scale &gt; self.main_window.MIN_SCALE:
-            self.main_window.image_scale /= self.ZOOM_SCALE
-            new_img_point = (img_point[0] / self.ZOOM_SCALE, img_point[1] /
-                             self.ZOOM_SCALE)
-
-            translation = (new_img_point[0] - img_point[0],
-                           new_img_point[1] - img_point[1])
-
-            self.main_window.image_x -= translation[0]
-            self.main_window.image_y -= translation[1]
-
-        else:
-            return False
-
-        self.logger.debug(&#34;Image Scale: {}&#34;.
-                          format(self.main_window.image_scale))
-        self.display_current_patch()
-        return True
-
-    def handle_left_click(self, click_location):
-        &#34;&#34;&#34;
-        Handle a left mouse click at the given location
-
-        :param click_location: The location (x, y) of the click
-        :returns: True on success, False otherwise
-        &#34;&#34;&#34;
-
-        click_location = self.convert_click_to_image_position(click_location)
-
-        if click_location is None:
-            return False
-
-        if self.current_mode == Mode.ADD_REGION:
-            self.logger.debug(&#34;Add region click {}&#34;.format(click_location))
-
-            draw_radius = self.add_region_radius / self.main_window.image_scale
-
-            patch = self.image.patches[self.current_patch]
-
-            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                                &#39;add_region&#39;)
-
-            patch.add_region(click_location, draw_radius)
-
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.REMOVE_REGION:
-            self.logger.debug(&#34;Remove region click&#34;)
-
-            draw_radius = (self.remove_region_radius /
-                           self.main_window.image_scale)
-
-            patch = self.image.patches[self.current_patch]
-
-            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                                &#39;remove_region&#39;)
-
-            patch.remove_region(click_location, draw_radius)
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.ADD_TIP:
-
-            patch = self.image.patches[self.current_patch]
-            patch.add_landmark(click_location, self.add_tip_radius,
-                               self.image.TIP_LABEL)
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.ADD_CROSSING:
-            patch = self.image.patches[self.current_patch]
-            patch.add_landmark(click_location, self.add_cross_radius,
-                               self.image.CROSS_LABEL)
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.ADD_BRANCH:
-            patch = self.image.patches[self.current_patch]
-            patch.add_landmark(click_location, self.add_branch_radius,
-                               self.image.BRANCH_LABEL)
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.REMOVE_LANDMARK:
-            draw_radius = (self.remove_landmark_radius /
-                           self.main_window.image_scale)
-
-            patch = self.image.patches[self.current_patch]
-            patch.remove_landmark(click_location, draw_radius)
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.FLOOD_ADD:
-
-            patch = self.image.patches[self.current_patch]
-
-            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                                &#39;flood_add&#39;)
-
-            patch.flood_add_region(click_location, self.flood_add_tolerance)
-
-            self.flood_add_position = click_location
-
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.FLOOD_REMOVE:
-            patch = self.image.patches[self.current_patch]
-
-            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                                &#39;flood_remove&#39;)
-
-            patch.flood_remove_region(click_location,
-                                      self.flood_remove_tolerance)
-
-            self.flood_remove_position = click_location
-
-            self.display_current_patch()
-
-        else:
-            return False
-
-        return True
-
-    def handle_right_click(self):
-        &#34;&#34;&#34;
-        Called when the right mouse button is clickd
-
-        :returns: None
-        &#34;&#34;&#34;
-        self.logger.debug(&#34;Right click&#34;)
-
-    def handle_left_release(self):
-        &#34;&#34;&#34;
-        Handle the release of the left mouse button
-
-        :returns: True on success, False otherwise
-        &#34;&#34;&#34;
-
-        if self.current_mode == Mode.ADD_REGION:
-            self.logger.debug(&#34;Add region release&#34;)
-            return True
-
-        elif self.current_mode == Mode.REMOVE_REGION:
-            self.logger.debug(&#34;Remove region release&#34;)
-            return True
-        else:
-            return False
-
-    def handle_motion(self, position):
-        &#34;&#34;&#34;
-        Handle motion events of the mouse at the given position
-
-        :param position: The position (x, y) of the mouse during the event
-        :returns: True on success, False otherwise
-        &#34;&#34;&#34;
-        position = self.convert_click_to_image_position(position)
-
-        if position is None:
-            return False
-
-        if self.current_mode == Mode.ADD_REGION:
-            self.logger.debug(&#34;Adding region&#34;)
-
-            draw_radius = self.add_region_radius / self.main_window.image_scale
-
-            patch = self.image.patches[self.current_patch]
-
-            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                                &#39;add_region_adjust&#39;)
-
-            patch.add_region(position, draw_radius)
-
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.REMOVE_REGION:
-            self.logger.debug(&#34;Removing Region&#34;)
-
-            draw_radius = (self.remove_region_radius /
-                           self.main_window.image_scale)
-
-            patch = self.image.patches[self.current_patch]
-
-            self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                                &#39;remove_region_adjust&#39;)
-
-            patch.remove_region(position, draw_radius)
-            self.display_current_patch()
-
-        elif self.current_mode == Mode.REMOVE_LANDMARK:
-            draw_radius = (self.remove_landmark_radius /
-                           self.main_window.image_scale)
-
-            patch = self.image.patches[self.current_patch]
-            patch.remove_landmark(position, draw_radius)
-            self.display_current_patch()
-
-        else:
-            return False
-
-        return True
-
-    def handle_mouse_wheel_motion(self, position):
-        &#34;&#34;&#34;
-        Handle when the mouse wheel is clicked and the mouse is dragged
-
-        :param position: The position of the mouse
-        :returns: None
-        &#34;&#34;&#34;
-
-        if self.current_secondary_mode == SecondaryMode.ZOOM:
-            self.main_window.image_x += (position[0] -
-                                         self.main_window.previous_position[0])
-
-            self.main_window.image_y += (position[1] -
-                                         self.main_window.previous_position[1])
-
-            self.display_current_patch()
-
-    def adjust_threshold(self, wheel_rotation):
-        &#34;&#34;&#34;
-        Adjust the current threshold of the patch mask
-
-        :param wheel_rotation: The rotation of the mouse wheel
-        :returns: None
-        &#34;&#34;&#34;
-
-        patch = self.image.patches[self.current_patch]
-
-        self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                            &#39;threshold_adjust&#39;)
-
-        # Adjust the threshold.  Note that it is inverted, because it feels
-        # more natural to scroll down to &#39;reduce&#39; the region, rather than
-        # reducing the threshold
-        if wheel_rotation &gt; 0 and patch.thresh &gt; 0:
-            patch.thresh -= 0.01
-
-        elif wheel_rotation &lt; 0 and patch.thresh &lt; 1:
-
-            patch.thresh += 0.01
-
-        self.main_window.update_thresh_slider_value(patch.thresh)
-        self.main_window.update_add_brush_sizer(self.add_region_radius)
-        patch.apply_threshold(patch.thresh)
-        patch.overlay_mask()
-
-        self.logger.debug(&#34;Threshold value: {}&#34;.format(patch.thresh))
-        self.display_current_patch()
-
-    def set_threshold(self, value):
-        &#34;&#34;&#34;
-        Set the value of the threshold
-
-        :param value: Value for the threshold
-        :returns: Nonw
-        &#34;&#34;&#34;
-
-        patch = self.image.patches[self.current_patch]
-
-        self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                            &#39;threshold_adjust&#39;)
-
-        patch.thresh = value
-        patch.apply_threshold(patch.thresh)
-        patch.overlay_mask()
-
-        self.display_current_patch()
-
-    def adjust_add_region_brush(self, wheel_rotation):
-        &#34;&#34;&#34;
-        Adjust the size of the region brush
-
-        :param wheel_rotation: The rotation of the mouse wheel
-        :returns: None
-        &#34;&#34;&#34;
-
-        self.logger.debug(&#34;Adjusting add region brush&#34;)
-        if wheel_rotation &gt; 0:
-            self.add_region_radius += 1
-        else:
-            self.add_region_radius -= 1
-
-        self.main_window.update_add_brush_sizer(self.add_region_radius)
-        self.main_window.set_brush_radius(self.add_region_radius)
-        self.main_window.draw_brush()
-
-    def set_add_region_brush(self, value):
-        &#34;&#34;&#34;
-        Set the value of the add region brush size
-
-        :param value: The size
-        :returns: None
-        &#34;&#34;&#34;
-
-        self.add_region_radius = value
-
-        self.main_window.set_brush_radius(self.add_region_radius)
-        self.main_window.draw_brush()
-
-    def adjust_remove_landmark_brush(self, wheel_rotation):
-        &#34;&#34;&#34;
-        Adjust the size of the remove landmark brush
-
-        :param wheel_rotation: The rotation of the mouse wheel
-        :returns: None
-        &#34;&#34;&#34;
-
-        if wheel_rotation &gt; 0:
-            self.remove_landmark_radius += 1
-        else:
-            self.remove_landmark_radius -= 1
-
-        self.main_window.set_brush_radius(self.remove_landmark_radius)
-        self.main_window.draw_brush()
-
-    def adjust_remove_region_brush(self, wheel_rotation):
-        &#34;&#34;&#34;
-        Adjust the size of the remove region brush
-
-        :param wheel_rotation: the rotation of the mouse wheel
-        :returns: None
-        &#34;&#34;&#34;
-
-        self.logger.debug(&#34;Adjusting the remove region brush&#34;)
-        if wheel_rotation &gt; 0:
-            self.remove_region_radius += 1
-        else:
-            self.remove_region_radius -= 1
-
-        self.main_window.update_remove_brush_sizer(self.remove_region_radius)
-        self.main_window.set_brush_radius(self.remove_region_radius)
-        self.main_window.draw_brush()
-
-    def set_remove_region_brush(self, value):
-        &#34;&#34;&#34;
-        Set the value of the remove region brush size
-
-        :param value: The value
-        :returns: None
-        &#34;&#34;&#34;
-        self.remove_region_radius = value
-
-        self.main_window.set_brush_radius(self.remove_region_radius)
-        self.main_window.draw_brush()
-
-    def undo(self):
-
-        patch = self.image.patches[self.current_patch]
-
-        redo_patch, operation = self.undo_manager.undo()
-
-        if redo_patch is None:
-            return
-
-        self.undo_manager.add_to_redo_stack(patch, operation)
-        self.main_window.toolbar_buttons[self.main_window.ID_TOOL_REDO]\
-            .config(state=&#34;normal&#34;)
-
-        self.image.patches[self.current_patch] = redo_patch
-
-        self.display_current_patch()
-
-    def redo(self):
-
-        patch = self.image.patches[self.current_patch]
-
-        undo_patch, operation = self.undo_manager.redo()
-
-        if undo_patch is None:
-            return
-
-        self.undo_manager.add_to_undo_stack(patch, operation)
-        if len(self.undo_manager.redo_stack) == 0:
-            self.main_window.toolbar_buttons[self.main_window.ID_TOOL_REDO]\
-                .config(state=&#34;disabled&#34;)
-
-        self.image.patches[self.current_patch] = undo_patch
-
-        self.display_current_patch()</code></pre>
+        return os.path.splitext(basename)[0] + &#39;_mask.png&#39;</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -2273,1733 +1566,423 @@ class UndoManager():
 <dd>
 <div class="desc"></div>
 </dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.ZOOM_SCALE"><code class="name">var <span class="ident">ZOOM_SCALE</span></code></dt>
+<dt id="friendly_ground_truth.controller.controller.Controller.NUM_PATCHES"><code class="name">var <span class="ident">NUM_PATCHES</span></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 </dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.controller.Controller.image_tools"><code class="name">var <span class="ident">image_tools</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def image_tools(self):
+    return self._image_tools</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
-<dt id="friendly_ground_truth.controller.controller.Controller.adjust_add_region_brush"><code class="name flex">
-<span>def <span class="ident">adjust_add_region_brush</span></span>(<span>self, wheel_rotation)</span>
+<dt id="friendly_ground_truth.controller.controller.Controller.activate_tool"><code class="name flex">
+<span>def <span class="ident">activate_tool</span></span>(<span>self, id)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Adjust the size of the region brush</p>
-<p>:param wheel_rotation: The rotation of the mouse wheel
-:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def adjust_add_region_brush(self, wheel_rotation):
-    &#34;&#34;&#34;
-    Adjust the size of the region brush
-
-    :param wheel_rotation: The rotation of the mouse wheel
-    :returns: None
-    &#34;&#34;&#34;
-
-    self.logger.debug(&#34;Adjusting add region brush&#34;)
-    if wheel_rotation &gt; 0:
-        self.add_region_radius += 1
-    else:
-        self.add_region_radius -= 1
-
-    self.main_window.update_add_brush_sizer(self.add_region_radius)
-    self.main_window.set_brush_radius(self.add_region_radius)
-    self.main_window.draw_brush()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.adjust_remove_landmark_brush"><code class="name flex">
-<span>def <span class="ident">adjust_remove_landmark_brush</span></span>(<span>self, wheel_rotation)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Adjust the size of the remove landmark brush</p>
-<p>:param wheel_rotation: The rotation of the mouse wheel
-:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def adjust_remove_landmark_brush(self, wheel_rotation):
-    &#34;&#34;&#34;
-    Adjust the size of the remove landmark brush
-
-    :param wheel_rotation: The rotation of the mouse wheel
-    :returns: None
-    &#34;&#34;&#34;
-
-    if wheel_rotation &gt; 0:
-        self.remove_landmark_radius += 1
-    else:
-        self.remove_landmark_radius -= 1
-
-    self.main_window.set_brush_radius(self.remove_landmark_radius)
-    self.main_window.draw_brush()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.adjust_remove_region_brush"><code class="name flex">
-<span>def <span class="ident">adjust_remove_region_brush</span></span>(<span>self, wheel_rotation)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Adjust the size of the remove region brush</p>
-<p>:param wheel_rotation: the rotation of the mouse wheel
-:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def adjust_remove_region_brush(self, wheel_rotation):
-    &#34;&#34;&#34;
-    Adjust the size of the remove region brush
-
-    :param wheel_rotation: the rotation of the mouse wheel
-    :returns: None
-    &#34;&#34;&#34;
-
-    self.logger.debug(&#34;Adjusting the remove region brush&#34;)
-    if wheel_rotation &gt; 0:
-        self.remove_region_radius += 1
-    else:
-        self.remove_region_radius -= 1
-
-    self.main_window.update_remove_brush_sizer(self.remove_region_radius)
-    self.main_window.set_brush_radius(self.remove_region_radius)
-    self.main_window.draw_brush()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.adjust_threshold"><code class="name flex">
-<span>def <span class="ident">adjust_threshold</span></span>(<span>self, wheel_rotation)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Adjust the current threshold of the patch mask</p>
-<p>:param wheel_rotation: The rotation of the mouse wheel
-:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def adjust_threshold(self, wheel_rotation):
-    &#34;&#34;&#34;
-    Adjust the current threshold of the patch mask
-
-    :param wheel_rotation: The rotation of the mouse wheel
-    :returns: None
-    &#34;&#34;&#34;
-
-    patch = self.image.patches[self.current_patch]
-
-    self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                        &#39;threshold_adjust&#39;)
-
-    # Adjust the threshold.  Note that it is inverted, because it feels
-    # more natural to scroll down to &#39;reduce&#39; the region, rather than
-    # reducing the threshold
-    if wheel_rotation &gt; 0 and patch.thresh &gt; 0:
-        patch.thresh -= 0.01
-
-    elif wheel_rotation &lt; 0 and patch.thresh &lt; 1:
-
-        patch.thresh += 0.01
-
-    self.main_window.update_thresh_slider_value(patch.thresh)
-    self.main_window.update_add_brush_sizer(self.add_region_radius)
-    patch.apply_threshold(patch.thresh)
-    patch.overlay_mask()
-
-    self.logger.debug(&#34;Threshold value: {}&#34;.format(patch.thresh))
-    self.display_current_patch()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.change_mode"><code class="name flex">
-<span>def <span class="ident">change_mode</span></span>(<span>self, new_mode_id)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Change the current editing mode</p>
-<p>:param new_mode_id: The ID of the mode button in the Main Window
-:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def change_mode(self, new_mode_id):
-    &#34;&#34;&#34;
-    Change the current editing mode
-
-    :param new_mode_id: The ID of the mode button in the Main Window
-    :returns: None
-    &#34;&#34;&#34;
-    if new_mode_id != self.main_window.ID_TOOL_NO_ROOT:
-        self.main_window.zoom_cursor = False
-        self.main_window.flood_cursor = False
-
-    if new_mode_id == self.main_window.ID_TOOL_THRESH:
-        self.current_mode = Mode.THRESHOLD
-        self.main_window.set_brush_radius(0)
-        patch = self.image.patches[self.current_patch]
-        self.main_window.update_thresh_slider_value(patch.thresh)
-
-    elif new_mode_id == self.main_window.ID_TOOL_ADD:
-        self.current_mode = Mode.ADD_REGION
-        self.main_window.set_brush_radius(self.add_region_radius)
-        self.main_window.update_add_brush_sizer(self.add_region_radius)
-
-    elif new_mode_id == self.main_window.ID_TOOL_REMOVE:
-        self.current_mode = Mode.REMOVE_REGION
-        self.main_window.set_brush_radius(self.remove_region_radius)
-        self.main_window.\
-            update_remove_brush_sizer(self.remove_region_radius)
-
-    elif new_mode_id == self.main_window.ID_TOOL_NO_ROOT:
-        self.no_root_activate()
-
-    elif new_mode_id == self.main_window.ID_TOOL_FLOOD_ADD:
-        self.current_mode = Mode.FLOOD_ADD
-        self.main_window.flood_cursor = True
-        self.flood_add_position = None
-        # self.flood_add_tolerance = 0.05
-        self.main_window.\
-            update_flood_add_slider_value(self.flood_add_tolerance)
-
-    elif new_mode_id == self.main_window.ID_TOOL_FLOOD_REMOVE:
-        self.current_mode = Mode.FLOOD_REMOVE
-        self.main_window.flood_cursor = True
-        self.flood_remove_position = None
-        # self.flood_remove_tolerance = 0.05
-        self.main_window.\
-            update_flood_remove_slider_value(self.flood_remove_tolerance)
-
-    elif new_mode_id == self.main_window.ID_TOOL_ADD_TIP:
-        self.current_mode = Mode.ADD_TIP
-        self.main_window.flood_cursor = True
-
-    elif new_mode_id == self.main_window.ID_TOOL_ADD_BRANCH:
-        self.current_mode = Mode.ADD_BRANCH
-        self.main_window.flood_cursor = True
-
-    elif new_mode_id == self.main_window.ID_TOOL_ADD_CROSS:
-        self.current_mode = Mode.ADD_CROSSING
-        self.main_window.flood_cursor = True
-
-    elif new_mode_id == self.main_window.ID_TOOL_REMOVE_LANDMARK:
-        self.current_mode = Mode.REMOVE_LANDMARK
-        self.main_window.set_brush_radius(self.remove_landmark_radius)
-
-    else:
-        self.logger.error(&#34;Invalid mode change&#34;)
-
-        return False</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.change_secondary_mode"><code class="name flex">
-<span>def <span class="ident">change_secondary_mode</span></span>(<span>self, new_mode_id)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Change the secondary mode (for mouse wheel tool adjustments)</p>
-<p>:param new_mode_id: The id of the new mode
-:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def change_secondary_mode(self, new_mode_id):
-    &#34;&#34;&#34;
-    Change the secondary mode (for mouse wheel tool adjustments)
-
-    :param new_mode_id: The id of the new mode
-    :returns: None
-    &#34;&#34;&#34;
-
-    if new_mode_id == self.main_window.ID_TOOL_ZOOM:
-        self.current_secondary_mode = SecondaryMode.ZOOM
-
-    elif new_mode_id == self.main_window.ID_ADJUST_TOOL:
-        self.current_secondary_mode = SecondaryMode.ADJUST_TOOL</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.convert_click_to_image_position"><code class="name flex">
-<span>def <span class="ident">convert_click_to_image_position</span></span>(<span>self, click_location)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Convert a click location to coordinates in the image</p>
-<p>:param click_location: (x, y) coords of the click
-:returns: The corresponding coordinates in the image</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def convert_click_to_image_position(self, click_location):
-    &#34;&#34;&#34;
-    Convert a click location to coordinates in the image
-
-    :param click_location: (x, y) coords of the click
-    :returns: The corresponding coordinates in the image
-    &#34;&#34;&#34;
-    click_location = (click_location[0] - self.main_window.image_x,
-                      click_location[1] - self.main_window.image_y)
-
-    click_location = (click_location[0] / self.main_window.image_scale,
-                      click_location[1] / self.main_window.image_scale)
-
-    click_location = (click_location[0] - self.patch_offset[1],
-                      click_location[1] - self.patch_offset[0])
-
-    # Make sure we are clicking on the image
-    if click_location[0] &lt; 0 or click_location[1] &lt; 0:
-        return None
-
-    return click_location</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.display_current_patch"><code class="name flex">
-<span>def <span class="ident">display_current_patch</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Display the current patch to be displayed</p>
-<p>:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def display_current_patch(self):
-    &#34;&#34;&#34;
-    Display the current patch to be displayed
-
-    :returns: None
-    &#34;&#34;&#34;
-    if self.image is None:
-        return
-
-    patch = self.image.patches[self.current_patch]
-    img = self.get_context_patches(patch)
-
-    self.main_window.update_tool = False
-    self.main_window.update_thresh_slider_value(patch.thresh)
-    self.main_window.update_add_brush_sizer(self.add_region_radius)
-    self.main_window.update_remove_brush_sizer(self.remove_region_radius)
-    self.main_window.\
-        update_flood_add_slider_value(self.flood_add_tolerance)
-    self.main_window.\
-        update_flood_remove_slider_value(self.flood_remove_tolerance)
-    self.main_window.set_brush_radius
-    self.main_window.show_image(img)</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.get_context_patches"><code class="name flex">
-<span>def <span class="ident">get_context_patches</span></span>(<span>self, patch)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get the patches immediately surrounding the current patch and place
-them in a larger image</p>
-<p>:param patch: The current patch
-:returns: A matrix of patches for display</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_context_patches(self, patch):
-    &#34;&#34;&#34;
-    Get the patches immediately surrounding the current patch and place
-    them in a larger image
-
-    :param patch: The current patch
-    :returns: A matrix of patches for display
-    &#34;&#34;&#34;
-
-    # Find the neighbouring patches
-    index = patch.patch_index
-
-    if self.context_img is not None:
-        patch = self.image.patches[self.current_patch]
-        r_start = self.patch_offset[0]
-        r_end = r_start + patch.overlay_image.shape[0]
-        c_start = self.patch_offset[1]
-        c_end = c_start + patch.overlay_image.shape[1]
-
-        o_img = patch.overlay_image
-        o_img = np.dstack((o_img, np.full(o_img.shape[0:-1],
-                           255, dtype=o_img.dtype)))
-        self.logger.debug(&#34;Using cached context image&#34;)
-
-        self.context_img[r_start:r_end, c_start:c_end] = o_img
-        return self.context_img
-
-    neighbouring_indices = []
-
-    start_i = index[0] - 1
-    start_j = index[1] - 1
-
-    num_rows = 0
-    num_cols = 0
-
-    for i in range(start_i, start_i + 3):
-
-        if i &lt; 0 or i &gt;= self.image.NUM_PATCHES:
-            self.logger.debug(&#34;Patch Out Of Bounds&#34;)
-            continue
-        for j in range(start_j, start_j + 3):
-            if j &lt; 0 or j &gt;= self.image.NUM_PATCHES:
-                self.logger.debug(&#34;Patch Out Of Bounds&#34;)
-                continue
-
-            neighbouring_indices.append((i, j))
-
-            if num_rows == 0:
-                num_cols += 1
-        num_rows += 1
-
-    neighbouring_patches = []
-    drawable_patch_index = None  # Index of our patch in this list
-
-    # TODO: This could be more efficient I&#39;m sure
-    for i in neighbouring_indices:
-        for patch in self.image.patches:
-            if patch.patch_index == i:
-                o_img = patch.overlay_image
-
-                if i == index:
-                    o_img = np.dstack((o_img, np.full(o_img.shape[0:-1],
-                                       255,
-                                       dtype=o_img.dtype)))
-                    drawable_patch_index = neighbouring_indices.index(i)
-                else:
-                    o_img = np.dstack((o_img, np.full(o_img.shape[0:-1],
-                                       self.CONTEXT_TRANSPARENCY,
-                                       dtype=o_img.dtype)))
-
-                neighbouring_patches.append(o_img)
-
-    # Layer them into a numpy array
-    img_shape = (patch.overlay_image.shape[0] * num_rows,
-                 patch.overlay_image.shape[1] * num_cols, 4)
-    img = np.zeros(img_shape, dtype=np.ubyte)
-
-    col_num = 0
-    row_num = 0
-
-    i = 0
-    for patch in neighbouring_patches:
-        r, c = row_num, col_num
-        r = r * patch.shape[0]
-        c = c * patch.shape[1]
-        img[r:r+patch.shape[0],
-            c:c+patch.shape[1]] += patch
-        if i == drawable_patch_index:
-            self.patch_offset = (r, c)
-
-        col_num += 1
-
-        if col_num == num_cols:
-            col_num = 0
-            row_num += 1
-
-        i += 1
-
-    self.context_img = img
-    return img</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.get_image_name_from_path"><code class="name flex">
-<span>def <span class="ident">get_image_name_from_path</span></span>(<span>self, path)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get the filename from the image to use for saving the mask</p>
+<div class="desc"><p>Activate the given tool id.</p>
 <h2 id="args">Args</h2>
 <dl>
-<dt><strong><code>path</code></strong></dt>
-<dd>The path to the original image</dd>
+<dt><strong><code>id</code></strong></dt>
+<dd>The id of the tool.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
-<dt><code>The new filename for the mask</code></dt>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="postcondition">Postcondition</h2>
+<p>The current tool is set to the tool matching the id
+Any activation functionality of the tool is performed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def activate_tool(self, id):
+    &#34;&#34;&#34;
+    Activate the given tool id.
+
+    Args:
+        id: The id of the tool.
+
+    Returns:
+        None
+
+    Postcondition:
+        The current tool is set to the tool matching the id
+        Any activation functionality of the tool is performed.
+    &#34;&#34;&#34;
+    if self._image is None:
+        return
+
+    tool = self.image_tools[id]
+    tool.image = self._image
+    tool.patch = self._image.patches[self._current_patch_index]
+
+    old_tool = None
+
+    if not tool.persistant:
+        old_tool = self._current_tool
+
+    self._current_tool = tool
+
+    tool.on_activate(self._current_patch_index)
+
+    if old_tool is not None:
+        self._current_tool = old_tool
+        tool = old_tool
+
+    tool.lock_undos()
+    # self._display_current_patch()
+    self._main_window.update_info_panel(tool)
+    self._main_window.set_canvas_cursor(tool.cursor)
+    tool.unlock_undos()
+
+    if not self._undo_manager.undo_empty:
+        self._main_window.enable_button(self._undo_id)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.controller.Controller.adjust_tool"><code class="name flex">
+<span>def <span class="ident">adjust_tool</span></span>(<span>self, direction)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adjust the current tool.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>direction</code></strong></dt>
+<dd>An integer, positive is up, negative is down.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_image_name_from_path(self, path):
+<pre><code class="python">def adjust_tool(self, direction):
     &#34;&#34;&#34;
-    Get the filename from the image to use for saving the mask
+    Adjust the current tool.
 
     Args:
-        path: The path to the original image
+        direction: An integer, positive is up, negative is down.
+
     Returns:
-        The new filename for the mask
+        None
     &#34;&#34;&#34;
+    self._current_tool.on_adjust(direction)
+    # self._display_current_patch()
 
-    if os.path.isdir(path):
-        raise ValueError(&#34;Cannot get image name from a directory.&#34;)
-
-    basename = os.path.basename(path)
-    return os.path.splitext(basename)[0] + &#39;_mask.png&#39;</code></pre>
+    if not self._undo_manager.undo_empty:
+        self._main_window.enable_button(self._undo_id)</code></pre>
 </details>
 </dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.get_landmark_name_from_path"><code class="name flex">
-<span>def <span class="ident">get_landmark_name_from_path</span></span>(<span>self, path)</span>
+<dt id="friendly_ground_truth.controller.controller.Controller.click_event"><code class="name flex">
+<span>def <span class="ident">click_event</span></span>(<span>self, pos)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get the name of the landmark matrix to use for saving</p>
-<p>:param path: The path to the original image
-:returns: The new filename for the mask</p></div>
+<div class="desc"><p>A click event in the main window has occured.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>pos</code></strong></dt>
+<dd>The position of the event.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_landmark_name_from_path(self, path):
+<pre><code class="python">def click_event(self, pos):
     &#34;&#34;&#34;
-    Get the name of the landmark matrix to use for saving
+    A click event in the main window has occured.
 
-    :param path: The path to the original image
-    :returns: The new filename for the mask
+    Args:
+        pos: The position of the event.
+
+    Returns:
+        None
     &#34;&#34;&#34;
+    # Correct for offset in context image
+    pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
 
-    if os.path.isdir(path):
-        raise ValueError(&#34;Cannot get image name from a directory&#34;)
+    # Need to invert the position, because tkinter coords are backward from
+    # skimage
+    pos = round(pos[1]-1), round(pos[0]-1)
 
-    basename = os.path.basename(path)
-    return os.path.splitext(basename)[0] + &#39;_labels.npy&#39;</code></pre>
+    self._logger.debug(&#34;Click Event: {}&#34;.format(pos))
+
+    if self._current_tool is not None:
+        self._current_tool.on_click(pos)
+
+    if not self._undo_manager.undo_empty:
+        self._main_window.enable_button(self._undo_id)</code></pre>
 </details>
 </dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.handle_flood_add_tolerance"><code class="name flex">
-<span>def <span class="ident">handle_flood_add_tolerance</span></span>(<span>self, wheel_rotation)</span>
+<dt id="friendly_ground_truth.controller.controller.Controller.drag_event"><code class="name flex">
+<span>def <span class="ident">drag_event</span></span>(<span>self, pos)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Adjust the current tolerance of the flood_add tool</p>
-<p>:param wheel_rotation: The rotation of the mouse wheel
-:returns: None</p></div>
+<div class="desc"><p>A click event in the main window has occured/</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>pos</code></strong></dt>
+<dd>The position of the event.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def handle_flood_add_tolerance(self, wheel_rotation):
+<pre><code class="python">def drag_event(self, pos):
     &#34;&#34;&#34;
-    Adjust the current tolerance of the flood_add tool
+    A click event in the main window has occured/
 
-    :param wheel_rotation: The rotation of the mouse wheel
-    :returns: None
+    Args:
+        pos: The position of the event.
+
+    Returns:
+        None
     &#34;&#34;&#34;
+    # Correct for offset in context image
+    pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
 
-    if self.flood_add_position is None:
-        return
+    # Need to invert the position, because tkinter coords are backward from
+    # skimage
+    pos = round(pos[1]-1), round(pos[0]-1)
 
-    if wheel_rotation &gt; 0:
-        self.flood_add_tolerance += 0.01
-    elif wheel_rotation &lt; 0:
-        self.flood_add_tolerance -= 0.01
+    self._current_tool.on_drag(pos)
 
-    patch = self.image.patches[self.current_patch]
-
-    patch.flood_add_region(self.flood_add_position,
-                           self.flood_add_tolerance)
-
-    patch.overlay_mask()
-    self.display_current_patch()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.handle_flood_remove_tolerance"><code class="name flex">
-<span>def <span class="ident">handle_flood_remove_tolerance</span></span>(<span>self, wheel_rotation)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Adjust the current tolerance of the flood_remove tool</p>
-<p>:param wheel_rotation: The rotation of the mouse wheel
-:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def handle_flood_remove_tolerance(self, wheel_rotation):
-    &#34;&#34;&#34;
-    Adjust the current tolerance of the flood_remove tool
-
-    :param wheel_rotation: The rotation of the mouse wheel
-    :returns: None
-    &#34;&#34;&#34;
-
-    if self.flood_remove_position is None:
-        return
-
-    if wheel_rotation &gt; 0:
-        self.flood_remove_tolerance += 0.01
-    elif wheel_rotation &lt; 0:
-        self.flood_remove_tolerance -= 0.01
-
-    patch = self.image.patches[self.current_patch]
-
-    patch.flood_remove_region(self.flood_remove_position,
-                              self.flood_remove_tolerance)
-
-    patch.overlay_mask()
-    self.display_current_patch()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.handle_left_click"><code class="name flex">
-<span>def <span class="ident">handle_left_click</span></span>(<span>self, click_location)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Handle a left mouse click at the given location</p>
-<p>:param click_location: The location (x, y) of the click
-:returns: True on success, False otherwise</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def handle_left_click(self, click_location):
-    &#34;&#34;&#34;
-    Handle a left mouse click at the given location
-
-    :param click_location: The location (x, y) of the click
-    :returns: True on success, False otherwise
-    &#34;&#34;&#34;
-
-    click_location = self.convert_click_to_image_position(click_location)
-
-    if click_location is None:
-        return False
-
-    if self.current_mode == Mode.ADD_REGION:
-        self.logger.debug(&#34;Add region click {}&#34;.format(click_location))
-
-        draw_radius = self.add_region_radius / self.main_window.image_scale
-
-        patch = self.image.patches[self.current_patch]
-
-        self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                            &#39;add_region&#39;)
-
-        patch.add_region(click_location, draw_radius)
-
-        self.display_current_patch()
-
-    elif self.current_mode == Mode.REMOVE_REGION:
-        self.logger.debug(&#34;Remove region click&#34;)
-
-        draw_radius = (self.remove_region_radius /
-                       self.main_window.image_scale)
-
-        patch = self.image.patches[self.current_patch]
-
-        self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                            &#39;remove_region&#39;)
-
-        patch.remove_region(click_location, draw_radius)
-        self.display_current_patch()
-
-    elif self.current_mode == Mode.ADD_TIP:
-
-        patch = self.image.patches[self.current_patch]
-        patch.add_landmark(click_location, self.add_tip_radius,
-                           self.image.TIP_LABEL)
-        self.display_current_patch()
-
-    elif self.current_mode == Mode.ADD_CROSSING:
-        patch = self.image.patches[self.current_patch]
-        patch.add_landmark(click_location, self.add_cross_radius,
-                           self.image.CROSS_LABEL)
-        self.display_current_patch()
-
-    elif self.current_mode == Mode.ADD_BRANCH:
-        patch = self.image.patches[self.current_patch]
-        patch.add_landmark(click_location, self.add_branch_radius,
-                           self.image.BRANCH_LABEL)
-        self.display_current_patch()
-
-    elif self.current_mode == Mode.REMOVE_LANDMARK:
-        draw_radius = (self.remove_landmark_radius /
-                       self.main_window.image_scale)
-
-        patch = self.image.patches[self.current_patch]
-        patch.remove_landmark(click_location, draw_radius)
-        self.display_current_patch()
-
-    elif self.current_mode == Mode.FLOOD_ADD:
-
-        patch = self.image.patches[self.current_patch]
-
-        self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                            &#39;flood_add&#39;)
-
-        patch.flood_add_region(click_location, self.flood_add_tolerance)
-
-        self.flood_add_position = click_location
-
-        self.display_current_patch()
-
-    elif self.current_mode == Mode.FLOOD_REMOVE:
-        patch = self.image.patches[self.current_patch]
-
-        self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                            &#39;flood_remove&#39;)
-
-        patch.flood_remove_region(click_location,
-                                  self.flood_remove_tolerance)
-
-        self.flood_remove_position = click_location
-
-        self.display_current_patch()
-
-    else:
-        return False
-
-    return True</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.handle_left_release"><code class="name flex">
-<span>def <span class="ident">handle_left_release</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Handle the release of the left mouse button</p>
-<p>:returns: True on success, False otherwise</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def handle_left_release(self):
-    &#34;&#34;&#34;
-    Handle the release of the left mouse button
-
-    :returns: True on success, False otherwise
-    &#34;&#34;&#34;
-
-    if self.current_mode == Mode.ADD_REGION:
-        self.logger.debug(&#34;Add region release&#34;)
-        return True
-
-    elif self.current_mode == Mode.REMOVE_REGION:
-        self.logger.debug(&#34;Remove region release&#34;)
-        return True
-    else:
-        return False</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.handle_motion"><code class="name flex">
-<span>def <span class="ident">handle_motion</span></span>(<span>self, position)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Handle motion events of the mouse at the given position</p>
-<p>:param position: The position (x, y) of the mouse during the event
-:returns: True on success, False otherwise</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def handle_motion(self, position):
-    &#34;&#34;&#34;
-    Handle motion events of the mouse at the given position
-
-    :param position: The position (x, y) of the mouse during the event
-    :returns: True on success, False otherwise
-    &#34;&#34;&#34;
-    position = self.convert_click_to_image_position(position)
-
-    if position is None:
-        return False
-
-    if self.current_mode == Mode.ADD_REGION:
-        self.logger.debug(&#34;Adding region&#34;)
-
-        draw_radius = self.add_region_radius / self.main_window.image_scale
-
-        patch = self.image.patches[self.current_patch]
-
-        self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                            &#39;add_region_adjust&#39;)
-
-        patch.add_region(position, draw_radius)
-
-        self.display_current_patch()
-
-    elif self.current_mode == Mode.REMOVE_REGION:
-        self.logger.debug(&#34;Removing Region&#34;)
-
-        draw_radius = (self.remove_region_radius /
-                       self.main_window.image_scale)
-
-        patch = self.image.patches[self.current_patch]
-
-        self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                            &#39;remove_region_adjust&#39;)
-
-        patch.remove_region(position, draw_radius)
-        self.display_current_patch()
-
-    elif self.current_mode == Mode.REMOVE_LANDMARK:
-        draw_radius = (self.remove_landmark_radius /
-                       self.main_window.image_scale)
-
-        patch = self.image.patches[self.current_patch]
-        patch.remove_landmark(position, draw_radius)
-        self.display_current_patch()
-
-    else:
-        return False
-
-    return True</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.handle_mouse_wheel"><code class="name flex">
-<span>def <span class="ident">handle_mouse_wheel</span></span>(<span>self, wheel_rotation, x, y)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Handle wheel rotation coming from the mouse</p>
-<p>:param wheel_rotation: The wheel rotation
-:param x: The x-position of the mouse event
-:param y: The y-position of the mouse event
-:returns: True on success, False otherwise</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def handle_mouse_wheel(self, wheel_rotation, x, y):
-    &#34;&#34;&#34;
-    Handle wheel rotation coming from the mouse
-
-    :param wheel_rotation: The wheel rotation
-    :param x: The x-position of the mouse event
-    :param y: The y-position of the mouse event
-    :returns: True on success, False otherwise
-    &#34;&#34;&#34;
-
-    if self.current_secondary_mode == SecondaryMode.ADJUST_TOOL:
-        if self.current_mode == Mode.THRESHOLD:
-
-            self.adjust_threshold(wheel_rotation)
-
-        elif self.current_mode == Mode.ADD_REGION:
-            self.adjust_add_region_brush(wheel_rotation)
-
-        elif self.current_mode == Mode.REMOVE_REGION:
-            self.adjust_remove_region_brush(wheel_rotation)
-
-        elif self.current_mode == Mode.REMOVE_LANDMARK:
-            self.adjust_remove_landmark_brush(wheel_rotation)
-
-        elif self.current_mode == Mode.FLOOD_ADD:
-            self.handle_flood_add_tolerance(wheel_rotation)
-
-        elif self.current_mode == Mode.FLOOD_REMOVE:
-            self.handle_flood_remove_tolerance(wheel_rotation)
-        else:
-            return False
-
-    elif self.current_secondary_mode == SecondaryMode.ZOOM:
-        self.handle_zoom(wheel_rotation, x, y)
-
-    else:
-        self.logger.error(&#34;Invalid mouse wheel rotation&#34;)
-        return False
-
-    return True</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.handle_mouse_wheel_motion"><code class="name flex">
-<span>def <span class="ident">handle_mouse_wheel_motion</span></span>(<span>self, position)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Handle when the mouse wheel is clicked and the mouse is dragged</p>
-<p>:param position: The position of the mouse
-:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def handle_mouse_wheel_motion(self, position):
-    &#34;&#34;&#34;
-    Handle when the mouse wheel is clicked and the mouse is dragged
-
-    :param position: The position of the mouse
-    :returns: None
-    &#34;&#34;&#34;
-
-    if self.current_secondary_mode == SecondaryMode.ZOOM:
-        self.main_window.image_x += (position[0] -
-                                     self.main_window.previous_position[0])
-
-        self.main_window.image_y += (position[1] -
-                                     self.main_window.previous_position[1])
-
-        self.display_current_patch()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.handle_right_click"><code class="name flex">
-<span>def <span class="ident">handle_right_click</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Called when the right mouse button is clickd</p>
-<p>:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def handle_right_click(self):
-    &#34;&#34;&#34;
-    Called when the right mouse button is clickd
-
-    :returns: None
-    &#34;&#34;&#34;
-    self.logger.debug(&#34;Right click&#34;)</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.handle_zoom"><code class="name flex">
-<span>def <span class="ident">handle_zoom</span></span>(<span>self, wheel_rotation, x, y)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Handle zooming with the mouse wheel</p>
-<p>:param wheel_rotation: The roation of the mouse wheel
-:param x: The x-cooridinate
-:param y: The y-coordinate
-:returns: True on success, False otherwise</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def handle_zoom(self, wheel_rotation, x, y):
-    &#34;&#34;&#34;
-    Handle zooming with the mouse wheel
-
-    :param wheel_rotation: The roation of the mouse wheel
-    :param x: The x-cooridinate
-    :param y: The y-coordinate
-    :returns: True on success, False otherwise
-    &#34;&#34;&#34;
-
-    old_scale = self.main_window.image_scale
-
-    img_point = (x - self.main_window.image_x,
-                 y - self.main_window.image_y)
-
-    img_point = (img_point[0] / self.main_window.image_scale,
-                 img_point[1] / self.main_window.image_scale)
-
-    if wheel_rotation &gt; 0 and old_scale &lt; self.main_window.MAX_SCALE:
-        self.main_window.image_scale *= self.ZOOM_SCALE
-        new_img_point = (img_point[0] * self.ZOOM_SCALE, img_point[1] *
-                         self.ZOOM_SCALE)
-
-        translation = (new_img_point[0] - img_point[0],
-                       new_img_point[1] - img_point[1])
-
-        self.main_window.image_x -= translation[0]
-        self.main_window.image_y -= translation[1]
-
-    elif wheel_rotation &lt; 0 and old_scale &gt; self.main_window.MIN_SCALE:
-        self.main_window.image_scale /= self.ZOOM_SCALE
-        new_img_point = (img_point[0] / self.ZOOM_SCALE, img_point[1] /
-                         self.ZOOM_SCALE)
-
-        translation = (new_img_point[0] - img_point[0],
-                       new_img_point[1] - img_point[1])
-
-        self.main_window.image_x -= translation[0]
-        self.main_window.image_y -= translation[1]
-
-    else:
-        return False
-
-    self.logger.debug(&#34;Image Scale: {}&#34;.
-                      format(self.main_window.image_scale))
-    self.display_current_patch()
-    return True</code></pre>
+    if not self._undo_manager.undo_empty:
+        self._main_window.enable_button(self._undo_id)</code></pre>
 </details>
 </dd>
 <dt id="friendly_ground_truth.controller.controller.Controller.load_new_image"><code class="name flex">
 <span>def <span class="ident">load_new_image</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Called when the user wants to load a new image to open a file
-browser dialogue and get the image path</p>
-<p>:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def load_new_image(self):
-    &#34;&#34;&#34;
-    Called when the user wants to load a new image to open a file
-    browser dialogue and get the image path
-
-    :returns: None
-    &#34;&#34;&#34;
-    self.context_img = None
-    self.logger.debug(&#34;Opening load file dialog&#34;)
-    filetypes = [(&#34;TIF Files&#34;, &#34;*.tif&#34;), (&#34;TIFF Files&#34;, &#34;*.tiff&#34;),
-                 (&#34;PNG Files&#34;, &#34;*.png&#34;)]
-
-    if self.last_load_dir is None:
-        initial_dir = os.path.expanduser(&#39;~&#39;)
-    else:
-        initial_dir = self.last_load_dir
-
-    file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
-                                                   initialdir=initial_dir)
-    if file_name is None:
-        return
-
-    self.last_load_dir = os.path.split(file_name)[0]
-
-    self.image_path = file_name
-    self.logger.debug(&#34;File: {}&#34;.format(self.image_path))
-    try:
-        self.main_window.start_progressbar(Image.NUM_PATCHES ** 2)
-        self.image = Image(file_name, self.update_progress_bar)
-
-    except FileNotFoundError:
-        self.logger.debug(&#34;There was a problem loading the image&#34;)
-        return
-
-    self.current_patch = 0
-    self.display_current_patch()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.next_patch"><code class="name flex">
-<span>def <span class="ident">next_patch</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Increment the current patch and display it</p>
-<p>:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def next_patch(self):
-    &#34;&#34;&#34;
-    Increment the current patch and display it
-
-    :returns: None
-    &#34;&#34;&#34;
-    self.context_img = None
-    self.undo_manager.clear_undos()
-
-    if self.current_patch &lt; len(self.image.patches)-1:
-
-        self.current_patch += 1
-        while self.image.patches[self.current_patch].display is False:
-            self.current_patch += 1
-
-        self.display_current_patch()
-    else:
-
-        if self.mask_saved:
-            return
-
-        self.logger.error(&#34;No More Patches&#34;)
-
-        dialog_message = &#34;No More Patches - Would you like to save the&#34; \
-                         &#34; mask?&#34;
-
-        dialog_title = &#34;No More Patches&#34;
-
-        result = tkinter.messagebox.askyesno(title=dialog_title,
-                                             message=dialog_message)
-        self.logger.debug(result)
-        if result:
-            self.show_saved_preview()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.no_root_activate"><code class="name flex">
-<span>def <span class="ident">no_root_activate</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set the mask for the patch to zero, there is no root here</p>
-<p>:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def no_root_activate(self):
-    &#34;&#34;&#34;
-    Set the mask for the patch to zero, there is no root here
-
-    :returns: None
-    &#34;&#34;&#34;
-    patch = self.image.patches[self.current_patch]
-
-    self.undo_manager.add_to_undo_stack(copy.deepcopy(patch), &#39;no_root&#39;)
-
-    patch.clear_mask()
-    patch.overlay_mask()
-
-    self.display_current_patch()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.prev_patch"><code class="name flex">
-<span>def <span class="ident">prev_patch</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Decrement the current patch and display it</p>
-<p>:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def prev_patch(self):
-    &#34;&#34;&#34;
-    Decrement the current patch and display it
-
-    :returns: None
-    &#34;&#34;&#34;
-    self.context_img = None
-    self.undo_manager.clear_undos()
-
-    if self.current_patch &gt; 0:
-
-        self.current_patch -= 1
-        while self.image.patches[self.current_patch].display is False:
-            self.current_patch -= 1
-
-        self.display_current_patch()
-
-    else:
-        self.logger.error(&#34;No Previous patches&#34;)</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.redo"><code class="name flex">
-<span>def <span class="ident">redo</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def redo(self):
-
-    patch = self.image.patches[self.current_patch]
-
-    undo_patch, operation = self.undo_manager.redo()
-
-    if undo_patch is None:
-        return
-
-    self.undo_manager.add_to_undo_stack(patch, operation)
-    if len(self.undo_manager.redo_stack) == 0:
-        self.main_window.toolbar_buttons[self.main_window.ID_TOOL_REDO]\
-            .config(state=&#34;disabled&#34;)
-
-    self.image.patches[self.current_patch] = undo_patch
-
-    self.display_current_patch()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.save_mask"><code class="name flex">
-<span>def <span class="ident">save_mask</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Save the finished image mask</p>
-<p>:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def save_mask(self):
-    &#34;&#34;&#34;
-    Save the finished image mask
-
-    :returns: None
-    &#34;&#34;&#34;
-
-    if not self.previewed:
-        self.show_saved_preview()
-        return
-
-    self.mask_saved = True
-
-    if self.last_save_dir is None:
-        initial_dir = os.path.expanduser(&#39;~&#39;)
-    else:
-        initial_dir = self.last_save_dir
-
-    dir_path = tkinter.filedialog.askdirectory(initialdir=initial_dir)
-
-    self.last_save_dir = dir_path
-
-    self.logger.debug(dir_path)
-
-    if dir_path is None:
-        return
-
-    image_name = self.get_image_name_from_path(self.image_path)
-    labels_name = self.get_landmark_name_from_path(self.image_path)
-
-    self.mask_pathname = os.path.join(dir_path, image_name)
-    self.label_pathname = os.path.join(dir_path, labels_name)
-
-    try:
-        self.logger.debug(&#34;Saving mask to {}&#34;.format(self.mask_pathname))
-        self.image.export_mask(self.mask_pathname)
-        # self.image.export_labels(self.label_pathname)
-        tkinter.messagebox.showinfo(&#34;Image Mask Saved!&#34;, &#34;Image Mask&#34;
-                                    &#34; Saved!&#34;)
-
-    except IOError:
-        self.logger.error(&#34;Could not save file!&#34;)</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.set_add_region_brush"><code class="name flex">
-<span>def <span class="ident">set_add_region_brush</span></span>(<span>self, value)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set the value of the add region brush size</p>
-<p>:param value: The size
-:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_add_region_brush(self, value):
-    &#34;&#34;&#34;
-    Set the value of the add region brush size
-
-    :param value: The size
-    :returns: None
-    &#34;&#34;&#34;
-
-    self.add_region_radius = value
-
-    self.main_window.set_brush_radius(self.add_region_radius)
-    self.main_window.draw_brush()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.set_flood_add_tolerance"><code class="name flex">
-<span>def <span class="ident">set_flood_add_tolerance</span></span>(<span>self, value)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set the current flood add tolerance</p>
-<p>:param value: The value to set it to
-:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_flood_add_tolerance(self, value):
-    &#34;&#34;&#34;
-    Set the current flood add tolerance
-
-    :param value: The value to set it to
-    :returns: None
-    &#34;&#34;&#34;
-
-    if self.flood_add_position is None:
-        return
-
-    self.flood_add_tolerance = value
-
-    patch = self.image.patches[self.current_patch]
-
-    patch.flood_add_region(self.flood_add_position,
-                           self.flood_add_tolerance)
-
-    patch.overlay_mask()
-    self.display_current_patch()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.set_flood_remove_tolerance"><code class="name flex">
-<span>def <span class="ident">set_flood_remove_tolerance</span></span>(<span>self, value)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set the current flood remove tolerance</p>
-<p>:param value: The value to set it to
-:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_flood_remove_tolerance(self, value):
-    &#34;&#34;&#34;
-    Set the current flood remove tolerance
-
-    :param value: The value to set it to
-    :returns: None
-    &#34;&#34;&#34;
-
-    if self.flood_remove_position is None:
-        return
-
-    self.flood_remove_tolerance = value
-
-    patch = self.image.patches[self.current_patch]
-
-    patch.flood_remove_region(self.flood_remove_position,
-                              self.flood_remove_tolerance)
-
-    patch.overlay_mask()
-    self.display_current_patch()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.set_remove_region_brush"><code class="name flex">
-<span>def <span class="ident">set_remove_region_brush</span></span>(<span>self, value)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set the value of the remove region brush size</p>
-<p>:param value: The value
-:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_remove_region_brush(self, value):
-    &#34;&#34;&#34;
-    Set the value of the remove region brush size
-
-    :param value: The value
-    :returns: None
-    &#34;&#34;&#34;
-    self.remove_region_radius = value
-
-    self.main_window.set_brush_radius(self.remove_region_radius)
-    self.main_window.draw_brush()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.set_threshold"><code class="name flex">
-<span>def <span class="ident">set_threshold</span></span>(<span>self, value)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Set the value of the threshold</p>
-<p>:param value: Value for the threshold
-:returns: Nonw</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_threshold(self, value):
-    &#34;&#34;&#34;
-    Set the value of the threshold
-
-    :param value: Value for the threshold
-    :returns: Nonw
-    &#34;&#34;&#34;
-
-    patch = self.image.patches[self.current_patch]
-
-    self.undo_manager.add_to_undo_stack(copy.deepcopy(patch),
-                                        &#39;threshold_adjust&#39;)
-
-    patch.thresh = value
-    patch.apply_threshold(patch.thresh)
-    patch.overlay_mask()
-
-    self.display_current_patch()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.show_saved_preview"><code class="name flex">
-<span>def <span class="ident">show_saved_preview</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Display a preview of the saved mask</p>
-<p>:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def show_saved_preview(self):
-    &#34;&#34;&#34;
-    Display a preview of the saved mask
-
-    :returns: None
-    &#34;&#34;&#34;
-    self.previewed = True
-    img = self.image.image
-    self.image.create_mask()
-    mask = self.image.mask
-
-    overlay = segmentation.mark_boundaries(img, mask)
-
-    overlay = img_as_ubyte(overlay)
-
-    rows = np.any(mask, axis=1)
-    cols = np.any(mask, axis=0)
-    rmin, rmax = np.where(rows)[0][[0, -1]]
-    cmin, cmax = np.where(cols)[0][[0, -1]]
-
-    overlay = overlay[rmin:rmax, cmin:cmax]
-
-    self.main_window.create_annotation_preview(overlay)</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.undo"><code class="name flex">
-<span>def <span class="ident">undo</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def undo(self):
-
-    patch = self.image.patches[self.current_patch]
-
-    redo_patch, operation = self.undo_manager.undo()
-
-    if redo_patch is None:
-        return
-
-    self.undo_manager.add_to_redo_stack(patch, operation)
-    self.main_window.toolbar_buttons[self.main_window.ID_TOOL_REDO]\
-        .config(state=&#34;normal&#34;)
-
-    self.image.patches[self.current_patch] = redo_patch
-
-    self.display_current_patch()</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Controller.update_progress_bar"><code class="name flex">
-<span>def <span class="ident">update_progress_bar</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Update the progress bar popup</p>
-<p>:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def update_progress_bar(self):
-    &#34;&#34;&#34;
-    Update the progress bar popup
-
-    :returns: None
-    &#34;&#34;&#34;
-
-    self.main_window.prog_popup.update()
-    self.main_window.load_progress += self.main_window.progress_step
-    self.main_window.load_prog_var.set(self.main_window.load_progress)
-
-    if self.main_window.load_progress &gt;= Image.NUM_PATCHES ** 2:
-        self.main_window.prog_popup.destroy()</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Mode"><code class="flex name class">
-<span>class <span class="ident">Mode</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Class representing the possible modes for editing</p>
-<h2 id="attributes">Attributes</h2>
+<div class="desc"><p>Load a new image with a file dialog.</p>
+<h2 id="returns">Returns</h2>
 <dl>
-<dt><strong><code>THREHSOLD</code></strong></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>ETC</code></strong></dt>
+<dt><code>None</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Mode(Enum):
+<pre><code class="python">def load_new_image(self):
     &#34;&#34;&#34;
-    Class representing the possible modes for editing
+    Load a new image with a file dialog.
 
-    Attributes:
-        THREHSOLD
-        ETC
-    &#34;&#34;&#34;
-    THRESHOLD = 1
-    ADD_REGION = 2
-    REMOVE_REGION = 3
-    NO_ROOT = 4
-    FLOOD_ADD = 6
-    FLOOD_REMOVE = 7
-    ADD_TIP = 8
-    ADD_BRANCH = 9
-    ADD_CROSSING = 10
-    REMOVE_LANDMARK = 11</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>enum.Enum</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="friendly_ground_truth.controller.controller.Mode.ADD_BRANCH"><code class="name">var <span class="ident">ADD_BRANCH</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Mode.ADD_CROSSING"><code class="name">var <span class="ident">ADD_CROSSING</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Mode.ADD_REGION"><code class="name">var <span class="ident">ADD_REGION</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Mode.ADD_TIP"><code class="name">var <span class="ident">ADD_TIP</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Mode.FLOOD_ADD"><code class="name">var <span class="ident">FLOOD_ADD</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Mode.FLOOD_REMOVE"><code class="name">var <span class="ident">FLOOD_REMOVE</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Mode.NO_ROOT"><code class="name">var <span class="ident">NO_ROOT</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Mode.REMOVE_LANDMARK"><code class="name">var <span class="ident">REMOVE_LANDMARK</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Mode.REMOVE_REGION"><code class="name">var <span class="ident">REMOVE_REGION</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.Mode.THRESHOLD"><code class="name">var <span class="ident">THRESHOLD</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.SecondaryMode"><code class="flex name class">
-<span>class <span class="ident">SecondaryMode</span></span>
-<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Class representing secondary adjustment modes</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class SecondaryMode(Enum):
-    &#34;&#34;&#34;
-    Class representing secondary adjustment modes
-    &#34;&#34;&#34;
-    ZOOM = 1
-    ADJUST_TOOL = 2</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>enum.Enum</li>
-</ul>
-<h3>Class variables</h3>
-<dl>
-<dt id="friendly_ground_truth.controller.controller.SecondaryMode.ADJUST_TOOL"><code class="name">var <span class="ident">ADJUST_TOOL</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.SecondaryMode.ZOOM"><code class="name">var <span class="ident">ZOOM</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.UndoManager"><code class="flex name class">
-<span>class <span class="ident">UndoManager</span></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Manages Undo Stuff</p>
-<p>Initialize the Undo Manager</p>
-<p>:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class UndoManager():
-    &#34;&#34;&#34;
-    Manages Undo Stuff
+
+    Returns:
+        None
     &#34;&#34;&#34;
 
-    MAX_SIZE = 20
+    self._context_img = None
+    filetypes = [(&#34;TIF Files&#34;, &#34;*.tif&#34;), (&#34;TIFF Files&#34;, &#34;*.tiff&#34;),
+                 (&#34;PNG Files&#34;, &#34;*.png&#34;), (&#34;JPEG Files&#34;, &#34;*.jpg&#34;)]
 
-    def __init__(self):
-        &#34;&#34;&#34;
-        Initialize the Undo Manager
+    if self._last_load_dir is None:
+        initial_dir = os.path.expanduser(&#34;~&#34;)
+    else:
+        initial_dir = self._last_load_dir
 
-        :returns: None
-        &#34;&#34;&#34;
+    file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
+                                                   initialdir=initial_dir)
 
-        self.undo_stack = []
-        self.redo_stack = []
+    if file_name is None or file_name == ():
+        return
 
-    def add_to_undo_stack(self, patch, operation):
-        &#34;&#34;&#34;
-        Add the given operation to the undo stack
+    self._last_load_dir = os.path.split(file_name)[0]
 
-        :returns: None
-        &#34;&#34;&#34;
-
-        if &#34;threshold_adjust&#34; == operation and len(self.undo_stack) &gt; 0:
-            if self.undo_stack[-1][1] == operation:
-                return
-        elif &#34;adjust&#34; in operation and len(self.undo_stack) &gt; 0:
-            if self.undo_stack[-1][1] == operation:
-                self.undo_stack.pop()
-
-        self.undo_stack.append((patch, operation))
-
-        if len(self.undo_stack) &gt; self.MAX_SIZE:
-            self.undo_stack.pop(0)
-
-    def undo(self):
-        &#34;&#34;&#34;
-        Undo the last operation added to the stack
-
-        :returns: The function and its parameters
-        &#34;&#34;&#34;
-        try:
-            patch, operation = self.undo_stack.pop()
-            return patch, operation
-
-        except IndexError:
-            return None, None
-
-    def add_to_redo_stack(self, patch, operation):
-        &#34;&#34;&#34;
-        Add the given operation to the redo stack
-
-        :returns: None
-        &#34;&#34;&#34;
-
-        self.redo_stack.append((patch, operation))
-
-        if len(self.redo_stack) &gt; self.MAX_SIZE:
-            self.redo_stack.pop(0)
-
-    def redo(self):
-        &#34;&#34;&#34;
-        Redo the last undone operation
-
-        :returns: The function and its parameters
-        &#34;&#34;&#34;
-
-        try:
-            patch, operation = self.redo_stack.pop()
-            return patch, operation
-        except IndexError:
-            return None, None
-
-    def clear_undos(self):
-
-        self.undo_stack = []
-        self.redo_stack = []</code></pre>
-</details>
-<h3>Class variables</h3>
-<dl>
-<dt id="friendly_ground_truth.controller.controller.UndoManager.MAX_SIZE"><code class="name">var <span class="ident">MAX_SIZE</span></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
-<h3>Methods</h3>
-<dl>
-<dt id="friendly_ground_truth.controller.controller.UndoManager.add_to_redo_stack"><code class="name flex">
-<span>def <span class="ident">add_to_redo_stack</span></span>(<span>self, patch, operation)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Add the given operation to the redo stack</p>
-<p>:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def add_to_redo_stack(self, patch, operation):
-    &#34;&#34;&#34;
-    Add the given operation to the redo stack
-
-    :returns: None
-    &#34;&#34;&#34;
-
-    self.redo_stack.append((patch, operation))
-
-    if len(self.redo_stack) &gt; self.MAX_SIZE:
-        self.redo_stack.pop(0)</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.UndoManager.add_to_undo_stack"><code class="name flex">
-<span>def <span class="ident">add_to_undo_stack</span></span>(<span>self, patch, operation)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Add the given operation to the undo stack</p>
-<p>:returns: None</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def add_to_undo_stack(self, patch, operation):
-    &#34;&#34;&#34;
-    Add the given operation to the undo stack
-
-    :returns: None
-    &#34;&#34;&#34;
-
-    if &#34;threshold_adjust&#34; == operation and len(self.undo_stack) &gt; 0:
-        if self.undo_stack[-1][1] == operation:
-            return
-    elif &#34;adjust&#34; in operation and len(self.undo_stack) &gt; 0:
-        if self.undo_stack[-1][1] == operation:
-            self.undo_stack.pop()
-
-    self.undo_stack.append((patch, operation))
-
-    if len(self.undo_stack) &gt; self.MAX_SIZE:
-        self.undo_stack.pop(0)</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.UndoManager.clear_undos"><code class="name flex">
-<span>def <span class="ident">clear_undos</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def clear_undos(self):
-
-    self.undo_stack = []
-    self.redo_stack = []</code></pre>
-</details>
-</dd>
-<dt id="friendly_ground_truth.controller.controller.UndoManager.redo"><code class="name flex">
-<span>def <span class="ident">redo</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Redo the last undone operation</p>
-<p>:returns: The function and its parameters</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def redo(self):
-    &#34;&#34;&#34;
-    Redo the last undone operation
-
-    :returns: The function and its parameters
-    &#34;&#34;&#34;
+    self._image_path = file_name
 
     try:
-        patch, operation = self.redo_stack.pop()
-        return patch, operation
-    except IndexError:
-        return None, None</code></pre>
+        self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
+        self._image = Image(file_name, 10, self._update_progressbar)
+
+    except FileNotFoundError:
+        self._logger.exception(&#34;There was a problem loading the image.&#34;)
+        return
+
+    self._current_patch_index = 0
+
+    self._display_current_patch()
+    self._main_window.update_image_indicator(self._image_path)</code></pre>
 </details>
 </dd>
-<dt id="friendly_ground_truth.controller.controller.UndoManager.undo"><code class="name flex">
-<span>def <span class="ident">undo</span></span>(<span>self)</span>
+<dt id="friendly_ground_truth.controller.controller.Controller.load_preferences"><code class="name flex">
+<span>def <span class="ident">load_preferences</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Undo the last operation added to the stack</p>
-<p>:returns: The function and its parameters</p></div>
+<div class="desc"><p>Load the preferences saved in the preferences file.</p>
+<h2 id="returns">Returns</h2>
+<p>A dictionary containing the user's preferences.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def undo(self):
+<pre><code class="python">def load_preferences(self):
     &#34;&#34;&#34;
-    Undo the last operation added to the stack
+    Load the preferences saved in the preferences file.
 
-    :returns: The function and its parameters
+
+    Returns:
+        A dictionary containing the user&#39;s preferences.
     &#34;&#34;&#34;
+    if not os.path.exists(PREFERENCES_PATH):
+        return DEFAULT_PREFS
+
+    with open(PREFERENCES_PATH, &#39;r&#39;) as fin:
+        preferences = json.load(fin)
+
+    return preferences</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.controller.Controller.save_mask"><code class="name flex">
+<span>def <span class="ident">save_mask</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Save the finished image mask.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_mask(self):
+    &#34;&#34;&#34;
+    Save the finished image mask.
+
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+
+    if not self._previewed:
+        self._show_saved_preview()
+        return
+
+    self._mask_saved = True
+
+    if self._last_save_dir is None:
+        initial_dir = os.path.expanduser(&#34;~&#34;)
+    else:
+        initial_dir = self._last_save_dir
+
+    dir_path = tkinter.filedialog.askdirectory(initialdir=initial_dir)
+
+    if dir_path is None:
+        return
+
+    image_name = self._get_image_name_from_path(self._image_path)
+    # labels_name = self._get_landmark_name_from_path(self._image_path)
+
+    mask_pathname = os.path.join(dir_path, image_name)
+    # label_pathname = os.path.join(dir_path, labels_name)
+
     try:
-        patch, operation = self.undo_stack.pop()
-        return patch, operation
+        self._image.export_mask(mask_pathname)
+        # self._image.export_labels(label_pathname)
 
-    except IndexError:
-        return None, None</code></pre>
+        tkinter.messagebox.showinfo(&#34;Image Mask Saved!&#34;,
+                                    &#34;Image Mask Saved!&#34;)
+
+    except IOError:
+        self._logger.error(&#34;Could not save file!&#34;)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.controller.Controller.save_preferences"><code class="name flex">
+<span>def <span class="ident">save_preferences</span></span>(<span>self, preferences)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Save the user preferences.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>preferences</code></strong></dt>
+<dd>A dictionary containing the user preferences.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_preferences(self, preferences):
+    &#34;&#34;&#34;
+    Save the user preferences.
+
+    Args:
+        preferences: A dictionary containing the user preferences.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+
+    with open(PREFERENCES_PATH, &#39;w&#39;) as fout:
+        json.dump(preferences, fout)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.controller.Controller.set_preferences"><code class="name flex">
+<span>def <span class="ident">set_preferences</span></span>(<span>self, preferences)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the current preferences for the application.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>preferences</code></strong></dt>
+<dd>A dictionary of preferences and their values.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_preferences(self, preferences):
+    &#34;&#34;&#34;
+    Set the current preferences for the application.
+
+    Args:
+        preferences: A dictionary of preferences and their values.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    theme = preferences[&#39;theme&#39;]
+
+    self._main_window.set_theme(theme)</code></pre>
 </details>
 </dd>
 </dl>
@@ -4024,74 +2007,17 @@ browser dialogue and get the image path</p>
 <h4><code><a title="friendly_ground_truth.controller.controller.Controller" href="#friendly_ground_truth.controller.controller.Controller">Controller</a></code></h4>
 <ul class="">
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.CONTEXT_TRANSPARENCY" href="#friendly_ground_truth.controller.controller.Controller.CONTEXT_TRANSPARENCY">CONTEXT_TRANSPARENCY</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.ZOOM_SCALE" href="#friendly_ground_truth.controller.controller.Controller.ZOOM_SCALE">ZOOM_SCALE</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.adjust_add_region_brush" href="#friendly_ground_truth.controller.controller.Controller.adjust_add_region_brush">adjust_add_region_brush</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.adjust_remove_landmark_brush" href="#friendly_ground_truth.controller.controller.Controller.adjust_remove_landmark_brush">adjust_remove_landmark_brush</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.adjust_remove_region_brush" href="#friendly_ground_truth.controller.controller.Controller.adjust_remove_region_brush">adjust_remove_region_brush</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.adjust_threshold" href="#friendly_ground_truth.controller.controller.Controller.adjust_threshold">adjust_threshold</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.change_mode" href="#friendly_ground_truth.controller.controller.Controller.change_mode">change_mode</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.change_secondary_mode" href="#friendly_ground_truth.controller.controller.Controller.change_secondary_mode">change_secondary_mode</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.convert_click_to_image_position" href="#friendly_ground_truth.controller.controller.Controller.convert_click_to_image_position">convert_click_to_image_position</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.display_current_patch" href="#friendly_ground_truth.controller.controller.Controller.display_current_patch">display_current_patch</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.get_context_patches" href="#friendly_ground_truth.controller.controller.Controller.get_context_patches">get_context_patches</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.get_image_name_from_path" href="#friendly_ground_truth.controller.controller.Controller.get_image_name_from_path">get_image_name_from_path</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.get_landmark_name_from_path" href="#friendly_ground_truth.controller.controller.Controller.get_landmark_name_from_path">get_landmark_name_from_path</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.handle_flood_add_tolerance" href="#friendly_ground_truth.controller.controller.Controller.handle_flood_add_tolerance">handle_flood_add_tolerance</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.handle_flood_remove_tolerance" href="#friendly_ground_truth.controller.controller.Controller.handle_flood_remove_tolerance">handle_flood_remove_tolerance</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.handle_left_click" href="#friendly_ground_truth.controller.controller.Controller.handle_left_click">handle_left_click</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.handle_left_release" href="#friendly_ground_truth.controller.controller.Controller.handle_left_release">handle_left_release</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.handle_motion" href="#friendly_ground_truth.controller.controller.Controller.handle_motion">handle_motion</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.handle_mouse_wheel" href="#friendly_ground_truth.controller.controller.Controller.handle_mouse_wheel">handle_mouse_wheel</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.handle_mouse_wheel_motion" href="#friendly_ground_truth.controller.controller.Controller.handle_mouse_wheel_motion">handle_mouse_wheel_motion</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.handle_right_click" href="#friendly_ground_truth.controller.controller.Controller.handle_right_click">handle_right_click</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.handle_zoom" href="#friendly_ground_truth.controller.controller.Controller.handle_zoom">handle_zoom</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.controller.Controller.NUM_PATCHES" href="#friendly_ground_truth.controller.controller.Controller.NUM_PATCHES">NUM_PATCHES</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.controller.Controller.activate_tool" href="#friendly_ground_truth.controller.controller.Controller.activate_tool">activate_tool</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.controller.Controller.adjust_tool" href="#friendly_ground_truth.controller.controller.Controller.adjust_tool">adjust_tool</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.controller.Controller.click_event" href="#friendly_ground_truth.controller.controller.Controller.click_event">click_event</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.controller.Controller.drag_event" href="#friendly_ground_truth.controller.controller.Controller.drag_event">drag_event</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.controller.Controller.image_tools" href="#friendly_ground_truth.controller.controller.Controller.image_tools">image_tools</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.load_new_image" href="#friendly_ground_truth.controller.controller.Controller.load_new_image">load_new_image</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.next_patch" href="#friendly_ground_truth.controller.controller.Controller.next_patch">next_patch</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.no_root_activate" href="#friendly_ground_truth.controller.controller.Controller.no_root_activate">no_root_activate</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.prev_patch" href="#friendly_ground_truth.controller.controller.Controller.prev_patch">prev_patch</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.redo" href="#friendly_ground_truth.controller.controller.Controller.redo">redo</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.controller.Controller.load_preferences" href="#friendly_ground_truth.controller.controller.Controller.load_preferences">load_preferences</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.save_mask" href="#friendly_ground_truth.controller.controller.Controller.save_mask">save_mask</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.set_add_region_brush" href="#friendly_ground_truth.controller.controller.Controller.set_add_region_brush">set_add_region_brush</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.set_flood_add_tolerance" href="#friendly_ground_truth.controller.controller.Controller.set_flood_add_tolerance">set_flood_add_tolerance</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.set_flood_remove_tolerance" href="#friendly_ground_truth.controller.controller.Controller.set_flood_remove_tolerance">set_flood_remove_tolerance</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.set_remove_region_brush" href="#friendly_ground_truth.controller.controller.Controller.set_remove_region_brush">set_remove_region_brush</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.set_threshold" href="#friendly_ground_truth.controller.controller.Controller.set_threshold">set_threshold</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.show_saved_preview" href="#friendly_ground_truth.controller.controller.Controller.show_saved_preview">show_saved_preview</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.undo" href="#friendly_ground_truth.controller.controller.Controller.undo">undo</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Controller.update_progress_bar" href="#friendly_ground_truth.controller.controller.Controller.update_progress_bar">update_progress_bar</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="friendly_ground_truth.controller.controller.Mode" href="#friendly_ground_truth.controller.controller.Mode">Mode</a></code></h4>
-<ul class="two-column">
-<li><code><a title="friendly_ground_truth.controller.controller.Mode.ADD_BRANCH" href="#friendly_ground_truth.controller.controller.Mode.ADD_BRANCH">ADD_BRANCH</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Mode.ADD_CROSSING" href="#friendly_ground_truth.controller.controller.Mode.ADD_CROSSING">ADD_CROSSING</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Mode.ADD_REGION" href="#friendly_ground_truth.controller.controller.Mode.ADD_REGION">ADD_REGION</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Mode.ADD_TIP" href="#friendly_ground_truth.controller.controller.Mode.ADD_TIP">ADD_TIP</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Mode.FLOOD_ADD" href="#friendly_ground_truth.controller.controller.Mode.FLOOD_ADD">FLOOD_ADD</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Mode.FLOOD_REMOVE" href="#friendly_ground_truth.controller.controller.Mode.FLOOD_REMOVE">FLOOD_REMOVE</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Mode.NO_ROOT" href="#friendly_ground_truth.controller.controller.Mode.NO_ROOT">NO_ROOT</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Mode.REMOVE_LANDMARK" href="#friendly_ground_truth.controller.controller.Mode.REMOVE_LANDMARK">REMOVE_LANDMARK</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Mode.REMOVE_REGION" href="#friendly_ground_truth.controller.controller.Mode.REMOVE_REGION">REMOVE_REGION</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.Mode.THRESHOLD" href="#friendly_ground_truth.controller.controller.Mode.THRESHOLD">THRESHOLD</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="friendly_ground_truth.controller.controller.SecondaryMode" href="#friendly_ground_truth.controller.controller.SecondaryMode">SecondaryMode</a></code></h4>
-<ul class="">
-<li><code><a title="friendly_ground_truth.controller.controller.SecondaryMode.ADJUST_TOOL" href="#friendly_ground_truth.controller.controller.SecondaryMode.ADJUST_TOOL">ADJUST_TOOL</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.SecondaryMode.ZOOM" href="#friendly_ground_truth.controller.controller.SecondaryMode.ZOOM">ZOOM</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="friendly_ground_truth.controller.controller.UndoManager" href="#friendly_ground_truth.controller.controller.UndoManager">UndoManager</a></code></h4>
-<ul class="two-column">
-<li><code><a title="friendly_ground_truth.controller.controller.UndoManager.MAX_SIZE" href="#friendly_ground_truth.controller.controller.UndoManager.MAX_SIZE">MAX_SIZE</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.UndoManager.add_to_redo_stack" href="#friendly_ground_truth.controller.controller.UndoManager.add_to_redo_stack">add_to_redo_stack</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.UndoManager.add_to_undo_stack" href="#friendly_ground_truth.controller.controller.UndoManager.add_to_undo_stack">add_to_undo_stack</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.UndoManager.clear_undos" href="#friendly_ground_truth.controller.controller.UndoManager.clear_undos">clear_undos</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.UndoManager.redo" href="#friendly_ground_truth.controller.controller.UndoManager.redo">redo</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.controller.UndoManager.undo" href="#friendly_ground_truth.controller.controller.UndoManager.undo">undo</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.controller.Controller.save_preferences" href="#friendly_ground_truth.controller.controller.Controller.save_preferences">save_preferences</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.controller.Controller.set_preferences" href="#friendly_ground_truth.controller.controller.Controller.set_preferences">set_preferences</a></code></li>
 </ul>
 </li>
 </ul>

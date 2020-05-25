@@ -28,6 +28,7 @@ from skimage import segmentation, img_as_ubyte
 
 import os
 import copy
+import json
 
 import tkinter.filedialog
 import tkinter.messagebox
@@ -36,6 +37,9 @@ import numpy as np
 
 import logging
 module_logger = logging.getLogger('friendly_gt.controller.controller')
+
+PREFERENCES_PATH = "./user_preferences.json"
+DEFAULT_PREFS = {'theme': 'Light'}
 
 
 class Controller():
@@ -201,6 +205,50 @@ class Controller():
         except IOError:
             self._logger.error("Could not save file!")
 
+    def set_preferences(self, preferences):
+        """
+        Set the current preferences for the application.
+
+        Args:
+            preferences: A dictionary of preferences and their values.
+
+        Returns:
+            None
+        """
+        theme = preferences['theme']
+
+        self._main_window.set_theme(theme)
+
+    def load_preferences(self):
+        """
+        Load the preferences saved in the preferences file.
+
+
+        Returns:
+            A dictionary containing the user's preferences.
+        """
+        if not os.path.exists(PREFERENCES_PATH):
+            return DEFAULT_PREFS
+
+        with open(PREFERENCES_PATH, 'r') as fin:
+            preferences = json.load(fin)
+
+        return preferences
+
+    def save_preferences(self, preferences):
+        """
+        Save the user preferences.
+
+        Args:
+            preferences: A dictionary containing the user preferences.
+
+        Returns:
+            None
+        """
+
+        with open(PREFERENCES_PATH, 'w') as fout:
+            json.dump(preferences, fout)
+
     def activate_tool(self, id):
         """
         Activate the given tool id.
@@ -215,6 +263,9 @@ class Controller():
             The current tool is set to the tool matching the id
             Any activation functionality of the tool is performed.
         """
+        if self._image is None:
+            return
+
         tool = self.image_tools[id]
         tool.image = self._image
         tool.patch = self._image.patches[self._current_patch_index]
@@ -269,9 +320,12 @@ class Controller():
         """
         # Correct for offset in context image
         pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
+
         # Need to invert the position, because tkinter coords are backward from
         # skimage
-        pos = pos[1], pos[0]
+        pos = round(pos[1]-1), round(pos[0]-1)
+
+        self._logger.debug("Click Event: {}".format(pos))
 
         if self._current_tool is not None:
             self._current_tool.on_click(pos)
@@ -294,7 +348,8 @@ class Controller():
 
         # Need to invert the position, because tkinter coords are backward from
         # skimage
-        pos = pos[1], pos[0]
+        pos = round(pos[1]-1), round(pos[0]-1)
+
         self._current_tool.on_drag(pos)
 
         if not self._undo_manager.undo_empty:
@@ -380,18 +435,34 @@ class Controller():
             self.save_mask()
             return
 
+        cur_patch = self._image.patches[self._current_patch_index]
+        cur_patch.undo_history = copy.deepcopy(self._undo_manager)
+
         self._context_img = None
         self._current_patch_index = index
 
+        cur_patch = self._image.patches[self._current_patch_index]
+
+        if cur_patch.undo_history is None:
+            self._undo_manager = UndoManager()
+        else:
+            self._undo_manager = copy.deepcopy(cur_patch.undo_history)
+
         for key in self._image_tools.keys():
             self._image_tools[key].patch = patch
-
-        self._undo_manager.clear_undos()
+            self._image_tools[key].undo_manager = self._undo_manager
 
         self._display_current_patch(new=True)
 
-        self._main_window.disable_button(self._undo_id)
-        self._main_window.disable_button(self._redo_id)
+        if self._undo_manager.undo_empty:
+            self._main_window.disable_button(self._undo_id)
+        else:
+            self._main_window.enable_button(self._undo_id)
+
+        if self._undo_manager.redo_empty:
+            self._main_window.disable_button(self._redo_id)
+        else:
+            self._main_window.enable_button(self._redo_id)
 
     def _prev_patch_callback(self, patch, index):
         """
@@ -408,13 +479,23 @@ class Controller():
         if patch is None or index == -1:
             return
 
+        cur_patch = self._image.patches[self._current_patch_index]
+        cur_patch.undo_history = copy.deepcopy(self._undo_manager)
+
         self._context_img = None
         self._current_patch_index = index
 
+        cur_patch = self._image.patches[self._current_patch_index]
+
+        if cur_patch.undo_history is None:
+            self._undo_manager = UndoManager()
+        else:
+            self._undo_manager = copy.deepcopy(cur_patch.undo_history)
+
         for key in self._image_tools.keys():
             self._image_tools[key].patch = patch
+            self._image_tools[key].undo_manager = self._undo_manager
 
-        self._undo_manager.clear_undos()
         self._display_current_patch(new=True)
 
         self._main_window.disable_button(self._undo_id)
@@ -497,7 +578,8 @@ class Controller():
         patch = self._image.patches[self._current_patch_index]
         img = self._get_context_patches(patch)
 
-        self._main_window.show_image(img, new=new)
+        self._main_window.show_image(img, new=new,
+                                     patch_offset=self._patch_offset)
 
         if self._current_tool is not None:
             self._current_tool.unlock_undos()
@@ -666,7 +748,7 @@ class Controller():
 
         overlay = overlay[rmin:rmax, cmin:cmax]
 
-        PreviewWindow(overlay, self)
+        PreviewWindow(overlay, self, self._main_window.style)
 
     def _get_image_name_from_path(self, path):
         """

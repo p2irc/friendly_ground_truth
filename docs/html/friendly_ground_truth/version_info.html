@@ -47,20 +47,51 @@ REPO_URL = &#34;https://api.github.com/repos/KyleS22/friendly_ground_truth/&#34;
 
 
 class VersionInfo():
+    &#34;&#34;&#34;
+    Represents the current version of the software and the connection to Github
+    Releases that checks for updates
+
+    Attributes:
+        VERSION_MAJOR: The major version number
+        VERSION_MINOR: The minor version number
+        VERSION_PATCH: The patch version number
+    &#34;&#34;&#34;
 
     def __init__(self):
         self.VERSION_MAJOR = 0
-        self.VERSION_MINOR = 7
-        self.VERSION_PATCH = 6
+        self.VERSION_MINOR = 9
+        self.VERSION_PATCH = 0
 
     def get_version_string(self):
+        &#34;&#34;&#34;
+        Return a string representing the current version of the software.
+        Format is &#39;vX.Y.Z&#39;
+
+        Returns:
+            A version string: Format is &#39;vX.Y.Z&#39;
+        &#34;&#34;&#34;
         return &#34;v&#34; + str(self.VERSION_MAJOR) + &#39;.&#39; +\
-                str(self.VERSION_MINOR) + &#39;.&#39; +\
-                str(self.VERSION_PATCH)
+               str(self.VERSION_MINOR) + &#39;.&#39; +\
+               str(self.VERSION_PATCH)
 
     def check_newer_version(self, version_string):
+        &#34;&#34;&#34;
+        Check to see if the given version string is greater than the current
+        version.
+
+        Args:
+            version_string: The version string to compare the current version
+            with.
+
+        Returns:
+            True if the version string is newer than the current version.
+            False if it is not.
+        &#34;&#34;&#34;
         version_string = version_string.strip(&#39;v&#39;)
         parts = version_string.split(&#34;.&#34;)
+        if &#39;d&#39; in parts[2]:
+            parts[2] = parts[2].strip(&#39;d&#39;)
+
         v_maj = int(parts[0])
         v_min = int(parts[1])
         v_patch = int(parts[2])
@@ -81,6 +112,13 @@ class VersionInfo():
         return False
 
     def get_newest_release_info(self):
+        &#34;&#34;&#34;
+        Get the newest version string from the Github repository
+
+
+        Returns:
+            The version string of the newest version in the repository
+        &#34;&#34;&#34;
 
         response = requests.get(REPO_URL)
         version = response.json()[&#34;name&#34;]
@@ -89,6 +127,13 @@ class VersionInfo():
         return version
 
     def check_for_update(self):
+        &#34;&#34;&#34;
+        Check the repository to see if there is a new version
+
+
+        Returns:
+            A string describing if there is a new version.
+        &#34;&#34;&#34;
 
         latest = self.get_newest_release_info()
 
@@ -181,26 +226,67 @@ if __name__ == &#34;__main__&#34;:
 <span>class <span class="ident">VersionInfo</span></span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Represents the current version of the software and the connection to Github
+Releases that checks for updates</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>VERSION_MAJOR</code></strong></dt>
+<dd>The major version number</dd>
+<dt><strong><code>VERSION_MINOR</code></strong></dt>
+<dd>The minor version number</dd>
+<dt><strong><code>VERSION_PATCH</code></strong></dt>
+<dd>The patch version number</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class VersionInfo():
+    &#34;&#34;&#34;
+    Represents the current version of the software and the connection to Github
+    Releases that checks for updates
+
+    Attributes:
+        VERSION_MAJOR: The major version number
+        VERSION_MINOR: The minor version number
+        VERSION_PATCH: The patch version number
+    &#34;&#34;&#34;
 
     def __init__(self):
         self.VERSION_MAJOR = 0
-        self.VERSION_MINOR = 7
-        self.VERSION_PATCH = 6
+        self.VERSION_MINOR = 9
+        self.VERSION_PATCH = 0
 
     def get_version_string(self):
+        &#34;&#34;&#34;
+        Return a string representing the current version of the software.
+        Format is &#39;vX.Y.Z&#39;
+
+        Returns:
+            A version string: Format is &#39;vX.Y.Z&#39;
+        &#34;&#34;&#34;
         return &#34;v&#34; + str(self.VERSION_MAJOR) + &#39;.&#39; +\
-                str(self.VERSION_MINOR) + &#39;.&#39; +\
-                str(self.VERSION_PATCH)
+               str(self.VERSION_MINOR) + &#39;.&#39; +\
+               str(self.VERSION_PATCH)
 
     def check_newer_version(self, version_string):
+        &#34;&#34;&#34;
+        Check to see if the given version string is greater than the current
+        version.
+
+        Args:
+            version_string: The version string to compare the current version
+            with.
+
+        Returns:
+            True if the version string is newer than the current version.
+            False if it is not.
+        &#34;&#34;&#34;
         version_string = version_string.strip(&#39;v&#39;)
         parts = version_string.split(&#34;.&#34;)
+        if &#39;d&#39; in parts[2]:
+            parts[2] = parts[2].strip(&#39;d&#39;)
+
         v_maj = int(parts[0])
         v_min = int(parts[1])
         v_patch = int(parts[2])
@@ -221,6 +307,13 @@ if __name__ == &#34;__main__&#34;:
         return False
 
     def get_newest_release_info(self):
+        &#34;&#34;&#34;
+        Get the newest version string from the Github repository
+
+
+        Returns:
+            The version string of the newest version in the repository
+        &#34;&#34;&#34;
 
         response = requests.get(REPO_URL)
         version = response.json()[&#34;name&#34;]
@@ -229,6 +322,13 @@ if __name__ == &#34;__main__&#34;:
         return version
 
     def check_for_update(self):
+        &#34;&#34;&#34;
+        Check the repository to see if there is a new version
+
+
+        Returns:
+            A string describing if there is a new version.
+        &#34;&#34;&#34;
 
         latest = self.get_newest_release_info()
 
@@ -243,12 +343,21 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">check_for_update</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Check the repository to see if there is a new version</p>
+<h2 id="returns">Returns</h2>
+<p>A string describing if there is a new version.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def check_for_update(self):
+    &#34;&#34;&#34;
+    Check the repository to see if there is a new version
+
+
+    Returns:
+        A string describing if there is a new version.
+    &#34;&#34;&#34;
 
     latest = self.get_newest_release_info()
 
@@ -262,14 +371,39 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">check_newer_version</span></span>(<span>self, version_string)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Check to see if the given version string is greater than the current
+version.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>version_string</code></strong></dt>
+<dd>The version string to compare the current version</dd>
+</dl>
+<p>with.</p>
+<h2 id="returns">Returns</h2>
+<p>True if the version string is newer than the current version.
+False if it is not.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def check_newer_version(self, version_string):
+    &#34;&#34;&#34;
+    Check to see if the given version string is greater than the current
+    version.
+
+    Args:
+        version_string: The version string to compare the current version
+        with.
+
+    Returns:
+        True if the version string is newer than the current version.
+        False if it is not.
+    &#34;&#34;&#34;
     version_string = version_string.strip(&#39;v&#39;)
     parts = version_string.split(&#34;.&#34;)
+    if &#39;d&#39; in parts[2]:
+        parts[2] = parts[2].strip(&#39;d&#39;)
+
     v_maj = int(parts[0])
     v_min = int(parts[1])
     v_patch = int(parts[2])
@@ -294,12 +428,24 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">get_newest_release_info</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Get the newest version string from the Github repository</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>The version string</code> of <code>the newest version in the repository</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_newest_release_info(self):
+    &#34;&#34;&#34;
+    Get the newest version string from the Github repository
+
+
+    Returns:
+        The version string of the newest version in the repository
+    &#34;&#34;&#34;
 
     response = requests.get(REPO_URL)
     version = response.json()[&#34;name&#34;]
@@ -312,15 +458,28 @@ if __name__ == &#34;__main__&#34;:
 <span>def <span class="ident">get_version_string</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Return a string representing the current version of the software.
+Format is 'vX.Y.Z'</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A version string</code></dt>
+<dd>Format is 'vX.Y.Z'</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_version_string(self):
+    &#34;&#34;&#34;
+    Return a string representing the current version of the software.
+    Format is &#39;vX.Y.Z&#39;
+
+    Returns:
+        A version string: Format is &#39;vX.Y.Z&#39;
+    &#34;&#34;&#34;
     return &#34;v&#34; + str(self.VERSION_MAJOR) + &#39;.&#39; +\
-            str(self.VERSION_MINOR) + &#39;.&#39; +\
-            str(self.VERSION_PATCH)</code></pre>
+           str(self.VERSION_MINOR) + &#39;.&#39; +\
+           str(self.VERSION_PATCH)</code></pre>
 </details>
 </dd>
 </dl>

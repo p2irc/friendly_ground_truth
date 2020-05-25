@@ -34,7 +34,7 @@ class TestRemoveRegionTool():
         Test Condition:
             The brush radius can be set to any positive number.
         """
-        tool = RemoveRegionTool()
+        tool = RemoveRegionTool(MagicMock())
 
         tool.brush_radius = 36
 
@@ -76,9 +76,9 @@ class TestRemoveRegionTool():
 
         mock_patch = MagicMock()
 
-        tool = RemoveRegionTool()
+        tool = RemoveRegionTool(MagicMock())
         tool.patch = mock_patch
 
-        tool.draw((10, 10))
+        tool._draw((10, 10))
 
         mock_patch.remove_region.assert_called()

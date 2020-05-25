@@ -304,6 +304,7 @@ class Patch():
         mask: The mask for the patch
         patch_index: The index of this patch in the original image
         overlay_image: The patch image with the mask overlaid on top
+        undo_history: The undo history for this patch
     """
 
     def __init__(self, patch, patch_index):
@@ -318,7 +319,7 @@ class Patch():
             A Patch object
         """
 
-        self.logger = logging.getLogger('friendly_gt.model.Patch')
+        self._logger = logging.getLogger('friendly_gt.model.Patch')
 
         self._patch = patch
         self._mask = np.zeros(self._patch.shape, dtype=bool)
@@ -341,6 +342,8 @@ class Patch():
 
         self._old_flood_remove_tolerance = 100
         self._old_flood_remove_position = None
+
+        self._undo_history = None
 
     @property
     def threshold(self):
@@ -442,6 +445,14 @@ class Patch():
             A numpy array colour image.
         """
         return self._overlay_image
+
+    @property
+    def undo_history(self):
+        return self._undo_history
+
+    @undo_history.setter
+    def undo_history(self, history):
+        self._undo_history = history
 
     def _apply_threshold(self, value):
         """
@@ -580,6 +591,10 @@ class Patch():
         Postconditions:
             The _mask will be updated with the circular region set to 1's
         """
+
+        position = round(position[0]), round(position[1])
+
+        self._logger.debug("Add Position: {}".format(position))
         rr, cc = self._get_circle(position, radius)
 
         self._mask[rr, cc] = 1

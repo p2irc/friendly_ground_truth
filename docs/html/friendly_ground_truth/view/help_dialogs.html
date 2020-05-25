@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>friendly_ground_truth.view.help_dialogs API documentation</title>
+<meta name="description" content="File Name: help_dialogs.py …" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>friendly_ground_truth.view.help_dialogs</code></h1>
+</header>
+<section id="section-intro">
+<p>File Name: help_dialogs.py</p>
+<p>Authors: Kyle Seidenthal</p>
+<p>Date: 18-05-2020</p>
+<p>Description: Dialogs that can be triggered from the help menu.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+File Name: help_dialogs.py
+
+Authors: Kyle Seidenthal
+
+Date: 18-05-2020
+
+Description: Dialogs that can be triggered from the help menu.
+
+&#34;&#34;&#34;
+import tkinter as tk
+from tkinter import ttk
+
+import webbrowser
+import base64
+
+from io import BytesIO
+from tkinter import font
+
+from friendly_ground_truth.version_info import VersionInfo
+from PIL import Image, ImageTk
+
+
+class AboutDialog(tk.Toplevel):
+    &#34;&#34;&#34;
+    A window that displays information about the current version of the
+    applciation.
+
+    Attributes:
+        {% An Attribute %}: {% Description %}
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        self._base = tk.Toplevel()
+        self._base.title(&#34;About&#34;)
+
+        version_info = VersionInfo()
+        current_version = version_info.get_version_string()
+
+        latest = version_info.check_for_update()
+
+        version_text = (&#34;You are currently using version &#34; +
+                        current_version + &#34; &#34;)
+
+        version_text += latest
+
+        self._version_link = (&#34;https://github.com/KyleS22/friendly_ground&#34; +
+                              &#34;_truth/releases/latest&#34;)
+
+        manual_text = &#34; A user manual can be found at: &#34;
+        self._manual_link = (&#34;https://github.com/KyleS22/friendly_ground&#34; +
+                             &#34;_truth/wiki/User-Manual&#34;)
+
+        bug_text = &#34;Found a bug?  Please report it at:&#34;
+        self._bug_link = (&#34;https://github.com/KyleS22/friendly_ground_truth&#34; +
+                          &#34;/issues&#34;)
+
+        self._frame = ttk.Frame(self._base, style=&#34;HelpDialog.TFrame&#34;)
+
+        self._version_label = ttk.Label(self._frame, text=version_text,
+                                        style=&#34;HelpDialog.TLabel&#34;)
+        self._version_label.pack(pady=15)
+
+        if version_info.check_newer_version(version_info.
+                                            get_newest_release_info()):
+            self._version_link_label = ttk.Label(self._frame,
+                                                 text=self._version_link,
+                                                 style=&#34;Link.TLabel&#34;,
+                                                 cursor=&#34;hand2&#34;)
+            self._version_link_label.pack(pady=15)
+            self._version_link_label.bind(&#34;&lt;Button-1&gt;&#34;, self._on_version_click)
+
+        self._manual_label = ttk.Label(self._frame, text=manual_text,
+                                       style=&#34;HelpDialog.TLabel&#34;)
+        self._manual_label.pack(pady=15)
+
+        self._manual_link_label = ttk.Label(self._frame,
+                                            text=self._manual_link,
+                                            style=&#34;Link.TLabel&#34;,
+                                            cursor=&#34;hand2&#34;)
+        self._manual_link_label.pack(pady=15)
+        self._manual_link_label.bind(&#34;&lt;Button-1&gt;&#34;, self._on_manual_click)
+
+        self._bug_label = ttk.Label(self._frame, text=bug_text,
+                                    style=&#34;HelpDialog.TLabel&#34;)
+        self._bug_label.pack(pady=15)
+
+        self._bug_link_label = ttk.Label(self._frame, text=self._bug_link,
+                                         style=&#34;Link.TLabel&#34;,
+                                         cursor=&#34;hand2&#34;)
+        self._bug_link_label.pack(pady=15)
+        self._bug_link_label.bind(&#34;&lt;Button-1&gt;&#34;, self._on_bug_click)
+
+        self._frame.pack(fill=&#39;both&#39;, expand=True)
+
+    def _on_version_click(self, event):
+        webbrowser.open(self._version_link)
+
+    def _on_manual_click(self, event):
+        webbrowser.open(self._manual_link)
+
+    def _on_bug_click(self, event):
+        webbrowser.open(self._bug_link)
+
+
+class KeyboardShortcutDialog(tk.Toplevel):
+    &#34;&#34;&#34;
+    A window displaying keyboard shortcuts for all the tools.
+
+    &#34;&#34;&#34;
+
+    NUM_COLS = 9
+
+    def __init__(self, tools, darkmode):
+        &#34;&#34;&#34;
+        Create the dialog.
+
+        Args:
+            tools: A dictionary of tools, keyed by their id.
+            darkmode: True if we are using the dark theme.
+        Returns:
+            The window.
+        &#34;&#34;&#34;
+
+        self._base = tk.Toplevel()
+        self._base.title(&#34;Keyboard Shortcuts&#34;)
+
+        self._frame = ttk.Frame(self._base, style=&#34;HelpDialog.TFrame&#34;)
+
+        group_priorities = [(0, &#34;Markups&#34;), (1, &#34;Navigation&#34;), (2, &#34;Undo&#34;)]
+
+        groups = [[] for _ in group_priorities]
+        groups.append([])
+
+        for tool_id in tools.keys():
+            tool = tools[tool_id]
+
+            tool_group = tool.group
+
+            in_priors = False
+
+            for p in group_priorities:
+                if tool_group == p[1]:
+                    groups[p[0]].append(tool)
+                    in_priors = True
+                    continue
+
+            if not in_priors:
+                groups[-1].append(tool)
+
+        if len(groups[-1]) == 0:
+            groups.pop()
+
+        row = 0
+        for group in groups:
+            name = group[0].group
+            centre_col = int(min(len(group), 3) * 3 / 2) - 1
+            panel = self._make_group_panel(name, centre_col)
+
+            tool_row = 1
+            tool_col = 0
+            for tool in group:
+                tool_col = self._make_tool_entry(tool, panel, tool_row,
+                                                 tool_col, darkmode)
+
+                if tool_col &gt;= self.NUM_COLS:
+                    tool_col = 0
+                    tool_row += 1
+
+            panel.grid(row=row, column=0, sticky=&#34;NESW&#34;)
+
+            row += 1
+
+        self._frame.grid_rowconfigure(0, weight=1)
+        self._frame.grid_columnconfigure(0, weight=1)
+
+        self._base.grid_rowconfigure(0, weight=1)
+        self._base.grid_columnconfigure(0, weight=1)
+
+        self._frame.grid(row=0, column=0, sticky=&#34;NESW&#34;)
+
+    def _make_tool_entry(self, tool, panel, row, column, darkmode):
+        &#34;&#34;&#34;
+        Create a keyboard shortcut label for the given tool.
+
+        Args:
+            tool: The tool to create the entry for.
+            panel: The parent panel for the entry.
+            row: The row for this tool to be put on.
+            column: The column to start adding to.
+            darkmode: True if we should use darmode versions of icons.
+        Returns:
+            The next available column index.
+        &#34;&#34;&#34;
+        if darkmode:
+            data = Image.open(BytesIO(base64
+                              .b64decode(tool.darkmode_icon_string)))
+        else:
+            data = Image.open(BytesIO(base64.b64decode(tool.icon_string)))
+
+        img = ImageTk.PhotoImage(data)
+
+        img_label = ttk.Label(panel, image=img, style=&#34;HelpDialog.TLabel&#34;)
+        img_label.image = img
+        img_label.grid(row=row, column=column, sticky=&#34;NESW&#34;)
+        panel.grid_columnconfigure(column, weight=1)
+
+        column += 1
+
+        shortcut_text = tool.name + &#34; (&#34; + tool.key_mapping + &#34;)&#34;
+        text_label = ttk.Label(panel, text=shortcut_text,
+                               style=&#34;HelpDialog.TLabel&#34;)
+
+        panel.grid_columnconfigure(column, weight=1)
+
+        text_label.grid(row=row, column=column, sticky=&#34;NSEW&#34;)
+        column += 1
+
+        space_label = ttk.Label(panel, text=&#34;    &#34;,
+                                style=&#34;HelpDialog.TLabel&#34;)
+
+        panel.grid_columnconfigure(column, weight=1)
+        space_label.grid(row=row, column=column, sticky=&#34;NSEW&#34;)
+
+        column += 1
+        panel.grid_columnconfigure(column, weight=1)
+
+        return column
+
+    def _make_group_panel(self, group, centre_col):
+        &#34;&#34;&#34;
+        Create a panel for the grouping of tools.
+
+        Args:
+            group: The name of the group.
+            centre_col: The column that is in the centre
+
+        Returns:
+            A panel for placing the tool icons into.
+        &#34;&#34;&#34;
+        panel = ttk.Frame(self._base,
+                          style=&#34;KeyboardGroup.TFrame&#34;)
+
+        panel_title = ttk.Label(panel, text=group, style=&#34;HelpDialog.TLabel&#34;)
+        panel_title.grid(row=0, column=centre_col, columnspan=2)
+
+        f = font.Font(panel_title, panel_title.cget(&#34;font&#34;))
+        f.configure(underline=True)
+        f.configure(weight=&#39;bold&#39;)
+        f.configure(size=16)
+        panel_title.configure(font=f)
+
+        return panel</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="friendly_ground_truth.view.help_dialogs.AboutDialog"><code class="flex name class">
+<span>class <span class="ident">AboutDialog</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>A window that displays information about the current version of the
+applciation.</p>
+<h2 id="attributes">Attributes</h2>
+<p>{% An Attribute %}: {% Description %}
+Construct a toplevel widget with the parent MASTER.</p>
+<p>Valid resource names: background, bd, bg, borderwidth, class,
+colormap, container, cursor, height, highlightbackground,
+highlightcolor, highlightthickness, menu, relief, screen, takefocus,
+use, visual, width.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AboutDialog(tk.Toplevel):
+    &#34;&#34;&#34;
+    A window that displays information about the current version of the
+    applciation.
+
+    Attributes:
+        {% An Attribute %}: {% Description %}
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        self._base = tk.Toplevel()
+        self._base.title(&#34;About&#34;)
+
+        version_info = VersionInfo()
+        current_version = version_info.get_version_string()
+
+        latest = version_info.check_for_update()
+
+        version_text = (&#34;You are currently using version &#34; +
+                        current_version + &#34; &#34;)
+
+        version_text += latest
+
+        self._version_link = (&#34;https://github.com/KyleS22/friendly_ground&#34; +
+                              &#34;_truth/releases/latest&#34;)
+
+        manual_text = &#34; A user manual can be found at: &#34;
+        self._manual_link = (&#34;https://github.com/KyleS22/friendly_ground&#34; +
+                             &#34;_truth/wiki/User-Manual&#34;)
+
+        bug_text = &#34;Found a bug?  Please report it at:&#34;
+        self._bug_link = (&#34;https://github.com/KyleS22/friendly_ground_truth&#34; +
+                          &#34;/issues&#34;)
+
+        self._frame = ttk.Frame(self._base, style=&#34;HelpDialog.TFrame&#34;)
+
+        self._version_label = ttk.Label(self._frame, text=version_text,
+                                        style=&#34;HelpDialog.TLabel&#34;)
+        self._version_label.pack(pady=15)
+
+        if version_info.check_newer_version(version_info.
+                                            get_newest_release_info()):
+            self._version_link_label = ttk.Label(self._frame,
+                                                 text=self._version_link,
+                                                 style=&#34;Link.TLabel&#34;,
+                                                 cursor=&#34;hand2&#34;)
+            self._version_link_label.pack(pady=15)
+            self._version_link_label.bind(&#34;&lt;Button-1&gt;&#34;, self._on_version_click)
+
+        self._manual_label = ttk.Label(self._frame, text=manual_text,
+                                       style=&#34;HelpDialog.TLabel&#34;)
+        self._manual_label.pack(pady=15)
+
+        self._manual_link_label = ttk.Label(self._frame,
+                                            text=self._manual_link,
+                                            style=&#34;Link.TLabel&#34;,
+                                            cursor=&#34;hand2&#34;)
+        self._manual_link_label.pack(pady=15)
+        self._manual_link_label.bind(&#34;&lt;Button-1&gt;&#34;, self._on_manual_click)
+
+        self._bug_label = ttk.Label(self._frame, text=bug_text,
+                                    style=&#34;HelpDialog.TLabel&#34;)
+        self._bug_label.pack(pady=15)
+
+        self._bug_link_label = ttk.Label(self._frame, text=self._bug_link,
+                                         style=&#34;Link.TLabel&#34;,
+                                         cursor=&#34;hand2&#34;)
+        self._bug_link_label.pack(pady=15)
+        self._bug_link_label.bind(&#34;&lt;Button-1&gt;&#34;, self._on_bug_click)
+
+        self._frame.pack(fill=&#39;both&#39;, expand=True)
+
+    def _on_version_click(self, event):
+        webbrowser.open(self._version_link)
+
+    def _on_manual_click(self, event):
+        webbrowser.open(self._manual_link)
+
+    def _on_bug_click(self, event):
+        webbrowser.open(self._bug_link)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>tkinter.Toplevel</li>
+<li>tkinter.BaseWidget</li>
+<li>tkinter.Misc</li>
+<li>tkinter.Wm</li>
+</ul>
+</dd>
+<dt id="friendly_ground_truth.view.help_dialogs.KeyboardShortcutDialog"><code class="flex name class">
+<span>class <span class="ident">KeyboardShortcutDialog</span></span>
+<span>(</span><span>tools, darkmode)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A window displaying keyboard shortcuts for all the tools.</p>
+<p>Create the dialog.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tools</code></strong></dt>
+<dd>A dictionary of tools, keyed by their id.</dd>
+<dt><strong><code>darkmode</code></strong></dt>
+<dd>True if we are using the dark theme.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The window.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class KeyboardShortcutDialog(tk.Toplevel):
+    &#34;&#34;&#34;
+    A window displaying keyboard shortcuts for all the tools.
+
+    &#34;&#34;&#34;
+
+    NUM_COLS = 9
+
+    def __init__(self, tools, darkmode):
+        &#34;&#34;&#34;
+        Create the dialog.
+
+        Args:
+            tools: A dictionary of tools, keyed by their id.
+            darkmode: True if we are using the dark theme.
+        Returns:
+            The window.
+        &#34;&#34;&#34;
+
+        self._base = tk.Toplevel()
+        self._base.title(&#34;Keyboard Shortcuts&#34;)
+
+        self._frame = ttk.Frame(self._base, style=&#34;HelpDialog.TFrame&#34;)
+
+        group_priorities = [(0, &#34;Markups&#34;), (1, &#34;Navigation&#34;), (2, &#34;Undo&#34;)]
+
+        groups = [[] for _ in group_priorities]
+        groups.append([])
+
+        for tool_id in tools.keys():
+            tool = tools[tool_id]
+
+            tool_group = tool.group
+
+            in_priors = False
+
+            for p in group_priorities:
+                if tool_group == p[1]:
+                    groups[p[0]].append(tool)
+                    in_priors = True
+                    continue
+
+            if not in_priors:
+                groups[-1].append(tool)
+
+        if len(groups[-1]) == 0:
+            groups.pop()
+
+        row = 0
+        for group in groups:
+            name = group[0].group
+            centre_col = int(min(len(group), 3) * 3 / 2) - 1
+            panel = self._make_group_panel(name, centre_col)
+
+            tool_row = 1
+            tool_col = 0
+            for tool in group:
+                tool_col = self._make_tool_entry(tool, panel, tool_row,
+                                                 tool_col, darkmode)
+
+                if tool_col &gt;= self.NUM_COLS:
+                    tool_col = 0
+                    tool_row += 1
+
+            panel.grid(row=row, column=0, sticky=&#34;NESW&#34;)
+
+            row += 1
+
+        self._frame.grid_rowconfigure(0, weight=1)
+        self._frame.grid_columnconfigure(0, weight=1)
+
+        self._base.grid_rowconfigure(0, weight=1)
+        self._base.grid_columnconfigure(0, weight=1)
+
+        self._frame.grid(row=0, column=0, sticky=&#34;NESW&#34;)
+
+    def _make_tool_entry(self, tool, panel, row, column, darkmode):
+        &#34;&#34;&#34;
+        Create a keyboard shortcut label for the given tool.
+
+        Args:
+            tool: The tool to create the entry for.
+            panel: The parent panel for the entry.
+            row: The row for this tool to be put on.
+            column: The column to start adding to.
+            darkmode: True if we should use darmode versions of icons.
+        Returns:
+            The next available column index.
+        &#34;&#34;&#34;
+        if darkmode:
+            data = Image.open(BytesIO(base64
+                              .b64decode(tool.darkmode_icon_string)))
+        else:
+            data = Image.open(BytesIO(base64.b64decode(tool.icon_string)))
+
+        img = ImageTk.PhotoImage(data)
+
+        img_label = ttk.Label(panel, image=img, style=&#34;HelpDialog.TLabel&#34;)
+        img_label.image = img
+        img_label.grid(row=row, column=column, sticky=&#34;NESW&#34;)
+        panel.grid_columnconfigure(column, weight=1)
+
+        column += 1
+
+        shortcut_text = tool.name + &#34; (&#34; + tool.key_mapping + &#34;)&#34;
+        text_label = ttk.Label(panel, text=shortcut_text,
+                               style=&#34;HelpDialog.TLabel&#34;)
+
+        panel.grid_columnconfigure(column, weight=1)
+
+        text_label.grid(row=row, column=column, sticky=&#34;NSEW&#34;)
+        column += 1
+
+        space_label = ttk.Label(panel, text=&#34;    &#34;,
+                                style=&#34;HelpDialog.TLabel&#34;)
+
+        panel.grid_columnconfigure(column, weight=1)
+        space_label.grid(row=row, column=column, sticky=&#34;NSEW&#34;)
+
+        column += 1
+        panel.grid_columnconfigure(column, weight=1)
+
+        return column
+
+    def _make_group_panel(self, group, centre_col):
+        &#34;&#34;&#34;
+        Create a panel for the grouping of tools.
+
+        Args:
+            group: The name of the group.
+            centre_col: The column that is in the centre
+
+        Returns:
+            A panel for placing the tool icons into.
+        &#34;&#34;&#34;
+        panel = ttk.Frame(self._base,
+                          style=&#34;KeyboardGroup.TFrame&#34;)
+
+        panel_title = ttk.Label(panel, text=group, style=&#34;HelpDialog.TLabel&#34;)
+        panel_title.grid(row=0, column=centre_col, columnspan=2)
+
+        f = font.Font(panel_title, panel_title.cget(&#34;font&#34;))
+        f.configure(underline=True)
+        f.configure(weight=&#39;bold&#39;)
+        f.configure(size=16)
+        panel_title.configure(font=f)
+
+        return panel</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>tkinter.Toplevel</li>
+<li>tkinter.BaseWidget</li>
+<li>tkinter.Misc</li>
+<li>tkinter.Wm</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="friendly_ground_truth.view.help_dialogs.KeyboardShortcutDialog.NUM_COLS"><code class="name">var <span class="ident">NUM_COLS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="friendly_ground_truth.view" href="index.html">friendly_ground_truth.view</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="friendly_ground_truth.view.help_dialogs.AboutDialog" href="#friendly_ground_truth.view.help_dialogs.AboutDialog">AboutDialog</a></code></h4>
+</li>
+<li>
+<h4><code><a title="friendly_ground_truth.view.help_dialogs.KeyboardShortcutDialog" href="#friendly_ground_truth.view.help_dialogs.KeyboardShortcutDialog">KeyboardShortcutDialog</a></code></h4>
+<ul class="">
+<li><code><a title="friendly_ground_truth.view.help_dialogs.KeyboardShortcutDialog.NUM_COLS" href="#friendly_ground_truth.view.help_dialogs.KeyboardShortcutDialog.NUM_COLS">NUM_COLS</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

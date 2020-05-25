@@ -17,6 +17,9 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 
+import logging
+module_logger = logging.getLogger('friendly_gt.viewi.fgt_canvas')
+
 
 class AutoScrollbar(ttk.Scrollbar):
     """
@@ -49,11 +52,16 @@ class FGTCanvas:
         cursor: The current cursor to use on the image
     """
 
-    def __init__(self, placeholder, img, main_window):
+    def __init__(self, placeholder, img, main_window, style):
+
+        self._logger = logging.getLogger('friendly_gt.view.FGTCanvas')
 
         self._previous_position = (0, 0)
         self._coord_scale = 1
         self._dragged = False
+        self._prev_offset = (0, 0)
+
+        self._style = style
 
         self.imscale = 1.0  # Scale of the image
 
@@ -79,6 +87,10 @@ class FGTCanvas:
                                 yscrollcommand=vbar.set)
 
         self.canvas.grid(row=0, column=0, sticky='nswe')
+
+        background = self._style.lookup("Canvas.TFrame", 'background')
+
+        self.canvas.config(background=background)
         self.canvas.update()  # Make sure the canvas updates
 
         self._orig_canvas_x = self.canvas.xview()[0]
@@ -179,6 +191,7 @@ class FGTCanvas:
     @cursor.setter
     def cursor(self, value):
         self._cursor = value
+        self._set_cursor(None)
 
     @property
     def brush_radius(self):
@@ -189,23 +202,18 @@ class FGTCanvas:
         self._brush_radius = value
         self.draw_brush()
 
-    def new_image(self, image):
+    def new_image(self, image, patch_offset=(0, 0)):
         """
         Reset the image and all properties of the image on the canvas.
 
         Args:
             image: The image, a numpy array.
+            patch_offset: The offset of the current patch within the image
 
         Returns:
             None
         """
         self.imscale = 1.0
-
-        anchorx = -self.canvas.canvasx(0)
-        anchory = -self.canvas.canvasy(0)
-
-        self.canvas.scan_mark(int(anchorx), int(anchory))
-        self.canvas.scan_dragto(0, 0, gain=1)
 
         self.canvas.delete("all")
         self.img = image
@@ -256,6 +264,22 @@ class FGTCanvas:
                                                       self.imheight), width=0)
 
         self.__show_image()
+
+        # Deal with 0 offsets in the y coordinate
+        if patch_offset[1] == 0 and patch_offset[0] != 0:
+            patch_offset = patch_offset[0], self._prev_offset[1]
+
+        self._prev_offset = patch_offset
+
+        # The anchor point will be moved to (0, 0) in the window
+        # We want to account for the patch offset, but not put the current
+        # patch right in the corner
+        anchorx = -self.canvas.canvasx(0 - (patch_offset[1]/2))
+        anchory = -self.canvas.canvasy(0 - (patch_offset[0]/2))
+
+        self.canvas.scan_mark(int(anchorx), int(anchory))
+        self.canvas.scan_dragto(0, 0, gain=1)
+
         self.canvas.focus_set()
 
     def _on_motion(self, event):
@@ -283,7 +307,7 @@ class FGTCanvas:
 
     def _set_cursor(self, event):
         """
-        Set the cursor to the current specified icon/
+        Set the cursor to the current specified icon.
 
         Args:
             event: Event
@@ -341,7 +365,8 @@ class FGTCanvas:
 
         self._brush_cursor = self.canvas.create_oval(x_max, y_max, x_min,
                                                      y_min,
-                                                     outline='white')
+                                                     outline='white',
+                                                     tag='brush')
 
     def set_image(self, img):
         self.img = img
@@ -503,8 +528,9 @@ class FGTCanvas:
         Postconditions:
             The image is drawn on the canvas.
         """
-        if self._cursor == "brush":
-            self.draw_brush()
+        #if self._cursor == "brush":
+            #self.draw_brush()
+
         box_image = self.canvas.coords(self.container)  # get image area
         box_canvas = (self.canvas.canvasx(0),  # get visible area of the canvas
                       self.canvas.canvasy(0),
@@ -610,10 +636,11 @@ class FGTCanvas:
             return
 
         pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+
         container_coords = self.canvas.coords(self.container)
         pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
-        pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
 
+        pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
         self._main_window.on_canvas_click(pos)
 
     def __move_to(self, event):
@@ -642,7 +669,11 @@ class FGTCanvas:
             pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
 
             self._main_window.on_canvas_drag(pos)
-            self.draw_brush(pos)
+
+            brush_pos = (self.canvas.canvasx(event.x),
+                         self.canvas.canvasy(event.y))
+
+            self.draw_brush(brush_pos)
 
         self.__show_image()  # zoom tile and show it on the canvas
 

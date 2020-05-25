@@ -38,9 +38,9 @@ class TestNoRootTool():
         """
         mock_patch = MagicMock()
 
-        tool = NoRootTool()
+        tool = NoRootTool(MagicMock(), MagicMock())
         tool.patch = mock_patch
 
-        tool.no_root()
+        tool._no_root()
 
         mock_patch.clear_mask.assert_called()
