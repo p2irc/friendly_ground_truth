@@ -11,6 +11,8 @@ Description: Definitions of tools that can be used in Friendly Ground Truth
 import logging
 import copy
 import tkinter as tk
+from tkinter import ttk
+
 import threading
 
 from friendly_ground_truth.view.icons import icon_strings as icns
@@ -133,17 +135,19 @@ class FGTTool():
     def darkmode_icon_string(self):
         return self._darkmode_icon_string
 
-    def get_info_widget(self, parent):
+    def get_info_widget(self, parent, style):
         """
         Get the widget that controls this tool in the UI.
 
         Args:
             parent: The parent for the widget.
+            style: ttk style objext
 
         Returns:
             The tkinter Frame widget for this tool.
         """
-        self._info_widget = tk.Frame(parent, padx=0, pady=15)
+        self._info_widget = ttk.Frame(parent,
+                                      style="InfoPanel.TFrame")
         return self._info_widget
 
     def lock_undos(self):
@@ -291,6 +295,7 @@ class ThresholdTool(FGTTool):
 
         self._threshold_slider_var = None
         self._threshold_slider = None
+        self._slider_init = False
         self._new_patch = False
 
     @property
@@ -310,7 +315,7 @@ class ThresholdTool(FGTTool):
                         add_to_undo_stack(copy.deepcopy(self.patch),
                                           'threshold_adjust')
 
-            if self._threshold_slider is not None:
+            if self._threshold_slider is not None and self._slider_init:
                 self._threshold_slider_var = value
                 self._threshold_slider.set(value)
 
@@ -341,18 +346,19 @@ class ThresholdTool(FGTTool):
 
         self._threshold = patch.threshold
 
-    def get_info_widget(self, parent):
+    def get_info_widget(self, parent, style):
         """
         Get the widget that controls this tool in the info panel.
 
         Args:
             parent: The parent tkinter object.
+            style: ttk style object
 
         Returns:
             The widget.
         """
         self.lock_undos()
-        super().get_info_widget(parent)
+        super().get_info_widget(parent, style)
 
         self._threshold_slider_var = tk.DoubleVar()
 
@@ -365,6 +371,16 @@ class ThresholdTool(FGTTool):
                                           variable=self._threshold_slider_var,
                                           orient='horizontal',
                                           command=self._on_threshold_slider)
+
+        background = style.lookup("InfoPanel.Horizontal.TScale", "background")
+        foreground = style.lookup("InfoPanel.Horizontal.TScale", "foreground")
+        trough = style.lookup("InfoPanel.Horizontal.TScale", "troughcolor")
+
+        self._threshold_slider.config(background=background,
+                                      foreground=foreground,
+                                      troughcolor=trough,
+                                      bd=0,
+                                      highlightthickness=0)
 
         self._threshold_slider.set(self._threshold)
         self._threshold_slider.pack(side='top')
@@ -474,33 +490,35 @@ class AddRegionTool(FGTTool):
             if self._brush_sizer is not None:
                 self._brush_sizer_var.set(value)
 
-    def get_info_widget(self, parent):
+    def get_info_widget(self, parent, style):
         """
         Get the widget that controls this tool in the info panel.
 
         Args:
             parent: The parent tkinter object.
-
+            style: ttk style object.
         Returns:
             The widget.
         """
-        super().get_info_widget(parent)
+        super().get_info_widget(parent, style)
 
-        self._brush_size_panel = tk.Frame(self._info_widget,
-                                          padx=0, pady=15)
+        self._brush_size_panel = ttk.Frame(self._info_widget,
+                                           style="InfoPanel.TFrame")
 
-        self._brush_size_label = tk.Label(self._brush_size_panel,
-                                          text="Brush Size")
+        self._brush_size_label = ttk.Label(self._brush_size_panel,
+                                           text="Brush Size",
+                                           style="InfoPanel.TLabel")
 
         self._brush_sizer_var = tk.IntVar()
         self._brush_sizer_var.set(self._brush_radius)
         self._brush_sizer_var.trace('w', self._on_brush_sizer)
 
-        self._brush_sizer = tk.Spinbox(self._brush_size_panel,
-                                       from_=0,
-                                       to=64,
-                                       width=17,
-                                       textvariable=self._brush_sizer_var)
+        self._brush_sizer = ttk.Spinbox(self._brush_size_panel,
+                                        from_=0,
+                                        to=64,
+                                        width=17,
+                                        textvariable=self._brush_sizer_var,
+                                        style="InfoPanel.TSpinbox")
 
         self._brush_size_label.pack(side='left')
         self._brush_sizer.pack(side='left')
@@ -639,33 +657,35 @@ class RemoveRegionTool(FGTTool):
             if self._brush_sizer is not None:
                 self._brush_sizer_var.set(value)
 
-    def get_info_widget(self, parent):
+    def get_info_widget(self, parent, style):
         """
         Get the widget that controls this tool in the info panel.
 
         Args:
             parent: The parent tkinter object.
+            style: ttk style object.
 
         Returns:
             The widget.
         """
-        super().get_info_widget(parent)
+        super().get_info_widget(parent, style)
 
-        self._brush_size_panel = tk.Frame(self._info_widget,
-                                          padx=0, pady=15)
+        self._brush_size_panel = ttk.Frame(self._info_widget,
+                                           style="InfoPanel.TFrame")
 
-        self._brush_size_label = tk.Label(self._brush_size_panel,
-                                          text="Brush Size")
+        self._brush_size_label = ttk.Label(self._brush_size_panel,
+                                           text="Brush Size",
+                                           style="InfoPanel.TLabel")
 
         self._brush_sizer_var = tk.IntVar()
         self._brush_sizer_var.set(self._brush_radius)
         self._brush_sizer_var.trace('w', self._on_brush_sizer)
 
-        self._brush_sizer = tk.Spinbox(self._brush_size_panel,
-                                       from_=0,
-                                       to=64,
-                                       width=17,
-                                       textvariable=self._brush_sizer_var)
+        self._brush_sizer = ttk.Spinbox(self._brush_size_panel,
+                                        from_=0,
+                                        to=64,
+                                        width=17,
+                                        textvariable=self._brush_sizer_var)
 
         self._brush_size_label.pack(side='left')
         self._brush_sizer.pack(side='left')
@@ -965,17 +985,17 @@ class FloodAddTool(FGTTool):
         self.patch.flood_add_region(position, self.tolerance)
         self._notify_observers()
 
-    def get_info_widget(self, parent):
+    def get_info_widget(self, parent, style):
         """
         Get the widget that controls this tool in the info panel.
 
         Args:
             parent: The parent tkinter object.
-
+            style: ttk style object.
         Returns:
             The widget.
         """
-        super().get_info_widget(parent)
+        super().get_info_widget(parent, style)
 
         self._flood_slider_var = tk.DoubleVar()
 
@@ -989,6 +1009,16 @@ class FloodAddTool(FGTTool):
                                       _flood_slider_var,
                                       orient='horizontal',
                                       command=self._on_flood_slider)
+
+        background = style.lookup("InfoPanel.Horizontal.TScale", "background")
+        foreground = style.lookup("InfoPanel.Horizontal.TScale", "foreground")
+        trough = style.lookup("InfoPanel.Horizontal.TScale", "troughcolor")
+
+        self._flood_slider.config(background=background,
+                                  foreground=foreground,
+                                  troughcolor=trough,
+                                  bd=0,
+                                  highlightthickness=0)
 
         self._flood_slider.set(self._tolerance)
         self._flood_slider.pack(side='top')
@@ -1123,17 +1153,18 @@ class FloodRemoveTool(FGTTool):
         self.patch.flood_remove_region(position, self.tolerance)
         self._notify_observers()
 
-    def get_info_widget(self, parent):
+    def get_info_widget(self, parent, style):
         """
         Get the widget that controls this tool in the info panel.
 
         Args:
             parent: The parent tkinter object.
+            style: ttk style object.
 
         Returns:
             The widget.
         """
-        super().get_info_widget(parent)
+        super().get_info_widget(parent, style)
 
         self._flood_slider_var = tk.DoubleVar()
 
@@ -1147,6 +1178,16 @@ class FloodRemoveTool(FGTTool):
                                       _flood_slider_var,
                                       orient='horizontal',
                                       command=self._on_flood_slider)
+
+        background = style.lookup("InfoPanel.Horizontal.TScale", "background")
+        foreground = style.lookup("InfoPanel.Horizontal.TScale", "foreground")
+        trough = style.lookup("InfoPanel.Horizontal.TScale", "troughcolor")
+
+        self._flood_slider.config(background=background,
+                                  foreground=foreground,
+                                  troughcolor=trough,
+                                  bd=0,
+                                  highlightthickness=0)
 
         self._flood_slider.set(self._tolerance)
         self._flood_slider.pack(side='top')

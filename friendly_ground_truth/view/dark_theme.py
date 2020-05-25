@@ -14,6 +14,8 @@ from friendly_ground_truth.view import light_theme
 
 colours = {
             "toolbar_activate": "#ba4100",
+            "link_colour": "#bb86fc",
+            "pbar_colour": "#4d1f80",
             "bg_level_0": "#121212",
             "fg_level_0": "#ffffff",
             "bg_level_1": "#212124",
@@ -60,9 +62,165 @@ settings = {
                 "foreground": colours['fg_level_1']
                 }
 
-            }
-
-        }
+            },
+        "Toolbar.TLabel": {
+            "configure": {
+                "background": colours['bg_level_1'],
+                "foreground": colours['fg_level_1']
+                }
+            },
+        "TSeparator": {
+            "configure": {
+                "background": colours['bg_level_0'],
+                "foreground": colours['fg_level_0']
+                }
+            },
+        "MenuBar.TMenubutton": {
+            "configure": {
+                "background": colours['bg_level_1'],
+                "foreground": colours['fg_level_1'],
+                "bordercolor": colours['bg_level_2'],
+                "activeforeground": colours['fg_level_2'],
+                "activebackground": colours['bg_level_2']
+                }
+            },
+        "Menu.TMenubutton": {
+                "configure": {
+                    "background": colours['bg_level_2'],
+                    "foreground": colours['fg_level_2'],
+                    "bordercolor": colours['bg_level_3'],
+                    "activeforeground": colours['fg_level_3'],
+                    "activebackground": colours['bg_level_3']
+                    }
+                },
+        "TFrame": {
+                "configure": {
+                    "background": colours['bg_level_1']
+                    }
+                },
+        "Main.TFrame": {
+                "configure": {
+                    "background": colours['bg_level_0']
+                    }
+                },
+        "TEntry": {
+                "configure": {
+                    "background": colours['bg_level_3'],
+                    "foreground": colours['fg_level_3']
+                    }
+                },
+        "InfoPanel.TLabel": {
+                "configure": {
+                    "background": colours['bg_level_1'],
+                    "foreground": colours['fg_level_1'],
+                    "padding": 10
+                    }
+                },
+        "InfoPanel.TFrame": {
+                "configure": {
+                    "background": colours['bg_level_1'],
+                    "foreground": colours['fg_level_1'],
+                    "bordercolor": colours['bg_level_2'],
+                    }
+                },
+        "Horizontal.TProgressbar": {
+                "configure": {
+                    "background": colours['pbar_colour'],
+                    "foreground": colours['pbar_colour'],
+                    "troughcolor": colours['fg_level_2']
+                    }
+            },
+        "InfoPanel.Horizontal.TScale": {
+                "configure": {
+                    "background": colours['bg_level_1'],
+                    "foreground": colours['fg_level_1'],
+                    "troughcolor": colours['bg_level_3']
+                    }
+                },
+        "Horizontal.TScrollbar": {
+                "configure": {
+                    "background": colours['bg_level_3'],
+                    "foreground": colours['fg_level_3'],
+                    "highlightcolor": colours['fg_level_3'],
+                    "troughcolor": colours['bg_level_2'],
+                    "bordercolor": colours['bg_level_2']
+                    }
+                },
+        "Vertical.TScrollbar": {
+                "configure": {
+                    "background": colours['bg_level_3'],
+                    "foreground": colours['fg_level_3'],
+                    "highlightcolor": colours['fg_level_3'],
+                    "troughcolor": colours['bg_level_2'],
+                    "bordercolor": colours['bg_level_2']
+                    }
+                },
+        "HelpDialog.TLabel": {
+                "configure": {
+                    "background": colours['bg_level_1'],
+                    "foreground": colours['fg_level_1']
+                    }
+                },
+        "Link.TLabel": {
+                "configure": {
+                    "background": colours['bg_level_1'],
+                    "foreground": colours['link_colour']
+                    }
+                },
+        "HelpDialog.TFrame": {
+                "configure": {
+                    "background": colours['bg_level_1'],
+                    "foreground": colours['fg_level_1']
+                    }
+                },
+        "KeyboardGroup.TFrame": {
+                "configure": {
+                    "background": colours['bg_level_1'],
+                    "foreground": colours['bg_level_2'],
+                    "padding": 10
+                    }
+                },
+        "TButton": {
+                "configure": {
+                    "background": colours['bg_level_2'],
+                    "foreground": colours['fg_level_2']
+                    },
+                "map": {
+                    "background": [('active', colours['bg_level_3'])],
+                    "relief": [('pressed', 'sunken')]
+                    }
+                },
+        "TLabel": {
+            "configure": {
+                "background": colours['bg_level_1'],
+                "foreground": colours['fg_level_1']
+                }
+            },
+        "TMenuButton": {
+                "configure": {
+                    "background": colours['bg_level_2'],
+                    "foreground": colours['bg_level_2']
+                    }
+                },
+        "TPanedWindow": {
+                "configure": {
+                    "background": colours['bg_level_3'],
+                    "foreground": colours['fg_level_3']
+                    }
+                },
+        "Canvas.TFrame": {
+                "configure": {
+                    "background": colours['bg_level_0'],
+                    "foreground": colours['fg_level_0']
+                    }
+                },
+        "ButtonPanel.TFrame": {
+                "configure": {
+                    "background": colours['bg_level_1'],
+                    "foreground": colours['fg_level_1']
+                    }
+                }
+}
 
 
 style = light_theme.style

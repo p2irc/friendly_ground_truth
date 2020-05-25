@@ -57,12 +57,14 @@ class MainWindow(ttk.Frame):
             from friendly_ground_truth.view import dark_theme
 
             dark_theme.style.theme_use("dark_theme")
+            self.style = dark_theme.style
 
         else:
             from friendly_ground_truth.view import light_theme
             light_theme.style.theme_use("light_theme")
+            self.style = light_theme.style
 
-        ttk.Frame.__init__(self, master=master)
+        ttk.Frame.__init__(self, master=master, style="Main.TFrame")
 
         # --------------------------------------
         # Private Attributes
@@ -112,6 +114,9 @@ class MainWindow(ttk.Frame):
         self._master.rowconfigure(0, weight=1)
         self._master.columnconfigure(0, weight=1)
 
+        background = self.style.lookup('Main.TFrame', 'background')
+        self._master.config(background=background)
+
         self._register_key_mappings()
 
         self._create_menubar()
@@ -126,8 +131,9 @@ class MainWindow(ttk.Frame):
         self.bind_all("<Button-4>", self._on_mousewheel)
 
         self._info_panel = InfoPanel(self.master)
-        self._info_panel.config(borderwidth=5)
-        self._info_panel.config(relief='ridge')
+        #self._info_panel.config(borderwidth=5)
+        #self._info_panel.config(relief='ridge')
+        self._info_panel.config(style="InfoPanel.TFrame")
 
         self._info_panel.grid(row=2, column=0, sticky='ew')
 
@@ -153,7 +159,7 @@ class MainWindow(ttk.Frame):
         if self._canvas is not None:
             self._canvas.destroy()
 
-        self._canvas = FGTCanvas(self.master, image, self)
+        self._canvas = FGTCanvas(self.master, image, self, self.style)
         self._canvas.grid(row=1, column=0, sticky="NSEW")
         self._master.grid_rowconfigure(0, weight=0)
         self._master.grid_rowconfigure(1, weight=1)
@@ -174,20 +180,29 @@ class MainWindow(ttk.Frame):
         self.progress_popup = tk.Toplevel()
         self.progress_popup.geometry("100x50+500+400")
 
-        tk.Label(self.progress_popup, text="Image Loading.")\
+        frame = ttk.Frame(self.progress_popup)
+
+        ttk.Label(frame, text="Image Loading.")\
             .grid(row=0, column=0)
 
         self.load_progress = 0
         self.load_progress_var = tk.DoubleVar()
-        self.load_progress_bar = ttk.Progressbar(self.progress_popup,
+        self.load_progress_bar = ttk.Progressbar(frame,
                                                  variable=self.
                                                  load_progress_var,
                                                  maximum=100)
 
-        self.load_progress_bar.grid(row=1, column=0)
+        self.load_progress_bar.grid(row=1, column=0, sticky="NSEW")
 
         self.progress_step = float(100.0/num_patches)
+
+        frame.grid(row=0, column=0, sticky="NSEW")
+        self.progress_popup.grid_columnconfigure(0, weight=1)
+
         self.progress_popup.pack_slaves()
+
+        background = self.style.lookup("TFrame", "background")
+        self.progress_popup.config(background=background)
 
     def show_image(self, img, new=False, patch_offset=(0, 0)):
         """
@@ -302,7 +317,8 @@ class MainWindow(ttk.Frame):
             self._old_tool.destroy_info_widget()
 
         self._info_panel.set_info_widget(tool.
-                                         get_info_widget(self._info_panel),
+                                         get_info_widget(self._info_panel,
+                                                         self.style),
                                          tool.name)
 
         self._old_tool = tool
@@ -368,7 +384,18 @@ class MainWindow(ttk.Frame):
             The menu bar will be created at the top of the screen.
         """
 
+        background = self.style.lookup('MenuBar.TMenubutton', 'background')
+        foreground = self.style.lookup('MenuBar.TMenubutton', 'foreground')
+
+        activebackground = self.style.lookup('MenuBar.TMenubutton',
+                                              'activebackground')
+        activeforeground = self.style.lookup('MenuBar.TMenubutton',
+                                              'activeforeground')
+
         self._menubar = tk.Menu(self.master)
+        self._menubar.config(background=background, foreground=foreground,
+                             activebackground=activebackground,
+                             activeforeground=activeforeground)
 
         self._create_file_menu()
 
@@ -392,6 +419,18 @@ class MainWindow(ttk.Frame):
 
         self._filemenu = tk.Menu(self._menubar, tearoff=0)
 
+        background = self.style.lookup('Menu.TMenubutton', 'background')
+        foreground = self.style.lookup('Menu.TMenubutton', 'foreground')
+
+        activebackground = self.style.lookup('Menu.TMenubutton',
+                                              'activebackground')
+        activeforeground = self.style.lookup('Menu.TMenubutton',
+                                              'activeforeground')
+
+        self._filemenu.config(background=background, foreground=foreground,
+                              activebackground=activebackground,
+                              activeforeground=activeforeground)
+
         self._filemenu.add_command(label="Load Image",
                                    command=self._on_load_image)
 
@@ -411,7 +450,20 @@ class MainWindow(ttk.Frame):
         Postconditions:
             The help menu will be populated.
         """
+
+        background = self.style.lookup('Menu.TMenubutton', 'background')
+        foreground = self.style.lookup('Menu.TMenubutton', 'foreground')
+
+        activebackground = self.style.lookup('Menu.TMenubutton',
+                                              'activebackground')
+        activeforeground = self.style.lookup('Menu.TMenubutton',
+                                              'activeforeground')
+
         self._helpmenu = tk.Menu(self._menubar, tearoff=0)
+
+        self._helpmenu.config(background=background, foreground=foreground,
+                              activebackground=activebackground,
+                              activeforeground=activeforeground)
 
         self._helpmenu.add_command(label="About",
                                    command=self._on_about)
@@ -505,10 +557,14 @@ class MainWindow(ttk.Frame):
                 self._create_tool_tip(button, tool.id, tool.name)
                 self._toolbar_buttons[tool.id] = button
 
-            sep = tk.ttk.Separator(self._toolbar, orient="vertical")
+            sep = tk.ttk.Separator(self._toolbar, orient="vertical",
+                                   style="TSeparator")
             sep.pack(side='left', padx=5, fill='both')
 
-        self._image_indicator = tk.Label(self._toolbar, text="No Image Loaded")
+        self._image_indicator = ttk.Label(self._toolbar,
+                                          text="No Image Loaded",
+                                          style="Toolbar.TLabel")
+
         self._image_indicator.pack(side='right', padx=2, pady=2)
         self._toolbar.grid(column=0, row=0, sticky='NEW')
 
@@ -628,7 +684,7 @@ class MainWindow(ttk.Frame):
         Returns:
             None
         """
-        KeyboardShortcutDialog(self._controller.image_tools)
+        KeyboardShortcutDialog(self._controller.image_tools, self._darkmode)
 
     def _on_tool_selected(self, id):
         """

@@ -700,7 +700,7 @@ class Controller():
 
         overlay = overlay[rmin:rmax, cmin:cmax]
 
-        PreviewWindow(overlay, self)
+        PreviewWindow(overlay, self, self._main_window.style)
 
     def _get_image_name_from_path(self, path):
         """

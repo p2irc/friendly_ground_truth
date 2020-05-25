@@ -10,6 +10,7 @@ Description: An image mask preview window.
 """
 
 import tkinter as tk
+from tkinter import ttk
 
 from PIL import Image, ImageTk as itk
 
@@ -22,9 +23,11 @@ class PreviewWindow(tk.Toplevel):
         img: The image for previewing
     """
 
-    def __init__(self, img, controller):
+    def __init__(self, img, controller, style):
         self._base = tk.Toplevel()
         self._base.title("Preview")
+
+        self._frame = ttk.Frame(self._base)
 
         self._canvas_size = img.shape[0]//2, img.shape[1]//2
 
@@ -33,26 +36,28 @@ class PreviewWindow(tk.Toplevel):
         self.img = img
         self.controller = controller
 
-        self._button_panel = tk.Frame(self._base, borderwidth=5,
-                                      relief='ridge',
-                                      padx=50,
-                                      pady=2)
+        self._button_panel = ttk.Frame(self._frame, borderwidth=5,
+                                       style="ButtonPanel.TFrame")
 
-        self._save_button = tk.Button(self._button_panel, text="Save",
-                                      command=self._on_save)
+        self._save_button = ttk.Button(self._button_panel, text="Save",
+                                       command=self._on_save)
 
         self._save_button.pack(side='right')
 
-        self._cancel_button = tk.Button(self._button_panel, text="Cancel",
-                                        command=self._on_cancel)
+        self._cancel_button = ttk.Button(self._button_panel, text="Cancel",
+                                         command=self._on_cancel)
 
         self._cancel_button.pack(side='left')
 
         self._button_panel.pack(side='top', fill='both')
 
-        self._canvas = tk.Canvas(self._base)
-        self._canvas.pack(fill='both', expand='yes')
+        self._canvas = tk.Canvas(self._frame)
 
+        background = style.lookup("Canvas.TFrame", "background")
+        self._canvas.config(background=background)
+
+        self._canvas.pack(fill='both', expand='yes')
+        self._frame.pack(fill='both', expand=True)
         self._show_image()
 
     def _on_save(self):

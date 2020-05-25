@@ -52,7 +52,7 @@ class FGTCanvas:
         cursor: The current cursor to use on the image
     """
 
-    def __init__(self, placeholder, img, main_window):
+    def __init__(self, placeholder, img, main_window, style):
 
         self._logger = logging.getLogger('friendly_gt.view.FGTCanvas')
 
@@ -60,6 +60,8 @@ class FGTCanvas:
         self._coord_scale = 1
         self._dragged = False
         self._prev_offset = (0, 0)
+
+        self._style = style
 
         self.imscale = 1.0  # Scale of the image
 
@@ -85,6 +87,10 @@ class FGTCanvas:
                                 yscrollcommand=vbar.set)
 
         self.canvas.grid(row=0, column=0, sticky='nswe')
+
+        background = self._style.lookup("Canvas.TFrame", 'background')
+
+        self.canvas.config(background=background)
         self.canvas.update()  # Make sure the canvas updates
 
         self._orig_canvas_x = self.canvas.xview()[0]
