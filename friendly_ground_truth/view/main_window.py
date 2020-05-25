@@ -24,8 +24,6 @@ from friendly_ground_truth.view.help_dialogs import (AboutDialog,
                                                      KeyboardShortcutDialog)
 from friendly_ground_truth.view.preferences_window import PreferencesWindow
 
-from sys import platform
-
 from functools import partial
 
 import logging
@@ -634,6 +632,10 @@ class MainWindow(ttk.Frame):
             self._controller.adjust_tool(1)
         elif key == "CTRL+minus" or key == "CTRL+-":
             self._controller.adjust_tool(-1)
+        elif key == "f11":
+            self._master.attributes('-fullscreen', True)
+        elif key == "escape":
+            self._master.attributes('-fullscreen', False)
         else:
             try:
                 tool_id = self._reverse_key_mappings[key]
