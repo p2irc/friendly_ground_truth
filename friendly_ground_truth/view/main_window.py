@@ -22,6 +22,7 @@ from friendly_ground_truth.view.fgt_canvas import FGTCanvas
 from friendly_ground_truth.view.info_panel import InfoPanel
 from friendly_ground_truth.view.help_dialogs import (AboutDialog,
                                                      KeyboardShortcutDialog)
+from friendly_ground_truth.view.preferences_window import PreferencesWindow
 
 from sys import platform
 
@@ -51,7 +52,14 @@ class MainWindow(ttk.Frame):
             A main window object.
         """
 
-        self._darkmode = True
+        preferences = controller.load_preferences()
+
+        theme = preferences['theme']
+
+        if theme == 'Light':
+            self._darkmode = False
+        elif theme == 'Dark':
+            self._darkmode = True
 
         if self._darkmode:
             from friendly_ground_truth.view import dark_theme
@@ -114,8 +122,7 @@ class MainWindow(ttk.Frame):
         self._master.rowconfigure(0, weight=1)
         self._master.columnconfigure(0, weight=1)
 
-        background = self.style.lookup('Main.TFrame', 'background')
-        self._master.config(background=background)
+        self._set_master_theme()
 
         self._register_key_mappings()
 
@@ -163,6 +170,42 @@ class MainWindow(ttk.Frame):
         self._canvas.grid(row=1, column=0, sticky="NSEW")
         self._master.grid_rowconfigure(0, weight=0)
         self._master.grid_rowconfigure(1, weight=1)
+
+    def set_theme(self, theme):
+        """
+        Set the current theme for the application.
+
+        Args:
+            theme: A string.
+
+        Returns:
+            None
+        """
+
+        if theme.lower() == 'dark':
+            self._darkmode = True
+
+            from friendly_ground_truth.view import dark_theme
+
+            dark_theme.style.theme_use("dark_theme")
+            self.style = dark_theme.style
+
+            self._enable_darkmode_buttons()
+
+        elif theme.lower() == 'light':
+            self._darkmode = False
+            from friendly_ground_truth.view import light_theme
+
+            light_theme.style.theme_use("light_theme")
+            self.style = light_theme.style
+
+            self._toolbar.destroy()
+            self._create_toolbar()
+
+        self._set_menubar_theme()
+        self._set_helpmenu_theme()
+        self._set_master_theme()
+        self._set_filemenu_theme()
 
     def start_progressbar(self, num_patches):
         """
@@ -384,18 +427,9 @@ class MainWindow(ttk.Frame):
             The menu bar will be created at the top of the screen.
         """
 
-        background = self.style.lookup('MenuBar.TMenubutton', 'background')
-        foreground = self.style.lookup('MenuBar.TMenubutton', 'foreground')
-
-        activebackground = self.style.lookup('MenuBar.TMenubutton',
-                                              'activebackground')
-        activeforeground = self.style.lookup('MenuBar.TMenubutton',
-                                              'activeforeground')
-
         self._menubar = tk.Menu(self.master)
-        self._menubar.config(background=background, foreground=foreground,
-                             activebackground=activebackground,
-                             activeforeground=activeforeground)
+
+        self._set_menubar_theme()
 
         self._create_file_menu()
 
@@ -419,23 +453,18 @@ class MainWindow(ttk.Frame):
 
         self._filemenu = tk.Menu(self._menubar, tearoff=0)
 
-        background = self.style.lookup('Menu.TMenubutton', 'background')
-        foreground = self.style.lookup('Menu.TMenubutton', 'foreground')
 
-        activebackground = self.style.lookup('Menu.TMenubutton',
-                                              'activebackground')
-        activeforeground = self.style.lookup('Menu.TMenubutton',
-                                              'activeforeground')
-
-        self._filemenu.config(background=background, foreground=foreground,
-                              activebackground=activebackground,
-                              activeforeground=activeforeground)
+        self._set_filemenu_theme()
 
         self._filemenu.add_command(label="Load Image",
                                    command=self._on_load_image)
 
         self._filemenu.add_command(label="Save Mask",
                                    command=self._on_save_mask)
+
+        self._filemenu.add_separator()
+        self._filemenu.add_command(label="Preferences",
+                                   command=self._on_preferences)
 
         self._menubar.add_cascade(label="File", menu=self._filemenu)
 
@@ -451,19 +480,9 @@ class MainWindow(ttk.Frame):
             The help menu will be populated.
         """
 
-        background = self.style.lookup('Menu.TMenubutton', 'background')
-        foreground = self.style.lookup('Menu.TMenubutton', 'foreground')
-
-        activebackground = self.style.lookup('Menu.TMenubutton',
-                                              'activebackground')
-        activeforeground = self.style.lookup('Menu.TMenubutton',
-                                              'activeforeground')
-
         self._helpmenu = tk.Menu(self._menubar, tearoff=0)
 
-        self._helpmenu.config(background=background, foreground=foreground,
-                              activebackground=activebackground,
-                              activeforeground=activeforeground)
+        self._set_helpmenu_theme()
 
         self._helpmenu.add_command(label="About",
                                    command=self._on_about)
@@ -666,6 +685,17 @@ class MainWindow(ttk.Frame):
         """
         self._controller.save_mask()
 
+
+    def _on_preferences(self):
+        """
+        Called when the preferences menu option is chosen.
+
+
+        Returns:
+            None
+        """
+        PreferencesWindow(self._controller, self.style)
+
     def _on_about(self):
         """
         Called when the about button is chosen.
@@ -766,6 +796,59 @@ class MainWindow(ttk.Frame):
         # If control is down)
         if event.state - self._previous_state == 4:
             self._controller.adjust_tool(rotation)
+
+    def _set_menubar_theme(self):
+        """
+        Set the theme for the menubar.
+
+
+        Returns:
+            None
+        """
+
+        background = self.style.lookup('MenuBar.TMenubutton', 'background')
+        foreground = self.style.lookup('MenuBar.TMenubutton', 'foreground')
+
+        activebackground = self.style.lookup('MenuBar.TMenubutton',
+                                             'activebackground')
+        activeforeground = self.style.lookup('MenuBar.TMenubutton',
+                                             'activeforeground')
+
+        self._menubar.config(background=background, foreground=foreground,
+                             activebackground=activebackground,
+                             activeforeground=activeforeground)
+
+    def _set_filemenu_theme(self):
+
+        background = self.style.lookup('Menu.TMenubutton', 'background')
+        foreground = self.style.lookup('Menu.TMenubutton', 'foreground')
+
+        activebackground = self.style.lookup('Menu.TMenubutton',
+                                             'activebackground')
+        activeforeground = self.style.lookup('Menu.TMenubutton',
+                                             'activeforeground')
+
+        self._filemenu.config(background=background, foreground=foreground,
+                              activebackground=activebackground,
+                              activeforeground=activeforeground)
+
+    def _set_helpmenu_theme(self):
+
+        background = self.style.lookup('Menu.TMenubutton', 'background')
+        foreground = self.style.lookup('Menu.TMenubutton', 'foreground')
+
+        activebackground = self.style.lookup('Menu.TMenubutton',
+                                             'activebackground')
+        activeforeground = self.style.lookup('Menu.TMenubutton',
+                                             'activeforeground')
+
+        self._helpmenu.config(background=background, foreground=foreground,
+                              activebackground=activebackground,
+                              activeforeground=activeforeground)
+
+    def _set_master_theme(self):
+        background = self.style.lookup('Main.TFrame', 'background')
+        self._master.config(background=background)
 
 
 class CreateToolTip(object):

@@ -28,6 +28,7 @@ from skimage import segmentation, img_as_ubyte
 
 import os
 import copy
+import json
 
 import tkinter.filedialog
 import tkinter.messagebox
@@ -36,6 +37,9 @@ import numpy as np
 
 import logging
 module_logger = logging.getLogger('friendly_gt.controller.controller')
+
+PREFERENCES_PATH = "./user_preferences.json"
+DEFAULT_PREFS = {'theme': 'Light'}
 
 
 class Controller():
@@ -200,6 +204,50 @@ class Controller():
 
         except IOError:
             self._logger.error("Could not save file!")
+
+    def set_preferences(self, preferences):
+        """
+        Set the current preferences for the application.
+
+        Args:
+            preferences: A dictionary of preferences and their values.
+
+        Returns:
+            None
+        """
+        theme = preferences['theme']
+
+        self._main_window.set_theme(theme)
+
+    def load_preferences(self):
+        """
+        Load the preferences saved in the preferences file.
+
+
+        Returns:
+            A dictionary containing the user's preferences.
+        """
+        if not os.path.exists(PREFERENCES_PATH):
+            return DEFAULT_PREFS
+
+        with open(PREFERENCES_PATH, 'r') as fin:
+            preferences = json.load(fin)
+
+        return preferences
+
+    def save_preferences(self, preferences):
+        """
+        Save the user preferences.
+
+        Args:
+            preferences: A dictionary containing the user preferences.
+
+        Returns:
+            None
+        """
+
+        with open(PREFERENCES_PATH, 'w') as fout:
+            json.dump(preferences, fout)
 
     def activate_tool(self, id):
         """
