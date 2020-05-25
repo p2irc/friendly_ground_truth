@@ -26,6 +26,8 @@ from friendly_ground_truth.model.model import Image
 
 from skimage import segmentation, img_as_ubyte
 
+from sys import platform
+
 import os
 import copy
 import json
@@ -38,7 +40,20 @@ import numpy as np
 import logging
 module_logger = logging.getLogger('friendly_gt.controller.controller')
 
-PREFERENCES_PATH = "./user_preferences.json"
+if platform != 'win32':
+
+    home = os.path.expanduser("~")
+
+    data_dir = os.path.join(home, ".friendly_ground_truth/")
+
+    if not os.path.exists(data_dir):
+        os.mkdir(data_dir)
+
+    PREFERENCES_PATH = os.path.join(data_dir, "user_preferences.json")
+
+else:
+    PREFERENCES_PATH = "./user_preferences.json"
+
 DEFAULT_PREFS = {'theme': 'Light'}
 
 
