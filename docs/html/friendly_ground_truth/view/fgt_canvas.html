@@ -1,0 +1,2243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>friendly_ground_truth.view.fgt_canvas API documentation</title>
+<meta name="description" content="File Name: fgt_canvas.py …" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>friendly_ground_truth.view.fgt_canvas</code></h1>
+</header>
+<section id="section-intro">
+<p>File Name: fgt_canvas.py</p>
+<p>Authors: Kyle Seienthal</p>
+<p>Date: 13-05-2020</p>
+<p>Description: Canvas widget for displaying and interacting with images.</p>
+<p>Code largely adapted from <a href="https://stackoverflow.com/a/48137257">https://stackoverflow.com/a/48137257</a></p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+File Name: fgt_canvas.py
+
+Authors: Kyle Seienthal
+
+Date: 13-05-2020
+
+Description: Canvas widget for displaying and interacting with images.
+
+
+Code largely adapted from https://stackoverflow.com/a/48137257
+&#34;&#34;&#34;
+import math
+import warnings
+import tkinter as tk
+
+from tkinter import ttk
+from PIL import Image, ImageTk
+
+import logging
+module_logger = logging.getLogger(&#39;friendly_gt.viewi.fgt_canvas&#39;)
+
+
+class AutoScrollbar(ttk.Scrollbar):
+    &#34;&#34;&#34;
+    Self hiding scrollbar.
+    &#34;&#34;&#34;
+
+    def set(self, lo, hi):
+
+        if float(lo) &lt;= 0.0 and float(hi) &gt;= 1.0:
+            self.grid_remove()
+        else:
+            self.grid()
+            ttk.Scrollbar.set(self, lo, hi)
+
+        def pack(self, **kw):
+            raise tk.TclError(&#39;Cannot use pack with the widget &#39; +
+                              self.__class__.__name__)
+
+        def place(self, **kw):
+            raise tk.TclError(&#39;Cannot use place with the widget &#39; +
+                              self.__class__.__name__)
+
+
+class FGTCanvas:
+    &#34;&#34;&#34;
+    A canvas that allows panning and zooming of large images.
+
+    Attributes:
+        imscale: The current scale of the image
+        cursor: The current cursor to use on the image
+    &#34;&#34;&#34;
+
+    def __init__(self, placeholder, img, main_window, style):
+
+        self._logger = logging.getLogger(&#39;friendly_gt.view.FGTCanvas&#39;)
+
+        self._previous_position = (0, 0)
+        self._coord_scale = 1
+        self._dragged = False
+        self._prev_offset = (0, 0)
+
+        self._style = style
+
+        self.imscale = 1.0  # Scale of the image
+
+        self._main_window = main_window
+
+        self.__delta = 1.3  # Zoom magnitude
+        self.__filter = Image.ANTIALIAS
+        self.__previous_state = 0  # The previous state of the keyboard
+        self.__imframe = ttk.Frame(placeholder)
+
+        self.img = img
+
+        # Scrollbars
+        hbar = AutoScrollbar(self.__imframe, orient=&#39;horizontal&#39;)
+        vbar = AutoScrollbar(self.__imframe, orient=&#39;vertical&#39;)
+
+        hbar.grid(row=1, column=0, sticky=&#39;we&#39;)
+        vbar.grid(row=0, column=1, sticky=&#39;ns&#39;)
+
+        # Create the canvas
+        self.canvas = tk.Canvas(self.__imframe, highlightthickness=0,
+                                xscrollcommand=hbar.set,
+                                yscrollcommand=vbar.set)
+
+        self.canvas.grid(row=0, column=0, sticky=&#39;nswe&#39;)
+
+        background = self._style.lookup(&#34;Canvas.TFrame&#34;, &#39;background&#39;)
+
+        self.canvas.config(background=background)
+        self.canvas.update()  # Make sure the canvas updates
+
+        self._orig_canvas_x = self.canvas.xview()[0]
+        self._orig_canvas_y = self.canvas.yview()[0]
+
+        hbar.configure(command=self.__scroll_x)
+        vbar.configure(command=self.__scroll_y)
+
+        # Bind events to the canvas
+        # When the canvas is resized
+        self.canvas.bind(&#39;&lt;Configure&gt;&#39;, lambda event: self.__show_image())
+        # Remember the canvas position
+        self.canvas.bind(&#39;&lt;ButtonPress-1&gt;&#39;, self.__move_from)
+
+        self.canvas.bind(&#39;&lt;ButtonRelease-1&gt;&#39;, self._on_click_release)
+        # Move the canvas
+        self.canvas.bind(&#39;&lt;B1-Motion&gt;&#39;, self.__move_to)
+        # Zoom for Windows and MacOs
+        self.canvas.bind(&#39;&lt;MouseWheel&gt;&#39;, self.__wheel)
+        # Zoom for Linux, scroll down
+        self.canvas.bind(&#39;&lt;Button-5&gt;&#39;, self.__wheel)
+        # Zoom for Linux, scroll up
+        self.canvas.bind(&#39;&lt;Button-4&gt;&#39;, self.__wheel)
+
+        # Deal with keystrokes in idle mode
+        self.canvas.bind(&#39;&lt;Key&gt;&#39;, lambda event:
+                         self.canvas.after_idle(self.__keystroke, event))
+
+        # Cursor stuff
+        self.canvas.bind(&#39;&lt;Motion&gt;&#39;, self._on_motion)
+        self.canvas.bind(&#39;&lt;Enter&gt;&#39;, self._set_cursor)
+        self.canvas.bind(&#39;&lt;Leave&gt;&#39;, self._default_cursor)
+        self.canvas.bind(&#39;&lt;FocusOut&gt;&#39;, self._default_cursor)
+        self.canvas.bind(&#39;&lt;FocusIn&gt;&#39;, self._set_cursor)
+
+        # Decide if the image is too big
+        self.__huge = False
+        self.__huge_size = 14000
+        self.__band_width = 1024
+
+        Image.MAX_IMAGE_PIXELS = 1000000000
+
+        with warnings.catch_warnings():
+            warnings.simplefilter(&#39;ignore&#39;)
+            self.__image = Image.fromarray(self.img)
+
+        self.imwidth, self.imheight = self.__image.size
+
+        if (self.imwidth * self.imheight &gt; self.__huge_size * self.__huge_size
+           and self.__image.tile[0][0] == &#39;raw&#39;):
+
+            self.__huge = True
+            self.__offset = self.__image.tile[0][2]
+            self.__tile = [self.__image.tile[0][0],
+                           [0, 0, self.imwidth, 0],
+                           self.__offset,
+                           self.__image.tile[0][3]]
+
+        self.__min_side = min(self.imwidth, self.imheight)
+
+        # Image Pyramid
+        if self.__huge:
+            self.__pyramid = [self.smaller()]
+        else:
+            self.__pyramid = [Image.fromarray(self.img)]
+
+        # Set ratio coefficeint for pyramid
+        if self.__huge:
+            self.__ratio = max(self.imwidth, self.imheight) / self.__huge_size
+        else:
+            self.__ratio = 1.0
+
+        self.__curr_img = 0  # The current image from the pyramid
+        self.__scale = self.imscale * self.__ratio
+        self.__reduction = 2  # Reduction degree of pyramid
+
+        w, h, = self.__pyramid[-1].size
+        while w &gt; 512 and h &gt; 512:
+            w /= self.__reduction
+            h /= self.__reduction
+            self.__pyramid.append(self.__pyramid[-1].resize((int(w), int(h)),
+                                  self.__filter))
+
+        # Put image into rectangle for setting corrdinates
+        self.container = self.canvas.create_rectangle((0, 0, self.imwidth,
+                                                      self.imheight), width=0)
+        self._cursor = &#34;arrow&#34;
+        self._brush_cursor = None
+        self._brush_radius = None
+
+        self.__show_image()
+        self.canvas.focus_set()
+
+    @property
+    def cursor(self):
+        return self._cursor
+
+    @cursor.setter
+    def cursor(self, value):
+        self._cursor = value
+        self._set_cursor(None)
+
+    @property
+    def brush_radius(self):
+        return self._brush_radius
+
+    @brush_radius.setter
+    def brush_radius(self, value):
+        self._brush_radius = value
+        self.draw_brush()
+
+    def new_image(self, image, patch_offset=(0, 0)):
+        &#34;&#34;&#34;
+        Reset the image and all properties of the image on the canvas.
+
+        Args:
+            image: The image, a numpy array.
+            patch_offset: The offset of the current patch within the image
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self.imscale = 1.0
+
+        self.canvas.delete(&#34;all&#34;)
+        self.img = image
+
+        with warnings.catch_warnings():
+            warnings.simplefilter(&#39;ignore&#39;)
+            self.__image = Image.fromarray(self.img)
+
+        self.imwidth, self.imheight = self.__image.size
+
+        if (self.imwidth * self.imheight &gt; self.__huge_size * self.__huge_size
+           and self.__image.tile[0][0] == &#39;raw&#39;):
+
+            self.__huge = True
+            self.__offset = self.__image.tile[0][2]
+            self.__tile = [self.__image.tile[0][0],
+                           [0, 0, self.imwidth, 0],
+                           self.__offset,
+                           self.__image.tile[0][3]]
+
+        self.__min_side = min(self.imwidth, self.imheight)
+
+        # Image Pyramid
+        if self.__huge:
+            self.__pyramid = [self.smaller()]
+        else:
+            self.__pyramid = [Image.fromarray(self.img)]
+
+        # Set ratio coefficeint for pyramid
+        if self.__huge:
+            self.__ratio = max(self.imwidth, self.imheight) / self.__huge_size
+        else:
+            self.__ratio = 1.0
+
+        self.__curr_img = 0  # The current image from the pyramid
+        self.__scale = self.imscale * self.__ratio
+        self.__reduction = 2  # Reduction degree of pyramid
+
+        w, h, = self.__pyramid[-1].size
+        while w &gt; 512 and h &gt; 512:
+            w /= self.__reduction
+            h /= self.__reduction
+            self.__pyramid.append(self.__pyramid[-1].resize((int(w), int(h)),
+                                  self.__filter))
+
+        # Put image into rectangle for setting corrdinates
+        self.container = self.canvas.create_rectangle((0, 0, self.imwidth,
+                                                      self.imheight), width=0)
+
+        self.__show_image()
+
+        # Deal with 0 offsets in the y coordinate
+        if patch_offset[1] == 0 and patch_offset[0] != 0:
+            patch_offset = patch_offset[0], self._prev_offset[1]
+
+        self._prev_offset = patch_offset
+
+        # The anchor point will be moved to (0, 0) in the window
+        # We want to account for the patch offset, but not put the current
+        # patch right in the corner
+        anchorx = -self.canvas.canvasx(0 - (patch_offset[1]/2))
+        anchory = -self.canvas.canvasy(0 - (patch_offset[0]/2))
+
+        self.canvas.scan_mark(int(anchorx), int(anchory))
+        self.canvas.scan_dragto(0, 0, gain=1)
+
+        self.canvas.focus_set()
+
+    def _on_motion(self, event):
+        &#34;&#34;&#34;
+        Called when the mouse is moved.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+
+        Postconditions:
+            The mouse cursor is drawn.
+            Previous position is set.
+        &#34;&#34;&#34;
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
+        pos = (x, y)
+
+        if self._cursor == &#34;brush&#34;:
+            self.draw_brush(pos)
+
+        self._previous_position = pos
+
+    def _set_cursor(self, event):
+        &#34;&#34;&#34;
+        Set the cursor to the current specified icon.
+
+        Args:
+            event: Event
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        if self._cursor == &#34;brush&#34;:
+            self.canvas.config(cursor=&#34;none&#34;)
+            self.draw_brush()
+        else:
+            self.canvas.config(cursor=self._cursor)
+            if self._brush_cursor is not None:
+                self.canvas.delete(self._brush_cursor)
+
+    def _default_cursor(self, event):
+        &#34;&#34;&#34;
+        Set the cursor back to the default.
+
+        Args:
+            event: The event
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self.canvas.config(cursor=&#34;arrow&#34;)
+        self._previous_position = (50, 50)
+
+    def draw_brush(self, pos=None):
+        &#34;&#34;&#34;
+        Draw the paintbrush cursor
+
+        Args:
+            pos: The position to draw the brush at.  The default value is None.
+
+        Returns:
+            None
+
+        Postcondition:
+            The brush is drawn on the canvas/
+        &#34;&#34;&#34;
+        if self._brush_cursor is not None:
+            self.canvas.delete(self._brush_cursor)
+
+        if self._brush_radius is None:
+            self._brush_radius = 15
+
+        if pos is None:
+            pos = self._previous_position
+
+        x_max = pos[0] + (self._brush_radius * self._coord_scale)
+        x_min = pos[0] - (self._brush_radius * self._coord_scale)
+        y_max = pos[1] + (self._brush_radius * self._coord_scale)
+        y_min = pos[1] - (self._brush_radius * self._coord_scale)
+
+        self._brush_cursor = self.canvas.create_oval(x_max, y_max, x_min,
+                                                     y_min,
+                                                     outline=&#39;white&#39;,
+                                                     tag=&#39;brush&#39;)
+
+    def set_image(self, img):
+        self.img = img
+        self.__show_image()
+        self.canvas.focus_set()
+
+    def smaller(self):
+        &#34;&#34;&#34;
+        Resize the image to be smaller.
+
+
+        Returns:
+            A resized PIL image
+        &#34;&#34;&#34;
+        w1, h1 = float(self.imwidth), float(self.imheight)
+        w2, h2 = float(self.__huge_size), float(self.__huge_size)
+
+        aspect_ratio1 = w1 / h1
+        aspect_ratio2 = w2 / h2
+
+        if aspect_ratio1 == aspect_ratio2:
+            image = Image.new(&#39;RGB&#39;, (int(w2), int(h2)))
+            k = h2 / h1  # Compression ratio
+            w = int(w2)  # Band length
+        elif aspect_ratio1 &gt; aspect_ratio2:
+            image = Image.new(&#39;RGB&#39;, (int(w2), int(w2 / aspect_ratio1)))
+            k = h2 / w1
+            w = int(w2)
+        else:  # aspect_ratio1 &lt; aspect_ratio2
+            image = Image.new(&#39;RGB&#39;, (int(h2 * aspect_ratio1), int(h2)))
+            k = h2 / h1
+            w = int(h2 * aspect_ratio1)
+
+        i, j, _ = 0, 1, round(0.5 + self.imheight / self.__band_width)
+
+        while i &lt; self.imheight:
+            # Width of the tile band
+            band = min(self.__band_width, self.imheight - i)
+
+            self.__tile[1][3] = band
+
+            # Tile offset (3 bytes per pixel)
+            self.__tile[2] = self.__offset + self.imwidth * i * 3
+            self.__image.close()
+            self.__image = Image.fromarray(self.img)
+            self.__image.size = (self.imwidth * band)
+            self.__image.tile = [self.__tile]
+
+            cropped = self.__image.crop((0, 0, self.imwidth, band))  # crop
+            image.paste(cropped.resize((w, int(band * k)+1), self.__filer), (0,
+                        int(i * k)))
+
+            i += band
+            j += 1
+
+        return image
+
+    def redraw_figures(self):
+        &#34;&#34;&#34;
+        Dummy function for redrawing in children classes
+
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        pass
+
+    def grid(self, **kw):
+        &#34;&#34;&#34;
+        Put the Canvas widget on the parent widget.
+
+        Args:
+            **kw: Kwargs
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self.__imframe.grid(**kw)  # Put the canvas on the grid
+        self.__imframe.grid(sticky=&#39;nswe&#39;)  # Make frame sticky
+        self.__imframe.rowconfigure(0, weight=1)  # Make canvas expandable
+        self.__imframe.columnconfigure(0, weight=1)
+
+    def pack(self, **kw):
+        &#34;&#34;&#34;
+        Cannot use pack.
+
+        Args:
+            **kw: Kwargs
+
+        Returns:
+            None
+
+        Raises:
+            Exception, you can&#39;t use the pack function.
+        &#34;&#34;&#34;
+        raise Exception(&#39;Cannot use pack with the widget &#39; +
+                        self.__class__.__name__)
+
+    def place(self, **kw):
+        &#34;&#34;&#34;
+        The place method of the tkinter widget.
+
+        Args:
+            **kw: kwargs
+
+        Returns:
+            None
+
+        Raises:
+            An exception, as this cannot be used with this widget.
+        &#34;&#34;&#34;
+        raise Exception(&#39;Cannot use place with the widget &#39; +
+                        self.__class__.__name__)
+
+    # noinspection PyUnusedLocal
+    def __scroll_x(self, *args, **kwargs):
+        &#34;&#34;&#34;
+        Scroll in the x direction.
+
+        Args:
+            *args: args
+            **kwargs: kwargs
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas is scrolled horizontally.
+        &#34;&#34;&#34;
+        self.canvas.xview(*args)  # scroll horizontally
+        self.__show_image()  # redraw the image
+
+    # noinspection PyUnusedLocal
+    def __scroll_y(self, *args, **kwargs):
+        &#34;&#34;&#34;
+        Scroll in the y direction
+
+        Args:
+            *args: args
+            **kwargs: kwargs
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas is scrolled vertically.
+        &#34;&#34;&#34;
+        self.canvas.yview(*args)  # scroll vertically
+        self.__show_image()  # redraw the image
+
+    def __show_image(self):
+        &#34;&#34;&#34;
+        Display the current image
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The image is drawn on the canvas.
+        &#34;&#34;&#34;
+        #if self._cursor == &#34;brush&#34;:
+            #self.draw_brush()
+
+        box_image = self.canvas.coords(self.container)  # get image area
+        box_canvas = (self.canvas.canvasx(0),  # get visible area of the canvas
+                      self.canvas.canvasy(0),
+                      self.canvas.canvasx(self.canvas.winfo_width()),
+                      self.canvas.canvasy(self.canvas.winfo_height()))
+
+        # convert to integer or it will not work properly
+        box_img_int = tuple(map(int, box_image))  # Get scroll region box
+
+        box_img_width = box_img_int[2] - box_img_int[0]
+
+        xscale = box_img_width/self.img.shape[1]
+
+        self._coord_scale = xscale
+
+        box_scroll = [min(box_img_int[0], box_canvas[0]),
+                      min(box_img_int[1], box_canvas[1]),
+                      max(box_img_int[2], box_canvas[2]),
+                      max(box_img_int[3], box_canvas[3])]
+
+        # Horizontal part of the image is in the visible area
+        if box_scroll[0] == box_canvas[0] and box_scroll[2] == box_canvas[2]:
+            box_scroll[0] = box_img_int[0]
+            box_scroll[2] = box_img_int[2]
+        # Vertical part of the image is in the visible area
+        if box_scroll[1] == box_canvas[1] and box_scroll[3] == box_canvas[3]:
+            box_scroll[1] = box_img_int[1]
+            box_scroll[3] = box_img_int[3]
+        # Convert scroll region to tuple and to integer
+        # set scroll region
+        self.canvas.configure(scrollregion=tuple(map(int, box_scroll)))
+
+        # get coordinates (x1,y1,x2,y2) of the image tile
+        x1 = max(box_canvas[0] - box_image[0], 0)
+        y1 = max(box_canvas[1] - box_image[1], 0)
+        x2 = min(box_canvas[2], box_image[2]) - box_image[0]
+        y2 = min(box_canvas[3], box_image[3]) - box_image[1]
+
+        # show image if it in the visible area
+        if int(x2 - x1) &gt; 0 and int(y2 - y1) &gt; 0:
+            if self.__huge and self.__curr_img &lt; 0:  # show huge image
+                h = int((y2 - y1) / self.imscale)  # height of the tile band
+                self.__tile[1][3] = h  # set the tile band height
+                self.__tile[2] = (self.__offset + self.imwidth *
+                                  int(y1 / self.imscale) * 3)
+                self.__image.close()
+                self.__image = Image.open(self.path)  # reopen / reset image
+                # set size of the tile band
+                self.__image.size = (self.imwidth, h)
+                self.__image.tile = [self.__tile]
+                image = self.__image.crop((int(x1 / self.imscale), 0,
+                                          int(x2 / self.imscale), h))
+            else:  # show normal image
+                # crop current img from pyramid
+                image = self.__pyramid[max(0, self.__curr_img)].crop(
+                                    (int(x1 / self.__scale),
+                                     int(y1 / self.__scale),
+                                     int(x2 / self.__scale),
+                                     int(y2 / self.__scale)))
+            #
+            imagetk = ImageTk.PhotoImage(image.resize((int(x2 - x1),
+                                         int(y2 - y1)), self.__filter))
+
+            imageid = self.canvas.create_image(max(box_canvas[0],
+                                               box_img_int[0]),
+                                               max(box_canvas[1],
+                                               box_img_int[1]),
+                                               anchor=&#39;nw&#39;, image=imagetk)
+            self.canvas.lower(imageid)  # set image into background
+            # keep an extra reference to prevent garbage-collection
+            self.canvas.imagetk = imagetk
+            self._image_id = imageid
+
+    def __move_from(self, event):
+        &#34;&#34;&#34;
+        Mark the position of the canvas to move from using scanning.
+
+        Args:
+            event: The mouse event
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas will have a scan mark at the event position.
+        &#34;&#34;&#34;
+        if self._cursor != &#34;brush&#34;:
+            self.canvas.scan_mark(event.x, event.y)
+
+    def _on_click_release(self, event):
+        &#34;&#34;&#34;
+        Called when the left mouse button is released.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        if self._dragged:
+            self._dragged = False
+            return
+
+        pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+
+        container_coords = self.canvas.coords(self.container)
+        pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
+
+        pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
+        self._main_window.on_canvas_click(pos)
+
+    def __move_to(self, event):
+        &#34;&#34;&#34;
+        Move the canvas to the event position.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas is moved to the event position.
+        &#34;&#34;&#34;
+        self._dragged = True
+        if self._cursor != &#34;brush&#34;:
+
+            self.canvas.scan_dragto(event.x, event.y, gain=1)
+
+        if self._cursor == &#34;brush&#34;:
+            pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+            self._previous_position = pos
+            container_coords = self.canvas.coords(self.container)
+            pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
+            pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
+
+            self._main_window.on_canvas_drag(pos)
+
+            brush_pos = (self.canvas.canvasx(event.x),
+                         self.canvas.canvasy(event.y))
+
+            self.draw_brush(brush_pos)
+
+        self.__show_image()  # zoom tile and show it on the canvas
+
+    def outside(self, x, y):
+        &#34;&#34;&#34;
+        Check it the input point is inside the image area.
+
+        Args:
+            x: The x coordinate
+            y: The y coordinate
+
+        Returns:
+            True if the point is inside the image.
+            False if the point is outside the image.
+        &#34;&#34;&#34;
+        bbox = self.canvas.coords(self.container)  # get image area
+        if bbox[0] &lt; x &lt; bbox[2] and bbox[1] &lt; y &lt; bbox[3]:
+            return False  # point (x,y) is inside the image area
+        else:
+            return True  # point (x,y) is outside the image area
+
+    def __wheel(self, event):
+        &#34;&#34;&#34;
+        Called when the mouse wheel is scrolled.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+
+        Postconditions:
+            The image on the canvas is zoomed.
+        &#34;&#34;&#34;
+        # get coordinates of the event on the canvas
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
+        if self.outside(x, y):
+            return  # zoom only inside image area
+
+        # Don&#39;t scroll if control is down
+        if event.state - self.__previous_state == 4:
+            return
+
+        scale = 1.0
+        # Respond to Linux (event.num) or Windows (event.delta) wheel event
+        if event.num == 5 or event.delta == -120:  # scroll down, smaller
+            if round(self.__min_side * self.imscale) &lt; 30:
+                return  # image is less than 30 pixels
+            self.imscale /= self.__delta
+            scale /= self.__delta
+        if event.num == 4 or event.delta == 120:  # scroll up, bigger
+            i = min(self.canvas.winfo_width(), self.canvas.winfo_height()) &gt;&gt; 1
+            if i &lt; self.imscale:
+                return  # 1 pixel is bigger than the visible area
+            self.imscale *= self.__delta
+            scale *= self.__delta
+        # Take appropriate image from the pyramid
+        k = self.imscale * self.__ratio  # temporary coefficient
+        self.__curr_img = min((-1) * int(math.log(k, self.__reduction)),
+                              len(self.__pyramid) - 1)
+        self.__scale = k * math.pow(self.__reduction, max(0, self.__curr_img))
+        #
+        self.canvas.scale(&#39;all&#39;, x, y, scale, scale)  # rescale all objects
+        # Redraw some figures before showing image on the screen
+        self.redraw_figures()  # method for child classes
+        self.__show_image()
+
+    def __keystroke(self, event):
+        &#34;&#34;&#34;
+        Called when the keybord is used.
+
+        Args:
+            event: The keyboard event.
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas is modified according to the key pressed.
+        &#34;&#34;&#34;
+        # means that the Control key is pressed
+        if event.state - self.__previous_state == 4:
+            pass  # do nothing if Control key is pressed
+        else:
+            # remember the last keystroke state
+            self.__previous_state = event.state
+
+    def crop(self, bbox):
+        &#34;&#34;&#34;
+        Crop the image using the given bounding box.
+
+        Args:
+            bbox: The bounding box, a list
+
+        Returns:
+            The cropped image.
+        &#34;&#34;&#34;
+        if self.__huge:  # image is huge and not totally in RAM
+            band = bbox[3] - bbox[1]  # width of the tile band
+            self.__tile[1][3] = band  # set the tile height
+            # set offset of the band
+            self.__tile[2] = self.__offset + self.imwidth * bbox[1] * 3
+            self.__image.close()
+            self.__image = Image.open(self.path)  # reopen / reset image
+            # set size of the tile band
+            self.__image.size = (self.imwidth, band)
+            self.__image.tile = [self.__tile]
+            return self.__image.crop((bbox[0], 0, bbox[2], band))
+        else:  # image is totally in RAM
+            return self.__pyramid[0].crop(bbox)
+
+    def destroy(self):
+        &#34;&#34;&#34; ImageFrame destructor &#34;&#34;&#34;
+        self.__image.close()
+        map(lambda i: i.close, self.__pyramid)  # close all pyramid images
+        del self.__pyramid[:]  # delete pyramid list
+        del self.__pyramid  # delete pyramid variable
+        self.canvas.destroy()
+        self.__imframe.destroy()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="friendly_ground_truth.view.fgt_canvas.AutoScrollbar"><code class="flex name class">
+<span>class <span class="ident">AutoScrollbar</span></span>
+<span>(</span><span>master=None, **kw)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Self hiding scrollbar.</p>
+<p>Construct a Ttk Scrollbar with parent master.</p>
+<p>STANDARD OPTIONS</p>
+<pre><code>class, cursor, style, takefocus
+</code></pre>
+<p>WIDGET-SPECIFIC OPTIONS</p>
+<pre><code>command, orient
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AutoScrollbar(ttk.Scrollbar):
+    &#34;&#34;&#34;
+    Self hiding scrollbar.
+    &#34;&#34;&#34;
+
+    def set(self, lo, hi):
+
+        if float(lo) &lt;= 0.0 and float(hi) &gt;= 1.0:
+            self.grid_remove()
+        else:
+            self.grid()
+            ttk.Scrollbar.set(self, lo, hi)
+
+        def pack(self, **kw):
+            raise tk.TclError(&#39;Cannot use pack with the widget &#39; +
+                              self.__class__.__name__)
+
+        def place(self, **kw):
+            raise tk.TclError(&#39;Cannot use place with the widget &#39; +
+                              self.__class__.__name__)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>tkinter.ttk.Scrollbar</li>
+<li>tkinter.ttk.Widget</li>
+<li>tkinter.Scrollbar</li>
+<li>tkinter.Widget</li>
+<li>tkinter.BaseWidget</li>
+<li>tkinter.Misc</li>
+<li>tkinter.Pack</li>
+<li>tkinter.Place</li>
+<li>tkinter.Grid</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="friendly_ground_truth.view.fgt_canvas.AutoScrollbar.set"><code class="name flex">
+<span>def <span class="ident">set</span></span>(<span>self, lo, hi)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the fractional values of the slider position (upper and
+lower ends as value between 0 and 1).</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set(self, lo, hi):
+
+    if float(lo) &lt;= 0.0 and float(hi) &gt;= 1.0:
+        self.grid_remove()
+    else:
+        self.grid()
+        ttk.Scrollbar.set(self, lo, hi)
+
+    def pack(self, **kw):
+        raise tk.TclError(&#39;Cannot use pack with the widget &#39; +
+                          self.__class__.__name__)
+
+    def place(self, **kw):
+        raise tk.TclError(&#39;Cannot use place with the widget &#39; +
+                          self.__class__.__name__)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="friendly_ground_truth.view.fgt_canvas.FGTCanvas"><code class="flex name class">
+<span>class <span class="ident">FGTCanvas</span></span>
+<span>(</span><span>placeholder, img, main_window, style)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A canvas that allows panning and zooming of large images.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>imscale</code></strong></dt>
+<dd>The current scale of the image</dd>
+<dt><strong><code>cursor</code></strong></dt>
+<dd>The current cursor to use on the image</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FGTCanvas:
+    &#34;&#34;&#34;
+    A canvas that allows panning and zooming of large images.
+
+    Attributes:
+        imscale: The current scale of the image
+        cursor: The current cursor to use on the image
+    &#34;&#34;&#34;
+
+    def __init__(self, placeholder, img, main_window, style):
+
+        self._logger = logging.getLogger(&#39;friendly_gt.view.FGTCanvas&#39;)
+
+        self._previous_position = (0, 0)
+        self._coord_scale = 1
+        self._dragged = False
+        self._prev_offset = (0, 0)
+
+        self._style = style
+
+        self.imscale = 1.0  # Scale of the image
+
+        self._main_window = main_window
+
+        self.__delta = 1.3  # Zoom magnitude
+        self.__filter = Image.ANTIALIAS
+        self.__previous_state = 0  # The previous state of the keyboard
+        self.__imframe = ttk.Frame(placeholder)
+
+        self.img = img
+
+        # Scrollbars
+        hbar = AutoScrollbar(self.__imframe, orient=&#39;horizontal&#39;)
+        vbar = AutoScrollbar(self.__imframe, orient=&#39;vertical&#39;)
+
+        hbar.grid(row=1, column=0, sticky=&#39;we&#39;)
+        vbar.grid(row=0, column=1, sticky=&#39;ns&#39;)
+
+        # Create the canvas
+        self.canvas = tk.Canvas(self.__imframe, highlightthickness=0,
+                                xscrollcommand=hbar.set,
+                                yscrollcommand=vbar.set)
+
+        self.canvas.grid(row=0, column=0, sticky=&#39;nswe&#39;)
+
+        background = self._style.lookup(&#34;Canvas.TFrame&#34;, &#39;background&#39;)
+
+        self.canvas.config(background=background)
+        self.canvas.update()  # Make sure the canvas updates
+
+        self._orig_canvas_x = self.canvas.xview()[0]
+        self._orig_canvas_y = self.canvas.yview()[0]
+
+        hbar.configure(command=self.__scroll_x)
+        vbar.configure(command=self.__scroll_y)
+
+        # Bind events to the canvas
+        # When the canvas is resized
+        self.canvas.bind(&#39;&lt;Configure&gt;&#39;, lambda event: self.__show_image())
+        # Remember the canvas position
+        self.canvas.bind(&#39;&lt;ButtonPress-1&gt;&#39;, self.__move_from)
+
+        self.canvas.bind(&#39;&lt;ButtonRelease-1&gt;&#39;, self._on_click_release)
+        # Move the canvas
+        self.canvas.bind(&#39;&lt;B1-Motion&gt;&#39;, self.__move_to)
+        # Zoom for Windows and MacOs
+        self.canvas.bind(&#39;&lt;MouseWheel&gt;&#39;, self.__wheel)
+        # Zoom for Linux, scroll down
+        self.canvas.bind(&#39;&lt;Button-5&gt;&#39;, self.__wheel)
+        # Zoom for Linux, scroll up
+        self.canvas.bind(&#39;&lt;Button-4&gt;&#39;, self.__wheel)
+
+        # Deal with keystrokes in idle mode
+        self.canvas.bind(&#39;&lt;Key&gt;&#39;, lambda event:
+                         self.canvas.after_idle(self.__keystroke, event))
+
+        # Cursor stuff
+        self.canvas.bind(&#39;&lt;Motion&gt;&#39;, self._on_motion)
+        self.canvas.bind(&#39;&lt;Enter&gt;&#39;, self._set_cursor)
+        self.canvas.bind(&#39;&lt;Leave&gt;&#39;, self._default_cursor)
+        self.canvas.bind(&#39;&lt;FocusOut&gt;&#39;, self._default_cursor)
+        self.canvas.bind(&#39;&lt;FocusIn&gt;&#39;, self._set_cursor)
+
+        # Decide if the image is too big
+        self.__huge = False
+        self.__huge_size = 14000
+        self.__band_width = 1024
+
+        Image.MAX_IMAGE_PIXELS = 1000000000
+
+        with warnings.catch_warnings():
+            warnings.simplefilter(&#39;ignore&#39;)
+            self.__image = Image.fromarray(self.img)
+
+        self.imwidth, self.imheight = self.__image.size
+
+        if (self.imwidth * self.imheight &gt; self.__huge_size * self.__huge_size
+           and self.__image.tile[0][0] == &#39;raw&#39;):
+
+            self.__huge = True
+            self.__offset = self.__image.tile[0][2]
+            self.__tile = [self.__image.tile[0][0],
+                           [0, 0, self.imwidth, 0],
+                           self.__offset,
+                           self.__image.tile[0][3]]
+
+        self.__min_side = min(self.imwidth, self.imheight)
+
+        # Image Pyramid
+        if self.__huge:
+            self.__pyramid = [self.smaller()]
+        else:
+            self.__pyramid = [Image.fromarray(self.img)]
+
+        # Set ratio coefficeint for pyramid
+        if self.__huge:
+            self.__ratio = max(self.imwidth, self.imheight) / self.__huge_size
+        else:
+            self.__ratio = 1.0
+
+        self.__curr_img = 0  # The current image from the pyramid
+        self.__scale = self.imscale * self.__ratio
+        self.__reduction = 2  # Reduction degree of pyramid
+
+        w, h, = self.__pyramid[-1].size
+        while w &gt; 512 and h &gt; 512:
+            w /= self.__reduction
+            h /= self.__reduction
+            self.__pyramid.append(self.__pyramid[-1].resize((int(w), int(h)),
+                                  self.__filter))
+
+        # Put image into rectangle for setting corrdinates
+        self.container = self.canvas.create_rectangle((0, 0, self.imwidth,
+                                                      self.imheight), width=0)
+        self._cursor = &#34;arrow&#34;
+        self._brush_cursor = None
+        self._brush_radius = None
+
+        self.__show_image()
+        self.canvas.focus_set()
+
+    @property
+    def cursor(self):
+        return self._cursor
+
+    @cursor.setter
+    def cursor(self, value):
+        self._cursor = value
+        self._set_cursor(None)
+
+    @property
+    def brush_radius(self):
+        return self._brush_radius
+
+    @brush_radius.setter
+    def brush_radius(self, value):
+        self._brush_radius = value
+        self.draw_brush()
+
+    def new_image(self, image, patch_offset=(0, 0)):
+        &#34;&#34;&#34;
+        Reset the image and all properties of the image on the canvas.
+
+        Args:
+            image: The image, a numpy array.
+            patch_offset: The offset of the current patch within the image
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self.imscale = 1.0
+
+        self.canvas.delete(&#34;all&#34;)
+        self.img = image
+
+        with warnings.catch_warnings():
+            warnings.simplefilter(&#39;ignore&#39;)
+            self.__image = Image.fromarray(self.img)
+
+        self.imwidth, self.imheight = self.__image.size
+
+        if (self.imwidth * self.imheight &gt; self.__huge_size * self.__huge_size
+           and self.__image.tile[0][0] == &#39;raw&#39;):
+
+            self.__huge = True
+            self.__offset = self.__image.tile[0][2]
+            self.__tile = [self.__image.tile[0][0],
+                           [0, 0, self.imwidth, 0],
+                           self.__offset,
+                           self.__image.tile[0][3]]
+
+        self.__min_side = min(self.imwidth, self.imheight)
+
+        # Image Pyramid
+        if self.__huge:
+            self.__pyramid = [self.smaller()]
+        else:
+            self.__pyramid = [Image.fromarray(self.img)]
+
+        # Set ratio coefficeint for pyramid
+        if self.__huge:
+            self.__ratio = max(self.imwidth, self.imheight) / self.__huge_size
+        else:
+            self.__ratio = 1.0
+
+        self.__curr_img = 0  # The current image from the pyramid
+        self.__scale = self.imscale * self.__ratio
+        self.__reduction = 2  # Reduction degree of pyramid
+
+        w, h, = self.__pyramid[-1].size
+        while w &gt; 512 and h &gt; 512:
+            w /= self.__reduction
+            h /= self.__reduction
+            self.__pyramid.append(self.__pyramid[-1].resize((int(w), int(h)),
+                                  self.__filter))
+
+        # Put image into rectangle for setting corrdinates
+        self.container = self.canvas.create_rectangle((0, 0, self.imwidth,
+                                                      self.imheight), width=0)
+
+        self.__show_image()
+
+        # Deal with 0 offsets in the y coordinate
+        if patch_offset[1] == 0 and patch_offset[0] != 0:
+            patch_offset = patch_offset[0], self._prev_offset[1]
+
+        self._prev_offset = patch_offset
+
+        # The anchor point will be moved to (0, 0) in the window
+        # We want to account for the patch offset, but not put the current
+        # patch right in the corner
+        anchorx = -self.canvas.canvasx(0 - (patch_offset[1]/2))
+        anchory = -self.canvas.canvasy(0 - (patch_offset[0]/2))
+
+        self.canvas.scan_mark(int(anchorx), int(anchory))
+        self.canvas.scan_dragto(0, 0, gain=1)
+
+        self.canvas.focus_set()
+
+    def _on_motion(self, event):
+        &#34;&#34;&#34;
+        Called when the mouse is moved.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+
+        Postconditions:
+            The mouse cursor is drawn.
+            Previous position is set.
+        &#34;&#34;&#34;
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
+        pos = (x, y)
+
+        if self._cursor == &#34;brush&#34;:
+            self.draw_brush(pos)
+
+        self._previous_position = pos
+
+    def _set_cursor(self, event):
+        &#34;&#34;&#34;
+        Set the cursor to the current specified icon.
+
+        Args:
+            event: Event
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        if self._cursor == &#34;brush&#34;:
+            self.canvas.config(cursor=&#34;none&#34;)
+            self.draw_brush()
+        else:
+            self.canvas.config(cursor=self._cursor)
+            if self._brush_cursor is not None:
+                self.canvas.delete(self._brush_cursor)
+
+    def _default_cursor(self, event):
+        &#34;&#34;&#34;
+        Set the cursor back to the default.
+
+        Args:
+            event: The event
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self.canvas.config(cursor=&#34;arrow&#34;)
+        self._previous_position = (50, 50)
+
+    def draw_brush(self, pos=None):
+        &#34;&#34;&#34;
+        Draw the paintbrush cursor
+
+        Args:
+            pos: The position to draw the brush at.  The default value is None.
+
+        Returns:
+            None
+
+        Postcondition:
+            The brush is drawn on the canvas/
+        &#34;&#34;&#34;
+        if self._brush_cursor is not None:
+            self.canvas.delete(self._brush_cursor)
+
+        if self._brush_radius is None:
+            self._brush_radius = 15
+
+        if pos is None:
+            pos = self._previous_position
+
+        x_max = pos[0] + (self._brush_radius * self._coord_scale)
+        x_min = pos[0] - (self._brush_radius * self._coord_scale)
+        y_max = pos[1] + (self._brush_radius * self._coord_scale)
+        y_min = pos[1] - (self._brush_radius * self._coord_scale)
+
+        self._brush_cursor = self.canvas.create_oval(x_max, y_max, x_min,
+                                                     y_min,
+                                                     outline=&#39;white&#39;,
+                                                     tag=&#39;brush&#39;)
+
+    def set_image(self, img):
+        self.img = img
+        self.__show_image()
+        self.canvas.focus_set()
+
+    def smaller(self):
+        &#34;&#34;&#34;
+        Resize the image to be smaller.
+
+
+        Returns:
+            A resized PIL image
+        &#34;&#34;&#34;
+        w1, h1 = float(self.imwidth), float(self.imheight)
+        w2, h2 = float(self.__huge_size), float(self.__huge_size)
+
+        aspect_ratio1 = w1 / h1
+        aspect_ratio2 = w2 / h2
+
+        if aspect_ratio1 == aspect_ratio2:
+            image = Image.new(&#39;RGB&#39;, (int(w2), int(h2)))
+            k = h2 / h1  # Compression ratio
+            w = int(w2)  # Band length
+        elif aspect_ratio1 &gt; aspect_ratio2:
+            image = Image.new(&#39;RGB&#39;, (int(w2), int(w2 / aspect_ratio1)))
+            k = h2 / w1
+            w = int(w2)
+        else:  # aspect_ratio1 &lt; aspect_ratio2
+            image = Image.new(&#39;RGB&#39;, (int(h2 * aspect_ratio1), int(h2)))
+            k = h2 / h1
+            w = int(h2 * aspect_ratio1)
+
+        i, j, _ = 0, 1, round(0.5 + self.imheight / self.__band_width)
+
+        while i &lt; self.imheight:
+            # Width of the tile band
+            band = min(self.__band_width, self.imheight - i)
+
+            self.__tile[1][3] = band
+
+            # Tile offset (3 bytes per pixel)
+            self.__tile[2] = self.__offset + self.imwidth * i * 3
+            self.__image.close()
+            self.__image = Image.fromarray(self.img)
+            self.__image.size = (self.imwidth * band)
+            self.__image.tile = [self.__tile]
+
+            cropped = self.__image.crop((0, 0, self.imwidth, band))  # crop
+            image.paste(cropped.resize((w, int(band * k)+1), self.__filer), (0,
+                        int(i * k)))
+
+            i += band
+            j += 1
+
+        return image
+
+    def redraw_figures(self):
+        &#34;&#34;&#34;
+        Dummy function for redrawing in children classes
+
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        pass
+
+    def grid(self, **kw):
+        &#34;&#34;&#34;
+        Put the Canvas widget on the parent widget.
+
+        Args:
+            **kw: Kwargs
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self.__imframe.grid(**kw)  # Put the canvas on the grid
+        self.__imframe.grid(sticky=&#39;nswe&#39;)  # Make frame sticky
+        self.__imframe.rowconfigure(0, weight=1)  # Make canvas expandable
+        self.__imframe.columnconfigure(0, weight=1)
+
+    def pack(self, **kw):
+        &#34;&#34;&#34;
+        Cannot use pack.
+
+        Args:
+            **kw: Kwargs
+
+        Returns:
+            None
+
+        Raises:
+            Exception, you can&#39;t use the pack function.
+        &#34;&#34;&#34;
+        raise Exception(&#39;Cannot use pack with the widget &#39; +
+                        self.__class__.__name__)
+
+    def place(self, **kw):
+        &#34;&#34;&#34;
+        The place method of the tkinter widget.
+
+        Args:
+            **kw: kwargs
+
+        Returns:
+            None
+
+        Raises:
+            An exception, as this cannot be used with this widget.
+        &#34;&#34;&#34;
+        raise Exception(&#39;Cannot use place with the widget &#39; +
+                        self.__class__.__name__)
+
+    # noinspection PyUnusedLocal
+    def __scroll_x(self, *args, **kwargs):
+        &#34;&#34;&#34;
+        Scroll in the x direction.
+
+        Args:
+            *args: args
+            **kwargs: kwargs
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas is scrolled horizontally.
+        &#34;&#34;&#34;
+        self.canvas.xview(*args)  # scroll horizontally
+        self.__show_image()  # redraw the image
+
+    # noinspection PyUnusedLocal
+    def __scroll_y(self, *args, **kwargs):
+        &#34;&#34;&#34;
+        Scroll in the y direction
+
+        Args:
+            *args: args
+            **kwargs: kwargs
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas is scrolled vertically.
+        &#34;&#34;&#34;
+        self.canvas.yview(*args)  # scroll vertically
+        self.__show_image()  # redraw the image
+
+    def __show_image(self):
+        &#34;&#34;&#34;
+        Display the current image
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The image is drawn on the canvas.
+        &#34;&#34;&#34;
+        #if self._cursor == &#34;brush&#34;:
+            #self.draw_brush()
+
+        box_image = self.canvas.coords(self.container)  # get image area
+        box_canvas = (self.canvas.canvasx(0),  # get visible area of the canvas
+                      self.canvas.canvasy(0),
+                      self.canvas.canvasx(self.canvas.winfo_width()),
+                      self.canvas.canvasy(self.canvas.winfo_height()))
+
+        # convert to integer or it will not work properly
+        box_img_int = tuple(map(int, box_image))  # Get scroll region box
+
+        box_img_width = box_img_int[2] - box_img_int[0]
+
+        xscale = box_img_width/self.img.shape[1]
+
+        self._coord_scale = xscale
+
+        box_scroll = [min(box_img_int[0], box_canvas[0]),
+                      min(box_img_int[1], box_canvas[1]),
+                      max(box_img_int[2], box_canvas[2]),
+                      max(box_img_int[3], box_canvas[3])]
+
+        # Horizontal part of the image is in the visible area
+        if box_scroll[0] == box_canvas[0] and box_scroll[2] == box_canvas[2]:
+            box_scroll[0] = box_img_int[0]
+            box_scroll[2] = box_img_int[2]
+        # Vertical part of the image is in the visible area
+        if box_scroll[1] == box_canvas[1] and box_scroll[3] == box_canvas[3]:
+            box_scroll[1] = box_img_int[1]
+            box_scroll[3] = box_img_int[3]
+        # Convert scroll region to tuple and to integer
+        # set scroll region
+        self.canvas.configure(scrollregion=tuple(map(int, box_scroll)))
+
+        # get coordinates (x1,y1,x2,y2) of the image tile
+        x1 = max(box_canvas[0] - box_image[0], 0)
+        y1 = max(box_canvas[1] - box_image[1], 0)
+        x2 = min(box_canvas[2], box_image[2]) - box_image[0]
+        y2 = min(box_canvas[3], box_image[3]) - box_image[1]
+
+        # show image if it in the visible area
+        if int(x2 - x1) &gt; 0 and int(y2 - y1) &gt; 0:
+            if self.__huge and self.__curr_img &lt; 0:  # show huge image
+                h = int((y2 - y1) / self.imscale)  # height of the tile band
+                self.__tile[1][3] = h  # set the tile band height
+                self.__tile[2] = (self.__offset + self.imwidth *
+                                  int(y1 / self.imscale) * 3)
+                self.__image.close()
+                self.__image = Image.open(self.path)  # reopen / reset image
+                # set size of the tile band
+                self.__image.size = (self.imwidth, h)
+                self.__image.tile = [self.__tile]
+                image = self.__image.crop((int(x1 / self.imscale), 0,
+                                          int(x2 / self.imscale), h))
+            else:  # show normal image
+                # crop current img from pyramid
+                image = self.__pyramid[max(0, self.__curr_img)].crop(
+                                    (int(x1 / self.__scale),
+                                     int(y1 / self.__scale),
+                                     int(x2 / self.__scale),
+                                     int(y2 / self.__scale)))
+            #
+            imagetk = ImageTk.PhotoImage(image.resize((int(x2 - x1),
+                                         int(y2 - y1)), self.__filter))
+
+            imageid = self.canvas.create_image(max(box_canvas[0],
+                                               box_img_int[0]),
+                                               max(box_canvas[1],
+                                               box_img_int[1]),
+                                               anchor=&#39;nw&#39;, image=imagetk)
+            self.canvas.lower(imageid)  # set image into background
+            # keep an extra reference to prevent garbage-collection
+            self.canvas.imagetk = imagetk
+            self._image_id = imageid
+
+    def __move_from(self, event):
+        &#34;&#34;&#34;
+        Mark the position of the canvas to move from using scanning.
+
+        Args:
+            event: The mouse event
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas will have a scan mark at the event position.
+        &#34;&#34;&#34;
+        if self._cursor != &#34;brush&#34;:
+            self.canvas.scan_mark(event.x, event.y)
+
+    def _on_click_release(self, event):
+        &#34;&#34;&#34;
+        Called when the left mouse button is released.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        if self._dragged:
+            self._dragged = False
+            return
+
+        pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+
+        container_coords = self.canvas.coords(self.container)
+        pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
+
+        pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
+        self._main_window.on_canvas_click(pos)
+
+    def __move_to(self, event):
+        &#34;&#34;&#34;
+        Move the canvas to the event position.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas is moved to the event position.
+        &#34;&#34;&#34;
+        self._dragged = True
+        if self._cursor != &#34;brush&#34;:
+
+            self.canvas.scan_dragto(event.x, event.y, gain=1)
+
+        if self._cursor == &#34;brush&#34;:
+            pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+            self._previous_position = pos
+            container_coords = self.canvas.coords(self.container)
+            pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
+            pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
+
+            self._main_window.on_canvas_drag(pos)
+
+            brush_pos = (self.canvas.canvasx(event.x),
+                         self.canvas.canvasy(event.y))
+
+            self.draw_brush(brush_pos)
+
+        self.__show_image()  # zoom tile and show it on the canvas
+
+    def outside(self, x, y):
+        &#34;&#34;&#34;
+        Check it the input point is inside the image area.
+
+        Args:
+            x: The x coordinate
+            y: The y coordinate
+
+        Returns:
+            True if the point is inside the image.
+            False if the point is outside the image.
+        &#34;&#34;&#34;
+        bbox = self.canvas.coords(self.container)  # get image area
+        if bbox[0] &lt; x &lt; bbox[2] and bbox[1] &lt; y &lt; bbox[3]:
+            return False  # point (x,y) is inside the image area
+        else:
+            return True  # point (x,y) is outside the image area
+
+    def __wheel(self, event):
+        &#34;&#34;&#34;
+        Called when the mouse wheel is scrolled.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+
+        Postconditions:
+            The image on the canvas is zoomed.
+        &#34;&#34;&#34;
+        # get coordinates of the event on the canvas
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
+        if self.outside(x, y):
+            return  # zoom only inside image area
+
+        # Don&#39;t scroll if control is down
+        if event.state - self.__previous_state == 4:
+            return
+
+        scale = 1.0
+        # Respond to Linux (event.num) or Windows (event.delta) wheel event
+        if event.num == 5 or event.delta == -120:  # scroll down, smaller
+            if round(self.__min_side * self.imscale) &lt; 30:
+                return  # image is less than 30 pixels
+            self.imscale /= self.__delta
+            scale /= self.__delta
+        if event.num == 4 or event.delta == 120:  # scroll up, bigger
+            i = min(self.canvas.winfo_width(), self.canvas.winfo_height()) &gt;&gt; 1
+            if i &lt; self.imscale:
+                return  # 1 pixel is bigger than the visible area
+            self.imscale *= self.__delta
+            scale *= self.__delta
+        # Take appropriate image from the pyramid
+        k = self.imscale * self.__ratio  # temporary coefficient
+        self.__curr_img = min((-1) * int(math.log(k, self.__reduction)),
+                              len(self.__pyramid) - 1)
+        self.__scale = k * math.pow(self.__reduction, max(0, self.__curr_img))
+        #
+        self.canvas.scale(&#39;all&#39;, x, y, scale, scale)  # rescale all objects
+        # Redraw some figures before showing image on the screen
+        self.redraw_figures()  # method for child classes
+        self.__show_image()
+
+    def __keystroke(self, event):
+        &#34;&#34;&#34;
+        Called when the keybord is used.
+
+        Args:
+            event: The keyboard event.
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas is modified according to the key pressed.
+        &#34;&#34;&#34;
+        # means that the Control key is pressed
+        if event.state - self.__previous_state == 4:
+            pass  # do nothing if Control key is pressed
+        else:
+            # remember the last keystroke state
+            self.__previous_state = event.state
+
+    def crop(self, bbox):
+        &#34;&#34;&#34;
+        Crop the image using the given bounding box.
+
+        Args:
+            bbox: The bounding box, a list
+
+        Returns:
+            The cropped image.
+        &#34;&#34;&#34;
+        if self.__huge:  # image is huge and not totally in RAM
+            band = bbox[3] - bbox[1]  # width of the tile band
+            self.__tile[1][3] = band  # set the tile height
+            # set offset of the band
+            self.__tile[2] = self.__offset + self.imwidth * bbox[1] * 3
+            self.__image.close()
+            self.__image = Image.open(self.path)  # reopen / reset image
+            # set size of the tile band
+            self.__image.size = (self.imwidth, band)
+            self.__image.tile = [self.__tile]
+            return self.__image.crop((bbox[0], 0, bbox[2], band))
+        else:  # image is totally in RAM
+            return self.__pyramid[0].crop(bbox)
+
+    def destroy(self):
+        &#34;&#34;&#34; ImageFrame destructor &#34;&#34;&#34;
+        self.__image.close()
+        map(lambda i: i.close, self.__pyramid)  # close all pyramid images
+        del self.__pyramid[:]  # delete pyramid list
+        del self.__pyramid  # delete pyramid variable
+        self.canvas.destroy()
+        self.__imframe.destroy()</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="friendly_ground_truth.view.fgt_canvas.FGTCanvas.brush_radius"><code class="name">var <span class="ident">brush_radius</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def brush_radius(self):
+    return self._brush_radius</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.view.fgt_canvas.FGTCanvas.cursor"><code class="name">var <span class="ident">cursor</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def cursor(self):
+    return self._cursor</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="friendly_ground_truth.view.fgt_canvas.FGTCanvas.crop"><code class="name flex">
+<span>def <span class="ident">crop</span></span>(<span>self, bbox)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Crop the image using the given bounding box.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>bbox</code></strong></dt>
+<dd>The bounding box, a list</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The cropped image.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def crop(self, bbox):
+    &#34;&#34;&#34;
+    Crop the image using the given bounding box.
+
+    Args:
+        bbox: The bounding box, a list
+
+    Returns:
+        The cropped image.
+    &#34;&#34;&#34;
+    if self.__huge:  # image is huge and not totally in RAM
+        band = bbox[3] - bbox[1]  # width of the tile band
+        self.__tile[1][3] = band  # set the tile height
+        # set offset of the band
+        self.__tile[2] = self.__offset + self.imwidth * bbox[1] * 3
+        self.__image.close()
+        self.__image = Image.open(self.path)  # reopen / reset image
+        # set size of the tile band
+        self.__image.size = (self.imwidth, band)
+        self.__image.tile = [self.__tile]
+        return self.__image.crop((bbox[0], 0, bbox[2], band))
+    else:  # image is totally in RAM
+        return self.__pyramid[0].crop(bbox)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.view.fgt_canvas.FGTCanvas.destroy"><code class="name flex">
+<span>def <span class="ident">destroy</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>ImageFrame destructor</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def destroy(self):
+    &#34;&#34;&#34; ImageFrame destructor &#34;&#34;&#34;
+    self.__image.close()
+    map(lambda i: i.close, self.__pyramid)  # close all pyramid images
+    del self.__pyramid[:]  # delete pyramid list
+    del self.__pyramid  # delete pyramid variable
+    self.canvas.destroy()
+    self.__imframe.destroy()</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.view.fgt_canvas.FGTCanvas.draw_brush"><code class="name flex">
+<span>def <span class="ident">draw_brush</span></span>(<span>self, pos=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Draw the paintbrush cursor</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>pos</code></strong></dt>
+<dd>The position to draw the brush at.
+The default value is None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="postcondition">Postcondition</h2>
+<p>The brush is drawn on the canvas/</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def draw_brush(self, pos=None):
+    &#34;&#34;&#34;
+    Draw the paintbrush cursor
+
+    Args:
+        pos: The position to draw the brush at.  The default value is None.
+
+    Returns:
+        None
+
+    Postcondition:
+        The brush is drawn on the canvas/
+    &#34;&#34;&#34;
+    if self._brush_cursor is not None:
+        self.canvas.delete(self._brush_cursor)
+
+    if self._brush_radius is None:
+        self._brush_radius = 15
+
+    if pos is None:
+        pos = self._previous_position
+
+    x_max = pos[0] + (self._brush_radius * self._coord_scale)
+    x_min = pos[0] - (self._brush_radius * self._coord_scale)
+    y_max = pos[1] + (self._brush_radius * self._coord_scale)
+    y_min = pos[1] - (self._brush_radius * self._coord_scale)
+
+    self._brush_cursor = self.canvas.create_oval(x_max, y_max, x_min,
+                                                 y_min,
+                                                 outline=&#39;white&#39;,
+                                                 tag=&#39;brush&#39;)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.view.fgt_canvas.FGTCanvas.grid"><code class="name flex">
+<span>def <span class="ident">grid</span></span>(<span>self, **kw)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Put the Canvas widget on the parent widget.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>**kw</code></strong></dt>
+<dd>Kwargs</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def grid(self, **kw):
+    &#34;&#34;&#34;
+    Put the Canvas widget on the parent widget.
+
+    Args:
+        **kw: Kwargs
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    self.__imframe.grid(**kw)  # Put the canvas on the grid
+    self.__imframe.grid(sticky=&#39;nswe&#39;)  # Make frame sticky
+    self.__imframe.rowconfigure(0, weight=1)  # Make canvas expandable
+    self.__imframe.columnconfigure(0, weight=1)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.view.fgt_canvas.FGTCanvas.new_image"><code class="name flex">
+<span>def <span class="ident">new_image</span></span>(<span>self, image, patch_offset=(0, 0))</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Reset the image and all properties of the image on the canvas.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>image</code></strong></dt>
+<dd>The image, a numpy array.</dd>
+<dt><strong><code>patch_offset</code></strong></dt>
+<dd>The offset of the current patch within the image</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def new_image(self, image, patch_offset=(0, 0)):
+    &#34;&#34;&#34;
+    Reset the image and all properties of the image on the canvas.
+
+    Args:
+        image: The image, a numpy array.
+        patch_offset: The offset of the current patch within the image
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    self.imscale = 1.0
+
+    self.canvas.delete(&#34;all&#34;)
+    self.img = image
+
+    with warnings.catch_warnings():
+        warnings.simplefilter(&#39;ignore&#39;)
+        self.__image = Image.fromarray(self.img)
+
+    self.imwidth, self.imheight = self.__image.size
+
+    if (self.imwidth * self.imheight &gt; self.__huge_size * self.__huge_size
+       and self.__image.tile[0][0] == &#39;raw&#39;):
+
+        self.__huge = True
+        self.__offset = self.__image.tile[0][2]
+        self.__tile = [self.__image.tile[0][0],
+                       [0, 0, self.imwidth, 0],
+                       self.__offset,
+                       self.__image.tile[0][3]]
+
+    self.__min_side = min(self.imwidth, self.imheight)
+
+    # Image Pyramid
+    if self.__huge:
+        self.__pyramid = [self.smaller()]
+    else:
+        self.__pyramid = [Image.fromarray(self.img)]
+
+    # Set ratio coefficeint for pyramid
+    if self.__huge:
+        self.__ratio = max(self.imwidth, self.imheight) / self.__huge_size
+    else:
+        self.__ratio = 1.0
+
+    self.__curr_img = 0  # The current image from the pyramid
+    self.__scale = self.imscale * self.__ratio
+    self.__reduction = 2  # Reduction degree of pyramid
+
+    w, h, = self.__pyramid[-1].size
+    while w &gt; 512 and h &gt; 512:
+        w /= self.__reduction
+        h /= self.__reduction
+        self.__pyramid.append(self.__pyramid[-1].resize((int(w), int(h)),
+                              self.__filter))
+
+    # Put image into rectangle for setting corrdinates
+    self.container = self.canvas.create_rectangle((0, 0, self.imwidth,
+                                                  self.imheight), width=0)
+
+    self.__show_image()
+
+    # Deal with 0 offsets in the y coordinate
+    if patch_offset[1] == 0 and patch_offset[0] != 0:
+        patch_offset = patch_offset[0], self._prev_offset[1]
+
+    self._prev_offset = patch_offset
+
+    # The anchor point will be moved to (0, 0) in the window
+    # We want to account for the patch offset, but not put the current
+    # patch right in the corner
+    anchorx = -self.canvas.canvasx(0 - (patch_offset[1]/2))
+    anchory = -self.canvas.canvasy(0 - (patch_offset[0]/2))
+
+    self.canvas.scan_mark(int(anchorx), int(anchory))
+    self.canvas.scan_dragto(0, 0, gain=1)
+
+    self.canvas.focus_set()</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.view.fgt_canvas.FGTCanvas.outside"><code class="name flex">
+<span>def <span class="ident">outside</span></span>(<span>self, x, y)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Check it the input point is inside the image area.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>x</code></strong></dt>
+<dd>The x coordinate</dd>
+<dt><strong><code>y</code></strong></dt>
+<dd>The y coordinate</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>True if the point is inside the image.
+False if the point is outside the image.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def outside(self, x, y):
+    &#34;&#34;&#34;
+    Check it the input point is inside the image area.
+
+    Args:
+        x: The x coordinate
+        y: The y coordinate
+
+    Returns:
+        True if the point is inside the image.
+        False if the point is outside the image.
+    &#34;&#34;&#34;
+    bbox = self.canvas.coords(self.container)  # get image area
+    if bbox[0] &lt; x &lt; bbox[2] and bbox[1] &lt; y &lt; bbox[3]:
+        return False  # point (x,y) is inside the image area
+    else:
+        return True  # point (x,y) is outside the image area</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.view.fgt_canvas.FGTCanvas.pack"><code class="name flex">
+<span>def <span class="ident">pack</span></span>(<span>self, **kw)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Cannot use pack.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>**kw</code></strong></dt>
+<dd>Kwargs</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<p>Exception, you can't use the pack function.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def pack(self, **kw):
+    &#34;&#34;&#34;
+    Cannot use pack.
+
+    Args:
+        **kw: Kwargs
+
+    Returns:
+        None
+
+    Raises:
+        Exception, you can&#39;t use the pack function.
+    &#34;&#34;&#34;
+    raise Exception(&#39;Cannot use pack with the widget &#39; +
+                    self.__class__.__name__)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.view.fgt_canvas.FGTCanvas.place"><code class="name flex">
+<span>def <span class="ident">place</span></span>(<span>self, **kw)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The place method of the tkinter widget.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>**kw</code></strong></dt>
+<dd>kwargs</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<p>An exception, as this cannot be used with this widget.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def place(self, **kw):
+    &#34;&#34;&#34;
+    The place method of the tkinter widget.
+
+    Args:
+        **kw: kwargs
+
+    Returns:
+        None
+
+    Raises:
+        An exception, as this cannot be used with this widget.
+    &#34;&#34;&#34;
+    raise Exception(&#39;Cannot use place with the widget &#39; +
+                    self.__class__.__name__)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.view.fgt_canvas.FGTCanvas.redraw_figures"><code class="name flex">
+<span>def <span class="ident">redraw_figures</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Dummy function for redrawing in children classes</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def redraw_figures(self):
+    &#34;&#34;&#34;
+    Dummy function for redrawing in children classes
+
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.view.fgt_canvas.FGTCanvas.set_image"><code class="name flex">
+<span>def <span class="ident">set_image</span></span>(<span>self, img)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_image(self, img):
+    self.img = img
+    self.__show_image()
+    self.canvas.focus_set()</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.view.fgt_canvas.FGTCanvas.smaller"><code class="name flex">
+<span>def <span class="ident">smaller</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Resize the image to be smaller.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A resized PIL image</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def smaller(self):
+    &#34;&#34;&#34;
+    Resize the image to be smaller.
+
+
+    Returns:
+        A resized PIL image
+    &#34;&#34;&#34;
+    w1, h1 = float(self.imwidth), float(self.imheight)
+    w2, h2 = float(self.__huge_size), float(self.__huge_size)
+
+    aspect_ratio1 = w1 / h1
+    aspect_ratio2 = w2 / h2
+
+    if aspect_ratio1 == aspect_ratio2:
+        image = Image.new(&#39;RGB&#39;, (int(w2), int(h2)))
+        k = h2 / h1  # Compression ratio
+        w = int(w2)  # Band length
+    elif aspect_ratio1 &gt; aspect_ratio2:
+        image = Image.new(&#39;RGB&#39;, (int(w2), int(w2 / aspect_ratio1)))
+        k = h2 / w1
+        w = int(w2)
+    else:  # aspect_ratio1 &lt; aspect_ratio2
+        image = Image.new(&#39;RGB&#39;, (int(h2 * aspect_ratio1), int(h2)))
+        k = h2 / h1
+        w = int(h2 * aspect_ratio1)
+
+    i, j, _ = 0, 1, round(0.5 + self.imheight / self.__band_width)
+
+    while i &lt; self.imheight:
+        # Width of the tile band
+        band = min(self.__band_width, self.imheight - i)
+
+        self.__tile[1][3] = band
+
+        # Tile offset (3 bytes per pixel)
+        self.__tile[2] = self.__offset + self.imwidth * i * 3
+        self.__image.close()
+        self.__image = Image.fromarray(self.img)
+        self.__image.size = (self.imwidth * band)
+        self.__image.tile = [self.__tile]
+
+        cropped = self.__image.crop((0, 0, self.imwidth, band))  # crop
+        image.paste(cropped.resize((w, int(band * k)+1), self.__filer), (0,
+                    int(i * k)))
+
+        i += band
+        j += 1
+
+    return image</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="friendly_ground_truth.view" href="index.html">friendly_ground_truth.view</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="friendly_ground_truth.view.fgt_canvas.AutoScrollbar" href="#friendly_ground_truth.view.fgt_canvas.AutoScrollbar">AutoScrollbar</a></code></h4>
+<ul class="">
+<li><code><a title="friendly_ground_truth.view.fgt_canvas.AutoScrollbar.set" href="#friendly_ground_truth.view.fgt_canvas.AutoScrollbar.set">set</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="friendly_ground_truth.view.fgt_canvas.FGTCanvas" href="#friendly_ground_truth.view.fgt_canvas.FGTCanvas">FGTCanvas</a></code></h4>
+<ul class="two-column">
+<li><code><a title="friendly_ground_truth.view.fgt_canvas.FGTCanvas.brush_radius" href="#friendly_ground_truth.view.fgt_canvas.FGTCanvas.brush_radius">brush_radius</a></code></li>
+<li><code><a title="friendly_ground_truth.view.fgt_canvas.FGTCanvas.crop" href="#friendly_ground_truth.view.fgt_canvas.FGTCanvas.crop">crop</a></code></li>
+<li><code><a title="friendly_ground_truth.view.fgt_canvas.FGTCanvas.cursor" href="#friendly_ground_truth.view.fgt_canvas.FGTCanvas.cursor">cursor</a></code></li>
+<li><code><a title="friendly_ground_truth.view.fgt_canvas.FGTCanvas.destroy" href="#friendly_ground_truth.view.fgt_canvas.FGTCanvas.destroy">destroy</a></code></li>
+<li><code><a title="friendly_ground_truth.view.fgt_canvas.FGTCanvas.draw_brush" href="#friendly_ground_truth.view.fgt_canvas.FGTCanvas.draw_brush">draw_brush</a></code></li>
+<li><code><a title="friendly_ground_truth.view.fgt_canvas.FGTCanvas.grid" href="#friendly_ground_truth.view.fgt_canvas.FGTCanvas.grid">grid</a></code></li>
+<li><code><a title="friendly_ground_truth.view.fgt_canvas.FGTCanvas.new_image" href="#friendly_ground_truth.view.fgt_canvas.FGTCanvas.new_image">new_image</a></code></li>
+<li><code><a title="friendly_ground_truth.view.fgt_canvas.FGTCanvas.outside" href="#friendly_ground_truth.view.fgt_canvas.FGTCanvas.outside">outside</a></code></li>
+<li><code><a title="friendly_ground_truth.view.fgt_canvas.FGTCanvas.pack" href="#friendly_ground_truth.view.fgt_canvas.FGTCanvas.pack">pack</a></code></li>
+<li><code><a title="friendly_ground_truth.view.fgt_canvas.FGTCanvas.place" href="#friendly_ground_truth.view.fgt_canvas.FGTCanvas.place">place</a></code></li>
+<li><code><a title="friendly_ground_truth.view.fgt_canvas.FGTCanvas.redraw_figures" href="#friendly_ground_truth.view.fgt_canvas.FGTCanvas.redraw_figures">redraw_figures</a></code></li>
+<li><code><a title="friendly_ground_truth.view.fgt_canvas.FGTCanvas.set_image" href="#friendly_ground_truth.view.fgt_canvas.FGTCanvas.set_image">set_image</a></code></li>
+<li><code><a title="friendly_ground_truth.view.fgt_canvas.FGTCanvas.smaller" href="#friendly_ground_truth.view.fgt_canvas.FGTCanvas.smaller">smaller</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

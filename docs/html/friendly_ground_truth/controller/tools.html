@@ -1,0 +1,5191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>friendly_ground_truth.controller.tools API documentation</title>
+<meta name="description" content="File Name: tools.py …" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>friendly_ground_truth.controller.tools</code></h1>
+</header>
+<section id="section-intro">
+<p>File Name: tools.py</p>
+<p>Authors: Kyle Seidenthal</p>
+<p>Date: 11-05-2020</p>
+<p>Description: Definitions of tools that can be used in Friendly Ground Truth</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+File Name: tools.py
+
+Authors: Kyle Seidenthal
+
+Date: 11-05-2020
+
+Description: Definitions of tools that can be used in Friendly Ground Truth
+
+&#34;&#34;&#34;
+import logging
+import copy
+import tkinter as tk
+from tkinter import ttk
+
+import threading
+
+from friendly_ground_truth.view.icons import icon_strings as icns
+
+module_logger = logging.getLogger(&#39;friendly_gt.controller.tools&#39;)
+
+
+class FGTTool():
+    &#34;&#34;&#34;
+    A class representing a tool that can be used on the image.
+
+    Attributes:
+        name: The name of the tool
+        icon_string: A 64 bit encoded string representing an icon image
+        id: A unique id for the tool
+        persistant: Whether the tool stays activated when it has been activated
+        key_mapping: The keyboard shortcut string for this tool
+        activation_callback: A function to call when the activate functiion is
+                             finished
+        info_widget: A tkinter widget for controlling this tool from an info
+                     panel
+        undo_manager: The manager for undos for this tool
+        darkmode_icon_string: A 64 bit encoded string representing an icon
+                              image for use with dark mode.
+    &#34;&#34;&#34;
+
+    def __init__(self, name, icon_string, id,  undo_manager,
+                 key_mapping, cursor=&#39;none&#39;, persistant=True,
+                 activation_callback=None, group=None,
+                 darkmode_icon_string=None):
+        &#34;&#34;&#34;
+        Initialize the object
+
+        Args:
+            name: The name of the tool
+            icon_string: A bytestring representing the icon for the tool
+            id: A unique id for the tool
+            cursor: The default cursor for this tool.  Default value is &#39;none&#39;
+            undo_manager: The controller&#39;s undo manager
+            key_mapping: The keyboard shortcut string for this tool
+            activation_callback: A function to call when the activate function
+                                 is finished
+            group: If this tool should be grouped with other tools, this string
+                   identifies what group it is a part of.
+            darkmode_icon_string: The embedded icon string to use for darkmode.
+        &#34;&#34;&#34;
+        self._logger = logging\
+            .getLogger(&#39;friendly_gt.controller.tools.FGTTool&#39;)
+
+        self._name = name
+        self._icon_string = icon_string
+        self._id = id
+        self._cursor = cursor
+        self._undo_manager = undo_manager
+        self._key_mapping = key_mapping
+        self._activation_callback = activation_callback
+        self._persistant = persistant
+        self._can_undo = True
+        self._observers = []
+        self._group = group
+        self._darkmode_icon_string = darkmode_icon_string
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def icon_string(self):
+        return self._icon_string
+
+    @icon_string.setter
+    def icon_string(self, string):
+        self._icon_string = string
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def cursor(self):
+        return self._cursor
+
+    @property
+    def patch(self):
+        return self._patch
+
+    @patch.setter
+    def patch(self, patch):
+        self._patch = patch
+
+    @property
+    def image(self):
+        return self._image
+
+    @image.setter
+    def image(self, image):
+        self._image = image
+
+    @property
+    def persistant(self):
+        return self._persistant
+
+    @property
+    def key_mapping(self):
+        return self._key_mapping
+
+    @property
+    def group(self):
+        return self._group
+
+    @property
+    def undo_manager(self):
+        return self._undo_manager
+
+    @undo_manager.setter
+    def undo_manager(self, manager):
+        self._undo_manager = manager
+
+    @property
+    def darkmode_icon_string(self):
+        return self._darkmode_icon_string
+
+    def get_info_widget(self, parent, style):
+        &#34;&#34;&#34;
+        Get the widget that controls this tool in the UI.
+
+        Args:
+            parent: The parent for the widget.
+            style: ttk style objext
+
+        Returns:
+            The tkinter Frame widget for this tool.
+        &#34;&#34;&#34;
+        self._info_widget = ttk.Frame(parent,
+                                      style=&#34;InfoPanel.TFrame&#34;)
+        return self._info_widget
+
+    def lock_undos(self):
+        &#34;&#34;&#34;
+        Make sure that undoing this action does not accidentally add it to the
+        undo stack again.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The _can_undo variable is set to False
+        &#34;&#34;&#34;
+        self._can_undo = False
+
+    def unlock_undos(self):
+        &#34;&#34;&#34;
+        Unlock undos so operations can be added to the undo stack.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The _can_undo variable is set to True
+        &#34;&#34;&#34;
+        self._can_undo = True
+
+    def destroy_info_widget(self):
+        &#34;&#34;&#34;
+        Set info widget attributes to none to avoid tkinter errors.
+
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        pass
+
+    def on_adjust(self, direction):
+        &#34;&#34;&#34;
+        What happens when the tool is adjusted.
+
+        Args:
+            direction: An integer, positive is up, negative is down
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        pass
+
+    def on_click(self, position):
+        &#34;&#34;&#34;
+        What happens for mouse clicks.
+
+        Args:
+            position: The position of the click
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        pass
+
+    def on_drag(self, position):
+        &#34;&#34;&#34;
+        What happens for click and drag.
+
+        Args:
+            position: The position of the mouse
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        pass
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        What happens when the tool is activated.
+
+        Args:
+            current_patch_num: The index of the current patch in the patches
+                               list
+        Returns:
+            None
+
+        Postconditions:
+            The activation callback may be called.
+        &#34;&#34;&#34;
+        pass
+
+    def bind_to(self, callback):
+        &#34;&#34;&#34;
+        Add the callback to the list of observers for updates.
+
+        Args:
+            callback: The function to call when things change.
+                        It should have no parameters, it just says that
+                        something about the image has changed.
+        Returns:
+            None
+
+        Postconditions:
+            The callback is added to the list of observers.
+        &#34;&#34;&#34;
+        self._observers.append(callback)
+
+    def _notify_observers(self):
+        &#34;&#34;&#34;
+        Notify observers of changes made.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            Observer callbacks are called.
+        &#34;&#34;&#34;
+        for ob in self._observers:
+            ob()
+
+
+class ThresholdTool(FGTTool):
+    &#34;&#34;&#34;
+    Tool representing a threshold action.
+
+    Attributes:
+        threshold: The value of the threshold. Between 0 and 1.
+        increment: The amount to change the threshold by when adjusting
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager):
+
+        super(ThresholdTool, self)\
+            .__init__(&#34;Threshold Tool&#34;, icns.threshold_icon, 1,
+                      undo_manager, &#34;t&#34;, cursor=&#39;arrow&#39;, persistant=True,
+                      activation_callback=None, group=&#34;Markups&#34;,
+                      darkmode_icon_string=icns.darkmode_thresh_icon)
+
+        self._logger = logging\
+            .getLogger(&#39;friendly_gt.controller.tools.ThresholdTool&#39;)
+
+        self._threshold = 0
+        self._increment = 0.01
+        self._patch = None
+
+        self._threshold_slider_var = None
+        self._threshold_slider = None
+        self._slider_init = False
+        self._new_patch = False
+
+    @property
+    def threshold(self):
+        return self._threshold
+
+    @threshold.setter
+    def threshold(self, value):
+        if value &lt;= 1 and value &gt;= 0:
+
+            self._threshold = value
+            if not self._new_patch:
+                self._patch.threshold = value
+
+                if self._can_undo:
+                    self._undo_manager.\
+                        add_to_undo_stack(copy.deepcopy(self.patch),
+                                          &#39;threshold_adjust&#39;)
+
+            if self._threshold_slider is not None and self._slider_init:
+                self._threshold_slider_var = value
+                self._threshold_slider.set(value)
+
+            self._logger.debug(&#39;Threshold drawing image&#39;)
+            self._notify_observers()
+            self._new_patch = False
+
+    @property
+    def increment(self):
+        return self._increment
+
+    @increment.setter
+    def increment(self, value):
+        self._increment = value
+
+    @property
+    def patch(self):
+        return self._patch
+
+    @patch.setter
+    def patch(self, patch):
+
+        if self.patch is None or patch.patch_index != self.patch.patch_index:
+            self._new_patch = True
+
+        self._patch = patch
+        self._slider_init = False
+
+        self._threshold = patch.threshold
+
+    def get_info_widget(self, parent, style):
+        &#34;&#34;&#34;
+        Get the widget that controls this tool in the info panel.
+
+        Args:
+            parent: The parent tkinter object.
+            style: ttk style object
+
+        Returns:
+            The widget.
+        &#34;&#34;&#34;
+        self.lock_undos()
+        super().get_info_widget(parent, style)
+
+        self._threshold_slider_var = tk.DoubleVar()
+
+        self._threshold_slider = tk.Scale(self._info_widget,
+                                          from_=0.00,
+                                          to=1.00,
+                                          tickinterval=0.50,
+                                          resolution=0.01,
+                                          length=200,
+                                          variable=self._threshold_slider_var,
+                                          orient=&#39;horizontal&#39;,
+                                          command=self._on_threshold_slider)
+
+        background = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;background&#34;)
+        foreground = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;foreground&#34;)
+        trough = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;troughcolor&#34;)
+
+        self._threshold_slider.config(background=background,
+                                      foreground=foreground,
+                                      troughcolor=trough,
+                                      bd=0,
+                                      highlightthickness=0)
+
+        self._threshold_slider.set(self._threshold)
+        self._threshold_slider.pack(side=&#39;top&#39;)
+
+        self.unlock_undos()
+
+        return self._info_widget
+
+    def destroy_info_widget(self):
+        &#34;&#34;&#34;
+        Destroy the info widget.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The info widget properties are set to None.
+        &#34;&#34;&#34;
+        self._threshold_slider = None
+        self._threshold_slider_var = None
+
+    def _on_threshold_slider(self, value):
+        &#34;&#34;&#34;
+        Called when the threshold slider is moved.
+
+        Args:
+            value: The value of the slider
+
+        Returns:
+            None
+
+        Postconditions:
+            The threshold for the patch is udpated accordingly.
+        &#34;&#34;&#34;
+        if self._slider_init:
+            self.threshold = float(value)
+
+        self._slider_init = True
+
+    def _adjust_threshold(self, direction):
+        &#34;&#34;&#34;
+        Adjust the current threshold
+
+        Args:
+            direction: An integer, positive indicates increasing threshold,
+                       negative idicates decreasing threshold
+
+        Returns:
+            None, the patch threshold will be set accordingly
+        &#34;&#34;&#34;
+        # Note inverted direction, it is more intuitive to increase the region,
+        # than to increase the threshold
+        if direction &lt; 0:
+            self.threshold += self.increment
+        else:
+            self.threshold -= self.increment
+
+    def on_adjust(self, direction):
+        &#34;&#34;&#34;
+        Adjust the threshold in the correct direction
+
+        Args:
+            direction: The direction, an integer
+                       Negative is down, positive is up
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._adjust_threshold(direction)
+
+
+class AddRegionTool(FGTTool):
+    &#34;&#34;&#34;
+    A tool acting as a paint brush for adding regions to the mask
+
+    Attributes:
+        brush_radius: The current radius of the brush
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager):
+        super(AddRegionTool, self)\
+            .__init__(&#34;Add Region Tool&#34;, icns.add_region_icon, 2,
+                      undo_manager, &#34;a&#34;, cursor=&#39;brush&#39;, persistant=True,
+                      group=&#34;Markups&#34;,
+                      darkmode_icon_string=icns.darkmode_add_region_icon)
+
+        self._logger = logging\
+            .getLogger(&#39;friendly_gt.controller.tools.AddRegionTool&#39;)
+
+        self._brush_radius = 15
+        self._brush_observers = []
+        self._brush_sizer = None
+
+    @property
+    def brush_radius(self):
+        return self._brush_radius
+
+    @brush_radius.setter
+    def brush_radius(self, value):
+        if value &gt;= 0:
+            self._brush_radius = value
+
+            for ob in self._brush_observers:
+                ob(self._brush_radius)
+
+            if self._brush_sizer is not None:
+                self._brush_sizer_var.set(value)
+
+    def get_info_widget(self, parent, style):
+        &#34;&#34;&#34;
+        Get the widget that controls this tool in the info panel.
+
+        Args:
+            parent: The parent tkinter object.
+            style: ttk style object.
+        Returns:
+            The widget.
+        &#34;&#34;&#34;
+        super().get_info_widget(parent, style)
+
+        self._brush_size_panel = ttk.Frame(self._info_widget,
+                                           style=&#34;InfoPanel.TFrame&#34;)
+
+        self._brush_size_label = ttk.Label(self._brush_size_panel,
+                                           text=&#34;Brush Size&#34;,
+                                           style=&#34;InfoPanel.TLabel&#34;)
+
+        self._brush_sizer_var = tk.IntVar()
+        self._brush_sizer_var.set(self._brush_radius)
+        self._brush_sizer_var.trace(&#39;w&#39;, self._on_brush_sizer)
+
+        self._brush_sizer = ttk.Spinbox(self._brush_size_panel,
+                                        from_=0,
+                                        to=64,
+                                        width=17,
+                                        textvariable=self._brush_sizer_var,
+                                        style=&#34;InfoPanel.TSpinbox&#34;)
+
+        self._brush_size_label.pack(side=&#39;left&#39;)
+        self._brush_sizer.pack(side=&#39;left&#39;)
+
+        self._brush_size_panel.pack(side=&#39;top&#39;)
+
+        return self._info_widget
+
+    def _on_brush_sizer(self, a, b, c):
+        &#34;&#34;&#34;
+        Called when the brush sizer is updated.
+
+        Args:
+            value: The value of the sizer.
+
+        Returns:
+            None
+
+        Postconditions:
+            The brush radius is udpated accordingly.
+        &#34;&#34;&#34;
+
+        val = self._brush_sizer_var.get()
+        self.brush_radius = val
+
+    def on_adjust(self, direction):
+        &#34;&#34;&#34;
+        Adust the brush size according to the direction.
+
+        Args:
+            direction: An integer, positive means up, negative means down.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        if direction &gt; 0:
+            self.brush_radius += 1
+        else:
+            self.brush_radius -= 1
+
+    def bind_brush(self, callback):
+        &#34;&#34;&#34;
+        Subscribe to brush radius notifications.
+
+        Args:
+            callback: The function to call when the brush radius changes.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._brush_observers.append(callback)
+
+    def on_click(self, position):
+        &#34;&#34;&#34;
+        What to do on mouse clicks.
+
+        Args:
+            position: The position of the mouse.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                             &#34;add_region&#34;)
+
+        self._draw(position)
+
+    def on_drag(self, position):
+        &#34;&#34;&#34;
+        What to do when clicking and dragging
+
+        Args:
+            position: The position of the mouse.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                             &#34;add_region_adjust&#34;)
+
+        t = threading.Thread(target=self._draw, name=&#34;draw&#34;, args=(position, ))
+        t.daemon = True
+        t.start()
+
+    def _draw(self, position):
+        &#34;&#34;&#34;
+        Draw a circle at the given position.  Uses the brush_radius property.
+
+        Args:
+            position: (x, y) coordinates to draw at.
+
+        Returns:
+            None
+
+        Postcondition:
+            The mask at the given position will be filled in.
+        &#34;&#34;&#34;
+        self.patch.add_region(position, self.brush_radius)
+        self._notify_observers()
+
+
+class RemoveRegionTool(FGTTool):
+    &#34;&#34;&#34;
+    A tool acting as a paint brush for removing regions from the mask
+
+    Attributes:
+        brush_radius: The current radius of the brush
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager):
+        super(RemoveRegionTool, self)\
+            .__init__(&#34;Remove Region Tool&#34;, icns.remove_region_icon, 3,
+                      undo_manager, &#34;r&#34;, cursor=&#34;brush&#34;, persistant=True,
+                      group=&#34;Markups&#34;,
+                      darkmode_icon_string=icns.darkmode_remove_region_icon)
+
+        self._logger = logging\
+            .getLogger(&#39;friendly_gt.controller.tools.RemoveRegionTool&#39;)
+
+        self._brush_radius = 15
+        self._brush_observers = []
+        self._brush_sizer = None
+
+    @property
+    def brush_radius(self):
+        return self._brush_radius
+
+    @brush_radius.setter
+    def brush_radius(self, value):
+        if value &gt;= 0:
+            self._brush_radius = value
+
+            for ob in self._brush_observers:
+                ob(self._brush_radius)
+
+            if self._brush_sizer is not None:
+                self._brush_sizer_var.set(value)
+
+    def get_info_widget(self, parent, style):
+        &#34;&#34;&#34;
+        Get the widget that controls this tool in the info panel.
+
+        Args:
+            parent: The parent tkinter object.
+            style: ttk style object.
+
+        Returns:
+            The widget.
+        &#34;&#34;&#34;
+        super().get_info_widget(parent, style)
+
+        self._brush_size_panel = ttk.Frame(self._info_widget,
+                                           style=&#34;InfoPanel.TFrame&#34;)
+
+        self._brush_size_label = ttk.Label(self._brush_size_panel,
+                                           text=&#34;Brush Size&#34;,
+                                           style=&#34;InfoPanel.TLabel&#34;)
+
+        self._brush_sizer_var = tk.IntVar()
+        self._brush_sizer_var.set(self._brush_radius)
+        self._brush_sizer_var.trace(&#39;w&#39;, self._on_brush_sizer)
+
+        self._brush_sizer = ttk.Spinbox(self._brush_size_panel,
+                                        from_=0,
+                                        to=64,
+                                        width=17,
+                                        textvariable=self._brush_sizer_var)
+
+        self._brush_size_label.pack(side=&#39;left&#39;)
+        self._brush_sizer.pack(side=&#39;left&#39;)
+
+        self._brush_size_panel.pack(side=&#39;top&#39;)
+
+        return self._info_widget
+
+    def _on_brush_sizer(self, a, b, c):
+        &#34;&#34;&#34;
+        Called when the brush sizer is updated.
+
+        Args:
+            value: The value of the sizer.
+
+        Returns:
+            None
+
+        Postconditions:
+            The brush radius is udpated accordingly.
+        &#34;&#34;&#34;
+
+        val = self._brush_sizer_var.get()
+        self.brush_radius = val
+
+    def on_adjust(self, direction):
+        &#34;&#34;&#34;
+        Adust the brush size according to the direction.
+
+        Args:
+            direction: An integer, positive means up, negative means down.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        if direction &gt; 0:
+            self.brush_radius += 1
+        else:
+            self.brush_radius -= 1
+
+    def bind_brush(self, callback):
+        &#34;&#34;&#34;
+        Subscribe to brush radius notifications.
+
+        Args:
+            callback: The function to call when the brush radius changes.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._brush_observers.append(callback)
+
+    def on_click(self, position):
+        &#34;&#34;&#34;
+        What to do on mouse clicks.
+
+        Args:
+            position: The position of the mouse.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                             &#34;remove_region&#34;)
+
+        self._draw(position)
+
+    def on_drag(self, position):
+        &#34;&#34;&#34;
+        What to do when clicking and dragging
+
+        Args:
+            position: The position of the mouse.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                             &#34;remove_region_adjust&#34;)
+
+        t = threading.Thread(target=self._draw, name=&#34;draw&#34;, args=(position, ))
+        t.daemon = True
+        t.start()
+
+    def _draw(self, position):
+        &#34;&#34;&#34;
+        Remove a circle at the given position.  Uses the brush_radius property.
+
+        Args:
+            position: (x, y) coordinates to draw at.
+
+        Returns:
+            None
+
+        Postcondition:
+            The mask at the given position will be removed.
+        &#34;&#34;&#34;
+
+        self.patch.remove_region(position, self.brush_radius)
+        self._notify_observers()
+
+
+class NoRootTool(FGTTool):
+    &#34;&#34;&#34;
+    A tool that marks a patch as having no foreground.
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager, next_patch_function):
+        &#34;&#34;&#34;
+        Create the tool
+
+        Args:
+            undo_manager: The undo manager
+            next_patch_function: The function to call to go to the next patch.
+                                 Must have a patch and index parameter
+
+        Returns:
+            {% A thing %}
+        &#34;&#34;&#34;
+        super(NoRootTool, self)\
+            .__init__(&#34;No Root Tool&#34;, icns.no_root_icon, 4,
+                      undo_manager, &#34;x&#34;, cursor=&#39;arrow&#39;, persistant=False,
+                      activation_callback=next_patch_function,
+                      group=&#34;Navigation&#34;,
+                      darkmode_icon_string=icns.darkmode_no_root_icon)
+
+        self._logger = logging\
+            .getLogger(&#39;friendly_gt.controller.tools.NoRootTool&#39;)
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        What happens when the tool is activated.
+
+        Args:
+            current_patch_num: The index of the current patch in the patches
+                               list
+        Returns:
+            None
+
+        Postconditions:
+            The foreground is removed from the patch, and the next patch is
+            displayed.
+        &#34;&#34;&#34;
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                             &#34;no_root&#34;)
+
+        self._no_root()
+        patch, index = self._next_patch(current_patch_num)
+
+        self._activation_callback(patch, index)
+
+    def _no_root(self):
+        &#34;&#34;&#34;
+        Clear the mask for this patch.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The mask for this patch is cleared.
+        &#34;&#34;&#34;
+        self.patch.clear_mask()
+
+    def _next_patch(self, current_patch_num):
+        &#34;&#34;&#34;
+        Move to the next patch if it exists.
+
+        Args:
+            current_patch_num: The index of the current patch in the patches
+                               list.
+
+        Returns:
+            A (patch, patch_num) tuple if there is a next patch.
+            (None, -1) if there is not a next patch
+        &#34;&#34;&#34;
+        patches = self._image.patches
+
+        next_index = current_patch_num + 1
+
+        if next_index &lt; len(patches):
+            return patches[next_index], next_index
+
+        else:
+            return None, -1
+
+
+class FloodAddTool(FGTTool):
+    &#34;&#34;&#34;
+    A tool that allows adding a region based on pixel tolerance.
+
+    Attributes:
+        tolerance: The tolerance for pixels to add to the region.
+        increment: The amount that the tolerance increases by when using the
+                   adjust method
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager):
+        super(FloodAddTool, self)\
+            .__init__(&#34;Flood Add Tool&#34;, icns.flood_add_icon, 5,
+                      undo_manager, &#34;f&#34;, cursor=&#39;crosshair&#39;, persistant=True,
+                      group=&#34;Markups&#34;,
+                      darkmode_icon_string=icns.darkmode_flood_add_icon)
+
+        self._logger = logging\
+            .getLogger(&#39;friendly_gt.controller.tools.FloodAddTool&#39;)
+
+        self._tolerance = 0.05
+        self._increment = 0.01
+
+        self._prev_position = None
+        self._flood_slider = None
+        self._flood_slider_var = None
+
+    @property
+    def tolerance(self):
+        return self._tolerance
+
+    @tolerance.setter
+    def tolerance(self, value):
+        if value &gt;= 0:
+            self._tolerance = value
+
+            if self._flood_slider is not None:
+                self._flood_slider_var = value
+                self._flood_slider.set(value)
+
+            self._add_region(self._prev_position)
+            self._notify_observers()
+
+    @property
+    def increment(self):
+        return self._increment
+
+    @increment.setter
+    def increment(self, value):
+        self._increment = value
+
+    @property
+    def patch(self):
+        return self._patch
+
+    @patch.setter
+    def patch(self, patch):
+        self._patch = patch
+        self._prev_position = None
+
+    def on_click(self, position):
+        &#34;&#34;&#34;
+        When the mouse is clicked, start the flood at the position/
+
+        Args:
+            position: The (x, y) coordinates of the place to start the flood.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._prev_position = position
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                             &#39;flood_add&#39;)
+        self._add_region(position)
+
+    def on_adjust(self, direction):
+        &#34;&#34;&#34;
+        When the tool is adjusted, the tolerance is changed.
+
+        Args:
+            direction: An integer, positive means up, negative means down.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        if direction &gt; 0:
+            self.tolerance += self.increment
+        else:
+            self.tolerance -= self.increment
+
+        self._add_region(self._prev_position)
+
+    def _add_region(self, position):
+        &#34;&#34;&#34;
+        Add a region at the given position, using the tolerance attribute.
+
+        Args:
+            position: (x, y) coordinates to start the flood.
+
+        Returns:
+            None
+
+        Postconditions:
+            A region will be added to the mask that matches the flooded region.
+        &#34;&#34;&#34;
+        if position is None:
+            return
+
+        self.patch.flood_add_region(position, self.tolerance)
+        self._notify_observers()
+
+    def get_info_widget(self, parent, style):
+        &#34;&#34;&#34;
+        Get the widget that controls this tool in the info panel.
+
+        Args:
+            parent: The parent tkinter object.
+            style: ttk style object.
+        Returns:
+            The widget.
+        &#34;&#34;&#34;
+        super().get_info_widget(parent, style)
+
+        self._flood_slider_var = tk.DoubleVar()
+
+        self._flood_slider = tk.Scale(self._info_widget,
+                                      from_=0.00,
+                                      to=1.00,
+                                      tickinterval=0.50,
+                                      resolution=0.01,
+                                      length=200,
+                                      variable=self.
+                                      _flood_slider_var,
+                                      orient=&#39;horizontal&#39;,
+                                      command=self._on_flood_slider)
+
+        background = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;background&#34;)
+        foreground = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;foreground&#34;)
+        trough = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;troughcolor&#34;)
+
+        self._flood_slider.config(background=background,
+                                  foreground=foreground,
+                                  troughcolor=trough,
+                                  bd=0,
+                                  highlightthickness=0)
+
+        self._flood_slider.set(self._tolerance)
+        self._flood_slider.pack(side=&#39;top&#39;)
+
+        return self._info_widget
+
+    def _on_flood_slider(self, value):
+        &#34;&#34;&#34;
+        Called when the flood slider is moved.
+
+        Args:
+            value: The value of the slider
+
+        Returns:
+            None
+
+        Postconditions:
+            The tolerance for the patch is udpated accordingly.
+        &#34;&#34;&#34;
+        self.tolerance = float(value)
+
+
+class FloodRemoveTool(FGTTool):
+    &#34;&#34;&#34;
+    A tool that allows removing a region based on pixel tolerance.
+
+    Attributes:
+        tolerance: The tolerance for pixels to remove from the region.
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager):
+        super(FloodRemoveTool, self)\
+            .__init__(&#34;Flood Remove Tool&#34;, icns.flood_remove_icon, 6,
+                      undo_manager, &#34;l&#34;, cursor=&#39;crosshair&#39;, persistant=True,
+                      group=&#34;Markups&#34;,
+                      darkmode_icon_string=icns.darkmode_flood_remove_icon)
+
+        self._logger = logging\
+            .getLogger(&#39;friendly_gt.controller.tools.FloodRemoveTool&#39;)
+
+        self._tolerance = 0.05
+        self._increment = 0.01
+
+        self._prev_position = None
+        self._flood_slider = None
+        self._flood_slider_var = None
+
+    @property
+    def tolerance(self):
+        return self._tolerance
+
+    @tolerance.setter
+    def tolerance(self, value):
+        if value &gt; 0:
+            self._tolerance = value
+
+            if self._flood_slider is not None:
+                self._flood_slider_var = value
+                self._flood_slider.set(value)
+
+            self._remove_region(self._prev_position)
+            self._notify_observers()
+
+    @property
+    def increment(self):
+        return self._increment
+
+    @increment.setter
+    def increment(self, value):
+        self._increment = value
+
+    @property
+    def patch(self):
+        return self._patch
+
+    @patch.setter
+    def patch(self, patch):
+        self._patch = patch
+        self._prev_position = None
+
+    def on_click(self, position):
+        &#34;&#34;&#34;
+        When the mouse is clicked, start the flood at the position.
+
+        Args:
+            position: The (x, y) coordinates of the place to start the flood.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._prev_position = position
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                             &#39;flood_remove&#39;)
+        self._remove_region(position)
+
+    def on_adjust(self, direction):
+        &#34;&#34;&#34;
+        When the tool is adjusted, the tolerance is changed.
+
+        Args:
+            direction: An integer, positive means up, negative means down.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        if direction &gt; 0:
+            self.tolerance += self.increment
+        else:
+            self.tolerance -= self.increment
+
+        self._remove_region(self._prev_position)
+
+    def _remove_region(self, position):
+        &#34;&#34;&#34;
+        Remove a region at the given position, using the tolerance attribute.
+
+        Args:
+            position: (x, y) coordinates to start the flood.
+
+        Returns:
+            None
+
+        Postconditions:
+            A region will be removed to the mask that matches the
+                flooded region.
+        &#34;&#34;&#34;
+
+        if position is None:
+            return
+
+        self.patch.flood_remove_region(position, self.tolerance)
+        self._notify_observers()
+
+    def get_info_widget(self, parent, style):
+        &#34;&#34;&#34;
+        Get the widget that controls this tool in the info panel.
+
+        Args:
+            parent: The parent tkinter object.
+            style: ttk style object.
+
+        Returns:
+            The widget.
+        &#34;&#34;&#34;
+        super().get_info_widget(parent, style)
+
+        self._flood_slider_var = tk.DoubleVar()
+
+        self._flood_slider = tk.Scale(self._info_widget,
+                                      from_=0.00,
+                                      to=1.00,
+                                      tickinterval=0.50,
+                                      resolution=0.01,
+                                      length=200,
+                                      variable=self.
+                                      _flood_slider_var,
+                                      orient=&#39;horizontal&#39;,
+                                      command=self._on_flood_slider)
+
+        background = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;background&#34;)
+        foreground = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;foreground&#34;)
+        trough = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;troughcolor&#34;)
+
+        self._flood_slider.config(background=background,
+                                  foreground=foreground,
+                                  troughcolor=trough,
+                                  bd=0,
+                                  highlightthickness=0)
+
+        self._flood_slider.set(self._tolerance)
+        self._flood_slider.pack(side=&#39;top&#39;)
+
+        return self._info_widget
+
+    def _on_flood_slider(self, value):
+        &#34;&#34;&#34;
+        Called when the flood slider is moved.
+
+        Args:
+            value: The value of the slider
+
+        Returns:
+            None
+
+        Postconditions:
+            The tolerance for the patch is udpated accordingly.
+        &#34;&#34;&#34;
+        self.tolerance = float(value)
+
+
+class PreviousPatchTool(FGTTool):
+    &#34;&#34;&#34;
+    A Tool that moves to the previous patch for the current image.
+
+    Attributes:
+        image: The image to operate on
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager, prev_patch_function):
+        &#34;&#34;&#34;
+        Create the tool.
+
+        Args:
+            undo_manager: The undo manager
+            prev_patch_function: A function callback that takes in a patch and
+                                 patch index representing the next patch
+
+        Returns:
+            A tool object
+        &#34;&#34;&#34;
+        super(PreviousPatchTool, self)\
+            .__init__(&#34;Previous Patch&#34;, icns.prev_patch_icon, 7,
+                      undo_manager, &#34;left&#34;, cursor=&#39;arrow&#39;,
+                      persistant=False,
+                      activation_callback=prev_patch_function,
+                      group=&#34;Navigation&#34;,
+                      darkmode_icon_string=icns.darkmode_prev_patch_icon)
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        When the tool is activated, move to the previous patch.
+
+        Args:
+            current_patch_num: The index of the current patch in the patches
+                               list
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        patch, index = self._prev_patch(current_patch_num)
+        self._activation_callback(patch, index)
+
+    def _prev_patch(self, current_patch_num):
+        &#34;&#34;&#34;
+        Move to the previous patch in the image.
+
+        Args:
+            current_patch_num: The index of the current patch.
+
+        Returns:
+            (patch, current_patch_index) if there is a previous patch
+            (None, -1) if there is not a previous patch
+        &#34;&#34;&#34;
+
+        patches = self._image.patches
+
+        prev_index = current_patch_num - 1
+
+        if prev_index &gt;= 0:
+            return patches[prev_index], prev_index
+
+        else:
+            return None, -1
+
+
+class NextPatchTool(FGTTool):
+    &#34;&#34;&#34;
+    A Tool that moves to the next patch for the current image.
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager, next_patch_function):
+        &#34;&#34;&#34;
+        Create the tool.
+
+        Args:
+            undo_manager: The undo_manager for this tool.
+            next_patch_function: A function callback that takes in a patch and
+                                 index
+        Returns:
+            A tool object
+        &#34;&#34;&#34;
+        super(NextPatchTool, self)\
+            .__init__(&#34;Next Patch&#34;, icns.next_patch_icon, 8,
+                      undo_manager, &#34;right&#34;, cursor=&#39;arrow&#39;,
+                      persistant=False,
+                      activation_callback=next_patch_function,
+                      group=&#34;Navigation&#34;,
+                      darkmode_icon_string=icns.darkmode_next_patch_icon)
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        When the tool is activated, move to the next patch.
+
+        Args:
+            current_patch_num: The index of the current patch in the patches
+                               list
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        patch, index = self._next_patch(current_patch_num)
+        self._activation_callback(patch, index)
+
+    def _next_patch(self, current_patch_num):
+        &#34;&#34;&#34;
+        Move to the next patch in the image.
+
+        Args:
+            current_patch_num: The index of the current patch.
+
+        Returns:
+            (patch, current_patch_index) if there is a next patch
+            (None, -1) if there is not a next patch
+        &#34;&#34;&#34;
+
+        patches = self._image.patches
+
+        next_index = current_patch_num + 1
+
+        if next_index &lt; len(patches):
+            return patches[next_index], next_index
+
+        else:
+            return None, -1
+
+
+class UndoTool(FGTTool):
+    &#34;&#34;&#34;
+    A tool for undoing mistakes.
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager, undo_callback):
+        &#34;&#34;&#34;
+        Initialize the tool
+
+        Args:
+            undo_manager: The manager for undo and redo operations
+            undo_callback: A function taking in a patch object and string tag
+                           to call when the undo action is taken.
+        Returns:
+            A tool object
+        &#34;&#34;&#34;
+        super(UndoTool, self)\
+            .__init__(&#34;Undo&#34;, icns.undo_icon, 9, undo_manager,
+                      &#34;CTRL+z&#34;, cursor=&#39;arrow&#39;, persistant=False,
+                      activation_callback=undo_callback, group=&#34;Undo&#34;,
+                      darkmode_icon_string=icns.darkmode_undo_icon)
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        Activate the undo tool.
+
+        Args:
+            current_patch_num: The current patch index in the patches list.
+
+        Returns:
+            The patch data and operation string.
+
+        Postconditions:
+            The last action is undone and put on the redo stack.
+        &#34;&#34;&#34;
+        patch, string = self._undo()
+        self._activation_callback(patch, string)
+        self._notify_observers()
+
+    def _undo(self):
+        &#34;&#34;&#34;
+        Undo the last operation.
+
+
+        Returns:
+            The patch data and the operation string
+        &#34;&#34;&#34;
+        return self._undo_manager.undo()
+
+
+class RedoTool(FGTTool):
+    &#34;&#34;&#34;
+    A tool for redoing undid mistakes.
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager, redo_callback):
+        &#34;&#34;&#34;
+        Initialize the tool
+
+        Args:
+            undo_manager: The manager for undo and redo operations
+            redo_callback: A function taking in a patch and string to call
+                           when the undo action is taken.
+        Returns:
+            A tool object
+        &#34;&#34;&#34;
+        super(RedoTool, self)\
+            .__init__(&#34;Redo&#34;, icns.redo_icon, 10, undo_manager, &#34;CTRL+r&#34;,
+                      cursor=&#39;arrow&#39;, persistant=False,
+                      activation_callback=redo_callback, group=&#34;Undo&#34;,
+                      darkmode_icon_string=icns.darkmode_redo_icon)
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        Activate the redo tool.
+
+        Args:
+            current_patch_num: The current patch index in the patches list.
+
+        Returns:
+            The patch data and operation string
+
+        Postconditions:
+            The last undone action is redone and put on the undo stack.
+        &#34;&#34;&#34;
+        patch, string = self._redo()
+        self._activation_callback(patch, string)
+        self._notify_observers()
+
+    def _redo(self):
+        &#34;&#34;&#34;
+        Redo the undone last operation.
+
+
+        Returns:
+            The patch data and the operation string
+        &#34;&#34;&#34;
+        return self._undo_manager.redo()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.AddRegionTool"><code class="flex name class">
+<span>class <span class="ident">AddRegionTool</span></span>
+<span>(</span><span>undo_manager)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A tool acting as a paint brush for adding regions to the mask</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>brush_radius</code></strong></dt>
+<dd>The current radius of the brush</dd>
+</dl>
+<p>Initialize the object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>The name of the tool</dd>
+<dt><strong><code>icon_string</code></strong></dt>
+<dd>A bytestring representing the icon for the tool</dd>
+<dt><strong><code>id</code></strong></dt>
+<dd>A unique id for the tool</dd>
+<dt><strong><code>cursor</code></strong></dt>
+<dd>The default cursor for this tool.
+Default value is 'none'</dd>
+<dt><strong><code>undo_manager</code></strong></dt>
+<dd>The controller's undo manager</dd>
+<dt><strong><code>key_mapping</code></strong></dt>
+<dd>The keyboard shortcut string for this tool</dd>
+<dt><strong><code>activation_callback</code></strong></dt>
+<dd>A function to call when the activate function
+is finished</dd>
+<dt><strong><code>group</code></strong></dt>
+<dd>If this tool should be grouped with other tools, this string
+identifies what group it is a part of.</dd>
+<dt><strong><code>darkmode_icon_string</code></strong></dt>
+<dd>The embedded icon string to use for darkmode.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AddRegionTool(FGTTool):
+    &#34;&#34;&#34;
+    A tool acting as a paint brush for adding regions to the mask
+
+    Attributes:
+        brush_radius: The current radius of the brush
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager):
+        super(AddRegionTool, self)\
+            .__init__(&#34;Add Region Tool&#34;, icns.add_region_icon, 2,
+                      undo_manager, &#34;a&#34;, cursor=&#39;brush&#39;, persistant=True,
+                      group=&#34;Markups&#34;,
+                      darkmode_icon_string=icns.darkmode_add_region_icon)
+
+        self._logger = logging\
+            .getLogger(&#39;friendly_gt.controller.tools.AddRegionTool&#39;)
+
+        self._brush_radius = 15
+        self._brush_observers = []
+        self._brush_sizer = None
+
+    @property
+    def brush_radius(self):
+        return self._brush_radius
+
+    @brush_radius.setter
+    def brush_radius(self, value):
+        if value &gt;= 0:
+            self._brush_radius = value
+
+            for ob in self._brush_observers:
+                ob(self._brush_radius)
+
+            if self._brush_sizer is not None:
+                self._brush_sizer_var.set(value)
+
+    def get_info_widget(self, parent, style):
+        &#34;&#34;&#34;
+        Get the widget that controls this tool in the info panel.
+
+        Args:
+            parent: The parent tkinter object.
+            style: ttk style object.
+        Returns:
+            The widget.
+        &#34;&#34;&#34;
+        super().get_info_widget(parent, style)
+
+        self._brush_size_panel = ttk.Frame(self._info_widget,
+                                           style=&#34;InfoPanel.TFrame&#34;)
+
+        self._brush_size_label = ttk.Label(self._brush_size_panel,
+                                           text=&#34;Brush Size&#34;,
+                                           style=&#34;InfoPanel.TLabel&#34;)
+
+        self._brush_sizer_var = tk.IntVar()
+        self._brush_sizer_var.set(self._brush_radius)
+        self._brush_sizer_var.trace(&#39;w&#39;, self._on_brush_sizer)
+
+        self._brush_sizer = ttk.Spinbox(self._brush_size_panel,
+                                        from_=0,
+                                        to=64,
+                                        width=17,
+                                        textvariable=self._brush_sizer_var,
+                                        style=&#34;InfoPanel.TSpinbox&#34;)
+
+        self._brush_size_label.pack(side=&#39;left&#39;)
+        self._brush_sizer.pack(side=&#39;left&#39;)
+
+        self._brush_size_panel.pack(side=&#39;top&#39;)
+
+        return self._info_widget
+
+    def _on_brush_sizer(self, a, b, c):
+        &#34;&#34;&#34;
+        Called when the brush sizer is updated.
+
+        Args:
+            value: The value of the sizer.
+
+        Returns:
+            None
+
+        Postconditions:
+            The brush radius is udpated accordingly.
+        &#34;&#34;&#34;
+
+        val = self._brush_sizer_var.get()
+        self.brush_radius = val
+
+    def on_adjust(self, direction):
+        &#34;&#34;&#34;
+        Adust the brush size according to the direction.
+
+        Args:
+            direction: An integer, positive means up, negative means down.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        if direction &gt; 0:
+            self.brush_radius += 1
+        else:
+            self.brush_radius -= 1
+
+    def bind_brush(self, callback):
+        &#34;&#34;&#34;
+        Subscribe to brush radius notifications.
+
+        Args:
+            callback: The function to call when the brush radius changes.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._brush_observers.append(callback)
+
+    def on_click(self, position):
+        &#34;&#34;&#34;
+        What to do on mouse clicks.
+
+        Args:
+            position: The position of the mouse.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                             &#34;add_region&#34;)
+
+        self._draw(position)
+
+    def on_drag(self, position):
+        &#34;&#34;&#34;
+        What to do when clicking and dragging
+
+        Args:
+            position: The position of the mouse.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                             &#34;add_region_adjust&#34;)
+
+        t = threading.Thread(target=self._draw, name=&#34;draw&#34;, args=(position, ))
+        t.daemon = True
+        t.start()
+
+    def _draw(self, position):
+        &#34;&#34;&#34;
+        Draw a circle at the given position.  Uses the brush_radius property.
+
+        Args:
+            position: (x, y) coordinates to draw at.
+
+        Returns:
+            None
+
+        Postcondition:
+            The mask at the given position will be filled in.
+        &#34;&#34;&#34;
+        self.patch.add_region(position, self.brush_radius)
+        self._notify_observers()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.AddRegionTool.brush_radius"><code class="name">var <span class="ident">brush_radius</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def brush_radius(self):
+    return self._brush_radius</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.AddRegionTool.bind_brush"><code class="name flex">
+<span>def <span class="ident">bind_brush</span></span>(<span>self, callback)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Subscribe to brush radius notifications.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>callback</code></strong></dt>
+<dd>The function to call when the brush radius changes.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bind_brush(self, callback):
+    &#34;&#34;&#34;
+    Subscribe to brush radius notifications.
+
+    Args:
+        callback: The function to call when the brush radius changes.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    self._brush_observers.append(callback)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.AddRegionTool.get_info_widget"><code class="name flex">
+<span>def <span class="ident">get_info_widget</span></span>(<span>self, parent, style)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the widget that controls this tool in the info panel.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>parent</code></strong></dt>
+<dd>The parent tkinter object.</dd>
+<dt><strong><code>style</code></strong></dt>
+<dd>ttk style object.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The widget.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_info_widget(self, parent, style):
+    &#34;&#34;&#34;
+    Get the widget that controls this tool in the info panel.
+
+    Args:
+        parent: The parent tkinter object.
+        style: ttk style object.
+    Returns:
+        The widget.
+    &#34;&#34;&#34;
+    super().get_info_widget(parent, style)
+
+    self._brush_size_panel = ttk.Frame(self._info_widget,
+                                       style=&#34;InfoPanel.TFrame&#34;)
+
+    self._brush_size_label = ttk.Label(self._brush_size_panel,
+                                       text=&#34;Brush Size&#34;,
+                                       style=&#34;InfoPanel.TLabel&#34;)
+
+    self._brush_sizer_var = tk.IntVar()
+    self._brush_sizer_var.set(self._brush_radius)
+    self._brush_sizer_var.trace(&#39;w&#39;, self._on_brush_sizer)
+
+    self._brush_sizer = ttk.Spinbox(self._brush_size_panel,
+                                    from_=0,
+                                    to=64,
+                                    width=17,
+                                    textvariable=self._brush_sizer_var,
+                                    style=&#34;InfoPanel.TSpinbox&#34;)
+
+    self._brush_size_label.pack(side=&#39;left&#39;)
+    self._brush_sizer.pack(side=&#39;left&#39;)
+
+    self._brush_size_panel.pack(side=&#39;top&#39;)
+
+    return self._info_widget</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.AddRegionTool.on_adjust"><code class="name flex">
+<span>def <span class="ident">on_adjust</span></span>(<span>self, direction)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adust the brush size according to the direction.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>direction</code></strong></dt>
+<dd>An integer, positive means up, negative means down.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_adjust(self, direction):
+    &#34;&#34;&#34;
+    Adust the brush size according to the direction.
+
+    Args:
+        direction: An integer, positive means up, negative means down.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    if direction &gt; 0:
+        self.brush_radius += 1
+    else:
+        self.brush_radius -= 1</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.AddRegionTool.on_click"><code class="name flex">
+<span>def <span class="ident">on_click</span></span>(<span>self, position)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>What to do on mouse clicks.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>position</code></strong></dt>
+<dd>The position of the mouse.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_click(self, position):
+    &#34;&#34;&#34;
+    What to do on mouse clicks.
+
+    Args:
+        position: The position of the mouse.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                         &#34;add_region&#34;)
+
+    self._draw(position)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.AddRegionTool.on_drag"><code class="name flex">
+<span>def <span class="ident">on_drag</span></span>(<span>self, position)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>What to do when clicking and dragging</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>position</code></strong></dt>
+<dd>The position of the mouse.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_drag(self, position):
+    &#34;&#34;&#34;
+    What to do when clicking and dragging
+
+    Args:
+        position: The position of the mouse.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                         &#34;add_region_adjust&#34;)
+
+    t = threading.Thread(target=self._draw, name=&#34;draw&#34;, args=(position, ))
+    t.daemon = True
+    t.start()</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></b></code>:
+<ul class="hlist">
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.bind_to" href="#friendly_ground_truth.controller.tools.FGTTool.bind_to">bind_to</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget">destroy_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.lock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.lock_undos">lock_undos</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_activate" href="#friendly_ground_truth.controller.tools.FGTTool.on_activate">on_activate</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.unlock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.unlock_undos">unlock_undos</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool"><code class="flex name class">
+<span>class <span class="ident">FGTTool</span></span>
+<span>(</span><span>name, icon_string, id, undo_manager, key_mapping, cursor='none', persistant=True, activation_callback=None, group=None, darkmode_icon_string=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A class representing a tool that can be used on the image.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>The name of the tool</dd>
+<dt><strong><code>icon_string</code></strong></dt>
+<dd>A 64 bit encoded string representing an icon image</dd>
+<dt><strong><code>id</code></strong></dt>
+<dd>A unique id for the tool</dd>
+<dt><strong><code>persistant</code></strong></dt>
+<dd>Whether the tool stays activated when it has been activated</dd>
+<dt><strong><code>key_mapping</code></strong></dt>
+<dd>The keyboard shortcut string for this tool</dd>
+<dt><strong><code>activation_callback</code></strong></dt>
+<dd>A function to call when the activate functiion is
+finished</dd>
+<dt><strong><code>info_widget</code></strong></dt>
+<dd>A tkinter widget for controlling this tool from an info
+panel</dd>
+<dt><strong><code>undo_manager</code></strong></dt>
+<dd>The manager for undos for this tool</dd>
+<dt><strong><code>darkmode_icon_string</code></strong></dt>
+<dd>A 64 bit encoded string representing an icon
+image for use with dark mode.</dd>
+</dl>
+<p>Initialize the object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>The name of the tool</dd>
+<dt><strong><code>icon_string</code></strong></dt>
+<dd>A bytestring representing the icon for the tool</dd>
+<dt><strong><code>id</code></strong></dt>
+<dd>A unique id for the tool</dd>
+<dt><strong><code>cursor</code></strong></dt>
+<dd>The default cursor for this tool.
+Default value is 'none'</dd>
+<dt><strong><code>undo_manager</code></strong></dt>
+<dd>The controller's undo manager</dd>
+<dt><strong><code>key_mapping</code></strong></dt>
+<dd>The keyboard shortcut string for this tool</dd>
+<dt><strong><code>activation_callback</code></strong></dt>
+<dd>A function to call when the activate function
+is finished</dd>
+<dt><strong><code>group</code></strong></dt>
+<dd>If this tool should be grouped with other tools, this string
+identifies what group it is a part of.</dd>
+<dt><strong><code>darkmode_icon_string</code></strong></dt>
+<dd>The embedded icon string to use for darkmode.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FGTTool():
+    &#34;&#34;&#34;
+    A class representing a tool that can be used on the image.
+
+    Attributes:
+        name: The name of the tool
+        icon_string: A 64 bit encoded string representing an icon image
+        id: A unique id for the tool
+        persistant: Whether the tool stays activated when it has been activated
+        key_mapping: The keyboard shortcut string for this tool
+        activation_callback: A function to call when the activate functiion is
+                             finished
+        info_widget: A tkinter widget for controlling this tool from an info
+                     panel
+        undo_manager: The manager for undos for this tool
+        darkmode_icon_string: A 64 bit encoded string representing an icon
+                              image for use with dark mode.
+    &#34;&#34;&#34;
+
+    def __init__(self, name, icon_string, id,  undo_manager,
+                 key_mapping, cursor=&#39;none&#39;, persistant=True,
+                 activation_callback=None, group=None,
+                 darkmode_icon_string=None):
+        &#34;&#34;&#34;
+        Initialize the object
+
+        Args:
+            name: The name of the tool
+            icon_string: A bytestring representing the icon for the tool
+            id: A unique id for the tool
+            cursor: The default cursor for this tool.  Default value is &#39;none&#39;
+            undo_manager: The controller&#39;s undo manager
+            key_mapping: The keyboard shortcut string for this tool
+            activation_callback: A function to call when the activate function
+                                 is finished
+            group: If this tool should be grouped with other tools, this string
+                   identifies what group it is a part of.
+            darkmode_icon_string: The embedded icon string to use for darkmode.
+        &#34;&#34;&#34;
+        self._logger = logging\
+            .getLogger(&#39;friendly_gt.controller.tools.FGTTool&#39;)
+
+        self._name = name
+        self._icon_string = icon_string
+        self._id = id
+        self._cursor = cursor
+        self._undo_manager = undo_manager
+        self._key_mapping = key_mapping
+        self._activation_callback = activation_callback
+        self._persistant = persistant
+        self._can_undo = True
+        self._observers = []
+        self._group = group
+        self._darkmode_icon_string = darkmode_icon_string
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def icon_string(self):
+        return self._icon_string
+
+    @icon_string.setter
+    def icon_string(self, string):
+        self._icon_string = string
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def cursor(self):
+        return self._cursor
+
+    @property
+    def patch(self):
+        return self._patch
+
+    @patch.setter
+    def patch(self, patch):
+        self._patch = patch
+
+    @property
+    def image(self):
+        return self._image
+
+    @image.setter
+    def image(self, image):
+        self._image = image
+
+    @property
+    def persistant(self):
+        return self._persistant
+
+    @property
+    def key_mapping(self):
+        return self._key_mapping
+
+    @property
+    def group(self):
+        return self._group
+
+    @property
+    def undo_manager(self):
+        return self._undo_manager
+
+    @undo_manager.setter
+    def undo_manager(self, manager):
+        self._undo_manager = manager
+
+    @property
+    def darkmode_icon_string(self):
+        return self._darkmode_icon_string
+
+    def get_info_widget(self, parent, style):
+        &#34;&#34;&#34;
+        Get the widget that controls this tool in the UI.
+
+        Args:
+            parent: The parent for the widget.
+            style: ttk style objext
+
+        Returns:
+            The tkinter Frame widget for this tool.
+        &#34;&#34;&#34;
+        self._info_widget = ttk.Frame(parent,
+                                      style=&#34;InfoPanel.TFrame&#34;)
+        return self._info_widget
+
+    def lock_undos(self):
+        &#34;&#34;&#34;
+        Make sure that undoing this action does not accidentally add it to the
+        undo stack again.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The _can_undo variable is set to False
+        &#34;&#34;&#34;
+        self._can_undo = False
+
+    def unlock_undos(self):
+        &#34;&#34;&#34;
+        Unlock undos so operations can be added to the undo stack.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The _can_undo variable is set to True
+        &#34;&#34;&#34;
+        self._can_undo = True
+
+    def destroy_info_widget(self):
+        &#34;&#34;&#34;
+        Set info widget attributes to none to avoid tkinter errors.
+
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        pass
+
+    def on_adjust(self, direction):
+        &#34;&#34;&#34;
+        What happens when the tool is adjusted.
+
+        Args:
+            direction: An integer, positive is up, negative is down
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        pass
+
+    def on_click(self, position):
+        &#34;&#34;&#34;
+        What happens for mouse clicks.
+
+        Args:
+            position: The position of the click
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        pass
+
+    def on_drag(self, position):
+        &#34;&#34;&#34;
+        What happens for click and drag.
+
+        Args:
+            position: The position of the mouse
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        pass
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        What happens when the tool is activated.
+
+        Args:
+            current_patch_num: The index of the current patch in the patches
+                               list
+        Returns:
+            None
+
+        Postconditions:
+            The activation callback may be called.
+        &#34;&#34;&#34;
+        pass
+
+    def bind_to(self, callback):
+        &#34;&#34;&#34;
+        Add the callback to the list of observers for updates.
+
+        Args:
+            callback: The function to call when things change.
+                        It should have no parameters, it just says that
+                        something about the image has changed.
+        Returns:
+            None
+
+        Postconditions:
+            The callback is added to the list of observers.
+        &#34;&#34;&#34;
+        self._observers.append(callback)
+
+    def _notify_observers(self):
+        &#34;&#34;&#34;
+        Notify observers of changes made.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            Observer callbacks are called.
+        &#34;&#34;&#34;
+        for ob in self._observers:
+            ob()</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="friendly_ground_truth.controller.tools.AddRegionTool" href="#friendly_ground_truth.controller.tools.AddRegionTool">AddRegionTool</a></li>
+<li><a title="friendly_ground_truth.controller.tools.FloodAddTool" href="#friendly_ground_truth.controller.tools.FloodAddTool">FloodAddTool</a></li>
+<li><a title="friendly_ground_truth.controller.tools.FloodRemoveTool" href="#friendly_ground_truth.controller.tools.FloodRemoveTool">FloodRemoveTool</a></li>
+<li><a title="friendly_ground_truth.controller.tools.NextPatchTool" href="#friendly_ground_truth.controller.tools.NextPatchTool">NextPatchTool</a></li>
+<li><a title="friendly_ground_truth.controller.tools.NoRootTool" href="#friendly_ground_truth.controller.tools.NoRootTool">NoRootTool</a></li>
+<li><a title="friendly_ground_truth.controller.tools.PreviousPatchTool" href="#friendly_ground_truth.controller.tools.PreviousPatchTool">PreviousPatchTool</a></li>
+<li><a title="friendly_ground_truth.controller.tools.RedoTool" href="#friendly_ground_truth.controller.tools.RedoTool">RedoTool</a></li>
+<li><a title="friendly_ground_truth.controller.tools.RemoveRegionTool" href="#friendly_ground_truth.controller.tools.RemoveRegionTool">RemoveRegionTool</a></li>
+<li><a title="friendly_ground_truth.controller.tools.ThresholdTool" href="#friendly_ground_truth.controller.tools.ThresholdTool">ThresholdTool</a></li>
+<li><a title="friendly_ground_truth.controller.tools.UndoTool" href="#friendly_ground_truth.controller.tools.UndoTool">UndoTool</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.cursor"><code class="name">var <span class="ident">cursor</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def cursor(self):
+    return self._cursor</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.darkmode_icon_string"><code class="name">var <span class="ident">darkmode_icon_string</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def darkmode_icon_string(self):
+    return self._darkmode_icon_string</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.group"><code class="name">var <span class="ident">group</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def group(self):
+    return self._group</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.icon_string"><code class="name">var <span class="ident">icon_string</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def icon_string(self):
+    return self._icon_string</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.id"><code class="name">var <span class="ident">id</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def id(self):
+    return self._id</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.image"><code class="name">var <span class="ident">image</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def image(self):
+    return self._image</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.key_mapping"><code class="name">var <span class="ident">key_mapping</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def key_mapping(self):
+    return self._key_mapping</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.name"><code class="name">var <span class="ident">name</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def name(self):
+    return self._name</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.patch"><code class="name">var <span class="ident">patch</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def patch(self):
+    return self._patch</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.persistant"><code class="name">var <span class="ident">persistant</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def persistant(self):
+    return self._persistant</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.undo_manager"><code class="name">var <span class="ident">undo_manager</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def undo_manager(self):
+    return self._undo_manager</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.bind_to"><code class="name flex">
+<span>def <span class="ident">bind_to</span></span>(<span>self, callback)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Add the callback to the list of observers for updates.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>callback</code></strong></dt>
+<dd>The function to call when things change.
+It should have no parameters, it just says that
+something about the image has changed.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="postconditions">Postconditions</h2>
+<p>The callback is added to the list of observers.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bind_to(self, callback):
+    &#34;&#34;&#34;
+    Add the callback to the list of observers for updates.
+
+    Args:
+        callback: The function to call when things change.
+                    It should have no parameters, it just says that
+                    something about the image has changed.
+    Returns:
+        None
+
+    Postconditions:
+        The callback is added to the list of observers.
+    &#34;&#34;&#34;
+    self._observers.append(callback)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget"><code class="name flex">
+<span>def <span class="ident">destroy_info_widget</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set info widget attributes to none to avoid tkinter errors.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def destroy_info_widget(self):
+    &#34;&#34;&#34;
+    Set info widget attributes to none to avoid tkinter errors.
+
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.get_info_widget"><code class="name flex">
+<span>def <span class="ident">get_info_widget</span></span>(<span>self, parent, style)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the widget that controls this tool in the UI.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>parent</code></strong></dt>
+<dd>The parent for the widget.</dd>
+<dt><strong><code>style</code></strong></dt>
+<dd>ttk style objext</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The tkinter Frame widget for this tool.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_info_widget(self, parent, style):
+    &#34;&#34;&#34;
+    Get the widget that controls this tool in the UI.
+
+    Args:
+        parent: The parent for the widget.
+        style: ttk style objext
+
+    Returns:
+        The tkinter Frame widget for this tool.
+    &#34;&#34;&#34;
+    self._info_widget = ttk.Frame(parent,
+                                  style=&#34;InfoPanel.TFrame&#34;)
+    return self._info_widget</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.lock_undos"><code class="name flex">
+<span>def <span class="ident">lock_undos</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Make sure that undoing this action does not accidentally add it to the
+undo stack again.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="postconditions">Postconditions</h2>
+<p>The _can_undo variable is set to False</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def lock_undos(self):
+    &#34;&#34;&#34;
+    Make sure that undoing this action does not accidentally add it to the
+    undo stack again.
+
+
+    Returns:
+        None
+
+    Postconditions:
+        The _can_undo variable is set to False
+    &#34;&#34;&#34;
+    self._can_undo = False</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.on_activate"><code class="name flex">
+<span>def <span class="ident">on_activate</span></span>(<span>self, current_patch_num)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>What happens when the tool is activated.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>current_patch_num</code></strong></dt>
+<dd>The index of the current patch in the patches
+list</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="postconditions">Postconditions</h2>
+<p>The activation callback may be called.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_activate(self, current_patch_num):
+    &#34;&#34;&#34;
+    What happens when the tool is activated.
+
+    Args:
+        current_patch_num: The index of the current patch in the patches
+                           list
+    Returns:
+        None
+
+    Postconditions:
+        The activation callback may be called.
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.on_adjust"><code class="name flex">
+<span>def <span class="ident">on_adjust</span></span>(<span>self, direction)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>What happens when the tool is adjusted.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>direction</code></strong></dt>
+<dd>An integer, positive is up, negative is down</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_adjust(self, direction):
+    &#34;&#34;&#34;
+    What happens when the tool is adjusted.
+
+    Args:
+        direction: An integer, positive is up, negative is down
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.on_click"><code class="name flex">
+<span>def <span class="ident">on_click</span></span>(<span>self, position)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>What happens for mouse clicks.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>position</code></strong></dt>
+<dd>The position of the click</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_click(self, position):
+    &#34;&#34;&#34;
+    What happens for mouse clicks.
+
+    Args:
+        position: The position of the click
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.on_drag"><code class="name flex">
+<span>def <span class="ident">on_drag</span></span>(<span>self, position)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>What happens for click and drag.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>position</code></strong></dt>
+<dd>The position of the mouse</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_drag(self, position):
+    &#34;&#34;&#34;
+    What happens for click and drag.
+
+    Args:
+        position: The position of the mouse
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    pass</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FGTTool.unlock_undos"><code class="name flex">
+<span>def <span class="ident">unlock_undos</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Unlock undos so operations can be added to the undo stack.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="postconditions">Postconditions</h2>
+<p>The _can_undo variable is set to True</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unlock_undos(self):
+    &#34;&#34;&#34;
+    Unlock undos so operations can be added to the undo stack.
+
+
+    Returns:
+        None
+
+    Postconditions:
+        The _can_undo variable is set to True
+    &#34;&#34;&#34;
+    self._can_undo = True</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FloodAddTool"><code class="flex name class">
+<span>class <span class="ident">FloodAddTool</span></span>
+<span>(</span><span>undo_manager)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A tool that allows adding a region based on pixel tolerance.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>tolerance</code></strong></dt>
+<dd>The tolerance for pixels to add to the region.</dd>
+<dt><strong><code>increment</code></strong></dt>
+<dd>The amount that the tolerance increases by when using the
+adjust method</dd>
+</dl>
+<p>Initialize the object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>The name of the tool</dd>
+<dt><strong><code>icon_string</code></strong></dt>
+<dd>A bytestring representing the icon for the tool</dd>
+<dt><strong><code>id</code></strong></dt>
+<dd>A unique id for the tool</dd>
+<dt><strong><code>cursor</code></strong></dt>
+<dd>The default cursor for this tool.
+Default value is 'none'</dd>
+<dt><strong><code>undo_manager</code></strong></dt>
+<dd>The controller's undo manager</dd>
+<dt><strong><code>key_mapping</code></strong></dt>
+<dd>The keyboard shortcut string for this tool</dd>
+<dt><strong><code>activation_callback</code></strong></dt>
+<dd>A function to call when the activate function
+is finished</dd>
+<dt><strong><code>group</code></strong></dt>
+<dd>If this tool should be grouped with other tools, this string
+identifies what group it is a part of.</dd>
+<dt><strong><code>darkmode_icon_string</code></strong></dt>
+<dd>The embedded icon string to use for darkmode.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FloodAddTool(FGTTool):
+    &#34;&#34;&#34;
+    A tool that allows adding a region based on pixel tolerance.
+
+    Attributes:
+        tolerance: The tolerance for pixels to add to the region.
+        increment: The amount that the tolerance increases by when using the
+                   adjust method
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager):
+        super(FloodAddTool, self)\
+            .__init__(&#34;Flood Add Tool&#34;, icns.flood_add_icon, 5,
+                      undo_manager, &#34;f&#34;, cursor=&#39;crosshair&#39;, persistant=True,
+                      group=&#34;Markups&#34;,
+                      darkmode_icon_string=icns.darkmode_flood_add_icon)
+
+        self._logger = logging\
+            .getLogger(&#39;friendly_gt.controller.tools.FloodAddTool&#39;)
+
+        self._tolerance = 0.05
+        self._increment = 0.01
+
+        self._prev_position = None
+        self._flood_slider = None
+        self._flood_slider_var = None
+
+    @property
+    def tolerance(self):
+        return self._tolerance
+
+    @tolerance.setter
+    def tolerance(self, value):
+        if value &gt;= 0:
+            self._tolerance = value
+
+            if self._flood_slider is not None:
+                self._flood_slider_var = value
+                self._flood_slider.set(value)
+
+            self._add_region(self._prev_position)
+            self._notify_observers()
+
+    @property
+    def increment(self):
+        return self._increment
+
+    @increment.setter
+    def increment(self, value):
+        self._increment = value
+
+    @property
+    def patch(self):
+        return self._patch
+
+    @patch.setter
+    def patch(self, patch):
+        self._patch = patch
+        self._prev_position = None
+
+    def on_click(self, position):
+        &#34;&#34;&#34;
+        When the mouse is clicked, start the flood at the position/
+
+        Args:
+            position: The (x, y) coordinates of the place to start the flood.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._prev_position = position
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                             &#39;flood_add&#39;)
+        self._add_region(position)
+
+    def on_adjust(self, direction):
+        &#34;&#34;&#34;
+        When the tool is adjusted, the tolerance is changed.
+
+        Args:
+            direction: An integer, positive means up, negative means down.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        if direction &gt; 0:
+            self.tolerance += self.increment
+        else:
+            self.tolerance -= self.increment
+
+        self._add_region(self._prev_position)
+
+    def _add_region(self, position):
+        &#34;&#34;&#34;
+        Add a region at the given position, using the tolerance attribute.
+
+        Args:
+            position: (x, y) coordinates to start the flood.
+
+        Returns:
+            None
+
+        Postconditions:
+            A region will be added to the mask that matches the flooded region.
+        &#34;&#34;&#34;
+        if position is None:
+            return
+
+        self.patch.flood_add_region(position, self.tolerance)
+        self._notify_observers()
+
+    def get_info_widget(self, parent, style):
+        &#34;&#34;&#34;
+        Get the widget that controls this tool in the info panel.
+
+        Args:
+            parent: The parent tkinter object.
+            style: ttk style object.
+        Returns:
+            The widget.
+        &#34;&#34;&#34;
+        super().get_info_widget(parent, style)
+
+        self._flood_slider_var = tk.DoubleVar()
+
+        self._flood_slider = tk.Scale(self._info_widget,
+                                      from_=0.00,
+                                      to=1.00,
+                                      tickinterval=0.50,
+                                      resolution=0.01,
+                                      length=200,
+                                      variable=self.
+                                      _flood_slider_var,
+                                      orient=&#39;horizontal&#39;,
+                                      command=self._on_flood_slider)
+
+        background = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;background&#34;)
+        foreground = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;foreground&#34;)
+        trough = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;troughcolor&#34;)
+
+        self._flood_slider.config(background=background,
+                                  foreground=foreground,
+                                  troughcolor=trough,
+                                  bd=0,
+                                  highlightthickness=0)
+
+        self._flood_slider.set(self._tolerance)
+        self._flood_slider.pack(side=&#39;top&#39;)
+
+        return self._info_widget
+
+    def _on_flood_slider(self, value):
+        &#34;&#34;&#34;
+        Called when the flood slider is moved.
+
+        Args:
+            value: The value of the slider
+
+        Returns:
+            None
+
+        Postconditions:
+            The tolerance for the patch is udpated accordingly.
+        &#34;&#34;&#34;
+        self.tolerance = float(value)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.FloodAddTool.increment"><code class="name">var <span class="ident">increment</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def increment(self):
+    return self._increment</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FloodAddTool.patch"><code class="name">var <span class="ident">patch</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def patch(self):
+    return self._patch</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FloodAddTool.tolerance"><code class="name">var <span class="ident">tolerance</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def tolerance(self):
+    return self._tolerance</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.FloodAddTool.get_info_widget"><code class="name flex">
+<span>def <span class="ident">get_info_widget</span></span>(<span>self, parent, style)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the widget that controls this tool in the info panel.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>parent</code></strong></dt>
+<dd>The parent tkinter object.</dd>
+<dt><strong><code>style</code></strong></dt>
+<dd>ttk style object.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The widget.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_info_widget(self, parent, style):
+    &#34;&#34;&#34;
+    Get the widget that controls this tool in the info panel.
+
+    Args:
+        parent: The parent tkinter object.
+        style: ttk style object.
+    Returns:
+        The widget.
+    &#34;&#34;&#34;
+    super().get_info_widget(parent, style)
+
+    self._flood_slider_var = tk.DoubleVar()
+
+    self._flood_slider = tk.Scale(self._info_widget,
+                                  from_=0.00,
+                                  to=1.00,
+                                  tickinterval=0.50,
+                                  resolution=0.01,
+                                  length=200,
+                                  variable=self.
+                                  _flood_slider_var,
+                                  orient=&#39;horizontal&#39;,
+                                  command=self._on_flood_slider)
+
+    background = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;background&#34;)
+    foreground = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;foreground&#34;)
+    trough = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;troughcolor&#34;)
+
+    self._flood_slider.config(background=background,
+                              foreground=foreground,
+                              troughcolor=trough,
+                              bd=0,
+                              highlightthickness=0)
+
+    self._flood_slider.set(self._tolerance)
+    self._flood_slider.pack(side=&#39;top&#39;)
+
+    return self._info_widget</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FloodAddTool.on_adjust"><code class="name flex">
+<span>def <span class="ident">on_adjust</span></span>(<span>self, direction)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>When the tool is adjusted, the tolerance is changed.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>direction</code></strong></dt>
+<dd>An integer, positive means up, negative means down.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_adjust(self, direction):
+    &#34;&#34;&#34;
+    When the tool is adjusted, the tolerance is changed.
+
+    Args:
+        direction: An integer, positive means up, negative means down.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+
+    if direction &gt; 0:
+        self.tolerance += self.increment
+    else:
+        self.tolerance -= self.increment
+
+    self._add_region(self._prev_position)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FloodAddTool.on_click"><code class="name flex">
+<span>def <span class="ident">on_click</span></span>(<span>self, position)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>When the mouse is clicked, start the flood at the position/</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>position</code></strong></dt>
+<dd>The (x, y) coordinates of the place to start the flood.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_click(self, position):
+    &#34;&#34;&#34;
+    When the mouse is clicked, start the flood at the position/
+
+    Args:
+        position: The (x, y) coordinates of the place to start the flood.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    self._prev_position = position
+    self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                         &#39;flood_add&#39;)
+    self._add_region(position)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></b></code>:
+<ul class="hlist">
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.bind_to" href="#friendly_ground_truth.controller.tools.FGTTool.bind_to">bind_to</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget">destroy_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.lock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.lock_undos">lock_undos</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_activate" href="#friendly_ground_truth.controller.tools.FGTTool.on_activate">on_activate</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_drag" href="#friendly_ground_truth.controller.tools.FGTTool.on_drag">on_drag</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.unlock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.unlock_undos">unlock_undos</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FloodRemoveTool"><code class="flex name class">
+<span>class <span class="ident">FloodRemoveTool</span></span>
+<span>(</span><span>undo_manager)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A tool that allows removing a region based on pixel tolerance.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>tolerance</code></strong></dt>
+<dd>The tolerance for pixels to remove from the region.</dd>
+</dl>
+<p>Initialize the object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>The name of the tool</dd>
+<dt><strong><code>icon_string</code></strong></dt>
+<dd>A bytestring representing the icon for the tool</dd>
+<dt><strong><code>id</code></strong></dt>
+<dd>A unique id for the tool</dd>
+<dt><strong><code>cursor</code></strong></dt>
+<dd>The default cursor for this tool.
+Default value is 'none'</dd>
+<dt><strong><code>undo_manager</code></strong></dt>
+<dd>The controller's undo manager</dd>
+<dt><strong><code>key_mapping</code></strong></dt>
+<dd>The keyboard shortcut string for this tool</dd>
+<dt><strong><code>activation_callback</code></strong></dt>
+<dd>A function to call when the activate function
+is finished</dd>
+<dt><strong><code>group</code></strong></dt>
+<dd>If this tool should be grouped with other tools, this string
+identifies what group it is a part of.</dd>
+<dt><strong><code>darkmode_icon_string</code></strong></dt>
+<dd>The embedded icon string to use for darkmode.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FloodRemoveTool(FGTTool):
+    &#34;&#34;&#34;
+    A tool that allows removing a region based on pixel tolerance.
+
+    Attributes:
+        tolerance: The tolerance for pixels to remove from the region.
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager):
+        super(FloodRemoveTool, self)\
+            .__init__(&#34;Flood Remove Tool&#34;, icns.flood_remove_icon, 6,
+                      undo_manager, &#34;l&#34;, cursor=&#39;crosshair&#39;, persistant=True,
+                      group=&#34;Markups&#34;,
+                      darkmode_icon_string=icns.darkmode_flood_remove_icon)
+
+        self._logger = logging\
+            .getLogger(&#39;friendly_gt.controller.tools.FloodRemoveTool&#39;)
+
+        self._tolerance = 0.05
+        self._increment = 0.01
+
+        self._prev_position = None
+        self._flood_slider = None
+        self._flood_slider_var = None
+
+    @property
+    def tolerance(self):
+        return self._tolerance
+
+    @tolerance.setter
+    def tolerance(self, value):
+        if value &gt; 0:
+            self._tolerance = value
+
+            if self._flood_slider is not None:
+                self._flood_slider_var = value
+                self._flood_slider.set(value)
+
+            self._remove_region(self._prev_position)
+            self._notify_observers()
+
+    @property
+    def increment(self):
+        return self._increment
+
+    @increment.setter
+    def increment(self, value):
+        self._increment = value
+
+    @property
+    def patch(self):
+        return self._patch
+
+    @patch.setter
+    def patch(self, patch):
+        self._patch = patch
+        self._prev_position = None
+
+    def on_click(self, position):
+        &#34;&#34;&#34;
+        When the mouse is clicked, start the flood at the position.
+
+        Args:
+            position: The (x, y) coordinates of the place to start the flood.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._prev_position = position
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                             &#39;flood_remove&#39;)
+        self._remove_region(position)
+
+    def on_adjust(self, direction):
+        &#34;&#34;&#34;
+        When the tool is adjusted, the tolerance is changed.
+
+        Args:
+            direction: An integer, positive means up, negative means down.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        if direction &gt; 0:
+            self.tolerance += self.increment
+        else:
+            self.tolerance -= self.increment
+
+        self._remove_region(self._prev_position)
+
+    def _remove_region(self, position):
+        &#34;&#34;&#34;
+        Remove a region at the given position, using the tolerance attribute.
+
+        Args:
+            position: (x, y) coordinates to start the flood.
+
+        Returns:
+            None
+
+        Postconditions:
+            A region will be removed to the mask that matches the
+                flooded region.
+        &#34;&#34;&#34;
+
+        if position is None:
+            return
+
+        self.patch.flood_remove_region(position, self.tolerance)
+        self._notify_observers()
+
+    def get_info_widget(self, parent, style):
+        &#34;&#34;&#34;
+        Get the widget that controls this tool in the info panel.
+
+        Args:
+            parent: The parent tkinter object.
+            style: ttk style object.
+
+        Returns:
+            The widget.
+        &#34;&#34;&#34;
+        super().get_info_widget(parent, style)
+
+        self._flood_slider_var = tk.DoubleVar()
+
+        self._flood_slider = tk.Scale(self._info_widget,
+                                      from_=0.00,
+                                      to=1.00,
+                                      tickinterval=0.50,
+                                      resolution=0.01,
+                                      length=200,
+                                      variable=self.
+                                      _flood_slider_var,
+                                      orient=&#39;horizontal&#39;,
+                                      command=self._on_flood_slider)
+
+        background = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;background&#34;)
+        foreground = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;foreground&#34;)
+        trough = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;troughcolor&#34;)
+
+        self._flood_slider.config(background=background,
+                                  foreground=foreground,
+                                  troughcolor=trough,
+                                  bd=0,
+                                  highlightthickness=0)
+
+        self._flood_slider.set(self._tolerance)
+        self._flood_slider.pack(side=&#39;top&#39;)
+
+        return self._info_widget
+
+    def _on_flood_slider(self, value):
+        &#34;&#34;&#34;
+        Called when the flood slider is moved.
+
+        Args:
+            value: The value of the slider
+
+        Returns:
+            None
+
+        Postconditions:
+            The tolerance for the patch is udpated accordingly.
+        &#34;&#34;&#34;
+        self.tolerance = float(value)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.FloodRemoveTool.increment"><code class="name">var <span class="ident">increment</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def increment(self):
+    return self._increment</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FloodRemoveTool.patch"><code class="name">var <span class="ident">patch</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def patch(self):
+    return self._patch</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FloodRemoveTool.tolerance"><code class="name">var <span class="ident">tolerance</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def tolerance(self):
+    return self._tolerance</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.FloodRemoveTool.get_info_widget"><code class="name flex">
+<span>def <span class="ident">get_info_widget</span></span>(<span>self, parent, style)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the widget that controls this tool in the info panel.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>parent</code></strong></dt>
+<dd>The parent tkinter object.</dd>
+<dt><strong><code>style</code></strong></dt>
+<dd>ttk style object.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The widget.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_info_widget(self, parent, style):
+    &#34;&#34;&#34;
+    Get the widget that controls this tool in the info panel.
+
+    Args:
+        parent: The parent tkinter object.
+        style: ttk style object.
+
+    Returns:
+        The widget.
+    &#34;&#34;&#34;
+    super().get_info_widget(parent, style)
+
+    self._flood_slider_var = tk.DoubleVar()
+
+    self._flood_slider = tk.Scale(self._info_widget,
+                                  from_=0.00,
+                                  to=1.00,
+                                  tickinterval=0.50,
+                                  resolution=0.01,
+                                  length=200,
+                                  variable=self.
+                                  _flood_slider_var,
+                                  orient=&#39;horizontal&#39;,
+                                  command=self._on_flood_slider)
+
+    background = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;background&#34;)
+    foreground = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;foreground&#34;)
+    trough = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;troughcolor&#34;)
+
+    self._flood_slider.config(background=background,
+                              foreground=foreground,
+                              troughcolor=trough,
+                              bd=0,
+                              highlightthickness=0)
+
+    self._flood_slider.set(self._tolerance)
+    self._flood_slider.pack(side=&#39;top&#39;)
+
+    return self._info_widget</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FloodRemoveTool.on_adjust"><code class="name flex">
+<span>def <span class="ident">on_adjust</span></span>(<span>self, direction)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>When the tool is adjusted, the tolerance is changed.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>direction</code></strong></dt>
+<dd>An integer, positive means up, negative means down.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_adjust(self, direction):
+    &#34;&#34;&#34;
+    When the tool is adjusted, the tolerance is changed.
+
+    Args:
+        direction: An integer, positive means up, negative means down.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+
+    if direction &gt; 0:
+        self.tolerance += self.increment
+    else:
+        self.tolerance -= self.increment
+
+    self._remove_region(self._prev_position)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.FloodRemoveTool.on_click"><code class="name flex">
+<span>def <span class="ident">on_click</span></span>(<span>self, position)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>When the mouse is clicked, start the flood at the position.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>position</code></strong></dt>
+<dd>The (x, y) coordinates of the place to start the flood.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_click(self, position):
+    &#34;&#34;&#34;
+    When the mouse is clicked, start the flood at the position.
+
+    Args:
+        position: The (x, y) coordinates of the place to start the flood.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    self._prev_position = position
+    self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                         &#39;flood_remove&#39;)
+    self._remove_region(position)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></b></code>:
+<ul class="hlist">
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.bind_to" href="#friendly_ground_truth.controller.tools.FGTTool.bind_to">bind_to</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget">destroy_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.lock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.lock_undos">lock_undos</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_activate" href="#friendly_ground_truth.controller.tools.FGTTool.on_activate">on_activate</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_drag" href="#friendly_ground_truth.controller.tools.FGTTool.on_drag">on_drag</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.unlock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.unlock_undos">unlock_undos</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.NextPatchTool"><code class="flex name class">
+<span>class <span class="ident">NextPatchTool</span></span>
+<span>(</span><span>undo_manager, next_patch_function)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A Tool that moves to the next patch for the current image.</p>
+<p>Create the tool.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>undo_manager</code></strong></dt>
+<dd>The undo_manager for this tool.</dd>
+<dt><strong><code>next_patch_function</code></strong></dt>
+<dd>A function callback that takes in a patch and
+index</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A tool object</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NextPatchTool(FGTTool):
+    &#34;&#34;&#34;
+    A Tool that moves to the next patch for the current image.
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager, next_patch_function):
+        &#34;&#34;&#34;
+        Create the tool.
+
+        Args:
+            undo_manager: The undo_manager for this tool.
+            next_patch_function: A function callback that takes in a patch and
+                                 index
+        Returns:
+            A tool object
+        &#34;&#34;&#34;
+        super(NextPatchTool, self)\
+            .__init__(&#34;Next Patch&#34;, icns.next_patch_icon, 8,
+                      undo_manager, &#34;right&#34;, cursor=&#39;arrow&#39;,
+                      persistant=False,
+                      activation_callback=next_patch_function,
+                      group=&#34;Navigation&#34;,
+                      darkmode_icon_string=icns.darkmode_next_patch_icon)
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        When the tool is activated, move to the next patch.
+
+        Args:
+            current_patch_num: The index of the current patch in the patches
+                               list
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        patch, index = self._next_patch(current_patch_num)
+        self._activation_callback(patch, index)
+
+    def _next_patch(self, current_patch_num):
+        &#34;&#34;&#34;
+        Move to the next patch in the image.
+
+        Args:
+            current_patch_num: The index of the current patch.
+
+        Returns:
+            (patch, current_patch_index) if there is a next patch
+            (None, -1) if there is not a next patch
+        &#34;&#34;&#34;
+
+        patches = self._image.patches
+
+        next_index = current_patch_num + 1
+
+        if next_index &lt; len(patches):
+            return patches[next_index], next_index
+
+        else:
+            return None, -1</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.NextPatchTool.on_activate"><code class="name flex">
+<span>def <span class="ident">on_activate</span></span>(<span>self, current_patch_num)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>When the tool is activated, move to the next patch.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>current_patch_num</code></strong></dt>
+<dd>The index of the current patch in the patches
+list</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_activate(self, current_patch_num):
+    &#34;&#34;&#34;
+    When the tool is activated, move to the next patch.
+
+    Args:
+        current_patch_num: The index of the current patch in the patches
+                           list
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    patch, index = self._next_patch(current_patch_num)
+    self._activation_callback(patch, index)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></b></code>:
+<ul class="hlist">
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.bind_to" href="#friendly_ground_truth.controller.tools.FGTTool.bind_to">bind_to</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget">destroy_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.get_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.get_info_widget">get_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.lock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.lock_undos">lock_undos</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_adjust" href="#friendly_ground_truth.controller.tools.FGTTool.on_adjust">on_adjust</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_click" href="#friendly_ground_truth.controller.tools.FGTTool.on_click">on_click</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_drag" href="#friendly_ground_truth.controller.tools.FGTTool.on_drag">on_drag</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.unlock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.unlock_undos">unlock_undos</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.NoRootTool"><code class="flex name class">
+<span>class <span class="ident">NoRootTool</span></span>
+<span>(</span><span>undo_manager, next_patch_function)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A tool that marks a patch as having no foreground.</p>
+<p>Create the tool</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>undo_manager</code></strong></dt>
+<dd>The undo manager</dd>
+<dt><strong><code>next_patch_function</code></strong></dt>
+<dd>The function to call to go to the next patch.
+Must have a patch and index parameter</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>{% A thing %}</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NoRootTool(FGTTool):
+    &#34;&#34;&#34;
+    A tool that marks a patch as having no foreground.
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager, next_patch_function):
+        &#34;&#34;&#34;
+        Create the tool
+
+        Args:
+            undo_manager: The undo manager
+            next_patch_function: The function to call to go to the next patch.
+                                 Must have a patch and index parameter
+
+        Returns:
+            {% A thing %}
+        &#34;&#34;&#34;
+        super(NoRootTool, self)\
+            .__init__(&#34;No Root Tool&#34;, icns.no_root_icon, 4,
+                      undo_manager, &#34;x&#34;, cursor=&#39;arrow&#39;, persistant=False,
+                      activation_callback=next_patch_function,
+                      group=&#34;Navigation&#34;,
+                      darkmode_icon_string=icns.darkmode_no_root_icon)
+
+        self._logger = logging\
+            .getLogger(&#39;friendly_gt.controller.tools.NoRootTool&#39;)
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        What happens when the tool is activated.
+
+        Args:
+            current_patch_num: The index of the current patch in the patches
+                               list
+        Returns:
+            None
+
+        Postconditions:
+            The foreground is removed from the patch, and the next patch is
+            displayed.
+        &#34;&#34;&#34;
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                             &#34;no_root&#34;)
+
+        self._no_root()
+        patch, index = self._next_patch(current_patch_num)
+
+        self._activation_callback(patch, index)
+
+    def _no_root(self):
+        &#34;&#34;&#34;
+        Clear the mask for this patch.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The mask for this patch is cleared.
+        &#34;&#34;&#34;
+        self.patch.clear_mask()
+
+    def _next_patch(self, current_patch_num):
+        &#34;&#34;&#34;
+        Move to the next patch if it exists.
+
+        Args:
+            current_patch_num: The index of the current patch in the patches
+                               list.
+
+        Returns:
+            A (patch, patch_num) tuple if there is a next patch.
+            (None, -1) if there is not a next patch
+        &#34;&#34;&#34;
+        patches = self._image.patches
+
+        next_index = current_patch_num + 1
+
+        if next_index &lt; len(patches):
+            return patches[next_index], next_index
+
+        else:
+            return None, -1</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.NoRootTool.on_activate"><code class="name flex">
+<span>def <span class="ident">on_activate</span></span>(<span>self, current_patch_num)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>What happens when the tool is activated.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>current_patch_num</code></strong></dt>
+<dd>The index of the current patch in the patches
+list</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="postconditions">Postconditions</h2>
+<p>The foreground is removed from the patch, and the next patch is
+displayed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_activate(self, current_patch_num):
+    &#34;&#34;&#34;
+    What happens when the tool is activated.
+
+    Args:
+        current_patch_num: The index of the current patch in the patches
+                           list
+    Returns:
+        None
+
+    Postconditions:
+        The foreground is removed from the patch, and the next patch is
+        displayed.
+    &#34;&#34;&#34;
+    self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                         &#34;no_root&#34;)
+
+    self._no_root()
+    patch, index = self._next_patch(current_patch_num)
+
+    self._activation_callback(patch, index)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></b></code>:
+<ul class="hlist">
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.bind_to" href="#friendly_ground_truth.controller.tools.FGTTool.bind_to">bind_to</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget">destroy_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.get_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.get_info_widget">get_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.lock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.lock_undos">lock_undos</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_adjust" href="#friendly_ground_truth.controller.tools.FGTTool.on_adjust">on_adjust</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_click" href="#friendly_ground_truth.controller.tools.FGTTool.on_click">on_click</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_drag" href="#friendly_ground_truth.controller.tools.FGTTool.on_drag">on_drag</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.unlock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.unlock_undos">unlock_undos</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.PreviousPatchTool"><code class="flex name class">
+<span>class <span class="ident">PreviousPatchTool</span></span>
+<span>(</span><span>undo_manager, prev_patch_function)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A Tool that moves to the previous patch for the current image.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>image</code></strong></dt>
+<dd>The image to operate on</dd>
+</dl>
+<p>Create the tool.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>undo_manager</code></strong></dt>
+<dd>The undo manager</dd>
+<dt><strong><code>prev_patch_function</code></strong></dt>
+<dd>A function callback that takes in a patch and
+patch index representing the next patch</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A tool object</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PreviousPatchTool(FGTTool):
+    &#34;&#34;&#34;
+    A Tool that moves to the previous patch for the current image.
+
+    Attributes:
+        image: The image to operate on
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager, prev_patch_function):
+        &#34;&#34;&#34;
+        Create the tool.
+
+        Args:
+            undo_manager: The undo manager
+            prev_patch_function: A function callback that takes in a patch and
+                                 patch index representing the next patch
+
+        Returns:
+            A tool object
+        &#34;&#34;&#34;
+        super(PreviousPatchTool, self)\
+            .__init__(&#34;Previous Patch&#34;, icns.prev_patch_icon, 7,
+                      undo_manager, &#34;left&#34;, cursor=&#39;arrow&#39;,
+                      persistant=False,
+                      activation_callback=prev_patch_function,
+                      group=&#34;Navigation&#34;,
+                      darkmode_icon_string=icns.darkmode_prev_patch_icon)
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        When the tool is activated, move to the previous patch.
+
+        Args:
+            current_patch_num: The index of the current patch in the patches
+                               list
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        patch, index = self._prev_patch(current_patch_num)
+        self._activation_callback(patch, index)
+
+    def _prev_patch(self, current_patch_num):
+        &#34;&#34;&#34;
+        Move to the previous patch in the image.
+
+        Args:
+            current_patch_num: The index of the current patch.
+
+        Returns:
+            (patch, current_patch_index) if there is a previous patch
+            (None, -1) if there is not a previous patch
+        &#34;&#34;&#34;
+
+        patches = self._image.patches
+
+        prev_index = current_patch_num - 1
+
+        if prev_index &gt;= 0:
+            return patches[prev_index], prev_index
+
+        else:
+            return None, -1</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.PreviousPatchTool.on_activate"><code class="name flex">
+<span>def <span class="ident">on_activate</span></span>(<span>self, current_patch_num)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>When the tool is activated, move to the previous patch.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>current_patch_num</code></strong></dt>
+<dd>The index of the current patch in the patches
+list</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_activate(self, current_patch_num):
+    &#34;&#34;&#34;
+    When the tool is activated, move to the previous patch.
+
+    Args:
+        current_patch_num: The index of the current patch in the patches
+                           list
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    patch, index = self._prev_patch(current_patch_num)
+    self._activation_callback(patch, index)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></b></code>:
+<ul class="hlist">
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.bind_to" href="#friendly_ground_truth.controller.tools.FGTTool.bind_to">bind_to</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget">destroy_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.get_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.get_info_widget">get_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.lock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.lock_undos">lock_undos</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_adjust" href="#friendly_ground_truth.controller.tools.FGTTool.on_adjust">on_adjust</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_click" href="#friendly_ground_truth.controller.tools.FGTTool.on_click">on_click</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_drag" href="#friendly_ground_truth.controller.tools.FGTTool.on_drag">on_drag</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.unlock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.unlock_undos">unlock_undos</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.RedoTool"><code class="flex name class">
+<span>class <span class="ident">RedoTool</span></span>
+<span>(</span><span>undo_manager, redo_callback)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A tool for redoing undid mistakes.</p>
+<p>Initialize the tool</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>undo_manager</code></strong></dt>
+<dd>The manager for undo and redo operations</dd>
+<dt><strong><code>redo_callback</code></strong></dt>
+<dd>A function taking in a patch and string to call
+when the undo action is taken.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A tool object</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RedoTool(FGTTool):
+    &#34;&#34;&#34;
+    A tool for redoing undid mistakes.
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager, redo_callback):
+        &#34;&#34;&#34;
+        Initialize the tool
+
+        Args:
+            undo_manager: The manager for undo and redo operations
+            redo_callback: A function taking in a patch and string to call
+                           when the undo action is taken.
+        Returns:
+            A tool object
+        &#34;&#34;&#34;
+        super(RedoTool, self)\
+            .__init__(&#34;Redo&#34;, icns.redo_icon, 10, undo_manager, &#34;CTRL+r&#34;,
+                      cursor=&#39;arrow&#39;, persistant=False,
+                      activation_callback=redo_callback, group=&#34;Undo&#34;,
+                      darkmode_icon_string=icns.darkmode_redo_icon)
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        Activate the redo tool.
+
+        Args:
+            current_patch_num: The current patch index in the patches list.
+
+        Returns:
+            The patch data and operation string
+
+        Postconditions:
+            The last undone action is redone and put on the undo stack.
+        &#34;&#34;&#34;
+        patch, string = self._redo()
+        self._activation_callback(patch, string)
+        self._notify_observers()
+
+    def _redo(self):
+        &#34;&#34;&#34;
+        Redo the undone last operation.
+
+
+        Returns:
+            The patch data and the operation string
+        &#34;&#34;&#34;
+        return self._undo_manager.redo()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.RedoTool.on_activate"><code class="name flex">
+<span>def <span class="ident">on_activate</span></span>(<span>self, current_patch_num)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Activate the redo tool.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>current_patch_num</code></strong></dt>
+<dd>The current patch index in the patches list.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>The patch data and operation string</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="postconditions">Postconditions</h2>
+<p>The last undone action is redone and put on the undo stack.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_activate(self, current_patch_num):
+    &#34;&#34;&#34;
+    Activate the redo tool.
+
+    Args:
+        current_patch_num: The current patch index in the patches list.
+
+    Returns:
+        The patch data and operation string
+
+    Postconditions:
+        The last undone action is redone and put on the undo stack.
+    &#34;&#34;&#34;
+    patch, string = self._redo()
+    self._activation_callback(patch, string)
+    self._notify_observers()</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></b></code>:
+<ul class="hlist">
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.bind_to" href="#friendly_ground_truth.controller.tools.FGTTool.bind_to">bind_to</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget">destroy_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.get_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.get_info_widget">get_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.lock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.lock_undos">lock_undos</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_adjust" href="#friendly_ground_truth.controller.tools.FGTTool.on_adjust">on_adjust</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_click" href="#friendly_ground_truth.controller.tools.FGTTool.on_click">on_click</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_drag" href="#friendly_ground_truth.controller.tools.FGTTool.on_drag">on_drag</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.unlock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.unlock_undos">unlock_undos</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.RemoveRegionTool"><code class="flex name class">
+<span>class <span class="ident">RemoveRegionTool</span></span>
+<span>(</span><span>undo_manager)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A tool acting as a paint brush for removing regions from the mask</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>brush_radius</code></strong></dt>
+<dd>The current radius of the brush</dd>
+</dl>
+<p>Initialize the object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>The name of the tool</dd>
+<dt><strong><code>icon_string</code></strong></dt>
+<dd>A bytestring representing the icon for the tool</dd>
+<dt><strong><code>id</code></strong></dt>
+<dd>A unique id for the tool</dd>
+<dt><strong><code>cursor</code></strong></dt>
+<dd>The default cursor for this tool.
+Default value is 'none'</dd>
+<dt><strong><code>undo_manager</code></strong></dt>
+<dd>The controller's undo manager</dd>
+<dt><strong><code>key_mapping</code></strong></dt>
+<dd>The keyboard shortcut string for this tool</dd>
+<dt><strong><code>activation_callback</code></strong></dt>
+<dd>A function to call when the activate function
+is finished</dd>
+<dt><strong><code>group</code></strong></dt>
+<dd>If this tool should be grouped with other tools, this string
+identifies what group it is a part of.</dd>
+<dt><strong><code>darkmode_icon_string</code></strong></dt>
+<dd>The embedded icon string to use for darkmode.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RemoveRegionTool(FGTTool):
+    &#34;&#34;&#34;
+    A tool acting as a paint brush for removing regions from the mask
+
+    Attributes:
+        brush_radius: The current radius of the brush
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager):
+        super(RemoveRegionTool, self)\
+            .__init__(&#34;Remove Region Tool&#34;, icns.remove_region_icon, 3,
+                      undo_manager, &#34;r&#34;, cursor=&#34;brush&#34;, persistant=True,
+                      group=&#34;Markups&#34;,
+                      darkmode_icon_string=icns.darkmode_remove_region_icon)
+
+        self._logger = logging\
+            .getLogger(&#39;friendly_gt.controller.tools.RemoveRegionTool&#39;)
+
+        self._brush_radius = 15
+        self._brush_observers = []
+        self._brush_sizer = None
+
+    @property
+    def brush_radius(self):
+        return self._brush_radius
+
+    @brush_radius.setter
+    def brush_radius(self, value):
+        if value &gt;= 0:
+            self._brush_radius = value
+
+            for ob in self._brush_observers:
+                ob(self._brush_radius)
+
+            if self._brush_sizer is not None:
+                self._brush_sizer_var.set(value)
+
+    def get_info_widget(self, parent, style):
+        &#34;&#34;&#34;
+        Get the widget that controls this tool in the info panel.
+
+        Args:
+            parent: The parent tkinter object.
+            style: ttk style object.
+
+        Returns:
+            The widget.
+        &#34;&#34;&#34;
+        super().get_info_widget(parent, style)
+
+        self._brush_size_panel = ttk.Frame(self._info_widget,
+                                           style=&#34;InfoPanel.TFrame&#34;)
+
+        self._brush_size_label = ttk.Label(self._brush_size_panel,
+                                           text=&#34;Brush Size&#34;,
+                                           style=&#34;InfoPanel.TLabel&#34;)
+
+        self._brush_sizer_var = tk.IntVar()
+        self._brush_sizer_var.set(self._brush_radius)
+        self._brush_sizer_var.trace(&#39;w&#39;, self._on_brush_sizer)
+
+        self._brush_sizer = ttk.Spinbox(self._brush_size_panel,
+                                        from_=0,
+                                        to=64,
+                                        width=17,
+                                        textvariable=self._brush_sizer_var)
+
+        self._brush_size_label.pack(side=&#39;left&#39;)
+        self._brush_sizer.pack(side=&#39;left&#39;)
+
+        self._brush_size_panel.pack(side=&#39;top&#39;)
+
+        return self._info_widget
+
+    def _on_brush_sizer(self, a, b, c):
+        &#34;&#34;&#34;
+        Called when the brush sizer is updated.
+
+        Args:
+            value: The value of the sizer.
+
+        Returns:
+            None
+
+        Postconditions:
+            The brush radius is udpated accordingly.
+        &#34;&#34;&#34;
+
+        val = self._brush_sizer_var.get()
+        self.brush_radius = val
+
+    def on_adjust(self, direction):
+        &#34;&#34;&#34;
+        Adust the brush size according to the direction.
+
+        Args:
+            direction: An integer, positive means up, negative means down.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        if direction &gt; 0:
+            self.brush_radius += 1
+        else:
+            self.brush_radius -= 1
+
+    def bind_brush(self, callback):
+        &#34;&#34;&#34;
+        Subscribe to brush radius notifications.
+
+        Args:
+            callback: The function to call when the brush radius changes.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._brush_observers.append(callback)
+
+    def on_click(self, position):
+        &#34;&#34;&#34;
+        What to do on mouse clicks.
+
+        Args:
+            position: The position of the mouse.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                             &#34;remove_region&#34;)
+
+        self._draw(position)
+
+    def on_drag(self, position):
+        &#34;&#34;&#34;
+        What to do when clicking and dragging
+
+        Args:
+            position: The position of the mouse.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                             &#34;remove_region_adjust&#34;)
+
+        t = threading.Thread(target=self._draw, name=&#34;draw&#34;, args=(position, ))
+        t.daemon = True
+        t.start()
+
+    def _draw(self, position):
+        &#34;&#34;&#34;
+        Remove a circle at the given position.  Uses the brush_radius property.
+
+        Args:
+            position: (x, y) coordinates to draw at.
+
+        Returns:
+            None
+
+        Postcondition:
+            The mask at the given position will be removed.
+        &#34;&#34;&#34;
+
+        self.patch.remove_region(position, self.brush_radius)
+        self._notify_observers()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.RemoveRegionTool.brush_radius"><code class="name">var <span class="ident">brush_radius</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def brush_radius(self):
+    return self._brush_radius</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.RemoveRegionTool.bind_brush"><code class="name flex">
+<span>def <span class="ident">bind_brush</span></span>(<span>self, callback)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Subscribe to brush radius notifications.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>callback</code></strong></dt>
+<dd>The function to call when the brush radius changes.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def bind_brush(self, callback):
+    &#34;&#34;&#34;
+    Subscribe to brush radius notifications.
+
+    Args:
+        callback: The function to call when the brush radius changes.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    self._brush_observers.append(callback)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.RemoveRegionTool.get_info_widget"><code class="name flex">
+<span>def <span class="ident">get_info_widget</span></span>(<span>self, parent, style)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the widget that controls this tool in the info panel.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>parent</code></strong></dt>
+<dd>The parent tkinter object.</dd>
+<dt><strong><code>style</code></strong></dt>
+<dd>ttk style object.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The widget.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_info_widget(self, parent, style):
+    &#34;&#34;&#34;
+    Get the widget that controls this tool in the info panel.
+
+    Args:
+        parent: The parent tkinter object.
+        style: ttk style object.
+
+    Returns:
+        The widget.
+    &#34;&#34;&#34;
+    super().get_info_widget(parent, style)
+
+    self._brush_size_panel = ttk.Frame(self._info_widget,
+                                       style=&#34;InfoPanel.TFrame&#34;)
+
+    self._brush_size_label = ttk.Label(self._brush_size_panel,
+                                       text=&#34;Brush Size&#34;,
+                                       style=&#34;InfoPanel.TLabel&#34;)
+
+    self._brush_sizer_var = tk.IntVar()
+    self._brush_sizer_var.set(self._brush_radius)
+    self._brush_sizer_var.trace(&#39;w&#39;, self._on_brush_sizer)
+
+    self._brush_sizer = ttk.Spinbox(self._brush_size_panel,
+                                    from_=0,
+                                    to=64,
+                                    width=17,
+                                    textvariable=self._brush_sizer_var)
+
+    self._brush_size_label.pack(side=&#39;left&#39;)
+    self._brush_sizer.pack(side=&#39;left&#39;)
+
+    self._brush_size_panel.pack(side=&#39;top&#39;)
+
+    return self._info_widget</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.RemoveRegionTool.on_adjust"><code class="name flex">
+<span>def <span class="ident">on_adjust</span></span>(<span>self, direction)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adust the brush size according to the direction.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>direction</code></strong></dt>
+<dd>An integer, positive means up, negative means down.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_adjust(self, direction):
+    &#34;&#34;&#34;
+    Adust the brush size according to the direction.
+
+    Args:
+        direction: An integer, positive means up, negative means down.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    if direction &gt; 0:
+        self.brush_radius += 1
+    else:
+        self.brush_radius -= 1</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.RemoveRegionTool.on_click"><code class="name flex">
+<span>def <span class="ident">on_click</span></span>(<span>self, position)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>What to do on mouse clicks.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>position</code></strong></dt>
+<dd>The position of the mouse.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_click(self, position):
+    &#34;&#34;&#34;
+    What to do on mouse clicks.
+
+    Args:
+        position: The position of the mouse.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                         &#34;remove_region&#34;)
+
+    self._draw(position)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.RemoveRegionTool.on_drag"><code class="name flex">
+<span>def <span class="ident">on_drag</span></span>(<span>self, position)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>What to do when clicking and dragging</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>position</code></strong></dt>
+<dd>The position of the mouse.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_drag(self, position):
+    &#34;&#34;&#34;
+    What to do when clicking and dragging
+
+    Args:
+        position: The position of the mouse.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
+                                         &#34;remove_region_adjust&#34;)
+
+    t = threading.Thread(target=self._draw, name=&#34;draw&#34;, args=(position, ))
+    t.daemon = True
+    t.start()</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></b></code>:
+<ul class="hlist">
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.bind_to" href="#friendly_ground_truth.controller.tools.FGTTool.bind_to">bind_to</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget">destroy_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.lock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.lock_undos">lock_undos</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_activate" href="#friendly_ground_truth.controller.tools.FGTTool.on_activate">on_activate</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.unlock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.unlock_undos">unlock_undos</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.ThresholdTool"><code class="flex name class">
+<span>class <span class="ident">ThresholdTool</span></span>
+<span>(</span><span>undo_manager)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Tool representing a threshold action.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>threshold</code></strong></dt>
+<dd>The value of the threshold. Between 0 and 1.</dd>
+<dt><strong><code>increment</code></strong></dt>
+<dd>The amount to change the threshold by when adjusting</dd>
+</dl>
+<p>Initialize the object</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>The name of the tool</dd>
+<dt><strong><code>icon_string</code></strong></dt>
+<dd>A bytestring representing the icon for the tool</dd>
+<dt><strong><code>id</code></strong></dt>
+<dd>A unique id for the tool</dd>
+<dt><strong><code>cursor</code></strong></dt>
+<dd>The default cursor for this tool.
+Default value is 'none'</dd>
+<dt><strong><code>undo_manager</code></strong></dt>
+<dd>The controller's undo manager</dd>
+<dt><strong><code>key_mapping</code></strong></dt>
+<dd>The keyboard shortcut string for this tool</dd>
+<dt><strong><code>activation_callback</code></strong></dt>
+<dd>A function to call when the activate function
+is finished</dd>
+<dt><strong><code>group</code></strong></dt>
+<dd>If this tool should be grouped with other tools, this string
+identifies what group it is a part of.</dd>
+<dt><strong><code>darkmode_icon_string</code></strong></dt>
+<dd>The embedded icon string to use for darkmode.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ThresholdTool(FGTTool):
+    &#34;&#34;&#34;
+    Tool representing a threshold action.
+
+    Attributes:
+        threshold: The value of the threshold. Between 0 and 1.
+        increment: The amount to change the threshold by when adjusting
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager):
+
+        super(ThresholdTool, self)\
+            .__init__(&#34;Threshold Tool&#34;, icns.threshold_icon, 1,
+                      undo_manager, &#34;t&#34;, cursor=&#39;arrow&#39;, persistant=True,
+                      activation_callback=None, group=&#34;Markups&#34;,
+                      darkmode_icon_string=icns.darkmode_thresh_icon)
+
+        self._logger = logging\
+            .getLogger(&#39;friendly_gt.controller.tools.ThresholdTool&#39;)
+
+        self._threshold = 0
+        self._increment = 0.01
+        self._patch = None
+
+        self._threshold_slider_var = None
+        self._threshold_slider = None
+        self._slider_init = False
+        self._new_patch = False
+
+    @property
+    def threshold(self):
+        return self._threshold
+
+    @threshold.setter
+    def threshold(self, value):
+        if value &lt;= 1 and value &gt;= 0:
+
+            self._threshold = value
+            if not self._new_patch:
+                self._patch.threshold = value
+
+                if self._can_undo:
+                    self._undo_manager.\
+                        add_to_undo_stack(copy.deepcopy(self.patch),
+                                          &#39;threshold_adjust&#39;)
+
+            if self._threshold_slider is not None and self._slider_init:
+                self._threshold_slider_var = value
+                self._threshold_slider.set(value)
+
+            self._logger.debug(&#39;Threshold drawing image&#39;)
+            self._notify_observers()
+            self._new_patch = False
+
+    @property
+    def increment(self):
+        return self._increment
+
+    @increment.setter
+    def increment(self, value):
+        self._increment = value
+
+    @property
+    def patch(self):
+        return self._patch
+
+    @patch.setter
+    def patch(self, patch):
+
+        if self.patch is None or patch.patch_index != self.patch.patch_index:
+            self._new_patch = True
+
+        self._patch = patch
+        self._slider_init = False
+
+        self._threshold = patch.threshold
+
+    def get_info_widget(self, parent, style):
+        &#34;&#34;&#34;
+        Get the widget that controls this tool in the info panel.
+
+        Args:
+            parent: The parent tkinter object.
+            style: ttk style object
+
+        Returns:
+            The widget.
+        &#34;&#34;&#34;
+        self.lock_undos()
+        super().get_info_widget(parent, style)
+
+        self._threshold_slider_var = tk.DoubleVar()
+
+        self._threshold_slider = tk.Scale(self._info_widget,
+                                          from_=0.00,
+                                          to=1.00,
+                                          tickinterval=0.50,
+                                          resolution=0.01,
+                                          length=200,
+                                          variable=self._threshold_slider_var,
+                                          orient=&#39;horizontal&#39;,
+                                          command=self._on_threshold_slider)
+
+        background = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;background&#34;)
+        foreground = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;foreground&#34;)
+        trough = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;troughcolor&#34;)
+
+        self._threshold_slider.config(background=background,
+                                      foreground=foreground,
+                                      troughcolor=trough,
+                                      bd=0,
+                                      highlightthickness=0)
+
+        self._threshold_slider.set(self._threshold)
+        self._threshold_slider.pack(side=&#39;top&#39;)
+
+        self.unlock_undos()
+
+        return self._info_widget
+
+    def destroy_info_widget(self):
+        &#34;&#34;&#34;
+        Destroy the info widget.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The info widget properties are set to None.
+        &#34;&#34;&#34;
+        self._threshold_slider = None
+        self._threshold_slider_var = None
+
+    def _on_threshold_slider(self, value):
+        &#34;&#34;&#34;
+        Called when the threshold slider is moved.
+
+        Args:
+            value: The value of the slider
+
+        Returns:
+            None
+
+        Postconditions:
+            The threshold for the patch is udpated accordingly.
+        &#34;&#34;&#34;
+        if self._slider_init:
+            self.threshold = float(value)
+
+        self._slider_init = True
+
+    def _adjust_threshold(self, direction):
+        &#34;&#34;&#34;
+        Adjust the current threshold
+
+        Args:
+            direction: An integer, positive indicates increasing threshold,
+                       negative idicates decreasing threshold
+
+        Returns:
+            None, the patch threshold will be set accordingly
+        &#34;&#34;&#34;
+        # Note inverted direction, it is more intuitive to increase the region,
+        # than to increase the threshold
+        if direction &lt; 0:
+            self.threshold += self.increment
+        else:
+            self.threshold -= self.increment
+
+    def on_adjust(self, direction):
+        &#34;&#34;&#34;
+        Adjust the threshold in the correct direction
+
+        Args:
+            direction: The direction, an integer
+                       Negative is down, positive is up
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self._adjust_threshold(direction)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.ThresholdTool.increment"><code class="name">var <span class="ident">increment</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def increment(self):
+    return self._increment</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.ThresholdTool.patch"><code class="name">var <span class="ident">patch</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def patch(self):
+    return self._patch</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.ThresholdTool.threshold"><code class="name">var <span class="ident">threshold</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def threshold(self):
+    return self._threshold</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.ThresholdTool.destroy_info_widget"><code class="name flex">
+<span>def <span class="ident">destroy_info_widget</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Destroy the info widget.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="postconditions">Postconditions</h2>
+<p>The info widget properties are set to None.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def destroy_info_widget(self):
+    &#34;&#34;&#34;
+    Destroy the info widget.
+
+
+    Returns:
+        None
+
+    Postconditions:
+        The info widget properties are set to None.
+    &#34;&#34;&#34;
+    self._threshold_slider = None
+    self._threshold_slider_var = None</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.ThresholdTool.get_info_widget"><code class="name flex">
+<span>def <span class="ident">get_info_widget</span></span>(<span>self, parent, style)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the widget that controls this tool in the info panel.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>parent</code></strong></dt>
+<dd>The parent tkinter object.</dd>
+<dt><strong><code>style</code></strong></dt>
+<dd>ttk style object</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The widget.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_info_widget(self, parent, style):
+    &#34;&#34;&#34;
+    Get the widget that controls this tool in the info panel.
+
+    Args:
+        parent: The parent tkinter object.
+        style: ttk style object
+
+    Returns:
+        The widget.
+    &#34;&#34;&#34;
+    self.lock_undos()
+    super().get_info_widget(parent, style)
+
+    self._threshold_slider_var = tk.DoubleVar()
+
+    self._threshold_slider = tk.Scale(self._info_widget,
+                                      from_=0.00,
+                                      to=1.00,
+                                      tickinterval=0.50,
+                                      resolution=0.01,
+                                      length=200,
+                                      variable=self._threshold_slider_var,
+                                      orient=&#39;horizontal&#39;,
+                                      command=self._on_threshold_slider)
+
+    background = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;background&#34;)
+    foreground = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;foreground&#34;)
+    trough = style.lookup(&#34;InfoPanel.Horizontal.TScale&#34;, &#34;troughcolor&#34;)
+
+    self._threshold_slider.config(background=background,
+                                  foreground=foreground,
+                                  troughcolor=trough,
+                                  bd=0,
+                                  highlightthickness=0)
+
+    self._threshold_slider.set(self._threshold)
+    self._threshold_slider.pack(side=&#39;top&#39;)
+
+    self.unlock_undos()
+
+    return self._info_widget</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.ThresholdTool.on_adjust"><code class="name flex">
+<span>def <span class="ident">on_adjust</span></span>(<span>self, direction)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adjust the threshold in the correct direction</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>direction</code></strong></dt>
+<dd>The direction, an integer
+Negative is down, positive is up</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_adjust(self, direction):
+    &#34;&#34;&#34;
+    Adjust the threshold in the correct direction
+
+    Args:
+        direction: The direction, an integer
+                   Negative is down, positive is up
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    self._adjust_threshold(direction)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></b></code>:
+<ul class="hlist">
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.bind_to" href="#friendly_ground_truth.controller.tools.FGTTool.bind_to">bind_to</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.lock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.lock_undos">lock_undos</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_activate" href="#friendly_ground_truth.controller.tools.FGTTool.on_activate">on_activate</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_click" href="#friendly_ground_truth.controller.tools.FGTTool.on_click">on_click</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_drag" href="#friendly_ground_truth.controller.tools.FGTTool.on_drag">on_drag</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.unlock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.unlock_undos">unlock_undos</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="friendly_ground_truth.controller.tools.UndoTool"><code class="flex name class">
+<span>class <span class="ident">UndoTool</span></span>
+<span>(</span><span>undo_manager, undo_callback)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A tool for undoing mistakes.</p>
+<p>Initialize the tool</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>undo_manager</code></strong></dt>
+<dd>The manager for undo and redo operations</dd>
+<dt><strong><code>undo_callback</code></strong></dt>
+<dd>A function taking in a patch object and string tag
+to call when the undo action is taken.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A tool object</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UndoTool(FGTTool):
+    &#34;&#34;&#34;
+    A tool for undoing mistakes.
+    &#34;&#34;&#34;
+
+    def __init__(self, undo_manager, undo_callback):
+        &#34;&#34;&#34;
+        Initialize the tool
+
+        Args:
+            undo_manager: The manager for undo and redo operations
+            undo_callback: A function taking in a patch object and string tag
+                           to call when the undo action is taken.
+        Returns:
+            A tool object
+        &#34;&#34;&#34;
+        super(UndoTool, self)\
+            .__init__(&#34;Undo&#34;, icns.undo_icon, 9, undo_manager,
+                      &#34;CTRL+z&#34;, cursor=&#39;arrow&#39;, persistant=False,
+                      activation_callback=undo_callback, group=&#34;Undo&#34;,
+                      darkmode_icon_string=icns.darkmode_undo_icon)
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        Activate the undo tool.
+
+        Args:
+            current_patch_num: The current patch index in the patches list.
+
+        Returns:
+            The patch data and operation string.
+
+        Postconditions:
+            The last action is undone and put on the redo stack.
+        &#34;&#34;&#34;
+        patch, string = self._undo()
+        self._activation_callback(patch, string)
+        self._notify_observers()
+
+    def _undo(self):
+        &#34;&#34;&#34;
+        Undo the last operation.
+
+
+        Returns:
+            The patch data and the operation string
+        &#34;&#34;&#34;
+        return self._undo_manager.undo()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="friendly_ground_truth.controller.tools.UndoTool.on_activate"><code class="name flex">
+<span>def <span class="ident">on_activate</span></span>(<span>self, current_patch_num)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Activate the undo tool.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>current_patch_num</code></strong></dt>
+<dd>The current patch index in the patches list.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The patch data and operation string.</p>
+<h2 id="postconditions">Postconditions</h2>
+<p>The last action is undone and put on the redo stack.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_activate(self, current_patch_num):
+    &#34;&#34;&#34;
+    Activate the undo tool.
+
+    Args:
+        current_patch_num: The current patch index in the patches list.
+
+    Returns:
+        The patch data and operation string.
+
+    Postconditions:
+        The last action is undone and put on the redo stack.
+    &#34;&#34;&#34;
+    patch, string = self._undo()
+    self._activation_callback(patch, string)
+    self._notify_observers()</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></b></code>:
+<ul class="hlist">
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.bind_to" href="#friendly_ground_truth.controller.tools.FGTTool.bind_to">bind_to</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget">destroy_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.get_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.get_info_widget">get_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.lock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.lock_undos">lock_undos</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_adjust" href="#friendly_ground_truth.controller.tools.FGTTool.on_adjust">on_adjust</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_click" href="#friendly_ground_truth.controller.tools.FGTTool.on_click">on_click</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_drag" href="#friendly_ground_truth.controller.tools.FGTTool.on_drag">on_drag</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.unlock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.unlock_undos">unlock_undos</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="friendly_ground_truth.controller" href="index.html">friendly_ground_truth.controller</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="friendly_ground_truth.controller.tools.AddRegionTool" href="#friendly_ground_truth.controller.tools.AddRegionTool">AddRegionTool</a></code></h4>
+<ul class="two-column">
+<li><code><a title="friendly_ground_truth.controller.tools.AddRegionTool.bind_brush" href="#friendly_ground_truth.controller.tools.AddRegionTool.bind_brush">bind_brush</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.AddRegionTool.brush_radius" href="#friendly_ground_truth.controller.tools.AddRegionTool.brush_radius">brush_radius</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.AddRegionTool.get_info_widget" href="#friendly_ground_truth.controller.tools.AddRegionTool.get_info_widget">get_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.AddRegionTool.on_adjust" href="#friendly_ground_truth.controller.tools.AddRegionTool.on_adjust">on_adjust</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.AddRegionTool.on_click" href="#friendly_ground_truth.controller.tools.AddRegionTool.on_click">on_click</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.AddRegionTool.on_drag" href="#friendly_ground_truth.controller.tools.AddRegionTool.on_drag">on_drag</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="friendly_ground_truth.controller.tools.FGTTool" href="#friendly_ground_truth.controller.tools.FGTTool">FGTTool</a></code></h4>
+<ul class="">
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.bind_to" href="#friendly_ground_truth.controller.tools.FGTTool.bind_to">bind_to</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.cursor" href="#friendly_ground_truth.controller.tools.FGTTool.cursor">cursor</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.darkmode_icon_string" href="#friendly_ground_truth.controller.tools.FGTTool.darkmode_icon_string">darkmode_icon_string</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget">destroy_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.get_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.get_info_widget">get_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.group" href="#friendly_ground_truth.controller.tools.FGTTool.group">group</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.icon_string" href="#friendly_ground_truth.controller.tools.FGTTool.icon_string">icon_string</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.id" href="#friendly_ground_truth.controller.tools.FGTTool.id">id</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.image" href="#friendly_ground_truth.controller.tools.FGTTool.image">image</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.key_mapping" href="#friendly_ground_truth.controller.tools.FGTTool.key_mapping">key_mapping</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.lock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.lock_undos">lock_undos</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.name" href="#friendly_ground_truth.controller.tools.FGTTool.name">name</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_activate" href="#friendly_ground_truth.controller.tools.FGTTool.on_activate">on_activate</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_adjust" href="#friendly_ground_truth.controller.tools.FGTTool.on_adjust">on_adjust</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_click" href="#friendly_ground_truth.controller.tools.FGTTool.on_click">on_click</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_drag" href="#friendly_ground_truth.controller.tools.FGTTool.on_drag">on_drag</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.patch" href="#friendly_ground_truth.controller.tools.FGTTool.patch">patch</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.persistant" href="#friendly_ground_truth.controller.tools.FGTTool.persistant">persistant</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.undo_manager" href="#friendly_ground_truth.controller.tools.FGTTool.undo_manager">undo_manager</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.unlock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.unlock_undos">unlock_undos</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="friendly_ground_truth.controller.tools.FloodAddTool" href="#friendly_ground_truth.controller.tools.FloodAddTool">FloodAddTool</a></code></h4>
+<ul class="two-column">
+<li><code><a title="friendly_ground_truth.controller.tools.FloodAddTool.get_info_widget" href="#friendly_ground_truth.controller.tools.FloodAddTool.get_info_widget">get_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FloodAddTool.increment" href="#friendly_ground_truth.controller.tools.FloodAddTool.increment">increment</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FloodAddTool.on_adjust" href="#friendly_ground_truth.controller.tools.FloodAddTool.on_adjust">on_adjust</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FloodAddTool.on_click" href="#friendly_ground_truth.controller.tools.FloodAddTool.on_click">on_click</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FloodAddTool.patch" href="#friendly_ground_truth.controller.tools.FloodAddTool.patch">patch</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FloodAddTool.tolerance" href="#friendly_ground_truth.controller.tools.FloodAddTool.tolerance">tolerance</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="friendly_ground_truth.controller.tools.FloodRemoveTool" href="#friendly_ground_truth.controller.tools.FloodRemoveTool">FloodRemoveTool</a></code></h4>
+<ul class="two-column">
+<li><code><a title="friendly_ground_truth.controller.tools.FloodRemoveTool.get_info_widget" href="#friendly_ground_truth.controller.tools.FloodRemoveTool.get_info_widget">get_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FloodRemoveTool.increment" href="#friendly_ground_truth.controller.tools.FloodRemoveTool.increment">increment</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FloodRemoveTool.on_adjust" href="#friendly_ground_truth.controller.tools.FloodRemoveTool.on_adjust">on_adjust</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FloodRemoveTool.on_click" href="#friendly_ground_truth.controller.tools.FloodRemoveTool.on_click">on_click</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FloodRemoveTool.patch" href="#friendly_ground_truth.controller.tools.FloodRemoveTool.patch">patch</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.FloodRemoveTool.tolerance" href="#friendly_ground_truth.controller.tools.FloodRemoveTool.tolerance">tolerance</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="friendly_ground_truth.controller.tools.NextPatchTool" href="#friendly_ground_truth.controller.tools.NextPatchTool">NextPatchTool</a></code></h4>
+<ul class="">
+<li><code><a title="friendly_ground_truth.controller.tools.NextPatchTool.on_activate" href="#friendly_ground_truth.controller.tools.NextPatchTool.on_activate">on_activate</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="friendly_ground_truth.controller.tools.NoRootTool" href="#friendly_ground_truth.controller.tools.NoRootTool">NoRootTool</a></code></h4>
+<ul class="">
+<li><code><a title="friendly_ground_truth.controller.tools.NoRootTool.on_activate" href="#friendly_ground_truth.controller.tools.NoRootTool.on_activate">on_activate</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="friendly_ground_truth.controller.tools.PreviousPatchTool" href="#friendly_ground_truth.controller.tools.PreviousPatchTool">PreviousPatchTool</a></code></h4>
+<ul class="">
+<li><code><a title="friendly_ground_truth.controller.tools.PreviousPatchTool.on_activate" href="#friendly_ground_truth.controller.tools.PreviousPatchTool.on_activate">on_activate</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="friendly_ground_truth.controller.tools.RedoTool" href="#friendly_ground_truth.controller.tools.RedoTool">RedoTool</a></code></h4>
+<ul class="">
+<li><code><a title="friendly_ground_truth.controller.tools.RedoTool.on_activate" href="#friendly_ground_truth.controller.tools.RedoTool.on_activate">on_activate</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="friendly_ground_truth.controller.tools.RemoveRegionTool" href="#friendly_ground_truth.controller.tools.RemoveRegionTool">RemoveRegionTool</a></code></h4>
+<ul class="two-column">
+<li><code><a title="friendly_ground_truth.controller.tools.RemoveRegionTool.bind_brush" href="#friendly_ground_truth.controller.tools.RemoveRegionTool.bind_brush">bind_brush</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.RemoveRegionTool.brush_radius" href="#friendly_ground_truth.controller.tools.RemoveRegionTool.brush_radius">brush_radius</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.RemoveRegionTool.get_info_widget" href="#friendly_ground_truth.controller.tools.RemoveRegionTool.get_info_widget">get_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.RemoveRegionTool.on_adjust" href="#friendly_ground_truth.controller.tools.RemoveRegionTool.on_adjust">on_adjust</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.RemoveRegionTool.on_click" href="#friendly_ground_truth.controller.tools.RemoveRegionTool.on_click">on_click</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.RemoveRegionTool.on_drag" href="#friendly_ground_truth.controller.tools.RemoveRegionTool.on_drag">on_drag</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="friendly_ground_truth.controller.tools.ThresholdTool" href="#friendly_ground_truth.controller.tools.ThresholdTool">ThresholdTool</a></code></h4>
+<ul class="two-column">
+<li><code><a title="friendly_ground_truth.controller.tools.ThresholdTool.destroy_info_widget" href="#friendly_ground_truth.controller.tools.ThresholdTool.destroy_info_widget">destroy_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.ThresholdTool.get_info_widget" href="#friendly_ground_truth.controller.tools.ThresholdTool.get_info_widget">get_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.ThresholdTool.increment" href="#friendly_ground_truth.controller.tools.ThresholdTool.increment">increment</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.ThresholdTool.on_adjust" href="#friendly_ground_truth.controller.tools.ThresholdTool.on_adjust">on_adjust</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.ThresholdTool.patch" href="#friendly_ground_truth.controller.tools.ThresholdTool.patch">patch</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.ThresholdTool.threshold" href="#friendly_ground_truth.controller.tools.ThresholdTool.threshold">threshold</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="friendly_ground_truth.controller.tools.UndoTool" href="#friendly_ground_truth.controller.tools.UndoTool">UndoTool</a></code></h4>
+<ul class="">
+<li><code><a title="friendly_ground_truth.controller.tools.UndoTool.on_activate" href="#friendly_ground_truth.controller.tools.UndoTool.on_activate">on_activate</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
