@@ -4,6 +4,8 @@ This file keeps a record of important changes to the project.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - <>
+
+## [v0.9.0] - 2020-05-25
 ### Added
 - Improved Pan and Zoom Performance
 - Auto centering of current patch when moving to the next patch
