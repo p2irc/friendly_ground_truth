@@ -34,6 +34,9 @@ class TestController():
         mocker.patch('PIL.ImageTk')
         mocker.patch('tkinter.PhotoImage')
         mocker.patch('tkinter.Toplevel')
+        mocker.patch('tkinter.ttk')
+        mocker.patch('tkinter.ttk.Style')
+
     @pytest.fixture
     def dcp_mock(self, mocker):
         """
