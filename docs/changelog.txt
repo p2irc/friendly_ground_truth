@@ -10,6 +10,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Each patch now keeps track of it's own undo history, meaning you can go back
 to a patch and undo any operation.
 - Improved brush drawing latency.
+- Improved UI performance
+- Dark Mode
 
 ### Changed
 - No Root Tool now automatically moves to the next patch

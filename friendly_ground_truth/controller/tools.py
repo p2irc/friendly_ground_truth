@@ -11,18 +11,11 @@ Description: Definitions of tools that can be used in Friendly Ground Truth
 import logging
 import copy
 import tkinter as tk
+from tkinter import ttk
+
 import threading
 
-from friendly_ground_truth.view.icons.icon_strings import (threshold_icon,
-                                                           add_region_icon,
-                                                           remove_region_icon,
-                                                           no_root_icon,
-                                                           flood_add_icon,
-                                                           flood_remove_icon,
-                                                           prev_patch_icon,
-                                                           next_patch_icon,
-                                                           undo_icon,
-                                                           redo_icon)
+from friendly_ground_truth.view.icons import icon_strings as icns
 
 module_logger = logging.getLogger('friendly_gt.controller.tools')
 
@@ -42,11 +35,14 @@ class FGTTool():
         info_widget: A tkinter widget for controlling this tool from an info
                      panel
         undo_manager: The manager for undos for this tool
+        darkmode_icon_string: A 64 bit encoded string representing an icon
+                              image for use with dark mode.
     """
 
     def __init__(self, name, icon_string, id,  undo_manager,
                  key_mapping, cursor='none', persistant=True,
-                 activation_callback=None, group=None):
+                 activation_callback=None, group=None,
+                 darkmode_icon_string=None):
         """
         Initialize the object
 
@@ -61,6 +57,7 @@ class FGTTool():
                                  is finished
             group: If this tool should be grouped with other tools, this string
                    identifies what group it is a part of.
+            darkmode_icon_string: The embedded icon string to use for darkmode.
         """
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.FGTTool')
@@ -76,6 +73,7 @@ class FGTTool():
         self._can_undo = True
         self._observers = []
         self._group = group
+        self._darkmode_icon_string = darkmode_icon_string
 
     @property
     def name(self):
@@ -133,17 +131,23 @@ class FGTTool():
     def undo_manager(self, manager):
         self._undo_manager = manager
 
-    def get_info_widget(self, parent):
+    @property
+    def darkmode_icon_string(self):
+        return self._darkmode_icon_string
+
+    def get_info_widget(self, parent, style):
         """
         Get the widget that controls this tool in the UI.
 
         Args:
             parent: The parent for the widget.
+            style: ttk style objext
 
         Returns:
             The tkinter Frame widget for this tool.
         """
-        self._info_widget = tk.Frame(parent, padx=0, pady=15)
+        self._info_widget = ttk.Frame(parent,
+                                      style="InfoPanel.TFrame")
         return self._info_widget
 
     def lock_undos(self):
@@ -277,9 +281,10 @@ class ThresholdTool(FGTTool):
     def __init__(self, undo_manager):
 
         super(ThresholdTool, self)\
-            .__init__("Threshold Tool", threshold_icon, 1,
+            .__init__("Threshold Tool", icns.threshold_icon, 1,
                       undo_manager, "t", cursor='arrow', persistant=True,
-                      activation_callback=None, group="Markups")
+                      activation_callback=None, group="Markups",
+                      darkmode_icon_string=icns.darkmode_thresh_icon)
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.ThresholdTool')
@@ -290,6 +295,7 @@ class ThresholdTool(FGTTool):
 
         self._threshold_slider_var = None
         self._threshold_slider = None
+        self._slider_init = False
         self._new_patch = False
 
     @property
@@ -309,7 +315,7 @@ class ThresholdTool(FGTTool):
                         add_to_undo_stack(copy.deepcopy(self.patch),
                                           'threshold_adjust')
 
-            if self._threshold_slider is not None:
+            if self._threshold_slider is not None and self._slider_init:
                 self._threshold_slider_var = value
                 self._threshold_slider.set(value)
 
@@ -340,18 +346,19 @@ class ThresholdTool(FGTTool):
 
         self._threshold = patch.threshold
 
-    def get_info_widget(self, parent):
+    def get_info_widget(self, parent, style):
         """
         Get the widget that controls this tool in the info panel.
 
         Args:
             parent: The parent tkinter object.
+            style: ttk style object
 
         Returns:
             The widget.
         """
         self.lock_undos()
-        super().get_info_widget(parent)
+        super().get_info_widget(parent, style)
 
         self._threshold_slider_var = tk.DoubleVar()
 
@@ -364,6 +371,16 @@ class ThresholdTool(FGTTool):
                                           variable=self._threshold_slider_var,
                                           orient='horizontal',
                                           command=self._on_threshold_slider)
+
+        background = style.lookup("InfoPanel.Horizontal.TScale", "background")
+        foreground = style.lookup("InfoPanel.Horizontal.TScale", "foreground")
+        trough = style.lookup("InfoPanel.Horizontal.TScale", "troughcolor")
+
+        self._threshold_slider.config(background=background,
+                                      foreground=foreground,
+                                      troughcolor=trough,
+                                      bd=0,
+                                      highlightthickness=0)
 
         self._threshold_slider.set(self._threshold)
         self._threshold_slider.pack(side='top')
@@ -446,9 +463,10 @@ class AddRegionTool(FGTTool):
 
     def __init__(self, undo_manager):
         super(AddRegionTool, self)\
-            .__init__("Add Region Tool", add_region_icon, 2,
+            .__init__("Add Region Tool", icns.add_region_icon, 2,
                       undo_manager, "a", cursor='brush', persistant=True,
-                      group="Markups")
+                      group="Markups",
+                      darkmode_icon_string=icns.darkmode_add_region_icon)
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.AddRegionTool')
@@ -472,33 +490,35 @@ class AddRegionTool(FGTTool):
             if self._brush_sizer is not None:
                 self._brush_sizer_var.set(value)
 
-    def get_info_widget(self, parent):
+    def get_info_widget(self, parent, style):
         """
         Get the widget that controls this tool in the info panel.
 
         Args:
             parent: The parent tkinter object.
-
+            style: ttk style object.
         Returns:
             The widget.
         """
-        super().get_info_widget(parent)
+        super().get_info_widget(parent, style)
 
-        self._brush_size_panel = tk.Frame(self._info_widget,
-                                          padx=0, pady=15)
+        self._brush_size_panel = ttk.Frame(self._info_widget,
+                                           style="InfoPanel.TFrame")
 
-        self._brush_size_label = tk.Label(self._brush_size_panel,
-                                          text="Brush Size")
+        self._brush_size_label = ttk.Label(self._brush_size_panel,
+                                           text="Brush Size",
+                                           style="InfoPanel.TLabel")
 
         self._brush_sizer_var = tk.IntVar()
         self._brush_sizer_var.set(self._brush_radius)
         self._brush_sizer_var.trace('w', self._on_brush_sizer)
 
-        self._brush_sizer = tk.Spinbox(self._brush_size_panel,
-                                       from_=0,
-                                       to=64,
-                                       width=17,
-                                       textvariable=self._brush_sizer_var)
+        self._brush_sizer = ttk.Spinbox(self._brush_size_panel,
+                                        from_=0,
+                                        to=64,
+                                        width=17,
+                                        textvariable=self._brush_sizer_var,
+                                        style="InfoPanel.TSpinbox")
 
         self._brush_size_label.pack(side='left')
         self._brush_sizer.pack(side='left')
@@ -610,9 +630,10 @@ class RemoveRegionTool(FGTTool):
 
     def __init__(self, undo_manager):
         super(RemoveRegionTool, self)\
-            .__init__("Remove Region Tool", remove_region_icon, 3,
+            .__init__("Remove Region Tool", icns.remove_region_icon, 3,
                       undo_manager, "r", cursor="brush", persistant=True,
-                      group="Markups")
+                      group="Markups",
+                      darkmode_icon_string=icns.darkmode_remove_region_icon)
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.RemoveRegionTool')
@@ -636,33 +657,35 @@ class RemoveRegionTool(FGTTool):
             if self._brush_sizer is not None:
                 self._brush_sizer_var.set(value)
 
-    def get_info_widget(self, parent):
+    def get_info_widget(self, parent, style):
         """
         Get the widget that controls this tool in the info panel.
 
         Args:
             parent: The parent tkinter object.
+            style: ttk style object.
 
         Returns:
             The widget.
         """
-        super().get_info_widget(parent)
+        super().get_info_widget(parent, style)
 
-        self._brush_size_panel = tk.Frame(self._info_widget,
-                                          padx=0, pady=15)
+        self._brush_size_panel = ttk.Frame(self._info_widget,
+                                           style="InfoPanel.TFrame")
 
-        self._brush_size_label = tk.Label(self._brush_size_panel,
-                                          text="Brush Size")
+        self._brush_size_label = ttk.Label(self._brush_size_panel,
+                                           text="Brush Size",
+                                           style="InfoPanel.TLabel")
 
         self._brush_sizer_var = tk.IntVar()
         self._brush_sizer_var.set(self._brush_radius)
         self._brush_sizer_var.trace('w', self._on_brush_sizer)
 
-        self._brush_sizer = tk.Spinbox(self._brush_size_panel,
-                                       from_=0,
-                                       to=64,
-                                       width=17,
-                                       textvariable=self._brush_sizer_var)
+        self._brush_sizer = ttk.Spinbox(self._brush_size_panel,
+                                        from_=0,
+                                        to=64,
+                                        width=17,
+                                        textvariable=self._brush_sizer_var)
 
         self._brush_size_label.pack(side='left')
         self._brush_sizer.pack(side='left')
@@ -783,10 +806,11 @@ class NoRootTool(FGTTool):
             {% A thing %}
         """
         super(NoRootTool, self)\
-            .__init__("No Root Tool", no_root_icon, 4,
+            .__init__("No Root Tool", icns.no_root_icon, 4,
                       undo_manager, "x", cursor='arrow', persistant=False,
                       activation_callback=next_patch_function,
-                      group="Navigation")
+                      group="Navigation",
+                      darkmode_icon_string=icns.darkmode_no_root_icon)
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.NoRootTool')
@@ -861,9 +885,10 @@ class FloodAddTool(FGTTool):
 
     def __init__(self, undo_manager):
         super(FloodAddTool, self)\
-            .__init__("Flood Add Tool", flood_add_icon, 5,
+            .__init__("Flood Add Tool", icns.flood_add_icon, 5,
                       undo_manager, "f", cursor='crosshair', persistant=True,
-                      group="Markups")
+                      group="Markups",
+                      darkmode_icon_string=icns.darkmode_flood_add_icon)
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.FloodAddTool')
@@ -960,17 +985,17 @@ class FloodAddTool(FGTTool):
         self.patch.flood_add_region(position, self.tolerance)
         self._notify_observers()
 
-    def get_info_widget(self, parent):
+    def get_info_widget(self, parent, style):
         """
         Get the widget that controls this tool in the info panel.
 
         Args:
             parent: The parent tkinter object.
-
+            style: ttk style object.
         Returns:
             The widget.
         """
-        super().get_info_widget(parent)
+        super().get_info_widget(parent, style)
 
         self._flood_slider_var = tk.DoubleVar()
 
@@ -984,6 +1009,16 @@ class FloodAddTool(FGTTool):
                                       _flood_slider_var,
                                       orient='horizontal',
                                       command=self._on_flood_slider)
+
+        background = style.lookup("InfoPanel.Horizontal.TScale", "background")
+        foreground = style.lookup("InfoPanel.Horizontal.TScale", "foreground")
+        trough = style.lookup("InfoPanel.Horizontal.TScale", "troughcolor")
+
+        self._flood_slider.config(background=background,
+                                  foreground=foreground,
+                                  troughcolor=trough,
+                                  bd=0,
+                                  highlightthickness=0)
 
         self._flood_slider.set(self._tolerance)
         self._flood_slider.pack(side='top')
@@ -1016,9 +1051,10 @@ class FloodRemoveTool(FGTTool):
 
     def __init__(self, undo_manager):
         super(FloodRemoveTool, self)\
-            .__init__("Flood Remove Tool", flood_remove_icon, 6,
+            .__init__("Flood Remove Tool", icns.flood_remove_icon, 6,
                       undo_manager, "l", cursor='crosshair', persistant=True,
-                      group="Markups")
+                      group="Markups",
+                      darkmode_icon_string=icns.darkmode_flood_remove_icon)
 
         self._logger = logging\
             .getLogger('friendly_gt.controller.tools.FloodRemoveTool')
@@ -1117,17 +1153,18 @@ class FloodRemoveTool(FGTTool):
         self.patch.flood_remove_region(position, self.tolerance)
         self._notify_observers()
 
-    def get_info_widget(self, parent):
+    def get_info_widget(self, parent, style):
         """
         Get the widget that controls this tool in the info panel.
 
         Args:
             parent: The parent tkinter object.
+            style: ttk style object.
 
         Returns:
             The widget.
         """
-        super().get_info_widget(parent)
+        super().get_info_widget(parent, style)
 
         self._flood_slider_var = tk.DoubleVar()
 
@@ -1141,6 +1178,16 @@ class FloodRemoveTool(FGTTool):
                                       _flood_slider_var,
                                       orient='horizontal',
                                       command=self._on_flood_slider)
+
+        background = style.lookup("InfoPanel.Horizontal.TScale", "background")
+        foreground = style.lookup("InfoPanel.Horizontal.TScale", "foreground")
+        trough = style.lookup("InfoPanel.Horizontal.TScale", "troughcolor")
+
+        self._flood_slider.config(background=background,
+                                  foreground=foreground,
+                                  troughcolor=trough,
+                                  bd=0,
+                                  highlightthickness=0)
 
         self._flood_slider.set(self._tolerance)
         self._flood_slider.pack(side='top')
@@ -1184,11 +1231,12 @@ class PreviousPatchTool(FGTTool):
             A tool object
         """
         super(PreviousPatchTool, self)\
-            .__init__("Previous Patch", prev_patch_icon, 7,
+            .__init__("Previous Patch", icns.prev_patch_icon, 7,
                       undo_manager, "left", cursor='arrow',
                       persistant=False,
                       activation_callback=prev_patch_function,
-                      group="Navigation")
+                      group="Navigation",
+                      darkmode_icon_string=icns.darkmode_prev_patch_icon)
 
     def on_activate(self, current_patch_num):
         """
@@ -1244,11 +1292,12 @@ class NextPatchTool(FGTTool):
             A tool object
         """
         super(NextPatchTool, self)\
-            .__init__("Next Patch", next_patch_icon, 8,
+            .__init__("Next Patch", icns.next_patch_icon, 8,
                       undo_manager, "right", cursor='arrow',
                       persistant=False,
                       activation_callback=next_patch_function,
-                      group="Navigation")
+                      group="Navigation",
+                      darkmode_icon_string=icns.darkmode_next_patch_icon)
 
     def on_activate(self, current_patch_num):
         """
@@ -1304,9 +1353,10 @@ class UndoTool(FGTTool):
             A tool object
         """
         super(UndoTool, self)\
-            .__init__("Undo", undo_icon, 9, undo_manager,
+            .__init__("Undo", icns.undo_icon, 9, undo_manager,
                       "CTRL+z", cursor='arrow', persistant=False,
-                      activation_callback=undo_callback, group="Undo")
+                      activation_callback=undo_callback, group="Undo",
+                      darkmode_icon_string=icns.darkmode_undo_icon)
 
     def on_activate(self, current_patch_num):
         """
@@ -1353,9 +1403,10 @@ class RedoTool(FGTTool):
             A tool object
         """
         super(RedoTool, self)\
-            .__init__("Redo", redo_icon, 10, undo_manager, "CTRL+r",
+            .__init__("Redo", icns.redo_icon, 10, undo_manager, "CTRL+r",
                       cursor='arrow', persistant=False,
-                      activation_callback=redo_callback, group="Undo")
+                      activation_callback=redo_callback, group="Undo",
+                      darkmode_icon_string=icns.darkmode_redo_icon)
 
     def on_activate(self, current_patch_num):
         """

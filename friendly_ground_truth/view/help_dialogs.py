@@ -9,6 +9,8 @@ Description: Dialogs that can be triggered from the help menu.
 
 """
 import tkinter as tk
+from tkinter import ttk
+
 import webbrowser
 import base64
 
@@ -53,32 +55,43 @@ class AboutDialog(tk.Toplevel):
         self._bug_link = ("https://github.com/KyleS22/friendly_ground_truth" +
                           "/issues")
 
-        self._version_label = tk.Label(self._base, text=version_text)
+        self._frame = ttk.Frame(self._base, style="HelpDialog.TFrame")
+
+        self._version_label = ttk.Label(self._frame, text=version_text,
+                                        style="HelpDialog.TLabel")
         self._version_label.pack(pady=15)
 
         if version_info.check_newer_version(version_info.
                                             get_newest_release_info()):
-            self._version_link_label = tk.Label(self._base,
-                                                text=self._version_link,
-                                                fg="blue", cursor="hand2")
+            self._version_link_label = ttk.Label(self._frame,
+                                                 text=self._version_link,
+                                                 style="Link.TLabel",
+                                                 cursor="hand2")
             self._version_link_label.pack(pady=15)
             self._version_link_label.bind("<Button-1>", self._on_version_click)
 
-        self._manual_label = tk.Label(self._base, text=manual_text)
+        self._manual_label = ttk.Label(self._frame, text=manual_text,
+                                       style="HelpDialog.TLabel")
         self._manual_label.pack(pady=15)
 
-        self._manual_link_label = tk.Label(self._base, text=self._manual_link,
-                                           fg="blue", cursor="hand2")
+        self._manual_link_label = ttk.Label(self._frame,
+                                            text=self._manual_link,
+                                            style="Link.TLabel",
+                                            cursor="hand2")
         self._manual_link_label.pack(pady=15)
         self._manual_link_label.bind("<Button-1>", self._on_manual_click)
 
-        self._bug_label = tk.Label(self._base, text=bug_text)
+        self._bug_label = ttk.Label(self._frame, text=bug_text,
+                                    style="HelpDialog.TLabel")
         self._bug_label.pack(pady=15)
 
-        self._bug_link_label = tk.Label(self._base, text=self._bug_link,
-                                        fg="blue", cursor="hand2")
+        self._bug_link_label = ttk.Label(self._frame, text=self._bug_link,
+                                         style="Link.TLabel",
+                                         cursor="hand2")
         self._bug_link_label.pack(pady=15)
         self._bug_link_label.bind("<Button-1>", self._on_bug_click)
+
+        self._frame.pack(fill='both', expand=True)
 
     def _on_version_click(self, event):
         webbrowser.open(self._version_link)
@@ -98,19 +111,21 @@ class KeyboardShortcutDialog(tk.Toplevel):
 
     NUM_COLS = 9
 
-    def __init__(self, tools):
+    def __init__(self, tools, darkmode):
         """
         Create the dialog.
 
         Args:
             tools: A dictionary of tools, keyed by their id.
-
+            darkmode: True if we are using the dark theme.
         Returns:
             The window.
         """
 
         self._base = tk.Toplevel()
         self._base.title("Keyboard Shortcuts")
+
+        self._frame = ttk.Frame(self._base, style="HelpDialog.TFrame")
 
         group_priorities = [(0, "Markups"), (1, "Navigation"), (2, "Undo")]
 
@@ -146,16 +161,25 @@ class KeyboardShortcutDialog(tk.Toplevel):
             tool_col = 0
             for tool in group:
                 tool_col = self._make_tool_entry(tool, panel, tool_row,
-                                                 tool_col)
+                                                 tool_col, darkmode)
 
                 if tool_col >= self.NUM_COLS:
                     tool_col = 0
                     tool_row += 1
 
-            panel.grid(row=row, column=0)
+            panel.grid(row=row, column=0, sticky="NESW")
+
             row += 1
 
-    def _make_tool_entry(self, tool, panel, row, column):
+        self._frame.grid_rowconfigure(0, weight=1)
+        self._frame.grid_columnconfigure(0, weight=1)
+
+        self._base.grid_rowconfigure(0, weight=1)
+        self._base.grid_columnconfigure(0, weight=1)
+
+        self._frame.grid(row=0, column=0, sticky="NESW")
+
+    def _make_tool_entry(self, tool, panel, row, column, darkmode):
         """
         Create a keyboard shortcut label for the given tool.
 
@@ -164,26 +188,42 @@ class KeyboardShortcutDialog(tk.Toplevel):
             panel: The parent panel for the entry.
             row: The row for this tool to be put on.
             column: The column to start adding to.
-
+            darkmode: True if we should use darmode versions of icons.
         Returns:
             The next available column index.
         """
-        data = Image.open(BytesIO(base64.b64decode(tool.icon_string)))
+        if darkmode:
+            data = Image.open(BytesIO(base64
+                              .b64decode(tool.darkmode_icon_string)))
+        else:
+            data = Image.open(BytesIO(base64.b64decode(tool.icon_string)))
+
         img = ImageTk.PhotoImage(data)
 
-        img_label = tk.Label(panel, image=img)
+        img_label = ttk.Label(panel, image=img, style="HelpDialog.TLabel")
         img_label.image = img
-        img_label.grid(row=row, column=column)
+        img_label.grid(row=row, column=column, sticky="NESW")
+        panel.grid_columnconfigure(column, weight=1)
+
         column += 1
 
         shortcut_text = tool.name + " (" + tool.key_mapping + ")"
-        text_label = tk.Label(panel, text=shortcut_text)
-        text_label.grid(row=row, column=column)
+        text_label = ttk.Label(panel, text=shortcut_text,
+                               style="HelpDialog.TLabel")
+
+        panel.grid_columnconfigure(column, weight=1)
+
+        text_label.grid(row=row, column=column, sticky="NSEW")
         column += 1
 
-        space_label = tk.Label(panel, text="    ")
-        space_label.grid(row=row, column=column)
+        space_label = ttk.Label(panel, text="    ",
+                                style="HelpDialog.TLabel")
+
+        panel.grid_columnconfigure(column, weight=1)
+        space_label.grid(row=row, column=column, sticky="NSEW")
+
         column += 1
+        panel.grid_columnconfigure(column, weight=1)
 
         return column
 
@@ -198,9 +238,10 @@ class KeyboardShortcutDialog(tk.Toplevel):
         Returns:
             A panel for placing the tool icons into.
         """
-        panel = tk.Frame(self._base, padx=0, pady=15)
+        panel = ttk.Frame(self._base,
+                          style="KeyboardGroup.TFrame")
 
-        panel_title = tk.Label(panel, text=group)
+        panel_title = ttk.Label(panel, text=group, style="HelpDialog.TLabel")
         panel_title.grid(row=0, column=centre_col, columnspan=2)
 
         f = font.Font(panel_title, panel_title.cget("font"))

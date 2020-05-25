@@ -29,8 +29,10 @@ class InfoPanel(ttk.Frame):
         self._master = master
 
         self._tool_title = "No Tool Selected"
-        self._info_panel_label = tk.Label(self,
-                                          text=self._tool_title)
+        self._info_panel_label = ttk.Label(self,
+                                           text=self._tool_title,
+                                           style="InfoPanel.TLabel",
+                                           anchor="center")
 
         self._info_panel_label.pack(side='top', fill='both')
 
