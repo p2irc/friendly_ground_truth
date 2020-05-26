@@ -641,7 +641,7 @@ class MainWindow(ttk.Frame):
                 tool_id = self._reverse_key_mappings[key]
                 self._on_tool_selected(tool_id)
             except KeyError:
-                self._logger.error("{} is not a valid key code".format(key))
+                self._logger.debug("{} is not a valid key code".format(key))
 
     def _load_icon_from_string(self, icon_string):
         """
