@@ -260,12 +260,11 @@ class MainWindow(ttk.Frame):
             The canvas's image will be set to the image.
         """
 
-        if new:
-            self._canvas.new_image(img, patch_offset=patch_offset)
-
         if self._canvas is None:
             self.create_canvas(img)
             return
+        elif new:
+            self._canvas.new_image(img, patch_offset=patch_offset)
         else:
             self._canvas.set_image(img)
 
