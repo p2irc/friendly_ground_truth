@@ -40,22 +40,6 @@ import numpy as np
 import logging
 module_logger = logging.getLogger('friendly_gt.controller.controller')
 
-if platform != 'win32':
-
-    home = os.path.expanduser("~")
-
-    data_dir = os.path.join(home, ".friendly_ground_truth/")
-
-    if not os.path.exists(data_dir):
-        os.mkdir(data_dir)
-
-    PREFERENCES_PATH = os.path.join(data_dir, "user_preferences.json")
-
-else:
-    PREFERENCES_PATH = "./user_preferences.json"
-
-DEFAULT_PREFS = {'theme': 'Light'}
-
 
 class Controller():
     """
@@ -66,6 +50,8 @@ class Controller():
     """
     CONTEXT_TRANSPARENCY = 100
     NUM_PATCHES = 10
+
+    DEFAULT_PREFS = {'theme': 'Light'}
 
     def __init__(self, root):
         """
@@ -83,6 +69,8 @@ class Controller():
         # ------------------------------------
         # Private Attributes
         # -----------------------------------
+
+        self.PREFERENCES_PATH = self.get_preferences_path()
 
         # The root tkinter object
         self._root = root
@@ -138,6 +126,31 @@ class Controller():
     # ===================================================
     # PUBLIC FUNCTIONS
     # ===================================================
+    def get_preferences_path(self):
+        """
+        Return the path to the preferences file.
+
+
+        Returns:
+            The path to the preferences file.
+        """
+        if platform != 'win32':
+
+            home = os.path.expanduser("~")
+
+            data_dir = os.path.join(home, ".friendly_ground_truth/")
+
+            if not os.path.exists(data_dir):
+                os.mkdir(data_dir)
+
+            preferences_path = os.path.join(data_dir,
+                                            "user_preferences.json")
+
+        else:
+            preferences_path = "./user_preferences.json"
+
+        return preferences_path
+
     def load_new_image(self):
         """
         Load a new image with a file dialog.
@@ -168,6 +181,8 @@ class Controller():
 
         try:
             self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
+
+            del self._image
             self._image = Image(file_name, 10, self._update_progressbar)
 
         except FileNotFoundError:
@@ -176,7 +191,7 @@ class Controller():
 
         self._current_patch_index = 0
 
-        self._display_current_patch()
+        self._display_current_patch(new=True)
         self._main_window.update_image_indicator(self._image_path)
 
     def save_mask(self):
@@ -242,10 +257,10 @@ class Controller():
         Returns:
             A dictionary containing the user's preferences.
         """
-        if not os.path.exists(PREFERENCES_PATH):
-            return DEFAULT_PREFS
+        if not os.path.exists(self.PREFERENCES_PATH):
+            return self.DEFAULT_PREFS
 
-        with open(PREFERENCES_PATH, 'r') as fin:
+        with open(self.PREFERENCES_PATH, 'r') as fin:
             preferences = json.load(fin)
 
         return preferences
@@ -261,7 +276,7 @@ class Controller():
             None
         """
 
-        with open(PREFERENCES_PATH, 'w') as fout:
+        with open(self.PREFERENCES_PATH, 'w') as fout:
             json.dump(preferences, fout)
 
     def activate_tool(self, id):
