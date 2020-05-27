@@ -11,6 +11,7 @@ Description: Tests for the main controller.
 
 import pytest
 import os
+import shutil
 
 from friendly_ground_truth.controller.controller import Controller
 
@@ -79,6 +80,48 @@ class TestController():
         controller = Controller(MagicMock())
 
         assert controller.PREFERENCES_PATH == './user_preferences.json'
+
+    def test_create_prefs_path_unix(self, setup, mocker):
+        """
+        Test creating the preferences path if the platform is unix based.
+
+        Args:
+            setup: Setup for the controller.
+            mocker: Mocker interface.
+
+        Test Condition:
+            The PREFERENCES_PATH variable is
+                '/home/$USER/user_preferences.json'
+        """
+
+        from friendly_ground_truth.controller import controller as ct
+        ct.platform = 'Linux'
+
+        fakehome = "./tests/data/fakehome/"
+
+        mocker.patch('friendly_ground_truth.controller.'
+                     'controller.Controller.load_preferences',
+                     return_value={'theme': 'Light'})
+
+        mocker.patch('os.path.expanduser',
+                     return_value=fakehome)
+
+        mocker.patch('os.path.exists', return_value=True)
+
+        controller = Controller(MagicMock())
+
+        assert controller.PREFERENCES_PATH == os.\
+            path.join(fakehome, '.friendly_ground_truth/user_preferences.json')
+
+        mocker.patch('friendly_ground_truth.controller.'
+                     'controller.Controller.load_preferences',
+                     return_value={'theme': 'Dark'})
+
+        mocker.patch('os.path.exists', return_value=False)
+        controller = Controller(MagicMock())
+
+        assert controller.PREFERENCES_PATH == os.\
+            path.join(fakehome, '.friendly_ground_truth/user_preferences.json')
 
 
 class TestIo(TestController):
