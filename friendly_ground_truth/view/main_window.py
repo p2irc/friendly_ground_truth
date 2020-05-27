@@ -260,12 +260,11 @@ class MainWindow(ttk.Frame):
             The canvas's image will be set to the image.
         """
 
-        if new:
-            self._canvas.new_image(img, patch_offset=patch_offset)
-
         if self._canvas is None:
             self.create_canvas(img)
             return
+        elif new:
+            self._canvas.new_image(img, patch_offset=patch_offset)
         else:
             self._canvas.set_image(img)
 
@@ -641,7 +640,7 @@ class MainWindow(ttk.Frame):
                 tool_id = self._reverse_key_mappings[key]
                 self._on_tool_selected(tool_id)
             except KeyError:
-                self._logger.error("{} is not a valid key code".format(key))
+                self._logger.debug("{} is not a valid key code".format(key))
 
     def _load_icon_from_string(self, icon_string):
         """

@@ -36,6 +36,7 @@ class TestController():
         mocker.patch('tkinter.Toplevel')
         mocker.patch('tkinter.ttk')
         mocker.patch('tkinter.ttk.Style')
+        mocker.patch('os.mkdir')
 
     @pytest.fixture
     def dcp_mock(self, mocker):
@@ -58,6 +59,27 @@ class TestController():
         controller = Controller(MagicMock())
         controller._main_window = MagicMock()
         return controller
+
+    def test_create_prefs_path_windows(self, setup, mocker):
+        """
+        Test creating the preferences path if the platform is windows.
+
+        Args:
+            setup: Setup for the controller.
+            mocker: Mocker interface.
+
+        Test Condition:
+            The PREFERENCES_PATH variable is
+                './user_preferences.json'
+        """
+
+        from friendly_ground_truth.controller import controller as ct
+        ct.platform = 'win32'
+
+        controller = Controller(MagicMock())
+
+        assert controller.PREFERENCES_PATH == './user_preferences.json'
+
 
 class TestIo(TestController):
     """
@@ -100,8 +122,6 @@ class TestIo(TestController):
         assert controller._image_path == valid_rgb_image_path
         assert controller._image is not None
         dcp_mock.assert_called()
-
-
 
 
 class TestInteractions(TestController):
