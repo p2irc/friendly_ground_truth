@@ -56,6 +56,8 @@ from friendly_ground_truth.model.model import Image
 
 from skimage import segmentation, img_as_ubyte
 
+from sys import platform
+
 import os
 import copy
 import json
@@ -68,9 +70,6 @@ import numpy as np
 import logging
 module_logger = logging.getLogger(&#39;friendly_gt.controller.controller&#39;)
 
-PREFERENCES_PATH = &#34;./user_preferences.json&#34;
-DEFAULT_PREFS = {&#39;theme&#39;: &#39;Light&#39;}
-
 
 class Controller():
     &#34;&#34;&#34;
@@ -81,6 +80,8 @@ class Controller():
     &#34;&#34;&#34;
     CONTEXT_TRANSPARENCY = 100
     NUM_PATCHES = 10
+
+    DEFAULT_PREFS = {&#39;theme&#39;: &#39;Light&#39;}
 
     def __init__(self, root):
         &#34;&#34;&#34;
@@ -98,6 +99,8 @@ class Controller():
         # ------------------------------------
         # Private Attributes
         # -----------------------------------
+
+        self.PREFERENCES_PATH = self.get_preferences_path()
 
         # The root tkinter object
         self._root = root
@@ -153,6 +156,30 @@ class Controller():
     # ===================================================
     # PUBLIC FUNCTIONS
     # ===================================================
+    def get_preferences_path(self):
+        &#34;&#34;&#34;
+        Return the path to the preferences file.
+
+
+        Returns:
+            The path to the preferences file.
+        &#34;&#34;&#34;
+        if platform != &#39;win32&#39;:
+
+            home = os.path.expanduser(&#34;~&#34;)
+            data_dir = os.path.join(home, &#34;.friendly_ground_truth/&#34;)
+
+            if not os.path.exists(data_dir):
+                os.mkdir(data_dir)
+
+            preferences_path = os.path.join(data_dir,
+                                            &#34;user_preferences.json&#34;)
+
+        else:
+            preferences_path = &#34;./user_preferences.json&#34;
+
+        return preferences_path
+
     def load_new_image(self):
         &#34;&#34;&#34;
         Load a new image with a file dialog.
@@ -183,6 +210,8 @@ class Controller():
 
         try:
             self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
+
+            del self._image
             self._image = Image(file_name, 10, self._update_progressbar)
 
         except FileNotFoundError:
@@ -191,7 +220,7 @@ class Controller():
 
         self._current_patch_index = 0
 
-        self._display_current_patch()
+        self._display_current_patch(new=True)
         self._main_window.update_image_indicator(self._image_path)
 
     def save_mask(self):
@@ -202,6 +231,9 @@ class Controller():
         Returns:
             None
         &#34;&#34;&#34;
+
+        if self._image is None:
+            return
 
         if not self._previewed:
             self._show_saved_preview()
@@ -231,6 +263,7 @@ class Controller():
 
             tkinter.messagebox.showinfo(&#34;Image Mask Saved!&#34;,
                                         &#34;Image Mask Saved!&#34;)
+            self._previewed = False
 
         except IOError:
             self._logger.error(&#34;Could not save file!&#34;)
@@ -257,10 +290,10 @@ class Controller():
         Returns:
             A dictionary containing the user&#39;s preferences.
         &#34;&#34;&#34;
-        if not os.path.exists(PREFERENCES_PATH):
-            return DEFAULT_PREFS
+        if not os.path.exists(self.PREFERENCES_PATH):
+            return self.DEFAULT_PREFS
 
-        with open(PREFERENCES_PATH, &#39;r&#39;) as fin:
+        with open(self.PREFERENCES_PATH, &#39;r&#39;) as fin:
             preferences = json.load(fin)
 
         return preferences
@@ -276,7 +309,7 @@ class Controller():
             None
         &#34;&#34;&#34;
 
-        with open(PREFERENCES_PATH, &#39;w&#39;) as fout:
+        with open(self.PREFERENCES_PATH, &#39;w&#39;) as fout:
             json.dump(preferences, fout)
 
     def activate_tool(self, id):
@@ -845,6 +878,8 @@ class Controller():
     CONTEXT_TRANSPARENCY = 100
     NUM_PATCHES = 10
 
+    DEFAULT_PREFS = {&#39;theme&#39;: &#39;Light&#39;}
+
     def __init__(self, root):
         &#34;&#34;&#34;
         Create a Controller object
@@ -861,6 +896,8 @@ class Controller():
         # ------------------------------------
         # Private Attributes
         # -----------------------------------
+
+        self.PREFERENCES_PATH = self.get_preferences_path()
 
         # The root tkinter object
         self._root = root
@@ -916,6 +953,30 @@ class Controller():
     # ===================================================
     # PUBLIC FUNCTIONS
     # ===================================================
+    def get_preferences_path(self):
+        &#34;&#34;&#34;
+        Return the path to the preferences file.
+
+
+        Returns:
+            The path to the preferences file.
+        &#34;&#34;&#34;
+        if platform != &#39;win32&#39;:
+
+            home = os.path.expanduser(&#34;~&#34;)
+            data_dir = os.path.join(home, &#34;.friendly_ground_truth/&#34;)
+
+            if not os.path.exists(data_dir):
+                os.mkdir(data_dir)
+
+            preferences_path = os.path.join(data_dir,
+                                            &#34;user_preferences.json&#34;)
+
+        else:
+            preferences_path = &#34;./user_preferences.json&#34;
+
+        return preferences_path
+
     def load_new_image(self):
         &#34;&#34;&#34;
         Load a new image with a file dialog.
@@ -946,6 +1007,8 @@ class Controller():
 
         try:
             self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
+
+            del self._image
             self._image = Image(file_name, 10, self._update_progressbar)
 
         except FileNotFoundError:
@@ -954,7 +1017,7 @@ class Controller():
 
         self._current_patch_index = 0
 
-        self._display_current_patch()
+        self._display_current_patch(new=True)
         self._main_window.update_image_indicator(self._image_path)
 
     def save_mask(self):
@@ -965,6 +1028,9 @@ class Controller():
         Returns:
             None
         &#34;&#34;&#34;
+
+        if self._image is None:
+            return
 
         if not self._previewed:
             self._show_saved_preview()
@@ -994,6 +1060,7 @@ class Controller():
 
             tkinter.messagebox.showinfo(&#34;Image Mask Saved!&#34;,
                                         &#34;Image Mask Saved!&#34;)
+            self._previewed = False
 
         except IOError:
             self._logger.error(&#34;Could not save file!&#34;)
@@ -1020,10 +1087,10 @@ class Controller():
         Returns:
             A dictionary containing the user&#39;s preferences.
         &#34;&#34;&#34;
-        if not os.path.exists(PREFERENCES_PATH):
-            return DEFAULT_PREFS
+        if not os.path.exists(self.PREFERENCES_PATH):
+            return self.DEFAULT_PREFS
 
-        with open(PREFERENCES_PATH, &#39;r&#39;) as fin:
+        with open(self.PREFERENCES_PATH, &#39;r&#39;) as fin:
             preferences = json.load(fin)
 
         return preferences
@@ -1039,7 +1106,7 @@ class Controller():
             None
         &#34;&#34;&#34;
 
-        with open(PREFERENCES_PATH, &#39;w&#39;) as fout:
+        with open(self.PREFERENCES_PATH, &#39;w&#39;) as fout:
             json.dump(preferences, fout)
 
     def activate_tool(self, id):
@@ -1566,6 +1633,10 @@ class Controller():
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="friendly_ground_truth.controller.controller.Controller.DEFAULT_PREFS"><code class="name">var <span class="ident">DEFAULT_PREFS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="friendly_ground_truth.controller.controller.Controller.NUM_PATCHES"><code class="name">var <span class="ident">NUM_PATCHES</span></code></dt>
 <dd>
 <div class="desc"></div>
@@ -1777,6 +1848,42 @@ Any activation functionality of the tool is performed.</p></div>
         self._main_window.enable_button(self._undo_id)</code></pre>
 </details>
 </dd>
+<dt id="friendly_ground_truth.controller.controller.Controller.get_preferences_path"><code class="name flex">
+<span>def <span class="ident">get_preferences_path</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the path to the preferences file.</p>
+<h2 id="returns">Returns</h2>
+<p>The path to the preferences file.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_preferences_path(self):
+    &#34;&#34;&#34;
+    Return the path to the preferences file.
+
+
+    Returns:
+        The path to the preferences file.
+    &#34;&#34;&#34;
+    if platform != &#39;win32&#39;:
+
+        home = os.path.expanduser(&#34;~&#34;)
+        data_dir = os.path.join(home, &#34;.friendly_ground_truth/&#34;)
+
+        if not os.path.exists(data_dir):
+            os.mkdir(data_dir)
+
+        preferences_path = os.path.join(data_dir,
+                                        &#34;user_preferences.json&#34;)
+
+    else:
+        preferences_path = &#34;./user_preferences.json&#34;
+
+    return preferences_path</code></pre>
+</details>
+</dd>
 <dt id="friendly_ground_truth.controller.controller.Controller.load_new_image"><code class="name flex">
 <span>def <span class="ident">load_new_image</span></span>(<span>self)</span>
 </code></dt>
@@ -1821,6 +1928,8 @@ Any activation functionality of the tool is performed.</p></div>
 
     try:
         self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
+
+        del self._image
         self._image = Image(file_name, 10, self._update_progressbar)
 
     except FileNotFoundError:
@@ -1829,7 +1938,7 @@ Any activation functionality of the tool is performed.</p></div>
 
     self._current_patch_index = 0
 
-    self._display_current_patch()
+    self._display_current_patch(new=True)
     self._main_window.update_image_indicator(self._image_path)</code></pre>
 </details>
 </dd>
@@ -1852,10 +1961,10 @@ Any activation functionality of the tool is performed.</p></div>
     Returns:
         A dictionary containing the user&#39;s preferences.
     &#34;&#34;&#34;
-    if not os.path.exists(PREFERENCES_PATH):
-        return DEFAULT_PREFS
+    if not os.path.exists(self.PREFERENCES_PATH):
+        return self.DEFAULT_PREFS
 
-    with open(PREFERENCES_PATH, &#39;r&#39;) as fin:
+    with open(self.PREFERENCES_PATH, &#39;r&#39;) as fin:
         preferences = json.load(fin)
 
     return preferences</code></pre>
@@ -1883,6 +1992,9 @@ Any activation functionality of the tool is performed.</p></div>
     Returns:
         None
     &#34;&#34;&#34;
+
+    if self._image is None:
+        return
 
     if not self._previewed:
         self._show_saved_preview()
@@ -1912,6 +2024,7 @@ Any activation functionality of the tool is performed.</p></div>
 
         tkinter.messagebox.showinfo(&#34;Image Mask Saved!&#34;,
                                     &#34;Image Mask Saved!&#34;)
+        self._previewed = False
 
     except IOError:
         self._logger.error(&#34;Could not save file!&#34;)</code></pre>
@@ -1947,7 +2060,7 @@ Any activation functionality of the tool is performed.</p></div>
         None
     &#34;&#34;&#34;
 
-    with open(PREFERENCES_PATH, &#39;w&#39;) as fout:
+    with open(self.PREFERENCES_PATH, &#39;w&#39;) as fout:
         json.dump(preferences, fout)</code></pre>
 </details>
 </dd>
@@ -2007,11 +2120,13 @@ Any activation functionality of the tool is performed.</p></div>
 <h4><code><a title="friendly_ground_truth.controller.controller.Controller" href="#friendly_ground_truth.controller.controller.Controller">Controller</a></code></h4>
 <ul class="">
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.CONTEXT_TRANSPARENCY" href="#friendly_ground_truth.controller.controller.Controller.CONTEXT_TRANSPARENCY">CONTEXT_TRANSPARENCY</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.controller.Controller.DEFAULT_PREFS" href="#friendly_ground_truth.controller.controller.Controller.DEFAULT_PREFS">DEFAULT_PREFS</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.NUM_PATCHES" href="#friendly_ground_truth.controller.controller.Controller.NUM_PATCHES">NUM_PATCHES</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.activate_tool" href="#friendly_ground_truth.controller.controller.Controller.activate_tool">activate_tool</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.adjust_tool" href="#friendly_ground_truth.controller.controller.Controller.adjust_tool">adjust_tool</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.click_event" href="#friendly_ground_truth.controller.controller.Controller.click_event">click_event</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.drag_event" href="#friendly_ground_truth.controller.controller.Controller.drag_event">drag_event</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.controller.Controller.get_preferences_path" href="#friendly_ground_truth.controller.controller.Controller.get_preferences_path">get_preferences_path</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.image_tools" href="#friendly_ground_truth.controller.controller.Controller.image_tools">image_tools</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.load_new_image" href="#friendly_ground_truth.controller.controller.Controller.load_new_image">load_new_image</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.load_preferences" href="#friendly_ground_truth.controller.controller.Controller.load_preferences">load_preferences</a></code></li>

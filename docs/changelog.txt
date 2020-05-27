@@ -3,7 +3,9 @@ This file keeps a record of important changes to the project.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - <>
+## Unreleased - <>
+
+## [v0.9.1] - 2020-05-27
 ### Changed
 - Loading a new image will now work properly and replace the old image on the
 screen.

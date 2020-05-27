@@ -54,8 +54,6 @@ from friendly_ground_truth.view.help_dialogs import (AboutDialog,
                                                      KeyboardShortcutDialog)
 from friendly_ground_truth.view.preferences_window import PreferencesWindow
 
-from sys import platform
-
 from functools import partial
 
 import logging
@@ -292,12 +290,11 @@ class MainWindow(ttk.Frame):
             The canvas&#39;s image will be set to the image.
         &#34;&#34;&#34;
 
-        if new:
-            self._canvas.new_image(img, patch_offset=patch_offset)
-
         if self._canvas is None:
             self.create_canvas(img)
             return
+        elif new:
+            self._canvas.new_image(img, patch_offset=patch_offset)
         else:
             self._canvas.set_image(img)
 
@@ -664,12 +661,16 @@ class MainWindow(ttk.Frame):
             self._controller.adjust_tool(1)
         elif key == &#34;CTRL+minus&#34; or key == &#34;CTRL+-&#34;:
             self._controller.adjust_tool(-1)
+        elif key == &#34;f11&#34;:
+            self._master.attributes(&#39;-fullscreen&#39;, True)
+        elif key == &#34;escape&#34;:
+            self._master.attributes(&#39;-fullscreen&#39;, False)
         else:
             try:
                 tool_id = self._reverse_key_mappings[key]
                 self._on_tool_selected(tool_id)
             except KeyError:
-                self._logger.error(&#34;{} is not a valid key code&#34;.format(key))
+                self._logger.debug(&#34;{} is not a valid key code&#34;.format(key))
 
     def _load_icon_from_string(self, icon_string):
         &#34;&#34;&#34;
@@ -1361,12 +1362,11 @@ Initialize the main window.</p>
             The canvas&#39;s image will be set to the image.
         &#34;&#34;&#34;
 
-        if new:
-            self._canvas.new_image(img, patch_offset=patch_offset)
-
         if self._canvas is None:
             self.create_canvas(img)
             return
+        elif new:
+            self._canvas.new_image(img, patch_offset=patch_offset)
         else:
             self._canvas.set_image(img)
 
@@ -1733,12 +1733,16 @@ Initialize the main window.</p>
             self._controller.adjust_tool(1)
         elif key == &#34;CTRL+minus&#34; or key == &#34;CTRL+-&#34;:
             self._controller.adjust_tool(-1)
+        elif key == &#34;f11&#34;:
+            self._master.attributes(&#39;-fullscreen&#39;, True)
+        elif key == &#34;escape&#34;:
+            self._master.attributes(&#39;-fullscreen&#39;, False)
         else:
             try:
                 tool_id = self._reverse_key_mappings[key]
                 self._on_tool_selected(tool_id)
             except KeyError:
-                self._logger.error(&#34;{} is not a valid key code&#34;.format(key))
+                self._logger.debug(&#34;{} is not a valid key code&#34;.format(key))
 
     def _load_icon_from_string(self, icon_string):
         &#34;&#34;&#34;
@@ -2314,12 +2318,11 @@ Initialize the main window.</p>
         The canvas&#39;s image will be set to the image.
     &#34;&#34;&#34;
 
-    if new:
-        self._canvas.new_image(img, patch_offset=patch_offset)
-
     if self._canvas is None:
         self.create_canvas(img)
         return
+    elif new:
+        self._canvas.new_image(img, patch_offset=patch_offset)
     else:
         self._canvas.set_image(img)</code></pre>
 </details>
