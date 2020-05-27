@@ -3,10 +3,15 @@ This file keeps a record of important changes to the project.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - <>
+## Unreleased - <>
+
+## [v0.9.1] - 2020-05-27
 ### Changed
 - Loading a new image will now work properly and replace the old image on the
 screen.
+- Selecting "Save Image" when there is no image loaded no longer causes
+problems.  Still not sure why anyone would do this though....
+- Can now pan with the right mouse button, even when using the brush tools.
 
 ## [v0.9.0] - 2020-05-25
 ### Added

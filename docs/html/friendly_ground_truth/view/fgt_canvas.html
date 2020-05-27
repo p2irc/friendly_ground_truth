@@ -139,6 +139,11 @@ class FGTCanvas:
         self.canvas.bind(&#39;&lt;ButtonRelease-1&gt;&#39;, self._on_click_release)
         # Move the canvas
         self.canvas.bind(&#39;&lt;B1-Motion&gt;&#39;, self.__move_to)
+        self.canvas.bind(&#39;&lt;B2-Motion&gt;&#39;, self._right_drag)
+        self.canvas.bind(&#39;&lt;ButtonPress-2&gt;&#39;, self._right_click)
+        self.canvas.bind(&#39;&lt;B3-Motion&gt;&#39;, self._right_drag)
+        self.canvas.bind(&#39;&lt;ButtonPress-3&gt;&#39;, self._right_click)
+
         # Zoom for Windows and MacOs
         self.canvas.bind(&#39;&lt;MouseWheel&gt;&#39;, self.__wheel)
         # Zoom for Linux, scroll down
@@ -559,8 +564,6 @@ class FGTCanvas:
         Postconditions:
             The image is drawn on the canvas.
         &#34;&#34;&#34;
-        #if self._cursor == &#34;brush&#34;:
-            #self.draw_brush()
 
         box_image = self.canvas.coords(self.container)  # get image area
         box_canvas = (self.canvas.canvasx(0),  # get visible area of the canvas
@@ -651,6 +654,18 @@ class FGTCanvas:
         if self._cursor != &#34;brush&#34;:
             self.canvas.scan_mark(event.x, event.y)
 
+    def _right_click(self, event):
+        &#34;&#34;&#34;
+        For dragging with right mouse button.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self.canvas.scan_mark(event.x, event.y)
+
     def _on_click_release(self, event):
         &#34;&#34;&#34;
         Called when the left mouse button is released.
@@ -707,6 +722,20 @@ class FGTCanvas:
             self.draw_brush(brush_pos)
 
         self.__show_image()  # zoom tile and show it on the canvas
+
+    def _right_drag(self, event):
+        &#34;&#34;&#34;
+        Drag with the right mouse button.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self.canvas.scan_dragto(event.x, event.y, gain=1)
+
+        self.__show_image()
 
     def outside(self, x, y):
         &#34;&#34;&#34;
@@ -999,6 +1028,11 @@ lower ends as value between 0 and 1).</p></div>
         self.canvas.bind(&#39;&lt;ButtonRelease-1&gt;&#39;, self._on_click_release)
         # Move the canvas
         self.canvas.bind(&#39;&lt;B1-Motion&gt;&#39;, self.__move_to)
+        self.canvas.bind(&#39;&lt;B2-Motion&gt;&#39;, self._right_drag)
+        self.canvas.bind(&#39;&lt;ButtonPress-2&gt;&#39;, self._right_click)
+        self.canvas.bind(&#39;&lt;B3-Motion&gt;&#39;, self._right_drag)
+        self.canvas.bind(&#39;&lt;ButtonPress-3&gt;&#39;, self._right_click)
+
         # Zoom for Windows and MacOs
         self.canvas.bind(&#39;&lt;MouseWheel&gt;&#39;, self.__wheel)
         # Zoom for Linux, scroll down
@@ -1419,8 +1453,6 @@ lower ends as value between 0 and 1).</p></div>
         Postconditions:
             The image is drawn on the canvas.
         &#34;&#34;&#34;
-        #if self._cursor == &#34;brush&#34;:
-            #self.draw_brush()
 
         box_image = self.canvas.coords(self.container)  # get image area
         box_canvas = (self.canvas.canvasx(0),  # get visible area of the canvas
@@ -1511,6 +1543,18 @@ lower ends as value between 0 and 1).</p></div>
         if self._cursor != &#34;brush&#34;:
             self.canvas.scan_mark(event.x, event.y)
 
+    def _right_click(self, event):
+        &#34;&#34;&#34;
+        For dragging with right mouse button.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self.canvas.scan_mark(event.x, event.y)
+
     def _on_click_release(self, event):
         &#34;&#34;&#34;
         Called when the left mouse button is released.
@@ -1567,6 +1611,20 @@ lower ends as value between 0 and 1).</p></div>
             self.draw_brush(brush_pos)
 
         self.__show_image()  # zoom tile and show it on the canvas
+
+    def _right_drag(self, event):
+        &#34;&#34;&#34;
+        Drag with the right mouse button.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        self.canvas.scan_dragto(event.x, event.y, gain=1)
+
+        self.__show_image()
 
     def outside(self, x, y):
         &#34;&#34;&#34;
