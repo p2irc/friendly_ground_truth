@@ -137,7 +137,6 @@ class Controller():
         if platform != 'win32':
 
             home = os.path.expanduser("~")
-
             data_dir = os.path.join(home, ".friendly_ground_truth/")
 
             if not os.path.exists(data_dir):
@@ -203,6 +202,9 @@ class Controller():
             None
         """
 
+        if self._image is None:
+            return
+
         if not self._previewed:
             self._show_saved_preview()
             return
@@ -231,6 +233,7 @@ class Controller():
 
             tkinter.messagebox.showinfo("Image Mask Saved!",
                                         "Image Mask Saved!")
+            self._previewed = False
 
         except IOError:
             self._logger.error("Could not save file!")
