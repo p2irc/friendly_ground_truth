@@ -108,6 +108,11 @@ class FGTCanvas:
         self.canvas.bind('<ButtonRelease-1>', self._on_click_release)
         # Move the canvas
         self.canvas.bind('<B1-Motion>', self.__move_to)
+        self.canvas.bind('<B2-Motion>', self._right_drag)
+        self.canvas.bind('<ButtonPress-2>', self._right_click)
+        self.canvas.bind('<B3-Motion>', self._right_drag)
+        self.canvas.bind('<ButtonPress-3>', self._right_click)
+
         # Zoom for Windows and MacOs
         self.canvas.bind('<MouseWheel>', self.__wheel)
         # Zoom for Linux, scroll down
@@ -528,8 +533,6 @@ class FGTCanvas:
         Postconditions:
             The image is drawn on the canvas.
         """
-        #if self._cursor == "brush":
-            #self.draw_brush()
 
         box_image = self.canvas.coords(self.container)  # get image area
         box_canvas = (self.canvas.canvasx(0),  # get visible area of the canvas
@@ -620,6 +623,18 @@ class FGTCanvas:
         if self._cursor != "brush":
             self.canvas.scan_mark(event.x, event.y)
 
+    def _right_click(self, event):
+        """
+        For dragging with right mouse button.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+        """
+        self.canvas.scan_mark(event.x, event.y)
+
     def _on_click_release(self, event):
         """
         Called when the left mouse button is released.
@@ -676,6 +691,20 @@ class FGTCanvas:
             self.draw_brush(brush_pos)
 
         self.__show_image()  # zoom tile and show it on the canvas
+
+    def _right_drag(self, event):
+        """
+        Drag with the right mouse button.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+        """
+        self.canvas.scan_dragto(event.x, event.y, gain=1)
+
+        self.__show_image()
 
     def outside(self, x, y):
         """
