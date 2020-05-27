@@ -11,7 +11,6 @@ Description: Tests for the main controller.
 
 import pytest
 import os
-import shutil
 
 from friendly_ground_truth.controller.controller import Controller
 
@@ -158,6 +157,44 @@ class TestIo(TestController):
                      "_update_progressbar")
 
         file_dir = os.path.split(valid_rgb_image_path)[0]
+
+        controller.load_new_image()
+
+        assert controller._last_load_dir == file_dir
+        assert controller._image_path == valid_rgb_image_path
+        assert controller._image is not None
+        dcp_mock.assert_called()
+
+    def test_load_new_image_with_load_dir(self, setup, dcp_mock,
+                                          valid_rgb_image_path,
+                                          controller, mocker):
+        """
+        Test loading a new image when there is a previous load directory.
+        A valid file path is returned from the dialog.
+
+        Args:
+            setup: Setup for the tests.
+            dcp_mock: Mock for the display current patch function.
+            valid_rgb_image_path: A path to a valid rgb image.
+            controller: The controller to use.
+            mocker: Mocker interface.
+
+        Test Condition:
+            _last_load_dir is set to the returned directory.
+            _image_path is set to the returned file
+            _image is set to an Image object
+            _display_current_patch is called
+        """
+        mock_file = mocker.patch('tkinter.filedialog.askopenfilename')
+        mock_file.return_value = valid_rgb_image_path
+
+        mocker.patch("friendly_ground_truth.view.main_window.MainWindow"
+                     ".start_progressbar")
+        mocker.patch("friendly_ground_truth.controller.controller.Controller."
+                     "_update_progressbar")
+
+        file_dir = os.path.split(valid_rgb_image_path)[0]
+        controller._last_load_dir = file_dir
 
         controller.load_new_image()
 

@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 screen.
 - Selecting "Save Image" when there is no image loaded no longer causes
 problems.  Still not sure why anyone would do this though....
+- Can now pan with the right mouse button, even when using the brush tools.
 
 ## [v0.9.0] - 2020-05-25
 ### Added
