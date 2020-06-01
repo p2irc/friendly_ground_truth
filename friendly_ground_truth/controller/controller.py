@@ -366,12 +366,13 @@ class Controller():
         if not self._undo_manager.undo_empty:
             self._main_window.enable_button(self._undo_id)
 
-    def drag_event(self, pos):
+    def drag_event(self, pos, drag_id=None):
         """
         A click event in the main window has occured/
 
         Args:
             pos: The position of the event.
+            drag_id: Unique identifier for the drag event.
 
         Returns:
             None
@@ -383,7 +384,7 @@ class Controller():
         # skimage
         pos = round(pos[1]-1), round(pos[0]-1)
 
-        self._current_tool.on_drag(pos)
+        self._current_tool.on_drag(pos, drag_id=drag_id)
 
         if not self._undo_manager.undo_empty:
             self._main_window.enable_button(self._undo_id)

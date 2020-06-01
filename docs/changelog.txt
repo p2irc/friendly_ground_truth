@@ -4,6 +4,9 @@ This file keeps a record of important changes to the project.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased - <>
+### Changed
+- Brush strokes are now detected separately, meaning the undo operation won't
+undo everything you have done anymore.
 
 ## [v0.9.1] - 2020-05-27
 ### Changed

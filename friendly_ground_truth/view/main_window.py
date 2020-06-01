@@ -280,18 +280,18 @@ class MainWindow(ttk.Frame):
         """
         self._controller.click_event(pos)
 
-    def on_canvas_drag(self, pos):
+    def on_canvas_drag(self, pos, drag_id=None):
         """
         Called when the canvas has a drag event.
 
         Args:
             pos: The position of the drag.
-
+            drag_id: Idenitifier for unique drag events.
 
         Returns:
             None
         """
-        self._controller.drag_event(pos)
+        self._controller.drag_event(pos, drag_id=drag_id)
 
     def set_canvas_cursor(self, cursor):
         """

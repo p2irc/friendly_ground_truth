@@ -211,12 +211,13 @@ class FGTTool():
         """
         pass
 
-    def on_drag(self, position):
+    def on_drag(self, position, drag_id=None):
         """
         What happens for click and drag.
 
         Args:
             position: The position of the mouse
+            drag_id: Unique identifier for drag events.
 
         Returns:
             None
@@ -475,6 +476,9 @@ class AddRegionTool(FGTTool):
         self._brush_observers = []
         self._brush_sizer = None
 
+        # To distinguish different brush strokes in the undo stack
+        self._drag_id = 0
+
     @property
     def brush_radius(self):
         return self._brush_radius
@@ -586,18 +590,25 @@ class AddRegionTool(FGTTool):
 
         self._draw(position)
 
-    def on_drag(self, position):
+    def on_drag(self, position, drag_id=None):
         """
         What to do when clicking and dragging
 
         Args:
             position: The position of the mouse.
+            drag_id: Unique identifier for drag events.
 
         Returns:
             None
         """
+
+        tag = "add_region_adjust"
+
+        if drag_id is not None:
+            tag += "_" + str(drag_id)
+
         self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
-                                             "add_region_adjust")
+                                             tag)
 
         t = threading.Thread(target=self._draw, name="draw", args=(position, ))
         t.daemon = True
@@ -753,18 +764,24 @@ class RemoveRegionTool(FGTTool):
 
         self._draw(position)
 
-    def on_drag(self, position):
+    def on_drag(self, position, drag_id=None):
         """
         What to do when clicking and dragging
 
         Args:
             position: The position of the mouse.
+            drag_id: Unique identifier for drag events.
 
         Returns:
             None
         """
+        tag = "remove_region_adjust"
+
+        if drag_id is not None:
+            tag += "_" + str(drag_id)
+
         self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
-                                             "remove_region_adjust")
+                                             tag)
 
         t = threading.Thread(target=self._draw, name="draw", args=(position, ))
         t.daemon = True
