@@ -687,7 +687,7 @@ class FGTCanvas:
                 self._main_window._master.after_cancel(self._drag_id)
 
             self._drag_id = self._main_window._master.\
-                after(100, self._stop_dragging)
+                after(300, self._stop_dragging)
 
             pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
             self._previous_position = pos

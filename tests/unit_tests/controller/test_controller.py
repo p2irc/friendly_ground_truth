@@ -273,6 +273,25 @@ class TestIo(TestController):
 
         assert not dcp_mock.called
 
+    def test_save_mask_none_image(self, setup, controller, mocker):
+        """
+        Test saving the mask when self._image is None.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller to test.
+            mocker: Mocker interface.
+
+        Test Condition:
+            _mask_saved is False
+        """
+
+        controller._image = None
+
+        controller.save_mask()
+
+        assert controller._mask_saved is False
+
 
 class TestInteractions(TestController):
     """

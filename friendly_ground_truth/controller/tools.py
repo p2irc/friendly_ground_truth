@@ -630,6 +630,20 @@ class AddRegionTool(FGTTool):
         self.patch.add_region(position, self.brush_radius)
         self._notify_observers()
 
+    def on_activate(self, current_patch_num):
+        """
+        Called when the tool is activated.
+
+        Args:
+            current_patch_num: The current patch index.
+
+        Returns:
+            None
+        """
+
+        for ob in self._brush_observers:
+            ob(self._brush_radius)
+
 
 class RemoveRegionTool(FGTTool):
     """
@@ -803,6 +817,21 @@ class RemoveRegionTool(FGTTool):
 
         self.patch.remove_region(position, self.brush_radius)
         self._notify_observers()
+
+    def on_activate(self, current_patch_num):
+        """
+        Called when the tool is activated.
+
+        Args:
+            current_patch_num: The current patch index.
+
+
+        Returns:
+            None
+        """
+
+        for ob in self._brush_observers:
+            ob(self._brush_radius)
 
 
 class NoRootTool(FGTTool):
