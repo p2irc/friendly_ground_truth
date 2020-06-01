@@ -203,6 +203,39 @@ class TestIo(TestController):
         assert controller._image is not None
         dcp_mock.assert_called()
 
+    def test_load_new_image_none_file(self, setup, dcp_mock,
+                                      valid_rgb_image_path,
+                                      controller, mocker):
+        """
+        Test loading a new image when the user cancels and no image path is
+        returned.
+
+        Args:
+            setup: Setup for testing.
+            dcp_mock: mock for the display_display_current_patch function.
+            valid_rgb_image_path: A path to a valid RGB image.
+            controller: The controller object to test with.
+            mocker: The mocker interface.
+
+        Test Condition:
+            _image_path is none
+            _image is none
+            _display_current_patch is not called
+        """
+        mock_file = mocker.patch('tkinter.filedialog.askopenfilename')
+        mock_file.return_value = None
+
+        mocker.patch("friendly_ground_truth.view.main_window.MainWindow"
+                     ".start_progressbar")
+        mocker.patch("friendly_ground_truth.controller.controller.Controller."
+                     "_update_progressbar")
+
+        controller.load_new_image()
+
+        assert controller._image_path is None
+        assert controller._image is None
+        assert not dcp_mock.called
+
 
 class TestInteractions(TestController):
     """

@@ -60,6 +60,8 @@ class FGTCanvas:
         self._coord_scale = 1
         self._dragged = False
         self._prev_offset = (0, 0)
+        self._drag_id = ''
+        self._unique_drag_id = 0
 
         self._style = style
 
@@ -677,13 +679,22 @@ class FGTCanvas:
             self.canvas.scan_dragto(event.x, event.y, gain=1)
 
         if self._cursor == "brush":
+
+            if self._drag_id == '':
+                self._logger.debug("Drag start")
+            else:
+                self._main_window._master.after_cancel(self._drag_id)
+
+            self._drag_id = self._main_window._master.\
+                after(100, self._stop_dragging)
+
             pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
             self._previous_position = pos
             container_coords = self.canvas.coords(self.container)
             pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
             pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
 
-            self._main_window.on_canvas_drag(pos)
+            self._main_window.on_canvas_drag(pos, drag_id=self._unique_drag_id)
 
             brush_pos = (self.canvas.canvasx(event.x),
                          self.canvas.canvasy(event.y))
@@ -691,6 +702,10 @@ class FGTCanvas:
             self.draw_brush(brush_pos)
 
         self.__show_image()  # zoom tile and show it on the canvas
+
+    def _stop_dragging(self):
+        self._drag_id = ''
+        self._unique_drag_id += 1
 
     def _right_drag(self, event):
         """
