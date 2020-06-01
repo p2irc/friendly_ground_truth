@@ -286,8 +286,9 @@ class FGTCanvas:
 
         self.canvas.scan_mark(int(anchorx), int(anchory))
         self.canvas.scan_dragto(0, 0, gain=1)
-
         self.canvas.focus_set()
+
+        self.__show_image()
 
     def _on_motion(self, event):
         """

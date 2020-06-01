@@ -180,12 +180,13 @@ class Controller():
 
         try:
             self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
-
+            print("Here")
             del self._image
             self._image = Image(file_name, 10, self._update_progressbar)
 
         except FileNotFoundError:
             self._logger.exception("There was a problem loading the image.")
+            print("ERROR")
             return
 
         self._current_patch_index = 0
