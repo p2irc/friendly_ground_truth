@@ -396,12 +396,13 @@ class Controller():
         if not self._undo_manager.undo_empty:
             self._main_window.enable_button(self._undo_id)
 
-    def drag_event(self, pos):
+    def drag_event(self, pos, drag_id=None):
         &#34;&#34;&#34;
         A click event in the main window has occured/
 
         Args:
             pos: The position of the event.
+            drag_id: Unique identifier for the drag event.
 
         Returns:
             None
@@ -413,7 +414,7 @@ class Controller():
         # skimage
         pos = round(pos[1]-1), round(pos[0]-1)
 
-        self._current_tool.on_drag(pos)
+        self._current_tool.on_drag(pos, drag_id=drag_id)
 
         if not self._undo_manager.undo_empty:
             self._main_window.enable_button(self._undo_id)
@@ -1193,12 +1194,13 @@ class Controller():
         if not self._undo_manager.undo_empty:
             self._main_window.enable_button(self._undo_id)
 
-    def drag_event(self, pos):
+    def drag_event(self, pos, drag_id=None):
         &#34;&#34;&#34;
         A click event in the main window has occured/
 
         Args:
             pos: The position of the event.
+            drag_id: Unique identifier for the drag event.
 
         Returns:
             None
@@ -1210,7 +1212,7 @@ class Controller():
         # skimage
         pos = round(pos[1]-1), round(pos[0]-1)
 
-        self._current_tool.on_drag(pos)
+        self._current_tool.on_drag(pos, drag_id=drag_id)
 
         if not self._undo_manager.undo_empty:
             self._main_window.enable_button(self._undo_id)
@@ -1807,7 +1809,7 @@ Any activation functionality of the tool is performed.</p></div>
 </details>
 </dd>
 <dt id="friendly_ground_truth.controller.controller.Controller.drag_event"><code class="name flex">
-<span>def <span class="ident">drag_event</span></span>(<span>self, pos)</span>
+<span>def <span class="ident">drag_event</span></span>(<span>self, pos, drag_id=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A click event in the main window has occured/</p>
@@ -1815,6 +1817,8 @@ Any activation functionality of the tool is performed.</p></div>
 <dl>
 <dt><strong><code>pos</code></strong></dt>
 <dd>The position of the event.</dd>
+<dt><strong><code>drag_id</code></strong></dt>
+<dd>Unique identifier for the drag event.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -1825,12 +1829,13 @@ Any activation functionality of the tool is performed.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def drag_event(self, pos):
+<pre><code class="python">def drag_event(self, pos, drag_id=None):
     &#34;&#34;&#34;
     A click event in the main window has occured/
 
     Args:
         pos: The position of the event.
+        drag_id: Unique identifier for the drag event.
 
     Returns:
         None
@@ -1842,7 +1847,7 @@ Any activation functionality of the tool is performed.</p></div>
     # skimage
     pos = round(pos[1]-1), round(pos[0]-1)
 
-    self._current_tool.on_drag(pos)
+    self._current_tool.on_drag(pos, drag_id=drag_id)
 
     if not self._undo_manager.undo_empty:
         self._main_window.enable_button(self._undo_id)</code></pre>

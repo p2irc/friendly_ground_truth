@@ -91,6 +91,8 @@ class FGTCanvas:
         self._coord_scale = 1
         self._dragged = False
         self._prev_offset = (0, 0)
+        self._drag_id = &#39;&#39;
+        self._unique_drag_id = 0
 
         self._style = style
 
@@ -315,8 +317,9 @@ class FGTCanvas:
 
         self.canvas.scan_mark(int(anchorx), int(anchory))
         self.canvas.scan_dragto(0, 0, gain=1)
-
         self.canvas.focus_set()
+
+        self.__show_image()
 
     def _on_motion(self, event):
         &#34;&#34;&#34;
@@ -708,13 +711,22 @@ class FGTCanvas:
             self.canvas.scan_dragto(event.x, event.y, gain=1)
 
         if self._cursor == &#34;brush&#34;:
+
+            if self._drag_id == &#39;&#39;:
+                self._logger.debug(&#34;Drag start&#34;)
+            else:
+                self._main_window._master.after_cancel(self._drag_id)
+
+            self._drag_id = self._main_window._master.\
+                after(300, self._stop_dragging)
+
             pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
             self._previous_position = pos
             container_coords = self.canvas.coords(self.container)
             pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
             pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
 
-            self._main_window.on_canvas_drag(pos)
+            self._main_window.on_canvas_drag(pos, drag_id=self._unique_drag_id)
 
             brush_pos = (self.canvas.canvasx(event.x),
                          self.canvas.canvasy(event.y))
@@ -722,6 +734,10 @@ class FGTCanvas:
             self.draw_brush(brush_pos)
 
         self.__show_image()  # zoom tile and show it on the canvas
+
+    def _stop_dragging(self):
+        self._drag_id = &#39;&#39;
+        self._unique_drag_id += 1
 
     def _right_drag(self, event):
         &#34;&#34;&#34;
@@ -980,6 +996,8 @@ lower ends as value between 0 and 1).</p></div>
         self._coord_scale = 1
         self._dragged = False
         self._prev_offset = (0, 0)
+        self._drag_id = &#39;&#39;
+        self._unique_drag_id = 0
 
         self._style = style
 
@@ -1204,8 +1222,9 @@ lower ends as value between 0 and 1).</p></div>
 
         self.canvas.scan_mark(int(anchorx), int(anchory))
         self.canvas.scan_dragto(0, 0, gain=1)
-
         self.canvas.focus_set()
+
+        self.__show_image()
 
     def _on_motion(self, event):
         &#34;&#34;&#34;
@@ -1597,13 +1616,22 @@ lower ends as value between 0 and 1).</p></div>
             self.canvas.scan_dragto(event.x, event.y, gain=1)
 
         if self._cursor == &#34;brush&#34;:
+
+            if self._drag_id == &#39;&#39;:
+                self._logger.debug(&#34;Drag start&#34;)
+            else:
+                self._main_window._master.after_cancel(self._drag_id)
+
+            self._drag_id = self._main_window._master.\
+                after(300, self._stop_dragging)
+
             pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
             self._previous_position = pos
             container_coords = self.canvas.coords(self.container)
             pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
             pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
 
-            self._main_window.on_canvas_drag(pos)
+            self._main_window.on_canvas_drag(pos, drag_id=self._unique_drag_id)
 
             brush_pos = (self.canvas.canvasx(event.x),
                          self.canvas.canvasy(event.y))
@@ -1611,6 +1639,10 @@ lower ends as value between 0 and 1).</p></div>
             self.draw_brush(brush_pos)
 
         self.__show_image()  # zoom tile and show it on the canvas
+
+    def _stop_dragging(self):
+        self._drag_id = &#39;&#39;
+        self._unique_drag_id += 1
 
     def _right_drag(self, event):
         &#34;&#34;&#34;
@@ -2021,8 +2053,9 @@ The default value is None.</dd>
 
     self.canvas.scan_mark(int(anchorx), int(anchory))
     self.canvas.scan_dragto(0, 0, gain=1)
+    self.canvas.focus_set()
 
-    self.canvas.focus_set()</code></pre>
+    self.__show_image()</code></pre>
 </details>
 </dd>
 <dt id="friendly_ground_truth.view.fgt_canvas.FGTCanvas.outside"><code class="name flex">
