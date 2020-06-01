@@ -241,12 +241,13 @@ class FGTTool():
         &#34;&#34;&#34;
         pass
 
-    def on_drag(self, position):
+    def on_drag(self, position, drag_id=None):
         &#34;&#34;&#34;
         What happens for click and drag.
 
         Args:
             position: The position of the mouse
+            drag_id: Unique identifier for drag events.
 
         Returns:
             None
@@ -505,6 +506,9 @@ class AddRegionTool(FGTTool):
         self._brush_observers = []
         self._brush_sizer = None
 
+        # To distinguish different brush strokes in the undo stack
+        self._drag_id = 0
+
     @property
     def brush_radius(self):
         return self._brush_radius
@@ -616,18 +620,25 @@ class AddRegionTool(FGTTool):
 
         self._draw(position)
 
-    def on_drag(self, position):
+    def on_drag(self, position, drag_id=None):
         &#34;&#34;&#34;
         What to do when clicking and dragging
 
         Args:
             position: The position of the mouse.
+            drag_id: Unique identifier for drag events.
 
         Returns:
             None
         &#34;&#34;&#34;
+
+        tag = &#34;add_region_adjust&#34;
+
+        if drag_id is not None:
+            tag += &#34;_&#34; + str(drag_id)
+
         self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
-                                             &#34;add_region_adjust&#34;)
+                                             tag)
 
         t = threading.Thread(target=self._draw, name=&#34;draw&#34;, args=(position, ))
         t.daemon = True
@@ -648,6 +659,20 @@ class AddRegionTool(FGTTool):
         &#34;&#34;&#34;
         self.patch.add_region(position, self.brush_radius)
         self._notify_observers()
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        Called when the tool is activated.
+
+        Args:
+            current_patch_num: The current patch index.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        for ob in self._brush_observers:
+            ob(self._brush_radius)
 
 
 class RemoveRegionTool(FGTTool):
@@ -783,18 +808,24 @@ class RemoveRegionTool(FGTTool):
 
         self._draw(position)
 
-    def on_drag(self, position):
+    def on_drag(self, position, drag_id=None):
         &#34;&#34;&#34;
         What to do when clicking and dragging
 
         Args:
             position: The position of the mouse.
+            drag_id: Unique identifier for drag events.
 
         Returns:
             None
         &#34;&#34;&#34;
+        tag = &#34;remove_region_adjust&#34;
+
+        if drag_id is not None:
+            tag += &#34;_&#34; + str(drag_id)
+
         self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
-                                             &#34;remove_region_adjust&#34;)
+                                             tag)
 
         t = threading.Thread(target=self._draw, name=&#34;draw&#34;, args=(position, ))
         t.daemon = True
@@ -816,6 +847,21 @@ class RemoveRegionTool(FGTTool):
 
         self.patch.remove_region(position, self.brush_radius)
         self._notify_observers()
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        Called when the tool is activated.
+
+        Args:
+            current_patch_num: The current patch index.
+
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        for ob in self._brush_observers:
+            ob(self._brush_radius)
 
 
 class NoRootTool(FGTTool):
@@ -1537,6 +1583,9 @@ identifies what group it is a part of.</dd>
         self._brush_observers = []
         self._brush_sizer = None
 
+        # To distinguish different brush strokes in the undo stack
+        self._drag_id = 0
+
     @property
     def brush_radius(self):
         return self._brush_radius
@@ -1648,18 +1697,25 @@ identifies what group it is a part of.</dd>
 
         self._draw(position)
 
-    def on_drag(self, position):
+    def on_drag(self, position, drag_id=None):
         &#34;&#34;&#34;
         What to do when clicking and dragging
 
         Args:
             position: The position of the mouse.
+            drag_id: Unique identifier for drag events.
 
         Returns:
             None
         &#34;&#34;&#34;
+
+        tag = &#34;add_region_adjust&#34;
+
+        if drag_id is not None:
+            tag += &#34;_&#34; + str(drag_id)
+
         self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
-                                             &#34;add_region_adjust&#34;)
+                                             tag)
 
         t = threading.Thread(target=self._draw, name=&#34;draw&#34;, args=(position, ))
         t.daemon = True
@@ -1679,7 +1735,21 @@ identifies what group it is a part of.</dd>
             The mask at the given position will be filled in.
         &#34;&#34;&#34;
         self.patch.add_region(position, self.brush_radius)
-        self._notify_observers()</code></pre>
+        self._notify_observers()
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        Called when the tool is activated.
+
+        Args:
+            current_patch_num: The current patch index.
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        for ob in self._brush_observers:
+            ob(self._brush_radius)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1790,6 +1860,40 @@ def brush_radius(self):
     return self._info_widget</code></pre>
 </details>
 </dd>
+<dt id="friendly_ground_truth.controller.tools.AddRegionTool.on_activate"><code class="name flex">
+<span>def <span class="ident">on_activate</span></span>(<span>self, current_patch_num)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Called when the tool is activated.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>current_patch_num</code></strong></dt>
+<dd>The current patch index.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_activate(self, current_patch_num):
+    &#34;&#34;&#34;
+    Called when the tool is activated.
+
+    Args:
+        current_patch_num: The current patch index.
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+
+    for ob in self._brush_observers:
+        ob(self._brush_radius)</code></pre>
+</details>
+</dd>
 <dt id="friendly_ground_truth.controller.tools.AddRegionTool.on_adjust"><code class="name flex">
 <span>def <span class="ident">on_adjust</span></span>(<span>self, direction)</span>
 </code></dt>
@@ -1861,7 +1965,7 @@ def brush_radius(self):
 </details>
 </dd>
 <dt id="friendly_ground_truth.controller.tools.AddRegionTool.on_drag"><code class="name flex">
-<span>def <span class="ident">on_drag</span></span>(<span>self, position)</span>
+<span>def <span class="ident">on_drag</span></span>(<span>self, position, drag_id=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>What to do when clicking and dragging</p>
@@ -1869,6 +1973,8 @@ def brush_radius(self):
 <dl>
 <dt><strong><code>position</code></strong></dt>
 <dd>The position of the mouse.</dd>
+<dt><strong><code>drag_id</code></strong></dt>
+<dd>Unique identifier for drag events.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -1879,18 +1985,25 @@ def brush_radius(self):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def on_drag(self, position):
+<pre><code class="python">def on_drag(self, position, drag_id=None):
     &#34;&#34;&#34;
     What to do when clicking and dragging
 
     Args:
         position: The position of the mouse.
+        drag_id: Unique identifier for drag events.
 
     Returns:
         None
     &#34;&#34;&#34;
+
+    tag = &#34;add_region_adjust&#34;
+
+    if drag_id is not None:
+        tag += &#34;_&#34; + str(drag_id)
+
     self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
-                                         &#34;add_region_adjust&#34;)
+                                         tag)
 
     t = threading.Thread(target=self._draw, name=&#34;draw&#34;, args=(position, ))
     t.daemon = True
@@ -1905,7 +2018,6 @@ def brush_radius(self):
 <li><code><a title="friendly_ground_truth.controller.tools.FGTTool.bind_to" href="#friendly_ground_truth.controller.tools.FGTTool.bind_to">bind_to</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget">destroy_info_widget</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.FGTTool.lock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.lock_undos">lock_undos</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_activate" href="#friendly_ground_truth.controller.tools.FGTTool.on_activate">on_activate</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.FGTTool.unlock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.unlock_undos">unlock_undos</a></code></li>
 </ul>
 </li>
@@ -2161,12 +2273,13 @@ identifies what group it is a part of.</dd>
         &#34;&#34;&#34;
         pass
 
-    def on_drag(self, position):
+    def on_drag(self, position, drag_id=None):
         &#34;&#34;&#34;
         What happens for click and drag.
 
         Args:
             position: The position of the mouse
+            drag_id: Unique identifier for drag events.
 
         Returns:
             None
@@ -2602,7 +2715,7 @@ list</dd>
 </details>
 </dd>
 <dt id="friendly_ground_truth.controller.tools.FGTTool.on_drag"><code class="name flex">
-<span>def <span class="ident">on_drag</span></span>(<span>self, position)</span>
+<span>def <span class="ident">on_drag</span></span>(<span>self, position, drag_id=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>What happens for click and drag.</p>
@@ -2610,6 +2723,8 @@ list</dd>
 <dl>
 <dt><strong><code>position</code></strong></dt>
 <dd>The position of the mouse</dd>
+<dt><strong><code>drag_id</code></strong></dt>
+<dd>Unique identifier for drag events.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -2620,12 +2735,13 @@ list</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def on_drag(self, position):
+<pre><code class="python">def on_drag(self, position, drag_id=None):
     &#34;&#34;&#34;
     What happens for click and drag.
 
     Args:
         position: The position of the mouse
+        drag_id: Unique identifier for drag events.
 
     Returns:
         None
@@ -4243,18 +4359,24 @@ identifies what group it is a part of.</dd>
 
         self._draw(position)
 
-    def on_drag(self, position):
+    def on_drag(self, position, drag_id=None):
         &#34;&#34;&#34;
         What to do when clicking and dragging
 
         Args:
             position: The position of the mouse.
+            drag_id: Unique identifier for drag events.
 
         Returns:
             None
         &#34;&#34;&#34;
+        tag = &#34;remove_region_adjust&#34;
+
+        if drag_id is not None:
+            tag += &#34;_&#34; + str(drag_id)
+
         self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
-                                             &#34;remove_region_adjust&#34;)
+                                             tag)
 
         t = threading.Thread(target=self._draw, name=&#34;draw&#34;, args=(position, ))
         t.daemon = True
@@ -4275,7 +4397,22 @@ identifies what group it is a part of.</dd>
         &#34;&#34;&#34;
 
         self.patch.remove_region(position, self.brush_radius)
-        self._notify_observers()</code></pre>
+        self._notify_observers()
+
+    def on_activate(self, current_patch_num):
+        &#34;&#34;&#34;
+        Called when the tool is activated.
+
+        Args:
+            current_patch_num: The current patch index.
+
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        for ob in self._brush_observers:
+            ob(self._brush_radius)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -4386,6 +4523,41 @@ def brush_radius(self):
     return self._info_widget</code></pre>
 </details>
 </dd>
+<dt id="friendly_ground_truth.controller.tools.RemoveRegionTool.on_activate"><code class="name flex">
+<span>def <span class="ident">on_activate</span></span>(<span>self, current_patch_num)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Called when the tool is activated.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>current_patch_num</code></strong></dt>
+<dd>The current patch index.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def on_activate(self, current_patch_num):
+    &#34;&#34;&#34;
+    Called when the tool is activated.
+
+    Args:
+        current_patch_num: The current patch index.
+
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+
+    for ob in self._brush_observers:
+        ob(self._brush_radius)</code></pre>
+</details>
+</dd>
 <dt id="friendly_ground_truth.controller.tools.RemoveRegionTool.on_adjust"><code class="name flex">
 <span>def <span class="ident">on_adjust</span></span>(<span>self, direction)</span>
 </code></dt>
@@ -4457,7 +4629,7 @@ def brush_radius(self):
 </details>
 </dd>
 <dt id="friendly_ground_truth.controller.tools.RemoveRegionTool.on_drag"><code class="name flex">
-<span>def <span class="ident">on_drag</span></span>(<span>self, position)</span>
+<span>def <span class="ident">on_drag</span></span>(<span>self, position, drag_id=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>What to do when clicking and dragging</p>
@@ -4465,6 +4637,8 @@ def brush_radius(self):
 <dl>
 <dt><strong><code>position</code></strong></dt>
 <dd>The position of the mouse.</dd>
+<dt><strong><code>drag_id</code></strong></dt>
+<dd>Unique identifier for drag events.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -4475,18 +4649,24 @@ def brush_radius(self):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def on_drag(self, position):
+<pre><code class="python">def on_drag(self, position, drag_id=None):
     &#34;&#34;&#34;
     What to do when clicking and dragging
 
     Args:
         position: The position of the mouse.
+        drag_id: Unique identifier for drag events.
 
     Returns:
         None
     &#34;&#34;&#34;
+    tag = &#34;remove_region_adjust&#34;
+
+    if drag_id is not None:
+        tag += &#34;_&#34; + str(drag_id)
+
     self._undo_manager.add_to_undo_stack(copy.deepcopy(self.patch),
-                                         &#34;remove_region_adjust&#34;)
+                                         tag)
 
     t = threading.Thread(target=self._draw, name=&#34;draw&#34;, args=(position, ))
     t.daemon = True
@@ -4501,7 +4681,6 @@ def brush_radius(self):
 <li><code><a title="friendly_ground_truth.controller.tools.FGTTool.bind_to" href="#friendly_ground_truth.controller.tools.FGTTool.bind_to">bind_to</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget" href="#friendly_ground_truth.controller.tools.FGTTool.destroy_info_widget">destroy_info_widget</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.FGTTool.lock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.lock_undos">lock_undos</a></code></li>
-<li><code><a title="friendly_ground_truth.controller.tools.FGTTool.on_activate" href="#friendly_ground_truth.controller.tools.FGTTool.on_activate">on_activate</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.FGTTool.unlock_undos" href="#friendly_ground_truth.controller.tools.FGTTool.unlock_undos">unlock_undos</a></code></li>
 </ul>
 </li>
@@ -5073,6 +5252,7 @@ to call when the undo action is taken.</dd>
 <li><code><a title="friendly_ground_truth.controller.tools.AddRegionTool.bind_brush" href="#friendly_ground_truth.controller.tools.AddRegionTool.bind_brush">bind_brush</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.AddRegionTool.brush_radius" href="#friendly_ground_truth.controller.tools.AddRegionTool.brush_radius">brush_radius</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.AddRegionTool.get_info_widget" href="#friendly_ground_truth.controller.tools.AddRegionTool.get_info_widget">get_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.AddRegionTool.on_activate" href="#friendly_ground_truth.controller.tools.AddRegionTool.on_activate">on_activate</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.AddRegionTool.on_adjust" href="#friendly_ground_truth.controller.tools.AddRegionTool.on_adjust">on_adjust</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.AddRegionTool.on_click" href="#friendly_ground_truth.controller.tools.AddRegionTool.on_click">on_click</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.AddRegionTool.on_drag" href="#friendly_ground_truth.controller.tools.AddRegionTool.on_drag">on_drag</a></code></li>
@@ -5155,6 +5335,7 @@ to call when the undo action is taken.</dd>
 <li><code><a title="friendly_ground_truth.controller.tools.RemoveRegionTool.bind_brush" href="#friendly_ground_truth.controller.tools.RemoveRegionTool.bind_brush">bind_brush</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.RemoveRegionTool.brush_radius" href="#friendly_ground_truth.controller.tools.RemoveRegionTool.brush_radius">brush_radius</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.RemoveRegionTool.get_info_widget" href="#friendly_ground_truth.controller.tools.RemoveRegionTool.get_info_widget">get_info_widget</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.tools.RemoveRegionTool.on_activate" href="#friendly_ground_truth.controller.tools.RemoveRegionTool.on_activate">on_activate</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.RemoveRegionTool.on_adjust" href="#friendly_ground_truth.controller.tools.RemoveRegionTool.on_adjust">on_adjust</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.RemoveRegionTool.on_click" href="#friendly_ground_truth.controller.tools.RemoveRegionTool.on_click">on_click</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.tools.RemoveRegionTool.on_drag" href="#friendly_ground_truth.controller.tools.RemoveRegionTool.on_drag">on_drag</a></code></li>

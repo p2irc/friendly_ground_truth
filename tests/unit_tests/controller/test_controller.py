@@ -203,6 +203,95 @@ class TestIo(TestController):
         assert controller._image is not None
         dcp_mock.assert_called()
 
+    def test_load_new_image_none_file(self, setup, dcp_mock,
+                                      valid_rgb_image_path,
+                                      controller, mocker):
+        """
+        Test loading a new image when the user cancels and no image path is
+        returned.
+
+        Args:
+            setup: Setup for testing.
+            dcp_mock: mock for the display_display_current_patch function.
+            valid_rgb_image_path: A path to a valid RGB image.
+            controller: The controller object to test with.
+            mocker: The mocker interface.
+
+        Test Condition:
+            _image_path is none
+            _image is none
+            _display_current_patch is not called
+        """
+        mock_file = mocker.patch('tkinter.filedialog.askopenfilename')
+        mock_file.return_value = None
+
+        mocker.patch("friendly_ground_truth.view.main_window.MainWindow"
+                     ".start_progressbar")
+        mocker.patch("friendly_ground_truth.controller.controller.Controller."
+                     "_update_progressbar")
+
+        controller.load_new_image()
+
+        assert controller._image_path is None
+        assert controller._image is None
+        assert not dcp_mock.called
+
+    def test_load_new_image_not_found(self, setup, dcp_mock,
+                                      valid_rgb_image_path,
+                                      controller, mocker):
+        """
+        Test loading an image when a non-existant file is chosen.
+
+        Args:
+            setup: Setup for testing.
+            dcp_mock: Mock for the display_current_patch function.
+            valid_rgb_image_path: Path to a valid RGB image.
+            controller: The controller to test with.
+            mocker: Mocker interface.
+
+        Test Condition:
+            dcp_mock is not called.
+        """
+        mock_file = mocker.patch('tkinter.filedialog.askopenfilename')
+        mock_file.return_value = valid_rgb_image_path
+
+        def raise_FileException(x):
+            raise FileNotFoundError
+
+        mocker.patch("friendly_ground_truth.view.main_window"
+                     ".MainWindow.start_progressbar",
+                     side_effect=raise_FileException)
+
+        mocker.patch("friendly_ground_truth.controller.controller.Controller."
+                     "_update_progressbar")
+
+        controller._main_window = MagicMock()
+        controller._main_window.\
+            start_progressbar.side_effect = raise_FileException
+
+        controller.load_new_image()
+
+        assert not dcp_mock.called
+
+    def test_save_mask_none_image(self, setup, controller, mocker):
+        """
+        Test saving the mask when self._image is None.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller to test.
+            mocker: Mocker interface.
+
+        Test Condition:
+            _mask_saved is False
+        """
+
+        controller._image = None
+
+        controller.save_mask()
+
+        assert controller._mask_saved is False
+
 
 class TestInteractions(TestController):
     """

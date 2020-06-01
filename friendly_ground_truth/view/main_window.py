@@ -136,8 +136,6 @@ class MainWindow(ttk.Frame):
         self.bind_all("<Button-4>", self._on_mousewheel)
 
         self._info_panel = InfoPanel(self.master)
-        #self._info_panel.config(borderwidth=5)
-        #self._info_panel.config(relief='ridge')
         self._info_panel.config(style="InfoPanel.TFrame")
 
         self._info_panel.grid(row=2, column=0, sticky='ew')
@@ -280,18 +278,18 @@ class MainWindow(ttk.Frame):
         """
         self._controller.click_event(pos)
 
-    def on_canvas_drag(self, pos):
+    def on_canvas_drag(self, pos, drag_id=None):
         """
         Called when the canvas has a drag event.
 
         Args:
             pos: The position of the drag.
-
+            drag_id: Idenitifier for unique drag events.
 
         Returns:
             None
         """
-        self._controller.drag_event(pos)
+        self._controller.drag_event(pos, drag_id=drag_id)
 
     def set_canvas_cursor(self, cursor):
         """
@@ -449,7 +447,6 @@ class MainWindow(ttk.Frame):
         """
 
         self._filemenu = tk.Menu(self._menubar, tearoff=0)
-
 
         self._set_filemenu_theme()
 
@@ -686,7 +683,6 @@ class MainWindow(ttk.Frame):
         """
         self._controller.save_mask()
 
-
     def _on_preferences(self):
         """
         Called when the preferences menu option is chosen.
@@ -767,6 +763,10 @@ class MainWindow(ttk.Frame):
         Postconditions:
             The toolbar button matching the given id will be activated.
         """
+
+        if not self._controller.image_tools[tool_id].persistant:
+            return
+
         for id, button in self._toolbar_buttons.items():
             if id == tool_id and self._controller.image_tools[id].persistant:
                 button.state(['disabled'])
