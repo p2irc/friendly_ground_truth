@@ -483,6 +483,8 @@ class TestSettings(TestController):
 
         mock_dump = mocker.patch('json.dump')
 
+        controller.PREFERENCES_PATH = "./tests/data/user_preferences.json"
+
         controller.save_preferences({"theme": "Uncooked Pasta"})
 
         mock_dump.assert_called()
