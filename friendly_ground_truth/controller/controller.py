@@ -221,6 +221,8 @@ class Controller():
         if dir_path is None:
             return
 
+        self._last_save_dir = dir_path
+
         image_name = self._get_image_name_from_path(self._image_path)
         # labels_name = self._get_landmark_name_from_path(self._image_path)
 
@@ -233,10 +235,10 @@ class Controller():
 
             tkinter.messagebox.showinfo("Image Mask Saved!",
                                         "Image Mask Saved!")
-            self._previewed = False
-
         except IOError:
             self._logger.error("Could not save file!")
+
+        self._previewed = False
 
     def set_preferences(self, preferences):
         """

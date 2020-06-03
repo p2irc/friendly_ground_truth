@@ -292,9 +292,197 @@ class TestIo(TestController):
 
         assert controller._mask_saved is False
 
+    def test_save_mask_not_previewed(self, setup, controller, mocker):
+        """
+        Test saving the mask if it has not been previewed yet.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller to test.
+            mocker: The mocker interface.
+
+        Test Condition:
+            _show_saved_preview() is called
+            _mask_saved is False
+        """
+        controller._image = MagicMock()
+        controller._previewed = False
+
+        preview_mock = mocker.patch.object(controller, '_show_saved_preview')
+
+        controller.save_mask()
+
+        preview_mock.assert_called()
+        assert controller._mask_saved is False
+
+    def test_save_mask_no_last_dir(self, setup, controller, mocker,
+                                   valid_rgb_image_path):
+        """
+        Test saving the mask when there is no previous save directory.
+
+        Args:
+            setup: Setup for the tests.
+            controller: The controller to test.
+            mocker: Mocker interface.
+            valid_rgb_image_path: A path to an RGB image.
+
+        Test Condition:
+            _last_save_dir is set to the directory returned by the dialog.
+            _image.export_mask() is called.
+        """
+
+        mock_file = mocker.patch('tkinter.filedialog.askdirectory')
+        mock_file.return_value = os.path.split(valid_rgb_image_path)[0]
+
+        controller._image_path = valid_rgb_image_path
+        controller._image = MagicMock()
+        controller._previewed = True
+
+        controller._last_save_dir = None
+
+        controller.save_mask()
+
+        assert controller._last_save_dir == mock_file.return_value
+        controller._image.export_mask.assert_called()
+
+    def test_save_mask_last_dir(self, setup, controller, mocker,
+                                valid_rgb_image_path):
+        """
+        Test saving the mask when there is a previously selected save
+        directory.
+
+        Args:
+            setup: Setup for the tests
+            controller: The controller to test.
+            mocker: The mocker interface
+            valid_rgb_image_path: A path to a valid RGB image.
+
+        Test Condition:
+            _image.export_mask() is called
+            _last_save_dir is set to the directory returned by the dialog.
+        """
+
+        mock_file = mocker.patch('tkinter.filedialog.askdirectory')
+        mock_file.return_value = os.path.split(valid_rgb_image_path)[0]
+
+        controller._image_path = valid_rgb_image_path
+        controller._image = MagicMock()
+        controller._previewed = True
+
+        controller._last_save_dir = mock_file.return_value
+
+        controller.save_mask()
+
+        assert controller._last_save_dir == mock_file.return_value
+        controller._image.export_mask.assert_called()
+
+    def test_save_mask_none_dir(self, setup, controller, mocker):
+        """
+        Test saving the mask when the user does not select a directory.
+
+        Args:
+            setup: Setup for the tests.
+            controller: The controller to test.
+            mocker: The mocker interface.
+
+        Test Condition:
+            _image.export_mask() is not called.
+        """
+        mock_file = mocker.patch('tkinter.filedialog.askdirectory')
+        mock_file.return_value = None
+
+        controller._image = MagicMock()
+        controller._previewed = True
+
+        controller._last_save_dir = mock_file.return_value
+
+        controller.save_mask()
+
+        assert not controller._image.export_mask.called
+
+    def test_save_mask_IOError(self, setup, controller, mocker,
+                               valid_rgb_image_path):
+        """
+        Test saving the mask when exporting throws an IO Error
+
+        Args:
+            setup: Setup for the tests.
+            controller: The controller to test.
+            mocker: The mocker interface.
+
+        Test Condition:
+           _previewed is set to false
+        """
+        mock_file = mocker.patch('tkinter.filedialog.askdirectory')
+        mock_file.return_value = valid_rgb_image_path
+
+        def raise_IOException(x):
+            raise IOError
+
+        mock_image = MagicMock()
+        mock_image.export_mask.side_effect = raise_IOException
+
+        controller._image = mock_image
+
+        controller._image_path = valid_rgb_image_path
+        controller._previewed = True
+
+        controller._last_save_dir = mock_file.return_value
+
+        controller.save_mask()
+
+        assert controller._previewed is False
+
 
 class TestInteractions(TestController):
     """
     Tests for interaction functions like clicking.
 
     """
+
+    pass
+
+
+class TestSettings(TestController):
+    """
+    Tests for functions that change the state of various settings.
+
+    """
+
+    def test_set_preferences(self, setup, controller, mocker):
+        """
+        Test setting the preferences given a dictionary of preferences.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller to test.
+            mocker: The mocker interface.
+
+        Test Condition:
+            _main_window.set_theme is called with the 'theme' property.
+        """
+
+        prefs = {"theme": "spaghetti"}
+
+        controller.set_preferences(prefs)
+
+        controller._main_window.set_theme.assert_called_with(prefs['theme'])
+
+    def test_save_preferences(self, setup, controller, mocker):
+        """
+        Test saving the preferences of the user.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller to test.
+            mocker: The mocker interface.
+
+        Test Condition:
+            json.dump is called
+        """
+
+        mock_dump = mocker.patch('json.dump')
+
+        controller.save_preferences({"theme": "Uncooked Pasta"})
+
+        mock_dump.assert_called()
