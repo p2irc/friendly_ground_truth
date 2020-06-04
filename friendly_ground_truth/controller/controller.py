@@ -205,10 +205,6 @@ class Controller():
         if self._image is None:
             return
 
-        if not self._previewed:
-            self._show_saved_preview()
-            return
-
         self._mask_saved = True
 
         if self._last_save_dir is None:
@@ -468,7 +464,7 @@ class Controller():
 
         if patch is None or index == -1:
             self._display_current_patch()
-            self.save_mask()
+            self.show_saved_preview()
             return
 
         cur_patch = self._image.patches[self._current_patch_index]
@@ -756,7 +752,7 @@ class Controller():
         if self._main_window.load_progress >= self.NUM_PATCHES ** 2:
             self._main_window.progress_popup.destroy()
 
-    def _show_saved_preview(self):
+    def show_saved_preview(self):
         """
         Display a preview of the saved mask overlaid with the image.
 
@@ -767,8 +763,6 @@ class Controller():
         Postconditions:
             A window displaying the image and mask is shown.
         """
-
-        self._previewed = True
 
         img = self._image.image
         mask = self._image.mask

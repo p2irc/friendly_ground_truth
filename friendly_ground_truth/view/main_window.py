@@ -681,7 +681,7 @@ class MainWindow(ttk.Frame):
         Returns:
             None
         """
-        self._controller.save_mask()
+        self._controller.show_saved_preview()
 
     def _on_preferences(self):
         """
