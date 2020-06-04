@@ -292,29 +292,6 @@ class TestIo(TestController):
 
         assert controller._mask_saved is False
 
-    def test_save_mask_not_previewed(self, setup, controller, mocker):
-        """
-        Test saving the mask if it has not been previewed yet.
-
-        Args:
-            setup: Setup for tests.
-            controller: The controller to test.
-            mocker: The mocker interface.
-
-        Test Condition:
-            _show_saved_preview() is called
-            _mask_saved is False
-        """
-        controller._image = MagicMock()
-        controller._previewed = False
-
-        preview_mock = mocker.patch.object(controller, '_show_saved_preview')
-
-        controller.save_mask()
-
-        preview_mock.assert_called()
-        assert controller._mask_saved is False
-
     def test_save_mask_no_last_dir(self, setup, controller, mocker,
                                    valid_rgb_image_path):
         """
