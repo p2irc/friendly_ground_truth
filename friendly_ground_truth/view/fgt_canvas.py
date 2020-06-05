@@ -575,6 +575,38 @@ class ScrollableImageCanvas:
         self._imframe.destroy()
 
 
+class PatchNavCanvas(ScrollableImageCanvas):
+
+    def __init__(self, placeholder, img, main_window, style):
+
+        self._logger = logging.getLogger('friendly_gt.view.FGTCanvas')
+
+        super(PatchNavCanvas, self).__init__(placeholder, img, main_window,
+                                             style)
+
+        self.canvas.bind("<ButtonRelease-1>", self._on_click_release)
+
+    def _on_click_release(self, event):
+        """
+        Called when the left mouse button is released.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+        """
+
+        pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+
+        container_coords = self.canvas.coords(self.container)
+        pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
+
+        pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
+
+        self._main_window.navigate_to_patch(pos)
+
+
 class FGTCanvas(ScrollableImageCanvas):
     """
     A canvas that allows panning and zooming of large images.

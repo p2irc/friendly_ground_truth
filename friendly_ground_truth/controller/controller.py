@@ -387,6 +387,26 @@ class Controller():
         if not self._undo_manager.undo_empty:
             self._main_window.enable_button(self._undo_id)
 
+    def navigate_to_patch(self, pos):
+        """
+        Navigate to the patch containing the given coordinates in the original
+        image.
+
+        Args:
+            pos: The position in the image to go to.
+
+        Returns:
+            None
+        """
+
+        pos = (pos[1], pos[0])
+
+        patch_index = self._image.get_patch_from_coords(pos)
+
+        patch = self._image.patches[patch_index]
+
+        self._next_patch_callback(patch, patch_index)
+
     # ===================================================
     # Private Functions
     # ===================================================

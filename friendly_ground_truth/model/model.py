@@ -171,6 +171,8 @@ class Image():
         block_size = (image.shape[0]//self.num_patches,
                       image.shape[1]//self.num_patches)
 
+        self._block_size = block_size
+
         # Make the blocks
         blocks = view_as_blocks(image, block_shape=block_size)
 
@@ -185,6 +187,22 @@ class Image():
                     self._progress_update_func()
 
         self._patches = patches
+
+    def get_patch_from_coords(self, coords):
+        """
+        Get the index of the patch that contains the given coordinates.
+
+        Args:
+            coords: Coordinates in the original image.
+
+        Returns:
+            The index into the patches list of the corresponding patch.
+        """
+
+        row = int(coords[0]/self._block_size[0])
+        col = int(coords[1]/self._block_size[1])
+
+        return row * self.num_patches + col
 
     def _create_mask(self):
         """
