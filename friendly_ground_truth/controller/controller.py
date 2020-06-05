@@ -464,7 +464,13 @@ class Controller():
 
         if patch is None or index == -1:
             self._display_current_patch()
-            self.show_saved_preview()
+
+            tkinter.messagebox.showinfo("No More Patches",
+                                        "There are no patches left in the"
+                                        "image.  You can save the mask using "
+                                        "the file menu, or use the "
+                                        "next/previous patch tools to review "
+                                        "your mask.")
             return
 
         cur_patch = self._image.patches[self._current_patch_index]
