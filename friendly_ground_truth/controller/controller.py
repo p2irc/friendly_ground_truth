@@ -770,19 +770,7 @@ class Controller():
             A window displaying the image and mask is shown.
         """
 
-        img = self._image.image
-        mask = self._image.mask
-
-        overlay = segmentation.mark_boundaries(img, mask)
-
-        overlay = img_as_ubyte(overlay)
-
-        rows = np.any(mask, axis=1)
-        cols = np.any(mask, axis=0)
-        rmin, rmax = np.where(rows)[0][[0, -1]]
-        cmin, cmax = np.where(cols)[0][[0, -1]]
-
-        overlay = overlay[rmin:rmax, cmin:cmax]
+        overlay = self._image.create_overlay_img()
 
         PreviewWindow(overlay, self, self._main_window.style)
 
