@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## Unreleased - <>
 ### Changed
 - Removed saving dialog at the end of the image patches.
+- The preview image is now scrollable
 
 ## [v0.9.2] - 2020-06-01
 ### Changed
