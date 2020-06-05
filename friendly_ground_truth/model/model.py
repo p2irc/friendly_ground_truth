@@ -211,6 +211,28 @@ class Image():
 
         self._mask = mask[:self.image.shape[0], :self.image.shape[1]]
 
+    def create_overlay_img(self):
+        """
+        Create an overlay image using the mask.
+
+
+        Returns:
+            The image
+        """
+
+        shape = self._padded_shape[0], self._padded_shape[1], 3
+        img = np.zeros(shape, dtype=self.patches[0].overlay_image.dtype)
+
+        for patch in self.patches:
+            r, c = patch.patch_index
+            r = r * patch.patch.shape[0]
+            c = c * patch.patch.shape[1]
+
+            img[r:r+patch.patch.shape[0],
+                c:c+patch.patch.shape[1], :] = patch.overlay_image
+
+        return img[:self.image.shape[0], :self.image.shape[1], :]
+
     def _create_labelling(self):
         """
         Take the labellings from all patches and combine them into one matrix

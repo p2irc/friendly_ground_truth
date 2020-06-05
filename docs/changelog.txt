@@ -4,6 +4,8 @@ This file keeps a record of important changes to the project.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased - <>
+### Changed
+- Removed saving dialog at the end of the image patches.
 
 ## [v0.9.2] - 2020-06-01
 ### Changed
