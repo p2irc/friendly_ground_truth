@@ -794,6 +794,10 @@ class Controller():
 
         PreviewWindow(overlay, self, self._main_window.style)
 
+    def get_image_preview(self):
+
+        return self._image.create_overlay_img()
+
     def _get_image_name_from_path(self, path):
         """
         Get the name of the image from its original path.

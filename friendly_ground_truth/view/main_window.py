@@ -23,6 +23,7 @@ from friendly_ground_truth.view.info_panel import InfoPanel
 from friendly_ground_truth.view.help_dialogs import (AboutDialog,
                                                      KeyboardShortcutDialog)
 from friendly_ground_truth.view.preferences_window import PreferencesWindow
+from friendly_ground_truth.view.preview_window import PreviewFrame
 
 from functools import partial
 
@@ -138,7 +139,7 @@ class MainWindow(ttk.Frame):
         self._info_panel = InfoPanel(self.master)
         self._info_panel.config(style="InfoPanel.TFrame")
 
-        self._info_panel.grid(row=2, column=0, sticky='ew')
+        self._info_panel.grid(row=2, column=0, sticky='ew', columnspan=2)
 
         if self._darkmode:
             self._enable_darkmode_buttons()
@@ -164,8 +165,18 @@ class MainWindow(ttk.Frame):
 
         self._canvas = FGTCanvas(self.master, image, self, self.style)
         self._canvas.grid(row=1, column=0, sticky="NSEW")
+
+        self._preview_window = PreviewFrame(self.master,
+                self._controller.get_image_preview(),
+                self._controller, self.style)
+
+        self._preview_window.grid(row=1, column=1, sticky="NSEW")
+
         self._master.grid_rowconfigure(0, weight=0)
         self._master.grid_rowconfigure(1, weight=1)
+
+        self._master.grid_columnconfigure(0, weight=2)
+        self._master.grid_columnconfigure(1, weight=1)
 
     def set_theme(self, theme):
         """
@@ -579,7 +590,7 @@ class MainWindow(ttk.Frame):
                                           style="Toolbar.TLabel")
 
         self._image_indicator.pack(side='right', padx=2, pady=2)
-        self._toolbar.grid(column=0, row=0, sticky='NEW')
+        self._toolbar.grid(column=0, row=0, sticky='NEW', columnspan=2)
 
     def _enable_darkmode_buttons(self):
         """
