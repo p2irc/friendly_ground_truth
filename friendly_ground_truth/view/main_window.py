@@ -54,6 +54,7 @@ class MainWindow(ttk.Frame):
         """
 
         self._preview_window = None
+        self._cur_preview_thread = None
 
         preferences = controller.load_preferences()
 
@@ -286,6 +287,14 @@ class MainWindow(ttk.Frame):
         else:
 
             self._canvas.set_image(img)
+
+            if self._cur_preview_thread is not None:
+                self._cur_preview_thread.cancel()
+
+            self._cur_preview_thread = threading.Timer(1.0,
+                                                       self.update_preview)
+            self._cur_preview_thread.daemon = True
+            self._cur_preview_thread.start()
 
     def update_preview(self):
 
@@ -815,7 +824,7 @@ class MainWindow(ttk.Frame):
         Returns:
             None
         """
-        self._controller.show_saved_preview()
+        self._controller.save_mask()
 
     def _on_preferences(self):
         """
