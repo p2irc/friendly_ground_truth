@@ -68,7 +68,20 @@ class PreviewFrame(ttk.Frame):
             None
         """
         self.img = img
-        self._canvas.new_image(self.img)
+        self._canvas.set_image(self.img)
+
+    def new_image(self, img):
+        """
+        Reset the image on the canvas.
+
+        Args:
+            img: The image.
+
+        Returns:
+            None
+        """
+        self.img = img
+        self._canvas.new_image(img)
 
 
 class PreviewWindow(tk.Toplevel):
