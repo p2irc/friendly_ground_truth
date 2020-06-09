@@ -490,7 +490,7 @@ class Controller():
                                         "There are no patches left in the"
                                         "image.  You can save the mask using "
                                         "the file menu, or use the "
-                                        "next/previous patch tools to review "
+                                        "preview window to review "
                                         "your mask.")
             return
 
