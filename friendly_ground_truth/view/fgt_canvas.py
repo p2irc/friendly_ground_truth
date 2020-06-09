@@ -14,6 +14,8 @@ import math
 import warnings
 import tkinter as tk
 
+import threading
+
 from tkinter import ttk
 from PIL import Image, ImageTk
 
@@ -634,56 +636,32 @@ class PatchNavCanvas(ScrollableImageCanvas):
         Returns:
             None
         """
-        self.imscale = 1.0
-
         self.img = image
+        self._image = Image.fromarray(image)
 
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
-            self._image = Image.fromarray(self.img)
+        pyramid_index = max(0, self._curr_img)
 
-        self.imwidth, self.imheight = self._image.size
+        old_img = self._pyramid[pyramid_index]
+        print(old_img.size)
 
-        if (self.imwidth * self.imheight > self._huge_size * self._huge_size
-           and self._image.tile[0][0] == 'raw'):
+        new_image = self._image.resize(old_img.size, self._filter)
 
-            self._huge = True
-            self._offset = self._image.tile[0][2]
-            self._tile = [self._image.tile[0][0],
-                          [0, 0, self.imwidth, 0],
-                          self._offset,
-                          self._image.tile[0][3]]
+        self._pyramid[pyramid_index] = new_image
 
-        self._min_side = min(self.imwidth, self.imheight)
-
-        # Image Pyramid
-        if self._huge:
-            self._pyramid = [self.smaller()]
-        else:
-            self._pyramid = [Image.fromarray(self.img)]
-
-        # Set ratio coefficeint for pyramid
-        if self._huge:
-            self._ratio = max(self.imwidth, self.imheight) / self._huge_size
-        else:
-            self._ratio = 1.0
-
-        self._curr_img = 0  # The current image from the pyramid
-        self._scale = self.imscale * self._ratio
-        self._reduction = 2  # Reduction degree of pyramid
-
-        w, h, = self._pyramid[-1].size
-        while w > 512 and h > 512:
-            w /= self._reduction
-            h /= self._reduction
-            self._pyramid.append(self._pyramid[-1].resize((int(w), int(h)),
-                                 self._filter))
-        self.canvas.delete("all")
-
-        # Put image into rectangle for setting corrdinates
-        self.container = self.canvas.create_rectangle((0, 0, self.imwidth,
-                                                      self.imheight), width=0)
         self._show_image()
+
+        t = threading.Thread(target=self.recompute_pyramid, name="pyramid")
+        t.daemon = True
+        t.start()
+
+    def recompute_pyramid(self):
+
+        new_pyramid = []
+        for img in self._pyramid:
+            new_image = self._image.resize(img.size, self._filter)
+            new_pyramid.append(new_image)
+
+        self._pyramid = new_pyramid
 
     def _move_to(self, event):
         """
