@@ -323,7 +323,6 @@ class ScrollableImageCanvas:
         Postconditions:
             The image is drawn on the canvas.
         """
-
         box_image = self.canvas.coords(self.container)  # get image area
         box_canvas = (self.canvas.canvasx(0),  # get visible area of the canvas
                       self.canvas.canvasy(0),
@@ -584,7 +583,15 @@ class PatchNavCanvas(ScrollableImageCanvas):
         super(PatchNavCanvas, self).__init__(placeholder, img, main_window,
                                              style)
 
+        borderwidth = self._style.lookup("Preview.TFrame", 'borderwidth')
+
+        relief = self._style.lookup("Preview.TFrame", 'relief')
+
+        self.canvas.config(borderwidth=borderwidth, relief=relief)
+
         self.canvas.bind("<ButtonRelease-1>", self._on_click_release)
+
+        self._dragged = False
 
     def _on_click_release(self, event):
         """
@@ -597,6 +604,10 @@ class PatchNavCanvas(ScrollableImageCanvas):
             None
         """
 
+        if self._dragged:
+            self._dragged = False
+            return
+
         pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
 
         container_coords = self.canvas.coords(self.container)
@@ -605,6 +616,91 @@ class PatchNavCanvas(ScrollableImageCanvas):
         pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
 
         self._main_window.navigate_to_patch(pos)
+
+    def set_image(self, img):
+
+        self.img = img
+
+        self._show_image()
+
+    def new_image(self, image, patch_offset=(0, 0)):
+        """
+        Reset the image and all properties of the image on the canvas.
+
+        Args:
+            image: The image, a numpy array.
+            patch_offset: The offset of the current patch within the image
+
+        Returns:
+            None
+        """
+        self.imscale = 1.0
+
+        self.img = image
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            self._image = Image.fromarray(self.img)
+
+        self.imwidth, self.imheight = self._image.size
+
+        if (self.imwidth * self.imheight > self._huge_size * self._huge_size
+           and self._image.tile[0][0] == 'raw'):
+
+            self._huge = True
+            self._offset = self._image.tile[0][2]
+            self._tile = [self._image.tile[0][0],
+                          [0, 0, self.imwidth, 0],
+                          self._offset,
+                          self._image.tile[0][3]]
+
+        self._min_side = min(self.imwidth, self.imheight)
+
+        # Image Pyramid
+        if self._huge:
+            self._pyramid = [self.smaller()]
+        else:
+            self._pyramid = [Image.fromarray(self.img)]
+
+        # Set ratio coefficeint for pyramid
+        if self._huge:
+            self._ratio = max(self.imwidth, self.imheight) / self._huge_size
+        else:
+            self._ratio = 1.0
+
+        self._curr_img = 0  # The current image from the pyramid
+        self._scale = self.imscale * self._ratio
+        self._reduction = 2  # Reduction degree of pyramid
+
+        w, h, = self._pyramid[-1].size
+        while w > 512 and h > 512:
+            w /= self._reduction
+            h /= self._reduction
+            self._pyramid.append(self._pyramid[-1].resize((int(w), int(h)),
+                                 self._filter))
+        self.canvas.delete("all")
+
+        # Put image into rectangle for setting corrdinates
+        self.container = self.canvas.create_rectangle((0, 0, self.imwidth,
+                                                      self.imheight), width=0)
+        self._show_image()
+
+    def _move_to(self, event):
+        """
+        Move the canvas to the event position.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas is moved to the event position.
+        """
+        self._dragged = True
+
+        super()._move_to(event)
 
 
 class FGTCanvas(ScrollableImageCanvas):

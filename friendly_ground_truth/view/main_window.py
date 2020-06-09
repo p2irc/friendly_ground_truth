@@ -12,6 +12,8 @@ Description: The main window for the application.
 import tkinter as tk
 import base64
 
+import threading
+
 from tkinter import ttk
 from io import BytesIO
 
@@ -167,15 +169,16 @@ class MainWindow(ttk.Frame):
         self._canvas.grid(row=1, column=0, sticky="NSEW")
 
         self._preview_window = PreviewFrame(self.master,
-                self._controller.get_image_preview(),
-                self._controller, self.style)
+                                            self._controller
+                                            .get_image_preview(),
+                                            self._controller, self.style)
 
         self._preview_window.grid(row=1, column=1, sticky="NSEW")
 
         self._master.grid_rowconfigure(0, weight=0)
         self._master.grid_rowconfigure(1, weight=1)
 
-        self._master.grid_columnconfigure(0, weight=2)
+        self._master.grid_columnconfigure(0, weight=3)
         self._master.grid_columnconfigure(1, weight=1)
 
     def set_theme(self, theme):
@@ -274,8 +277,18 @@ class MainWindow(ttk.Frame):
             return
         elif new:
             self._canvas.new_image(img, patch_offset=patch_offset)
+
+            t = threading.Thread(target=self.update_preview, name="preview")
+            t.daemon = True
+            t.start()
+
         else:
+
             self._canvas.set_image(img)
+
+    def update_preview(self):
+        img = self._controller.get_image_preview()
+        self._preview_window.update_image(img)
 
     def on_canvas_click(self, pos):
         """

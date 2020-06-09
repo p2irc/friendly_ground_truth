@@ -19,21 +19,29 @@ class PreviewFrame(ttk.Frame):
 
     def __init__(self, master, img, controller, style):
 
-        ttk.Frame.__init__(self, master=master)
+        ttk.Frame.__init__(self, master=master, style="Preview.TFrame")
 
         self._master = master
 
         self.img = img
         self.controller = controller
 
+        self._banner = ttk.Frame(self, borderwidth=5,
+                                 style="ButtonPanel.TFrame")
+
+        self._banner_label = ttk.Label(self._banner, text="Preview")
+
+        self._banner_label.pack(side="left")
+
         self._canvas = PatchNavCanvas(self, self.img, self, style)
 
         self._canvas.set_zoom(-5)
 
-        self._canvas.grid(row=0, column=0, sticky="NSEW")
+        self._banner.grid(row=0, column=0, sticky="NEW")
+        self._canvas.grid(row=1, column=0, sticky="NSEW")
 
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
 
     def navigate_to_patch(self, pos):
         """
@@ -48,6 +56,19 @@ class PreviewFrame(ttk.Frame):
         """
 
         self.controller.navigate_to_patch(pos)
+
+    def update_image(self, img):
+        """
+        Update the preview image.
+
+        Args:
+            img: The image to show in the preview.
+
+        Returns:
+            None
+        """
+        self.img = img
+        self._canvas.new_image(self.img)
 
 
 class PreviewWindow(tk.Toplevel):

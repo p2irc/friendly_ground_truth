@@ -237,7 +237,7 @@ class Image():
         Returns:
             The image
         """
-
+        print("Overlay Image")
         shape = self._padded_shape[0], self._padded_shape[1], 3
         img = np.zeros(shape, dtype=self.patches[0].overlay_image.dtype)
 
