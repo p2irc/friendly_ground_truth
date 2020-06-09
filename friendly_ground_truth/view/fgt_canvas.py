@@ -14,6 +14,8 @@ import math
 import warnings
 import tkinter as tk
 
+import threading
+
 from tkinter import ttk
 from PIL import Image, ImageTk
 
@@ -167,6 +169,11 @@ class ScrollableImageCanvas:
         self.img = img
         self._show_image()
         self.canvas.focus_set()
+
+    def set_theme(self, style):
+        background = self._style.lookup("Canvas.TFrame", 'background')
+
+        self.canvas.config(background=background)
 
     def smaller(self):
         """
@@ -323,7 +330,6 @@ class ScrollableImageCanvas:
         Postconditions:
             The image is drawn on the canvas.
         """
-
         box_image = self.canvas.coords(self.container)  # get image area
         box_canvas = (self.canvas.canvasx(0),  # get visible area of the canvas
                       self.canvas.canvasy(0),
@@ -573,6 +579,158 @@ class ScrollableImageCanvas:
         del self._pyramid  # delete pyramid variable
         self.canvas.destroy()
         self._imframe.destroy()
+
+
+class PatchNavCanvas(ScrollableImageCanvas):
+
+    def __init__(self, placeholder, img, main_window, style):
+
+        self._logger = logging.getLogger('friendly_gt.view.FGTCanvas')
+
+        super(PatchNavCanvas, self).__init__(placeholder, img, main_window,
+                                             style)
+
+        borderwidth = self._style.lookup("Preview.TFrame", 'borderwidth')
+
+        relief = self._style.lookup("Preview.TFrame", 'relief')
+
+        self.canvas.config(borderwidth=borderwidth, relief=relief)
+
+        self.canvas.bind("<ButtonRelease-1>", self._on_click_release)
+
+        self._dragged = False
+
+    def _on_click_release(self, event):
+        """
+        Called when the left mouse button is released.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+        """
+
+        if self._dragged:
+            self._dragged = False
+            return
+
+        pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+
+        container_coords = self.canvas.coords(self.container)
+        pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
+
+        pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
+
+        self._main_window.navigate_to_patch(pos)
+
+    def set_image(self, image):
+
+        self.img = image
+        self._image = Image.fromarray(image)
+
+        pyramid_index = max(0, self._curr_img)
+
+        old_img = self._pyramid[pyramid_index]
+
+        new_image = self._image.resize(old_img.size, self._filter)
+
+        self._pyramid[pyramid_index] = new_image
+
+        self._show_image()
+
+        t = threading.Thread(target=self.recompute_pyramid, name="pyramid")
+        t.daemon = True
+        t.start()
+
+    def new_image(self, image, patch_offset=(0, 0)):
+        """
+        Reset the image and all properties of the image on the canvas.
+
+        Args:
+            image: The image, a numpy array.
+            patch_offset: The offset of the current patch within the image
+
+        Returns:
+            None
+        """
+        self.imscale = 1.0
+
+        self.canvas.delete("all")
+        self.img = image
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            self._image = Image.fromarray(self.img)
+
+        self.imwidth, self.imheight = self._image.size
+
+        if (self.imwidth * self.imheight > self._huge_size * self._huge_size
+           and self._image.tile[0][0] == 'raw'):
+
+            self._huge = True
+            self._offset = self._image.tile[0][2]
+            self._tile = [self._image.tile[0][0],
+                          [0, 0, self.imwidth, 0],
+                          self._offset,
+                          self._image.tile[0][3]]
+
+        self._min_side = min(self.imwidth, self.imheight)
+
+        # Image Pyramid
+        if self._huge:
+            self._pyramid = [self.smaller()]
+        else:
+            self._pyramid = [Image.fromarray(self.img)]
+
+        # Set ratio coefficeint for pyramid
+        if self._huge:
+            self._ratio = max(self.imwidth, self.imheight) / self._huge_size
+        else:
+            self._ratio = 1.0
+
+        self._curr_img = 0  # The current image from the pyramid
+        self._scale = self.imscale * self._ratio
+        self._reduction = 2  # Reduction degree of pyramid
+
+        w, h, = self._pyramid[-1].size
+        while w > 512 and h > 512:
+            w /= self._reduction
+            h /= self._reduction
+            self._pyramid.append(self._pyramid[-1].resize((int(w), int(h)),
+                                 self._filter))
+
+        # Put image into rectangle for setting corrdinates
+        self.container = self.canvas.create_rectangle((0, 0, self.imwidth,
+                                                      self.imheight), width=0)
+
+        self._show_image()
+
+    def recompute_pyramid(self):
+
+        new_pyramid = []
+        for img in self._pyramid:
+            new_image = self._image.resize(img.size, self._filter)
+            new_pyramid.append(new_image)
+
+        self._pyramid = new_pyramid
+
+    def _move_to(self, event):
+        """
+        Move the canvas to the event position.
+
+        Args:
+            event: The mouse event.
+
+        Returns:
+            None
+
+        Postconditions:
+            The canvas is moved to the event position.
+        """
+        self._dragged = True
+
+        super()._move_to(event)
 
 
 class FGTCanvas(ScrollableImageCanvas):

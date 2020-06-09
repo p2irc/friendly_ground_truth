@@ -31,6 +31,7 @@ class TestController():
         mocker.patch('friendly_ground_truth.model.model.Image')
         mocker.patch('tkinter.filedialog')
         mocker.patch('tkinter.messagebox')
+        mocker.patch('tkinter.IntVar')
         mocker.patch('PIL.ImageTk')
         mocker.patch('tkinter.PhotoImage')
         mocker.patch('tkinter.Toplevel')

@@ -25,6 +25,7 @@ from friendly_ground_truth.controller.undo_manager import UndoManager
 from friendly_ground_truth.model.model import Image
 
 from skimage import segmentation, img_as_ubyte
+from skimage.draw import rectangle_perimeter
 
 from sys import platform
 
@@ -387,6 +388,26 @@ class Controller():
         if not self._undo_manager.undo_empty:
             self._main_window.enable_button(self._undo_id)
 
+    def navigate_to_patch(self, pos):
+        """
+        Navigate to the patch containing the given coordinates in the original
+        image.
+
+        Args:
+            pos: The position in the image to go to.
+
+        Returns:
+            None
+        """
+
+        pos = (pos[1], pos[0])
+
+        patch_index = self._image.get_patch_from_coords(pos)
+
+        patch = self._image.patches[patch_index]
+
+        self._next_patch_callback(patch, patch_index)
+
     # ===================================================
     # Private Functions
     # ===================================================
@@ -469,7 +490,7 @@ class Controller():
                                         "There are no patches left in the"
                                         "image.  You can save the mask using "
                                         "the file menu, or use the "
-                                        "next/previous patch tools to review "
+                                        "preview window to review "
                                         "your mask.")
             return
 
@@ -773,6 +794,46 @@ class Controller():
         overlay = self._image.create_overlay_img()
 
         PreviewWindow(overlay, self, self._main_window.style)
+
+    def get_image_preview(self):
+
+        img = self._image.create_overlay_img()
+
+        patch_size_x = self\
+            ._image.patches[self._current_patch_index].patch.shape[0]
+
+        patch_size_y = self\
+            ._image.patches[self._current_patch_index].patch.shape[1]
+
+        start_x = self._image\
+            .patches[self._current_patch_index].patch_index[0] * patch_size_x
+
+        stop_x = start_x + patch_size_x
+
+        start_y = self\
+            ._image.patches[self._current_patch_index]\
+            .patch_index[1] * patch_size_y
+
+        stop_y = start_y + patch_size_y
+
+        rec_start = (start_x, start_y)
+        rec_end = (stop_x, stop_y)
+
+        rr, cc = rectangle_perimeter(rec_start, end=rec_end,
+                                     shape=self._image.image.shape)
+
+        img[rr, cc] = [255, 255, 0]
+
+        for i in range(4):
+            rec_start = (rec_start[0] + 1, rec_start[1] + 1)
+            rec_end = (rec_end[0] - 1, rec_end[1] - 1)
+
+            rr, cc = rectangle_perimeter(rec_start, end=rec_end,
+                                         shape=self._image.image.shape)
+
+            img[rr, cc] = [255, 255, 0]
+
+        return img
 
     def _get_image_name_from_path(self, path):
         """
