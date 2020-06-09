@@ -170,6 +170,11 @@ class ScrollableImageCanvas:
         self._show_image()
         self.canvas.focus_set()
 
+    def set_theme(self, style):
+        background = self._style.lookup("Canvas.TFrame", 'background')
+
+        self.canvas.config(background=background)
+
     def smaller(self):
         """
         Resize the image to be smaller.
@@ -627,7 +632,6 @@ class PatchNavCanvas(ScrollableImageCanvas):
         pyramid_index = max(0, self._curr_img)
 
         old_img = self._pyramid[pyramid_index]
-        print(old_img.size)
 
         new_image = self._image.resize(old_img.size, self._filter)
 

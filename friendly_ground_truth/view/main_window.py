@@ -25,8 +25,8 @@ from friendly_ground_truth.view.info_panel import InfoPanel
 from friendly_ground_truth.view.help_dialogs import (AboutDialog,
                                                      KeyboardShortcutDialog)
 from friendly_ground_truth.view.preferences_window import PreferencesWindow
-from friendly_ground_truth.view.preview_window import PreviewFrame
-
+from friendly_ground_truth.view.preview_window import (PreviewFrame,
+                                                       PreviewWindow)
 from functools import partial
 
 import logging
@@ -53,7 +53,11 @@ class MainWindow(ttk.Frame):
             A main window object.
         """
 
+        self._preview_window = None
+
         preferences = controller.load_preferences()
+
+        self._preferences = preferences
 
         theme = preferences['theme']
 
@@ -120,8 +124,10 @@ class MainWindow(ttk.Frame):
         # --------------------------------------
 
         self._master.title("Friendly Ground Truth")
-        self._master.rowconfigure(0, weight=1)
         self._master.columnconfigure(0, weight=1)
+
+        self._master.grid_rowconfigure(0, weight=0)
+        self._master.grid_rowconfigure(1, weight=1)
 
         self._set_master_theme()
 
@@ -168,18 +174,7 @@ class MainWindow(ttk.Frame):
         self._canvas = FGTCanvas(self.master, image, self, self.style)
         self._canvas.grid(row=1, column=0, sticky="NSEW")
 
-        self._preview_window = PreviewFrame(self.master,
-                                            self._controller
-                                            .get_image_preview(),
-                                            self._controller, self.style)
-
-        self._preview_window.grid(row=1, column=1, sticky="NSEW")
-
-        self._master.grid_rowconfigure(0, weight=0)
-        self._master.grid_rowconfigure(1, weight=1)
-
-        self._master.grid_columnconfigure(0, weight=3)
-        self._master.grid_columnconfigure(1, weight=1)
+        self._on_preview_setting()
 
     def set_theme(self, theme):
         """
@@ -214,8 +209,14 @@ class MainWindow(ttk.Frame):
 
         self._set_menubar_theme()
         self._set_helpmenu_theme()
+        self._set_viewmenu_theme()
         self._set_master_theme()
         self._set_filemenu_theme()
+
+        self._canvas.set_theme(self.style)
+
+        if self._preview_window is not None:
+            self._preview_window.set_theme(self.style)
 
     def start_progressbar(self, num_patches):
         """
@@ -287,8 +288,11 @@ class MainWindow(ttk.Frame):
             self._canvas.set_image(img)
 
     def update_preview(self):
-        img = self._controller.get_image_preview()
-        self._preview_window.update_image(img)
+
+        if self._preview_window is not None:
+            img = self._controller.get_image_preview()
+
+            self._preview_window.update_image(img)
 
     def on_canvas_click(self, pos):
         """
@@ -452,6 +456,8 @@ class MainWindow(ttk.Frame):
 
         self._create_file_menu()
 
+        self._create_view_menu()
+
         self._create_help_menu()
 
         self._create_toolbar()
@@ -467,7 +473,7 @@ class MainWindow(ttk.Frame):
             None
 
         Postconditions:
-            The file menu will be popultated.
+            The file menu will be populated.
         """
 
         self._filemenu = tk.Menu(self._menubar, tearoff=0)
@@ -485,6 +491,110 @@ class MainWindow(ttk.Frame):
                                    command=self._on_preferences)
 
         self._menubar.add_cascade(label="File", menu=self._filemenu)
+
+    def _create_view_menu(self):
+        """
+        Create the view menu.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            The view menu will be populated.
+        """
+        if "preview" not in self._preferences.keys():
+            preview_pref = 1
+        else:
+            preview_pref = self._preferences['preview']
+
+        self._viewmenu = tk.Menu(self._menubar, tearoff=0)
+
+        self._preview_setting = tk.IntVar()
+        self._preview_setting.set(preview_pref)
+
+        submenu = tk.Menu(self._menubar)
+        submenu.add_radiobutton(label="Docked", value=1,
+                                variable=self._preview_setting,
+                                command=self._on_preview_setting)
+
+        submenu.add_radiobutton(label="Floating", value=2,
+                                variable=self._preview_setting,
+                                command=self._on_preview_setting)
+
+        submenu.add_radiobutton(label="Hidden", value=3,
+                                variable=self._preview_setting,
+                                command=self._on_preview_setting)
+
+        self._previewmenu = submenu
+
+        self._set_viewmenu_theme()
+
+        self._menubar.add_cascade(label="View", menu=self._viewmenu)
+        self._viewmenu.add_cascade(label="Preview", menu=submenu)
+
+    def _on_preview_setting(self):
+        """
+        Called when the user changes the preview window settings.
+
+
+        Returns:
+            None
+        """
+
+        # Set to docked
+        if self._preview_setting.get() == 1:
+            self._dock_preview()
+        # Set to floating
+        elif self._preview_setting.get() == 2:
+            self._float_preview()
+        # Set to hidden
+        else:
+            self._hide_preview()
+
+        self._preferences['preview'] = self._preview_setting.get()
+
+        self._controller.save_preferences(self._preferences)
+
+    def _dock_preview(self):
+
+        if self._preview_window is not None:
+            self._preview_window.destroy()
+
+        self._preview_window = PreviewFrame(self.master,
+                                            self._controller
+                                            .get_image_preview(),
+                                            self._controller, self.style)
+
+        self._preview_window.grid(row=1, column=1, sticky="NSEW")
+
+        self._master.grid_rowconfigure(0, weight=0)
+        self._master.grid_rowconfigure(1, weight=1)
+
+        self._master.grid_columnconfigure(0, weight=3)
+        self._master.grid_columnconfigure(1, weight=1)
+
+    def _float_preview(self):
+
+        if self._preview_window is not None:
+            self._preview_window.destroy()
+
+        self._preview_window = PreviewWindow(self._controller
+                                             .get_image_preview(),
+                                             self._controller, self.style)
+
+        self._master.grid_columnconfigure(0, weight=1)
+        self._master.grid_columnconfigure(1, weight=0)
+
+    def _hide_preview(self):
+
+        if self._preview_window is not None:
+            self._preview_window.destroy()
+
+        self._master.grid_columnconfigure(0, weight=1)
+        self._master.grid_columnconfigure(1, weight=0)
+
+        self._preview_window = None
 
     def _create_help_menu(self):
         """
@@ -856,6 +966,24 @@ class MainWindow(ttk.Frame):
         self._filemenu.config(background=background, foreground=foreground,
                               activebackground=activebackground,
                               activeforeground=activeforeground)
+
+    def _set_viewmenu_theme(self):
+
+        background = self.style.lookup('Menu.TMenubutton', 'background')
+        foreground = self.style.lookup('Menu.TMenubutton', 'foreground')
+
+        activebackground = self.style.lookup('Menu.TMenubutton',
+                                             'activebackground')
+        activeforeground = self.style.lookup('Menu.TMenubutton',
+                                             'activeforeground')
+
+        self._viewmenu.config(background=background, foreground=foreground,
+                              activebackground=activebackground,
+                              activeforeground=activeforeground)
+
+        self._previewmenu.config(background=background, foreground=foreground,
+                                 activebackground=activebackground,
+                                 activeforeground=activeforeground)
 
     def _set_helpmenu_theme(self):
 

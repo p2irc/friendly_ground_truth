@@ -43,6 +43,10 @@ class PreviewFrame(ttk.Frame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
+    def set_theme(self, style):
+
+        self._canvas.set_theme(style)
+
     def navigate_to_patch(self, pos):
         """
         Navigate to the patch containing the given coordinates in the original
@@ -100,3 +104,24 @@ class PreviewWindow(tk.Toplevel):
         self._frame = PreviewFrame(self._base, img, controller, style)
 
         self._frame.pack(fill='both', expand=True)
+
+    def update_image(self, img):
+        """
+        Update the preview image.
+
+        Args:
+            img: The image to display.
+
+        Returns:
+            None.
+        """
+
+        self._frame.update_image(img)
+
+    def set_theme(self, style):
+
+        self._frame.set_theme(style)
+
+    def destroy(self):
+
+        self._base.destroy()
