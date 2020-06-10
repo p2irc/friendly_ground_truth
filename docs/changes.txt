@@ -1,0 +1,5 @@
+## [v0.10.0] - 2020-06-10
+### Changed
+- Removed saving dialog at the end of the image patches.
+- The preview image is now scrollable
+- Dockable and Floatable preview window that allows navigation by clicking.
