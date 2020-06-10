@@ -5,3 +5,6 @@ Fixes #
   -
   -
   -
+
+I Have:
+- [ ] Updated the changelog
