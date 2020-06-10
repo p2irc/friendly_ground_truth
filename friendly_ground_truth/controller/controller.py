@@ -24,7 +24,7 @@ from friendly_ground_truth.controller.tools import (ThresholdTool,
 from friendly_ground_truth.controller.undo_manager import UndoManager
 from friendly_ground_truth.model.model import Image
 
-from skimage import segmentation, img_as_ubyte
+# from skimage import segmentation, img_as_ubyte
 from skimage.draw import rectangle_perimeter
 
 from sys import platform
@@ -72,7 +72,7 @@ class Controller():
         # -----------------------------------
 
         self.PREFERENCES_PATH = self.get_preferences_path()
-
+        self._grid_img = None
         # The root tkinter object
         self._root = root
         # For logging
@@ -161,6 +161,8 @@ class Controller():
         """
 
         self._context_img = None
+        self._grid_img = None
+
         filetypes = [("TIF Files", "*.tif"), ("TIFF Files", "*.tiff"),
                      ("PNG Files", "*.png"), ("JPEG Files", "*.jpg")]
 
@@ -805,6 +807,29 @@ class Controller():
         patch_size_y = self\
             ._image.patches[self._current_patch_index].patch.shape[1]
 
+        # Draw patch grid
+        if self._grid_img is None:
+            self._grid_img = np.zeros(img.shape, dtype=np.bool)
+
+            for i in range(self.NUM_PATCHES):
+                for j in range(self.NUM_PATCHES):
+                    start_x = i * patch_size_x
+                    stop_x = start_x + patch_size_x
+
+                    start_y = j * patch_size_y
+                    stop_y = start_y + patch_size_y
+
+                    rec_start = (start_x, start_y)
+                    rec_end = (stop_x, stop_y)
+
+                    rr, cc = rectangle_perimeter(rec_start, end=rec_end,
+                                                 shape=self._grid_img.shape)
+
+                    self._grid_img[rr, cc] = True
+
+        img[self._grid_img] = 207
+
+        # Draw current Patch
         start_x = self._image\
             .patches[self._current_patch_index].patch_index[0] * patch_size_x
 
