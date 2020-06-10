@@ -219,7 +219,13 @@ settings = {
                     "background": colours['bg_level_1'],
                     "foreground": colours['fg_level_1']
                     }
+                },
+        "Preview.TFrame": {
+                "configure": {
+                    "borderwidth": 3,
+                    "relief": "groove"
                 }
+            }
 }
 
 

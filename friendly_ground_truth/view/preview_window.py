@@ -12,7 +12,80 @@ Description: An image mask preview window.
 import tkinter as tk
 from tkinter import ttk
 
-from PIL import Image, ImageTk as itk
+from friendly_ground_truth.view.fgt_canvas import PatchNavCanvas
+
+
+class PreviewFrame(ttk.Frame):
+
+    def __init__(self, master, img, controller, style):
+
+        ttk.Frame.__init__(self, master=master, style="Preview.TFrame")
+
+        self._master = master
+
+        self.img = img
+        self.controller = controller
+
+        self._banner = ttk.Frame(self, borderwidth=5,
+                                 style="ButtonPanel.TFrame")
+
+        self._banner_label = ttk.Label(self._banner, text="Preview")
+
+        self._banner_label.pack(side="left")
+
+        self._canvas = PatchNavCanvas(self, self.img, self, style)
+
+        self._canvas.set_zoom(-5)
+
+        self._banner.grid(row=0, column=0, sticky="NEW")
+        self._canvas.grid(row=1, column=0, sticky="NSEW")
+
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+
+    def set_theme(self, style):
+
+        self._canvas.set_theme(style)
+
+    def navigate_to_patch(self, pos):
+        """
+        Navigate to the patch containing the given coordinates in the original
+        image.
+
+        Args:
+            pos: The position in the image to go to.
+
+        Returns:
+            None
+        """
+
+        self.controller.navigate_to_patch(pos)
+
+    def update_image(self, img):
+        """
+        Update the preview image.
+
+        Args:
+            img: The image to show in the preview.
+
+        Returns:
+            None
+        """
+        self.img = img
+        self._canvas.set_image(self.img)
+
+    def new_image(self, img):
+        """
+        Reset the image on the canvas.
+
+        Args:
+            img: The image.
+
+        Returns:
+            None
+        """
+        self.img = img
+        self._canvas.new_image(img)
 
 
 class PreviewWindow(tk.Toplevel):
@@ -26,91 +99,29 @@ class PreviewWindow(tk.Toplevel):
     def __init__(self, img, controller, style):
         self._base = tk.Toplevel()
         self._base.title("Preview")
+        self._base.geometry("1000x800+200+200")
 
-        self._frame = ttk.Frame(self._base)
+        self._frame = PreviewFrame(self._base, img, controller, style)
 
-        self._canvas_size = img.shape[0]//2, img.shape[1]//2
-
-        self._base.minsize(width=self._canvas_size[1] + 50,
-                           height=self._canvas_size[0] + 50)
-        self.img = img
-        self.controller = controller
-
-        self._button_panel = ttk.Frame(self._frame, borderwidth=5,
-                                       style="ButtonPanel.TFrame")
-
-        self._save_button = ttk.Button(self._button_panel, text="Save",
-                                       command=self._on_save)
-
-        self._save_button.pack(side='right')
-
-        self._cancel_button = ttk.Button(self._button_panel, text="Cancel",
-                                         command=self._on_cancel)
-
-        self._cancel_button.pack(side='left')
-
-        self._button_panel.pack(side='top', fill='both')
-
-        self._canvas = tk.Canvas(self._frame)
-
-        background = style.lookup("Canvas.TFrame", "background")
-        self._canvas.config(background=background)
-
-        self._canvas.pack(fill='both', expand='yes')
         self._frame.pack(fill='both', expand=True)
-        self._show_image()
 
-    def _on_save(self):
+    def update_image(self, img):
         """
-        Called when the save button is pressed.
+        Update the preview image.
 
+        Args:
+            img: The image to display.
 
         Returns:
-            None
-
-        Postconditions:
-            The mask is saved and the window is destroyed.
+            None.
         """
-        self._base.withdraw()
-        self.controller.save_mask()
+
+        self._frame.update_image(img)
+
+    def set_theme(self, style):
+
+        self._frame.set_theme(style)
+
+    def destroy(self):
+
         self._base.destroy()
-
-    def _on_cancel(self):
-        """
-        Called when the cancel button is pressed.
-
-
-        Returns:
-            None
-
-        Postconditions:
-            The window is destroyed.
-        """
-        self._base.destroy()
-
-    def _show_image(self):
-        """
-        Display the image on the canvas.
-
-
-        Returns:
-            None
-
-        Postconditions:
-            The image is displayed on the canvas.
-        """
-        image = Image.fromarray(self.img)
-
-        canvas_h = self._canvas_size[0]
-        canvas_w = self._canvas_size[1]
-
-        size = (canvas_w, canvas_h)
-        image = image.resize(size)
-        self._display_img = itk.PhotoImage(image=image)
-
-        x, y = 0, 0  # self.image_x, self.image_y
-
-        self._image_id = self._canvas.create_image(x, y, anchor="nw",
-                                                   image=self._display_img)
-        self._canvas.image = self._display_img
-        self._canvas.pack()
