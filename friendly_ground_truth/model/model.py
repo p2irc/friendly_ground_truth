@@ -171,6 +171,8 @@ class Image():
         block_size = (image.shape[0]//self.num_patches,
                       image.shape[1]//self.num_patches)
 
+        self._block_size = block_size
+
         # Make the blocks
         blocks = view_as_blocks(image, block_shape=block_size)
 
@@ -185,6 +187,22 @@ class Image():
                     self._progress_update_func()
 
         self._patches = patches
+
+    def get_patch_from_coords(self, coords):
+        """
+        Get the index of the patch that contains the given coordinates.
+
+        Args:
+            coords: Coordinates in the original image.
+
+        Returns:
+            The index into the patches list of the corresponding patch.
+        """
+
+        row = int(coords[0]/self._block_size[0])
+        col = int(coords[1]/self._block_size[1])
+
+        return row * self.num_patches + col
 
     def _create_mask(self):
         """
@@ -210,6 +228,27 @@ class Image():
                  c:c+patch.patch.shape[1]] += patch.mask
 
         self._mask = mask[:self.image.shape[0], :self.image.shape[1]]
+
+    def create_overlay_img(self):
+        """
+        Create an overlay image using the mask.
+
+
+        Returns:
+            The image
+        """
+        shape = self._padded_shape[0], self._padded_shape[1], 3
+        img = np.zeros(shape, dtype=self.patches[0].overlay_image.dtype)
+
+        for patch in self.patches:
+            r, c = patch.patch_index
+            r = r * patch.patch.shape[0]
+            c = c * patch.patch.shape[1]
+
+            img[r:r+patch.patch.shape[0],
+                c:c+patch.patch.shape[1], :] = patch.overlay_image
+
+        return img[:self.image.shape[0], :self.image.shape[1], :]
 
     def _create_labelling(self):
         """

@@ -24,7 +24,8 @@ from friendly_ground_truth.controller.tools import (ThresholdTool,
 from friendly_ground_truth.controller.undo_manager import UndoManager
 from friendly_ground_truth.model.model import Image
 
-from skimage import segmentation, img_as_ubyte
+# from skimage import segmentation, img_as_ubyte
+from skimage.draw import rectangle_perimeter
 
 from sys import platform
 
@@ -71,7 +72,7 @@ class Controller():
         # -----------------------------------
 
         self.PREFERENCES_PATH = self.get_preferences_path()
-
+        self._grid_img = None
         # The root tkinter object
         self._root = root
         # For logging
@@ -160,6 +161,8 @@ class Controller():
         """
 
         self._context_img = None
+        self._grid_img = None
+
         filetypes = [("TIF Files", "*.tif"), ("TIFF Files", "*.tiff"),
                      ("PNG Files", "*.png"), ("JPEG Files", "*.jpg")]
 
@@ -205,10 +208,6 @@ class Controller():
         if self._image is None:
             return
 
-        if not self._previewed:
-            self._show_saved_preview()
-            return
-
         self._mask_saved = True
 
         if self._last_save_dir is None:
@@ -220,6 +219,8 @@ class Controller():
 
         if dir_path is None:
             return
+
+        self._last_save_dir = dir_path
 
         image_name = self._get_image_name_from_path(self._image_path)
         # labels_name = self._get_landmark_name_from_path(self._image_path)
@@ -233,10 +234,10 @@ class Controller():
 
             tkinter.messagebox.showinfo("Image Mask Saved!",
                                         "Image Mask Saved!")
-            self._previewed = False
-
         except IOError:
             self._logger.error("Could not save file!")
+
+        self._previewed = False
 
     def set_preferences(self, preferences):
         """
@@ -389,6 +390,26 @@ class Controller():
         if not self._undo_manager.undo_empty:
             self._main_window.enable_button(self._undo_id)
 
+    def navigate_to_patch(self, pos):
+        """
+        Navigate to the patch containing the given coordinates in the original
+        image.
+
+        Args:
+            pos: The position in the image to go to.
+
+        Returns:
+            None
+        """
+
+        pos = (pos[1], pos[0])
+
+        patch_index = self._image.get_patch_from_coords(pos)
+
+        patch = self._image.patches[patch_index]
+
+        self._next_patch_callback(patch, patch_index)
+
     # ===================================================
     # Private Functions
     # ===================================================
@@ -466,7 +487,13 @@ class Controller():
 
         if patch is None or index == -1:
             self._display_current_patch()
-            self.save_mask()
+
+            tkinter.messagebox.showinfo("No More Patches",
+                                        "There are no patches left in the"
+                                        "image.  You can save the mask using "
+                                        "the file menu, or use the "
+                                        "preview window to review "
+                                        "your mask.")
             return
 
         cur_patch = self._image.patches[self._current_patch_index]
@@ -754,7 +781,7 @@ class Controller():
         if self._main_window.load_progress >= self.NUM_PATCHES ** 2:
             self._main_window.progress_popup.destroy()
 
-    def _show_saved_preview(self):
+    def show_saved_preview(self):
         """
         Display a preview of the saved mask overlaid with the image.
 
@@ -766,23 +793,72 @@ class Controller():
             A window displaying the image and mask is shown.
         """
 
-        self._previewed = True
-
-        img = self._image.image
-        mask = self._image.mask
-
-        overlay = segmentation.mark_boundaries(img, mask)
-
-        overlay = img_as_ubyte(overlay)
-
-        rows = np.any(mask, axis=1)
-        cols = np.any(mask, axis=0)
-        rmin, rmax = np.where(rows)[0][[0, -1]]
-        cmin, cmax = np.where(cols)[0][[0, -1]]
-
-        overlay = overlay[rmin:rmax, cmin:cmax]
+        overlay = self._image.create_overlay_img()
 
         PreviewWindow(overlay, self, self._main_window.style)
+
+    def get_image_preview(self):
+
+        img = self._image.create_overlay_img()
+
+        patch_size_x = self\
+            ._image.patches[self._current_patch_index].patch.shape[0]
+
+        patch_size_y = self\
+            ._image.patches[self._current_patch_index].patch.shape[1]
+
+        # Draw patch grid
+        if self._grid_img is None:
+            self._grid_img = np.zeros(img.shape, dtype=np.bool)
+
+            for i in range(self.NUM_PATCHES):
+                for j in range(self.NUM_PATCHES):
+                    start_x = i * patch_size_x
+                    stop_x = start_x + patch_size_x
+
+                    start_y = j * patch_size_y
+                    stop_y = start_y + patch_size_y
+
+                    rec_start = (start_x, start_y)
+                    rec_end = (stop_x, stop_y)
+
+                    rr, cc = rectangle_perimeter(rec_start, end=rec_end,
+                                                 shape=self._grid_img.shape)
+
+                    self._grid_img[rr, cc] = True
+
+        img[self._grid_img] = 207
+
+        # Draw current Patch
+        start_x = self._image\
+            .patches[self._current_patch_index].patch_index[0] * patch_size_x
+
+        stop_x = start_x + patch_size_x
+
+        start_y = self\
+            ._image.patches[self._current_patch_index]\
+            .patch_index[1] * patch_size_y
+
+        stop_y = start_y + patch_size_y
+
+        rec_start = (start_x, start_y)
+        rec_end = (stop_x, stop_y)
+
+        rr, cc = rectangle_perimeter(rec_start, end=rec_end,
+                                     shape=self._image.image.shape)
+
+        img[rr, cc] = [255, 255, 0]
+
+        for i in range(4):
+            rec_start = (rec_start[0] + 1, rec_start[1] + 1)
+            rec_end = (rec_end[0] - 1, rec_end[1] - 1)
+
+            rr, cc = rectangle_perimeter(rec_start, end=rec_end,
+                                         shape=self._image.image.shape)
+
+            img[rr, cc] = [255, 255, 0]
+
+        return img
 
     def _get_image_name_from_path(self, path):
         """
