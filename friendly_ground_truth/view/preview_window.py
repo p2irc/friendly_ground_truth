@@ -33,6 +33,12 @@ class PreviewFrame(ttk.Frame):
 
         self._banner_label.pack(side="left")
 
+        self._roi_button = ttk.Button(self._banner, text="ROI",
+                                      command=self._on_roi,
+                                      style="Preview.TButton")
+
+        self._roi_button.pack(side="right")
+
         self._canvas = PatchNavCanvas(self, self.img, self, style)
 
         self._canvas.set_zoom(-5)
@@ -86,6 +92,15 @@ class PreviewFrame(ttk.Frame):
         """
         self.img = img
         self._canvas.new_image(img)
+
+    def _on_roi(self):
+        self._canvas.activate_roi()
+        self._roi_button.state(['disabled'])
+
+    def stop_roi(self, start, end):
+        self._roi_button.state(['!disabled'])
+
+        self.controller.select_roi(start, end)
 
 
 class PreviewWindow(tk.Toplevel):

@@ -24,7 +24,7 @@ from friendly_ground_truth.controller.tools import (ThresholdTool,
 from friendly_ground_truth.controller.undo_manager import UndoManager
 from friendly_ground_truth.model.model import Image
 
-from skimage import segmentation, img_as_ubyte
+# from skimage import segmentation, img_as_ubyte
 from skimage.draw import rectangle_perimeter
 
 from sys import platform
@@ -180,7 +180,8 @@ class Controller():
         self._image_path = file_name
 
         try:
-            self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
+            self._main_window.start_progressbar(self.NUM_PATCHES ** 2,
+                    "Loading Image")
 
             del self._image
             self._image = Image(file_name, 10, self._update_progressbar)
@@ -407,6 +408,47 @@ class Controller():
         patch = self._image.patches[patch_index]
 
         self._next_patch_callback(patch, patch_index)
+
+    def select_roi(self, start, end):
+
+        # Invert for skimage coords
+        start = start[1], start[0]
+        end = end[1], end[0]
+
+        top_left_patch_index = self._image.get_patch_from_coords(start)
+        top_right_patch_index = self._image.get_patch_from_coords((start[0],
+                                                                   end[1]))
+        bottom_left_patch_index = self._image.get_patch_from_coords((end[0],
+                                                                     start[1]))
+        bottom_right_patch_index = self._image.get_patch_from_coords(end)
+
+        # Note that patch indices are (row, column)
+        top_left_patch = self._image.patches[top_left_patch_index].patch_index
+        top_right_patch = self._image\
+            .patches[top_right_patch_index].patch_index
+        bottom_left_patch = self._image\
+            .patches[bottom_left_patch_index].patch_index
+        bottom_right_patch = self._image\
+            .patches[bottom_right_patch_index].patch_index
+
+        good_patches = []
+
+        for i in range(top_left_patch[0], bottom_left_patch[0]+1):
+
+            for j in range(top_left_patch[1], top_right_patch[1]+1):
+                good_patches.append((i, j))
+
+        self._main_window.start_progressbar(self.NUM_PATCHES ** 2 -
+                                            len(good_patches),
+                                            title="Cropping...")
+        for patch in self._image.patches:
+            if patch.patch_index not in good_patches:
+                patch.clear_mask()
+                self._update_progressbar()
+
+        self._cropped_patches = good_patches
+
+        self.navigate_to_patch((start[1], start[0]))
 
     # ===================================================
     # Private Functions
@@ -776,7 +818,7 @@ class Controller():
         self._main_window.load_progress_var\
             .set(self._main_window.load_progress)
 
-        if self._main_window.load_progress >= self.NUM_PATCHES ** 2:
+        if self._main_window.load_progress >= self._main_window.max_progress: # self.NUM_PATCHES ** 2:
             self._main_window.progress_popup.destroy()
 
     def show_saved_preview(self):

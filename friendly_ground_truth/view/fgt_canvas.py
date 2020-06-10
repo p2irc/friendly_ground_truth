@@ -599,6 +599,8 @@ class PatchNavCanvas(ScrollableImageCanvas):
         self.canvas.bind("<ButtonRelease-1>", self._on_click_release)
 
         self._dragged = False
+        self._roi = False
+        self._select_id = None
 
     def _on_click_release(self, event):
         """
@@ -610,6 +612,22 @@ class PatchNavCanvas(ScrollableImageCanvas):
         Returns:
             None
         """
+
+        if self._roi:
+            self._roi = False
+            self.canvas.delete(self._select_id)
+            self._select_id = None
+
+            start = self._convert_canvas_coord_to_image(self._select_x,
+                                                        self._select_y)
+
+            end = self._convert_canvas_coord_to_image(self._select_end_x,
+                                                      self._select_end_y)
+
+            self._main_window.stop_roi(start, end)
+
+            self.canvas.config(cursor="arrow")
+            return
 
         if self._dragged:
             self._dragged = False
@@ -623,6 +641,15 @@ class PatchNavCanvas(ScrollableImageCanvas):
         pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
 
         self._main_window.navigate_to_patch(pos)
+
+    def _convert_canvas_coord_to_image(self, x, y):
+
+        container_coords = self.canvas.coords(self.container)
+        pos = x - container_coords[0], y - container_coords[1]
+
+        pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
+
+        return pos
 
     def set_image(self, image):
 
@@ -728,9 +755,43 @@ class PatchNavCanvas(ScrollableImageCanvas):
         Postconditions:
             The canvas is moved to the event position.
         """
-        self._dragged = True
+        if self._roi:
+            if self._select_id is None:
+                self._create_selection_rect(event)
+            else:
+                self._update_selection_rect(event)
 
-        super()._move_to(event)
+        else:
+
+            self._dragged = True
+
+            super()._move_to(event)
+
+    def _update_selection_rect(self, event):
+
+        pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+
+        self.canvas.coords(self._select_id, self._select_x, self._select_y,
+                           pos[0], pos[1])
+
+        self._select_end_x = pos[0]
+        self._select_end_y = pos[1]
+
+    def _create_selection_rect(self, event):
+
+        pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+
+        self._select_id = self.canvas.create_rectangle(pos[0], pos[1],
+                                                       pos[0], pos[1],
+                                                       dash=(2, 2), fill='',
+                                                       outline='white')
+
+        self._select_x = pos[0]
+        self._select_y = pos[1]
+
+    def activate_roi(self):
+        self._roi = True
+        self.canvas.config(cursor="cross")
 
 
 class FGTCanvas(ScrollableImageCanvas):

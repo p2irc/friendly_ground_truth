@@ -226,7 +226,25 @@ settings = {
                     "borderwidth": 3,
                     "relief": "groove"
                 }
-            }
+            },
+        "Preview.TButton": {
+            "configure": {
+                    "background": colours['bg_level_2'],
+                    "foreground": colours['fg_level_2'],
+                    "borderwidth": 2,
+                    "bordercolor": colours['bg_level_2']
+                },
+            "map": {
+                "background": [('pressed', colours['toolbar_activate']),
+                               ('disabled', colours['toolbar_activate']),
+                               ('active', colours['bg_level_3'])],
+                "foreground": [],
+                "relief": [('pressed', 'sunken'), ('disabled', 'sunken'),
+                           ('!disabled', 'flat')]
+                }
+
+            },
+
 
 }
 

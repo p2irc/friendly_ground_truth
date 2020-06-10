@@ -219,13 +219,13 @@ class MainWindow(ttk.Frame):
         if self._preview_window is not None:
             self._preview_window.set_theme(self.style)
 
-    def start_progressbar(self, num_patches):
+    def start_progressbar(self, num_patches, title):
         """
         Start displaying a progressbar.
 
         Args:
             num_patches: The number of patches that are being loaded.
-
+            title: The title for the window.
         Returns:
             None
 
@@ -237,8 +237,10 @@ class MainWindow(ttk.Frame):
 
         frame = ttk.Frame(self.progress_popup)
 
-        ttk.Label(frame, text="Image Loading.")\
+        ttk.Label(frame, text=title)\
             .grid(row=0, column=0)
+
+        self.max_progress = num_patches
 
         self.load_progress = 0
         self.load_progress_var = tk.DoubleVar()
