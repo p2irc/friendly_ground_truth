@@ -16,6 +16,7 @@ from tkinter import ttk
 import threading
 
 from friendly_ground_truth.view.icons import icon_strings as icns
+from friendly_ground_truth.controller.event_logger import EventLogger
 
 module_logger = logging.getLogger('friendly_gt.controller.tools')
 
@@ -74,6 +75,8 @@ class FGTTool():
         self._observers = []
         self._group = group
         self._darkmode_icon_string = darkmode_icon_string
+
+        self._event_logger = EventLogger()
 
     @property
     def name(self):
@@ -308,6 +311,12 @@ class ThresholdTool(FGTTool):
         if value <= 1 and value >= 0:
 
             self._threshold = value
+
+            self._event_logger.log_event("threshold_change",
+                                         self._patch.patch_index,
+                                         "threshold_select",
+                                         new_threshold_value=self._threshold)
+
             if not self._new_patch:
                 self._patch.threshold = value
 
@@ -546,7 +555,15 @@ class AddRegionTool(FGTTool):
         """
 
         val = self._brush_sizer_var.get()
-        self.brush_radius = val
+        self._brush_radius = val
+
+        self._event_logger.log_event("brush_size_change",
+                                     self._patch.patch_index,
+                                     "add_region",
+                                     new_brush_size=self._brush_radius)
+
+        for ob in self._brush_observers:
+            ob(self._brush_radius)
 
     def on_adjust(self, direction):
         """
@@ -734,7 +751,15 @@ class RemoveRegionTool(FGTTool):
         """
 
         val = self._brush_sizer_var.get()
-        self.brush_radius = val
+        self._brush_radius = val
+
+        self._event_logger.log_event("brush_size_change",
+                                     self._patch.patch_index,
+                                     "remove_region",
+                                     new_brush_size=self._brush_radius)
+
+        for ob in self._brush_observers:
+            ob(self._brush_radius)
 
     def on_adjust(self, direction):
         """

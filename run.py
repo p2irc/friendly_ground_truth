@@ -34,20 +34,30 @@ if len(sys.argv) > 1:
 
 logger = logging.getLogger('friendly_gt')
 
+event_logger = logging.getLogger('event_logger')
+event_logger.setLevel(logging.INFO)
+
 if debug:
     logger.setLevel(logging.DEBUG)
 
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 
+fh = logging.FileHandler('events.log')
+fh.setLevel(logging.INFO)
+
 # create formatter and add it to the handlers
 log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 formatter = logging.Formatter(log_format)
 ch.setFormatter(formatter)
 
+event_format = '%(asctime)s - %(message)s'
+event_formatter = logging.Formatter(event_format)
+fh.setFormatter(event_formatter)
+
 # add the handlers to the logger
 logger.addHandler(ch)
-
+event_logger.addHandler(fh)
 
 if __name__ == '__main__':
 

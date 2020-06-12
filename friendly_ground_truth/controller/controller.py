@@ -23,6 +23,7 @@ from friendly_ground_truth.controller.tools import (ThresholdTool,
 
 from friendly_ground_truth.controller.undo_manager import UndoManager
 from friendly_ground_truth.model.model import Image
+from friendly_ground_truth.controller.event_logger import EventLogger
 
 # from skimage import segmentation, img_as_ubyte
 from skimage.draw import rectangle_perimeter
@@ -41,6 +42,8 @@ import numpy as np
 import logging
 module_logger = logging.getLogger('friendly_gt.controller.controller')
 
+import time
+import datetime
 
 class Controller():
     """
@@ -78,6 +81,9 @@ class Controller():
         # For logging
         self._logger = logging.getLogger('friendly_gt.controller.'
                                          'controller.Controller')
+
+        self._event_logger = EventLogger()
+
         # The last directory used to load an image
         self._last_load_dir = None
         # The last directory used to save an image
@@ -190,6 +196,14 @@ class Controller():
         except FileNotFoundError:
             self._logger.exception("There was a problem loading the image.")
             return
+
+        image_filename = os.path.split(file_name)[-1]
+        image_shape = self._image.image.shape
+        patch_grid_shape = self._image.patches[0].patch.shape
+
+        self._event_logger.log_load_image(image_filename, image_shape[1],
+                                          image_shape[0], patch_grid_shape[1],
+                                          patch_grid_shape[0])
 
         self._current_patch_index = 0
 
@@ -876,3 +890,5 @@ class Controller():
         basename = os.path.basename(path)
 
         return os.path.splitext(basename)[0] + '_mask.png'
+
+
