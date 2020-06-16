@@ -46,6 +46,7 @@ from tkinter import ttk
 import threading
 
 from friendly_ground_truth.view.icons import icon_strings as icns
+from friendly_ground_truth.controller.event_logger import EventLogger
 
 module_logger = logging.getLogger(&#39;friendly_gt.controller.tools&#39;)
 
@@ -72,7 +73,8 @@ class FGTTool():
     def __init__(self, name, icon_string, id,  undo_manager,
                  key_mapping, cursor=&#39;none&#39;, persistant=True,
                  activation_callback=None, group=None,
-                 darkmode_icon_string=None):
+                 darkmode_icon_string=None,
+                 event_logger=None):
         &#34;&#34;&#34;
         Initialize the object
 
@@ -104,6 +106,8 @@ class FGTTool():
         self._observers = []
         self._group = group
         self._darkmode_icon_string = darkmode_icon_string
+
+        self._event_logger = event_logger
 
     @property
     def name(self):
@@ -309,13 +313,14 @@ class ThresholdTool(FGTTool):
         increment: The amount to change the threshold by when adjusting
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager):
+    def __init__(self, undo_manager, event_logger=None):
 
         super(ThresholdTool, self)\
             .__init__(&#34;Threshold Tool&#34;, icns.threshold_icon, 1,
                       undo_manager, &#34;t&#34;, cursor=&#39;arrow&#39;, persistant=True,
                       activation_callback=None, group=&#34;Markups&#34;,
-                      darkmode_icon_string=icns.darkmode_thresh_icon)
+                      darkmode_icon_string=icns.darkmode_thresh_icon,
+                      event_logger=event_logger)
 
         self._logger = logging\
             .getLogger(&#39;friendly_gt.controller.tools.ThresholdTool&#39;)
@@ -338,6 +343,11 @@ class ThresholdTool(FGTTool):
         if value &lt;= 1 and value &gt;= 0:
 
             self._threshold = value
+
+            self._event_logger.log_event(&#34;threshold_change&#34;,
+                                         self._patch.patch_index,
+                                         new_threshold_value=self._threshold)
+
             if not self._new_patch:
                 self._patch.threshold = value
 
@@ -492,12 +502,13 @@ class AddRegionTool(FGTTool):
         brush_radius: The current radius of the brush
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager):
+    def __init__(self, undo_manager, event_logger=None):
         super(AddRegionTool, self)\
             .__init__(&#34;Add Region Tool&#34;, icns.add_region_icon, 2,
                       undo_manager, &#34;a&#34;, cursor=&#39;brush&#39;, persistant=True,
                       group=&#34;Markups&#34;,
-                      darkmode_icon_string=icns.darkmode_add_region_icon)
+                      darkmode_icon_string=icns.darkmode_add_region_icon,
+                      event_logger=event_logger)
 
         self._logger = logging\
             .getLogger(&#39;friendly_gt.controller.tools.AddRegionTool&#39;)
@@ -576,7 +587,14 @@ class AddRegionTool(FGTTool):
         &#34;&#34;&#34;
 
         val = self._brush_sizer_var.get()
-        self.brush_radius = val
+        self._brush_radius = val
+
+        self._event_logger.log_event(&#34;brush_size_change&#34;,
+                                     self._patch.patch_index,
+                                     new_brush_size=self._brush_radius)
+
+        for ob in self._brush_observers:
+            ob(self._brush_radius)
 
     def on_adjust(self, direction):
         &#34;&#34;&#34;
@@ -683,12 +701,13 @@ class RemoveRegionTool(FGTTool):
         brush_radius: The current radius of the brush
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager):
+    def __init__(self, undo_manager, event_logger=None):
         super(RemoveRegionTool, self)\
             .__init__(&#34;Remove Region Tool&#34;, icns.remove_region_icon, 3,
                       undo_manager, &#34;r&#34;, cursor=&#34;brush&#34;, persistant=True,
                       group=&#34;Markups&#34;,
-                      darkmode_icon_string=icns.darkmode_remove_region_icon)
+                      darkmode_icon_string=icns.darkmode_remove_region_icon,
+                      event_logger=event_logger)
 
         self._logger = logging\
             .getLogger(&#39;friendly_gt.controller.tools.RemoveRegionTool&#39;)
@@ -764,7 +783,14 @@ class RemoveRegionTool(FGTTool):
         &#34;&#34;&#34;
 
         val = self._brush_sizer_var.get()
-        self.brush_radius = val
+        self._brush_radius = val
+
+        self._event_logger.log_event(&#34;brush_size_change&#34;,
+                                     self._patch.patch_index,
+                                     new_brush_size=self._brush_radius)
+
+        for ob in self._brush_observers:
+            ob(self._brush_radius)
 
     def on_adjust(self, direction):
         &#34;&#34;&#34;
@@ -869,7 +895,7 @@ class NoRootTool(FGTTool):
     A tool that marks a patch as having no foreground.
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager, next_patch_function):
+    def __init__(self, undo_manager, next_patch_function, event_logger=None):
         &#34;&#34;&#34;
         Create the tool
 
@@ -886,7 +912,8 @@ class NoRootTool(FGTTool):
                       undo_manager, &#34;x&#34;, cursor=&#39;arrow&#39;, persistant=False,
                       activation_callback=next_patch_function,
                       group=&#34;Navigation&#34;,
-                      darkmode_icon_string=icns.darkmode_no_root_icon)
+                      darkmode_icon_string=icns.darkmode_no_root_icon,
+                      event_logger=event_logger)
 
         self._logger = logging\
             .getLogger(&#39;friendly_gt.controller.tools.NoRootTool&#39;)
@@ -910,6 +937,10 @@ class NoRootTool(FGTTool):
 
         self._no_root()
         patch, index = self._next_patch(current_patch_num)
+
+        self._event_logger.log_event(&#34;no_root&#34;,
+                                     self._patch.patch_index,
+                                     new_patch_coordinate=patch.patch_index)
 
         self._activation_callback(patch, index)
 
@@ -959,12 +990,13 @@ class FloodAddTool(FGTTool):
                    adjust method
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager):
+    def __init__(self, undo_manager, event_logger=None):
         super(FloodAddTool, self)\
             .__init__(&#34;Flood Add Tool&#34;, icns.flood_add_icon, 5,
                       undo_manager, &#34;f&#34;, cursor=&#39;crosshair&#39;, persistant=True,
                       group=&#34;Markups&#34;,
-                      darkmode_icon_string=icns.darkmode_flood_add_icon)
+                      darkmode_icon_string=icns.darkmode_flood_add_icon,
+                      event_logger=event_logger)
 
         self._logger = logging\
             .getLogger(&#39;friendly_gt.controller.tools.FloodAddTool&#39;)
@@ -975,6 +1007,8 @@ class FloodAddTool(FGTTool):
         self._prev_position = None
         self._flood_slider = None
         self._flood_slider_var = None
+
+        self._slider_init = False
 
     @property
     def tolerance(self):
@@ -1008,6 +1042,7 @@ class FloodAddTool(FGTTool):
     def patch(self, patch):
         self._patch = patch
         self._prev_position = None
+        self._slider_init = False
 
     def on_click(self, position):
         &#34;&#34;&#34;
@@ -1114,8 +1149,13 @@ class FloodAddTool(FGTTool):
         Postconditions:
             The tolerance for the patch is udpated accordingly.
         &#34;&#34;&#34;
-        self.tolerance = float(value)
+        if self._slider_init:
+            self.tolerance = float(value)
 
+            self._event_logger.log_event(&#34;flood_threshold_change&#34;,
+                                     self._patch.patch_index,
+                                     new_flood_threshold=self._tolerance)
+        self._slider_init = True
 
 class FloodRemoveTool(FGTTool):
     &#34;&#34;&#34;
@@ -1125,12 +1165,13 @@ class FloodRemoveTool(FGTTool):
         tolerance: The tolerance for pixels to remove from the region.
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager):
+    def __init__(self, undo_manager, event_logger=None):
         super(FloodRemoveTool, self)\
             .__init__(&#34;Flood Remove Tool&#34;, icns.flood_remove_icon, 6,
                       undo_manager, &#34;l&#34;, cursor=&#39;crosshair&#39;, persistant=True,
                       group=&#34;Markups&#34;,
-                      darkmode_icon_string=icns.darkmode_flood_remove_icon)
+                      darkmode_icon_string=icns.darkmode_flood_remove_icon,
+                      event_logger=event_logger)
 
         self._logger = logging\
             .getLogger(&#39;friendly_gt.controller.tools.FloodRemoveTool&#39;)
@@ -1141,6 +1182,7 @@ class FloodRemoveTool(FGTTool):
         self._prev_position = None
         self._flood_slider = None
         self._flood_slider_var = None
+        self._slider_init = False
 
     @property
     def tolerance(self):
@@ -1174,6 +1216,7 @@ class FloodRemoveTool(FGTTool):
     def patch(self, patch):
         self._patch = patch
         self._prev_position = None
+        self._slider_init = False
 
     def on_click(self, position):
         &#34;&#34;&#34;
@@ -1283,7 +1326,15 @@ class FloodRemoveTool(FGTTool):
         Postconditions:
             The tolerance for the patch is udpated accordingly.
         &#34;&#34;&#34;
-        self.tolerance = float(value)
+
+        if self._slider_init:
+            self.tolerance = float(value)
+
+            self._event_logger.log_event(&#34;flood_threshold_change&#34;,
+                                         self._patch.patch_index,
+                                         new_flood_threshold=self._tolerance)
+
+        self._slider_init = True
 
 
 class PreviousPatchTool(FGTTool):
@@ -1294,7 +1345,7 @@ class PreviousPatchTool(FGTTool):
         image: The image to operate on
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager, prev_patch_function):
+    def __init__(self, undo_manager, prev_patch_function, event_logger=None):
         &#34;&#34;&#34;
         Create the tool.
 
@@ -1312,7 +1363,8 @@ class PreviousPatchTool(FGTTool):
                       persistant=False,
                       activation_callback=prev_patch_function,
                       group=&#34;Navigation&#34;,
-                      darkmode_icon_string=icns.darkmode_prev_patch_icon)
+                      darkmode_icon_string=icns.darkmode_prev_patch_icon,
+                      event_logger=event_logger)
 
     def on_activate(self, current_patch_num):
         &#34;&#34;&#34;
@@ -1326,6 +1378,11 @@ class PreviousPatchTool(FGTTool):
             None
         &#34;&#34;&#34;
         patch, index = self._prev_patch(current_patch_num)
+
+        self._event_logger.log_event(&#34;previous_patch&#34;,
+                                     self._patch.patch_index,
+                                     new_patch_coordinate=patch.patch_index)
+
         self._activation_callback(patch, index)
 
     def _prev_patch(self, current_patch_num):
@@ -1356,7 +1413,7 @@ class NextPatchTool(FGTTool):
     A Tool that moves to the next patch for the current image.
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager, next_patch_function):
+    def __init__(self, undo_manager, next_patch_function, event_logger=None):
         &#34;&#34;&#34;
         Create the tool.
 
@@ -1373,7 +1430,8 @@ class NextPatchTool(FGTTool):
                       persistant=False,
                       activation_callback=next_patch_function,
                       group=&#34;Navigation&#34;,
-                      darkmode_icon_string=icns.darkmode_next_patch_icon)
+                      darkmode_icon_string=icns.darkmode_next_patch_icon,
+                      event_logger=event_logger)
 
     def on_activate(self, current_patch_num):
         &#34;&#34;&#34;
@@ -1387,6 +1445,11 @@ class NextPatchTool(FGTTool):
             None
         &#34;&#34;&#34;
         patch, index = self._next_patch(current_patch_num)
+
+        self._event_logger.log_event(&#34;next_patch&#34;,
+                                     self._patch.patch_index,
+                                     new_patch_coordinate=patch.patch_index)
+
         self._activation_callback(patch, index)
 
     def _next_patch(self, current_patch_num):
@@ -1417,7 +1480,7 @@ class UndoTool(FGTTool):
     A tool for undoing mistakes.
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager, undo_callback):
+    def __init__(self, undo_manager, undo_callback, event_logger=None):
         &#34;&#34;&#34;
         Initialize the tool
 
@@ -1432,7 +1495,8 @@ class UndoTool(FGTTool):
             .__init__(&#34;Undo&#34;, icns.undo_icon, 9, undo_manager,
                       &#34;CTRL+z&#34;, cursor=&#39;arrow&#39;, persistant=False,
                       activation_callback=undo_callback, group=&#34;Undo&#34;,
-                      darkmode_icon_string=icns.darkmode_undo_icon)
+                      darkmode_icon_string=icns.darkmode_undo_icon,
+                      event_logger=event_logger)
 
     def on_activate(self, current_patch_num):
         &#34;&#34;&#34;
@@ -1448,6 +1512,11 @@ class UndoTool(FGTTool):
             The last action is undone and put on the redo stack.
         &#34;&#34;&#34;
         patch, string = self._undo()
+
+        self._event_logger.log_event(&#34;undo&#34;,
+                                     self._patch.patch_index)
+
+
         self._activation_callback(patch, string)
         self._notify_observers()
 
@@ -1467,7 +1536,7 @@ class RedoTool(FGTTool):
     A tool for redoing undid mistakes.
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager, redo_callback):
+    def __init__(self, undo_manager, redo_callback, event_logger=None):
         &#34;&#34;&#34;
         Initialize the tool
 
@@ -1482,7 +1551,8 @@ class RedoTool(FGTTool):
             .__init__(&#34;Redo&#34;, icns.redo_icon, 10, undo_manager, &#34;CTRL+r&#34;,
                       cursor=&#39;arrow&#39;, persistant=False,
                       activation_callback=redo_callback, group=&#34;Undo&#34;,
-                      darkmode_icon_string=icns.darkmode_redo_icon)
+                      darkmode_icon_string=icns.darkmode_redo_icon,
+                      event_logger=event_logger)
 
     def on_activate(self, current_patch_num):
         &#34;&#34;&#34;
@@ -1498,6 +1568,10 @@ class RedoTool(FGTTool):
             The last undone action is redone and put on the undo stack.
         &#34;&#34;&#34;
         patch, string = self._redo()
+
+        self._event_logger.log_event(&#34;redo&#34;,
+                                     self._patch.patch_index)
+
         self._activation_callback(patch, string)
         self._notify_observers()
 
@@ -1523,7 +1597,7 @@ class RedoTool(FGTTool):
 <dl>
 <dt id="friendly_ground_truth.controller.tools.AddRegionTool"><code class="flex name class">
 <span>class <span class="ident">AddRegionTool</span></span>
-<span>(</span><span>undo_manager)</span>
+<span>(</span><span>undo_manager, event_logger=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A tool acting as a paint brush for adding regions to the mask</p>
@@ -1569,12 +1643,13 @@ identifies what group it is a part of.</dd>
         brush_radius: The current radius of the brush
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager):
+    def __init__(self, undo_manager, event_logger=None):
         super(AddRegionTool, self)\
             .__init__(&#34;Add Region Tool&#34;, icns.add_region_icon, 2,
                       undo_manager, &#34;a&#34;, cursor=&#39;brush&#39;, persistant=True,
                       group=&#34;Markups&#34;,
-                      darkmode_icon_string=icns.darkmode_add_region_icon)
+                      darkmode_icon_string=icns.darkmode_add_region_icon,
+                      event_logger=event_logger)
 
         self._logger = logging\
             .getLogger(&#39;friendly_gt.controller.tools.AddRegionTool&#39;)
@@ -1653,7 +1728,14 @@ identifies what group it is a part of.</dd>
         &#34;&#34;&#34;
 
         val = self._brush_sizer_var.get()
-        self.brush_radius = val
+        self._brush_radius = val
+
+        self._event_logger.log_event(&#34;brush_size_change&#34;,
+                                     self._patch.patch_index,
+                                     new_brush_size=self._brush_radius)
+
+        for ob in self._brush_observers:
+            ob(self._brush_radius)
 
     def on_adjust(self, direction):
         &#34;&#34;&#34;
@@ -2025,7 +2107,7 @@ def brush_radius(self):
 </dd>
 <dt id="friendly_ground_truth.controller.tools.FGTTool"><code class="flex name class">
 <span>class <span class="ident">FGTTool</span></span>
-<span>(</span><span>name, icon_string, id, undo_manager, key_mapping, cursor='none', persistant=True, activation_callback=None, group=None, darkmode_icon_string=None)</span>
+<span>(</span><span>name, icon_string, id, undo_manager, key_mapping, cursor='none', persistant=True, activation_callback=None, group=None, darkmode_icon_string=None, event_logger=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A class representing a tool that can be used on the image.</p>
@@ -2104,7 +2186,8 @@ identifies what group it is a part of.</dd>
     def __init__(self, name, icon_string, id,  undo_manager,
                  key_mapping, cursor=&#39;none&#39;, persistant=True,
                  activation_callback=None, group=None,
-                 darkmode_icon_string=None):
+                 darkmode_icon_string=None,
+                 event_logger=None):
         &#34;&#34;&#34;
         Initialize the object
 
@@ -2136,6 +2219,8 @@ identifies what group it is a part of.</dd>
         self._observers = []
         self._group = group
         self._darkmode_icon_string = darkmode_icon_string
+
+        self._event_logger = event_logger
 
     @property
     def name(self):
@@ -2783,7 +2868,7 @@ list</dd>
 </dd>
 <dt id="friendly_ground_truth.controller.tools.FloodAddTool"><code class="flex name class">
 <span>class <span class="ident">FloodAddTool</span></span>
-<span>(</span><span>undo_manager)</span>
+<span>(</span><span>undo_manager, event_logger=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A tool that allows adding a region based on pixel tolerance.</p>
@@ -2834,12 +2919,13 @@ identifies what group it is a part of.</dd>
                    adjust method
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager):
+    def __init__(self, undo_manager, event_logger=None):
         super(FloodAddTool, self)\
             .__init__(&#34;Flood Add Tool&#34;, icns.flood_add_icon, 5,
                       undo_manager, &#34;f&#34;, cursor=&#39;crosshair&#39;, persistant=True,
                       group=&#34;Markups&#34;,
-                      darkmode_icon_string=icns.darkmode_flood_add_icon)
+                      darkmode_icon_string=icns.darkmode_flood_add_icon,
+                      event_logger=event_logger)
 
         self._logger = logging\
             .getLogger(&#39;friendly_gt.controller.tools.FloodAddTool&#39;)
@@ -2850,6 +2936,8 @@ identifies what group it is a part of.</dd>
         self._prev_position = None
         self._flood_slider = None
         self._flood_slider_var = None
+
+        self._slider_init = False
 
     @property
     def tolerance(self):
@@ -2883,6 +2971,7 @@ identifies what group it is a part of.</dd>
     def patch(self, patch):
         self._patch = patch
         self._prev_position = None
+        self._slider_init = False
 
     def on_click(self, position):
         &#34;&#34;&#34;
@@ -2989,7 +3078,13 @@ identifies what group it is a part of.</dd>
         Postconditions:
             The tolerance for the patch is udpated accordingly.
         &#34;&#34;&#34;
-        self.tolerance = float(value)</code></pre>
+        if self._slider_init:
+            self.tolerance = float(value)
+
+            self._event_logger.log_event(&#34;flood_threshold_change&#34;,
+                                     self._patch.patch_index,
+                                     new_flood_threshold=self._tolerance)
+        self._slider_init = True</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -3185,7 +3280,7 @@ def tolerance(self):
 </dd>
 <dt id="friendly_ground_truth.controller.tools.FloodRemoveTool"><code class="flex name class">
 <span>class <span class="ident">FloodRemoveTool</span></span>
-<span>(</span><span>undo_manager)</span>
+<span>(</span><span>undo_manager, event_logger=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A tool that allows removing a region based on pixel tolerance.</p>
@@ -3231,12 +3326,13 @@ identifies what group it is a part of.</dd>
         tolerance: The tolerance for pixels to remove from the region.
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager):
+    def __init__(self, undo_manager, event_logger=None):
         super(FloodRemoveTool, self)\
             .__init__(&#34;Flood Remove Tool&#34;, icns.flood_remove_icon, 6,
                       undo_manager, &#34;l&#34;, cursor=&#39;crosshair&#39;, persistant=True,
                       group=&#34;Markups&#34;,
-                      darkmode_icon_string=icns.darkmode_flood_remove_icon)
+                      darkmode_icon_string=icns.darkmode_flood_remove_icon,
+                      event_logger=event_logger)
 
         self._logger = logging\
             .getLogger(&#39;friendly_gt.controller.tools.FloodRemoveTool&#39;)
@@ -3247,6 +3343,7 @@ identifies what group it is a part of.</dd>
         self._prev_position = None
         self._flood_slider = None
         self._flood_slider_var = None
+        self._slider_init = False
 
     @property
     def tolerance(self):
@@ -3280,6 +3377,7 @@ identifies what group it is a part of.</dd>
     def patch(self, patch):
         self._patch = patch
         self._prev_position = None
+        self._slider_init = False
 
     def on_click(self, position):
         &#34;&#34;&#34;
@@ -3389,7 +3487,15 @@ identifies what group it is a part of.</dd>
         Postconditions:
             The tolerance for the patch is udpated accordingly.
         &#34;&#34;&#34;
-        self.tolerance = float(value)</code></pre>
+
+        if self._slider_init:
+            self.tolerance = float(value)
+
+            self._event_logger.log_event(&#34;flood_threshold_change&#34;,
+                                         self._patch.patch_index,
+                                         new_flood_threshold=self._tolerance)
+
+        self._slider_init = True</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -3586,7 +3692,7 @@ def tolerance(self):
 </dd>
 <dt id="friendly_ground_truth.controller.tools.NextPatchTool"><code class="flex name class">
 <span>class <span class="ident">NextPatchTool</span></span>
-<span>(</span><span>undo_manager, next_patch_function)</span>
+<span>(</span><span>undo_manager, next_patch_function, event_logger=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A Tool that moves to the next patch for the current image.</p>
@@ -3613,7 +3719,7 @@ index</dd>
     A Tool that moves to the next patch for the current image.
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager, next_patch_function):
+    def __init__(self, undo_manager, next_patch_function, event_logger=None):
         &#34;&#34;&#34;
         Create the tool.
 
@@ -3630,7 +3736,8 @@ index</dd>
                       persistant=False,
                       activation_callback=next_patch_function,
                       group=&#34;Navigation&#34;,
-                      darkmode_icon_string=icns.darkmode_next_patch_icon)
+                      darkmode_icon_string=icns.darkmode_next_patch_icon,
+                      event_logger=event_logger)
 
     def on_activate(self, current_patch_num):
         &#34;&#34;&#34;
@@ -3644,6 +3751,11 @@ index</dd>
             None
         &#34;&#34;&#34;
         patch, index = self._next_patch(current_patch_num)
+
+        self._event_logger.log_event(&#34;next_patch&#34;,
+                                     self._patch.patch_index,
+                                     new_patch_coordinate=patch.patch_index)
+
         self._activation_callback(patch, index)
 
     def _next_patch(self, current_patch_num):
@@ -3706,6 +3818,11 @@ list</dd>
         None
     &#34;&#34;&#34;
     patch, index = self._next_patch(current_patch_num)
+
+    self._event_logger.log_event(&#34;next_patch&#34;,
+                                 self._patch.patch_index,
+                                 new_patch_coordinate=patch.patch_index)
+
     self._activation_callback(patch, index)</code></pre>
 </details>
 </dd>
@@ -3728,7 +3845,7 @@ list</dd>
 </dd>
 <dt id="friendly_ground_truth.controller.tools.NoRootTool"><code class="flex name class">
 <span>class <span class="ident">NoRootTool</span></span>
-<span>(</span><span>undo_manager, next_patch_function)</span>
+<span>(</span><span>undo_manager, next_patch_function, event_logger=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A tool that marks a patch as having no foreground.</p>
@@ -3752,7 +3869,7 @@ Must have a patch and index parameter</dd>
     A tool that marks a patch as having no foreground.
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager, next_patch_function):
+    def __init__(self, undo_manager, next_patch_function, event_logger=None):
         &#34;&#34;&#34;
         Create the tool
 
@@ -3769,7 +3886,8 @@ Must have a patch and index parameter</dd>
                       undo_manager, &#34;x&#34;, cursor=&#39;arrow&#39;, persistant=False,
                       activation_callback=next_patch_function,
                       group=&#34;Navigation&#34;,
-                      darkmode_icon_string=icns.darkmode_no_root_icon)
+                      darkmode_icon_string=icns.darkmode_no_root_icon,
+                      event_logger=event_logger)
 
         self._logger = logging\
             .getLogger(&#39;friendly_gt.controller.tools.NoRootTool&#39;)
@@ -3793,6 +3911,10 @@ Must have a patch and index parameter</dd>
 
         self._no_root()
         patch, index = self._next_patch(current_patch_num)
+
+        self._event_logger.log_event(&#34;no_root&#34;,
+                                     self._patch.patch_index,
+                                     new_patch_coordinate=patch.patch_index)
 
         self._activation_callback(patch, index)
 
@@ -3880,6 +4002,10 @@ displayed.</p></div>
     self._no_root()
     patch, index = self._next_patch(current_patch_num)
 
+    self._event_logger.log_event(&#34;no_root&#34;,
+                                 self._patch.patch_index,
+                                 new_patch_coordinate=patch.patch_index)
+
     self._activation_callback(patch, index)</code></pre>
 </details>
 </dd>
@@ -3902,7 +4028,7 @@ displayed.</p></div>
 </dd>
 <dt id="friendly_ground_truth.controller.tools.PreviousPatchTool"><code class="flex name class">
 <span>class <span class="ident">PreviousPatchTool</span></span>
-<span>(</span><span>undo_manager, prev_patch_function)</span>
+<span>(</span><span>undo_manager, prev_patch_function, event_logger=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A Tool that moves to the previous patch for the current image.</p>
@@ -3937,7 +4063,7 @@ patch index representing the next patch</dd>
         image: The image to operate on
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager, prev_patch_function):
+    def __init__(self, undo_manager, prev_patch_function, event_logger=None):
         &#34;&#34;&#34;
         Create the tool.
 
@@ -3955,7 +4081,8 @@ patch index representing the next patch</dd>
                       persistant=False,
                       activation_callback=prev_patch_function,
                       group=&#34;Navigation&#34;,
-                      darkmode_icon_string=icns.darkmode_prev_patch_icon)
+                      darkmode_icon_string=icns.darkmode_prev_patch_icon,
+                      event_logger=event_logger)
 
     def on_activate(self, current_patch_num):
         &#34;&#34;&#34;
@@ -3969,6 +4096,11 @@ patch index representing the next patch</dd>
             None
         &#34;&#34;&#34;
         patch, index = self._prev_patch(current_patch_num)
+
+        self._event_logger.log_event(&#34;previous_patch&#34;,
+                                     self._patch.patch_index,
+                                     new_patch_coordinate=patch.patch_index)
+
         self._activation_callback(patch, index)
 
     def _prev_patch(self, current_patch_num):
@@ -4031,6 +4163,11 @@ list</dd>
         None
     &#34;&#34;&#34;
     patch, index = self._prev_patch(current_patch_num)
+
+    self._event_logger.log_event(&#34;previous_patch&#34;,
+                                 self._patch.patch_index,
+                                 new_patch_coordinate=patch.patch_index)
+
     self._activation_callback(patch, index)</code></pre>
 </details>
 </dd>
@@ -4053,7 +4190,7 @@ list</dd>
 </dd>
 <dt id="friendly_ground_truth.controller.tools.RedoTool"><code class="flex name class">
 <span>class <span class="ident">RedoTool</span></span>
-<span>(</span><span>undo_manager, redo_callback)</span>
+<span>(</span><span>undo_manager, redo_callback, event_logger=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A tool for redoing undid mistakes.</p>
@@ -4080,7 +4217,7 @@ when the undo action is taken.</dd>
     A tool for redoing undid mistakes.
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager, redo_callback):
+    def __init__(self, undo_manager, redo_callback, event_logger=None):
         &#34;&#34;&#34;
         Initialize the tool
 
@@ -4095,7 +4232,8 @@ when the undo action is taken.</dd>
             .__init__(&#34;Redo&#34;, icns.redo_icon, 10, undo_manager, &#34;CTRL+r&#34;,
                       cursor=&#39;arrow&#39;, persistant=False,
                       activation_callback=redo_callback, group=&#34;Undo&#34;,
-                      darkmode_icon_string=icns.darkmode_redo_icon)
+                      darkmode_icon_string=icns.darkmode_redo_icon,
+                      event_logger=event_logger)
 
     def on_activate(self, current_patch_num):
         &#34;&#34;&#34;
@@ -4111,6 +4249,10 @@ when the undo action is taken.</dd>
             The last undone action is redone and put on the undo stack.
         &#34;&#34;&#34;
         patch, string = self._redo()
+
+        self._event_logger.log_event(&#34;redo&#34;,
+                                     self._patch.patch_index)
+
         self._activation_callback(patch, string)
         self._notify_observers()
 
@@ -4165,6 +4307,10 @@ when the undo action is taken.</dd>
         The last undone action is redone and put on the undo stack.
     &#34;&#34;&#34;
     patch, string = self._redo()
+
+    self._event_logger.log_event(&#34;redo&#34;,
+                                 self._patch.patch_index)
+
     self._activation_callback(patch, string)
     self._notify_observers()</code></pre>
 </details>
@@ -4188,7 +4334,7 @@ when the undo action is taken.</dd>
 </dd>
 <dt id="friendly_ground_truth.controller.tools.RemoveRegionTool"><code class="flex name class">
 <span>class <span class="ident">RemoveRegionTool</span></span>
-<span>(</span><span>undo_manager)</span>
+<span>(</span><span>undo_manager, event_logger=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A tool acting as a paint brush for removing regions from the mask</p>
@@ -4234,12 +4380,13 @@ identifies what group it is a part of.</dd>
         brush_radius: The current radius of the brush
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager):
+    def __init__(self, undo_manager, event_logger=None):
         super(RemoveRegionTool, self)\
             .__init__(&#34;Remove Region Tool&#34;, icns.remove_region_icon, 3,
                       undo_manager, &#34;r&#34;, cursor=&#34;brush&#34;, persistant=True,
                       group=&#34;Markups&#34;,
-                      darkmode_icon_string=icns.darkmode_remove_region_icon)
+                      darkmode_icon_string=icns.darkmode_remove_region_icon,
+                      event_logger=event_logger)
 
         self._logger = logging\
             .getLogger(&#39;friendly_gt.controller.tools.RemoveRegionTool&#39;)
@@ -4315,7 +4462,14 @@ identifies what group it is a part of.</dd>
         &#34;&#34;&#34;
 
         val = self._brush_sizer_var.get()
-        self.brush_radius = val
+        self._brush_radius = val
+
+        self._event_logger.log_event(&#34;brush_size_change&#34;,
+                                     self._patch.patch_index,
+                                     new_brush_size=self._brush_radius)
+
+        for ob in self._brush_observers:
+            ob(self._brush_radius)
 
     def on_adjust(self, direction):
         &#34;&#34;&#34;
@@ -4688,7 +4842,7 @@ def brush_radius(self):
 </dd>
 <dt id="friendly_ground_truth.controller.tools.ThresholdTool"><code class="flex name class">
 <span>class <span class="ident">ThresholdTool</span></span>
-<span>(</span><span>undo_manager)</span>
+<span>(</span><span>undo_manager, event_logger=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Tool representing a threshold action.</p>
@@ -4737,13 +4891,14 @@ identifies what group it is a part of.</dd>
         increment: The amount to change the threshold by when adjusting
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager):
+    def __init__(self, undo_manager, event_logger=None):
 
         super(ThresholdTool, self)\
             .__init__(&#34;Threshold Tool&#34;, icns.threshold_icon, 1,
                       undo_manager, &#34;t&#34;, cursor=&#39;arrow&#39;, persistant=True,
                       activation_callback=None, group=&#34;Markups&#34;,
-                      darkmode_icon_string=icns.darkmode_thresh_icon)
+                      darkmode_icon_string=icns.darkmode_thresh_icon,
+                      event_logger=event_logger)
 
         self._logger = logging\
             .getLogger(&#39;friendly_gt.controller.tools.ThresholdTool&#39;)
@@ -4766,6 +4921,11 @@ identifies what group it is a part of.</dd>
         if value &lt;= 1 and value &gt;= 0:
 
             self._threshold = value
+
+            self._event_logger.log_event(&#34;threshold_change&#34;,
+                                         self._patch.patch_index,
+                                         new_threshold_value=self._threshold)
+
             if not self._new_patch:
                 self._patch.threshold = value
 
@@ -5100,7 +5260,7 @@ Negative is down, positive is up</dd>
 </dd>
 <dt id="friendly_ground_truth.controller.tools.UndoTool"><code class="flex name class">
 <span>class <span class="ident">UndoTool</span></span>
-<span>(</span><span>undo_manager, undo_callback)</span>
+<span>(</span><span>undo_manager, undo_callback, event_logger=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A tool for undoing mistakes.</p>
@@ -5127,7 +5287,7 @@ to call when the undo action is taken.</dd>
     A tool for undoing mistakes.
     &#34;&#34;&#34;
 
-    def __init__(self, undo_manager, undo_callback):
+    def __init__(self, undo_manager, undo_callback, event_logger=None):
         &#34;&#34;&#34;
         Initialize the tool
 
@@ -5142,7 +5302,8 @@ to call when the undo action is taken.</dd>
             .__init__(&#34;Undo&#34;, icns.undo_icon, 9, undo_manager,
                       &#34;CTRL+z&#34;, cursor=&#39;arrow&#39;, persistant=False,
                       activation_callback=undo_callback, group=&#34;Undo&#34;,
-                      darkmode_icon_string=icns.darkmode_undo_icon)
+                      darkmode_icon_string=icns.darkmode_undo_icon,
+                      event_logger=event_logger)
 
     def on_activate(self, current_patch_num):
         &#34;&#34;&#34;
@@ -5158,6 +5319,11 @@ to call when the undo action is taken.</dd>
             The last action is undone and put on the redo stack.
         &#34;&#34;&#34;
         patch, string = self._undo()
+
+        self._event_logger.log_event(&#34;undo&#34;,
+                                     self._patch.patch_index)
+
+
         self._activation_callback(patch, string)
         self._notify_observers()
 
@@ -5209,6 +5375,11 @@ to call when the undo action is taken.</dd>
         The last action is undone and put on the redo stack.
     &#34;&#34;&#34;
     patch, string = self._undo()
+
+    self._event_logger.log_event(&#34;undo&#34;,
+                                 self._patch.patch_index)
+
+
     self._activation_callback(patch, string)
     self._notify_observers()</code></pre>
 </details>
