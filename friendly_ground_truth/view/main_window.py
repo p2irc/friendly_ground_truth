@@ -446,6 +446,9 @@ class MainWindow(ttk.Frame):
     def log_mouse_event(self, pos, event, button):
         self._controller.log_mouse_event(pos, event, button)
 
+    def log_drag_event(self, drag_type, start_pos, end_pos):
+        self._controller.log_drag_event(drag_type, start_pos, end_pos)
+
     def log_zoom_event(self, zoom_factor):
         self._controller.log_zoom_event(zoom_factor)
 

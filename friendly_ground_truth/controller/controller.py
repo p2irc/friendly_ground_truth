@@ -33,6 +33,8 @@ from sys import platform
 import os
 import copy
 import json
+import re
+import threading
 
 import tkinter.filedialog
 import tkinter.messagebox
@@ -87,6 +89,8 @@ class Controller():
         # The last directory used to save an image
         self._last_save_dir = None
 
+        self._autosave_dir = None
+
         # Image containing neighbouring patches
         self._context_img = None
 
@@ -123,6 +127,8 @@ class Controller():
         # Disable the redo button for now
         self._main_window.disable_button(self._redo_id)
         self._main_window.disable_button(self._undo_id)
+
+        self._ask_save_dir()
 
     @property
     def image_tools(self):
@@ -455,12 +461,6 @@ class Controller():
                                          image_coord=image_pos,
                                          mouse_button=button)
 
-        elif event == "drag":
-            self._event_logger.log_event("mouse_drag", patch_grid_coord,
-                                         patch_coord=patch_pos,
-                                         image_coord=image_pos,
-                                         mouse_button=button)
-
     def log_zoom_event(self, zoom_factor):
 
         patch_grid_coord = self.\
@@ -468,9 +468,71 @@ class Controller():
 
         self._event_logger.log_event("zoom_factor_change", patch_grid_coord,
                                      new_zoom_factor=zoom_factor)
+
+    def log_drag_event(self, drag_type, start, end):
+
+        patch_grid_coord = self.\
+            _image.patches[self._current_patch_index].patch_index
+
+        start = self._convert_canvas_to_patch_pos(start)
+        end = self._convert_canvas_to_patch_pos(end)
+
+        image_start = self._convert_patch_to_image_pos(start)
+        image_end = self._convert_patch_to_image_pos(end)
+
+        self._event_logger.log_event("drag", patch_grid_coord,
+                                     patch_start=start, patch_end=end,
+                                     image_start=image_start,
+                                     image_end=image_end,
+                                     drag_type=drag_type)
+
     # ===================================================
     # Private Functions
     # ===================================================
+
+    def _ask_save_dir(self):
+
+        # Get the chosen directory
+        if self._last_save_dir is None:
+            initial_dir = os.path.expanduser("~")
+        else:
+            initial_dir = self._last_save_dir
+
+        dir_path = tkinter.filedialog.askdirectory(initialdir=initial_dir,
+                                                   title="Choose Output"
+                                                   " Directory")
+        if dir_path is None:
+            self._ask_save_dir()
+
+        self._last_save_dir = dir_path
+
+        self._autosave_dir = dir_path
+
+        # Get annotation group id
+
+        # For our purposes, the folder structure is:
+        # annoations-xxx-xx/annoations
+        folder = os.path.split(dir_path)[0]
+        folder = os.path.split(folder)[-1]
+
+        pattern = re.compile("^annotations-[0-9][0-9][0-9]-[0-9]+")
+
+        if pattern.match(folder):
+            log_name = folder + ".log"
+
+        else:
+            log_name = 'events.log'
+
+        log_name = os.path.join(self._autosave_dir, log_name)
+
+        fh = logging.FileHandler(log_name)
+        fh.setLevel(logging.INFO)
+
+        event_format = '%(message)s'
+        event_formatter = logging.Formatter(event_format)
+        fh.setFormatter(event_formatter)
+
+        self._event_logger.add_handler(fh)
 
     def _convert_canvas_to_patch_pos(self, pos):
 

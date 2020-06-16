@@ -754,6 +754,7 @@ class FGTCanvas(ScrollableImageCanvas):
         self._prev_offset = (0, 0)
         self._drag_id = ''
         self._unique_drag_id = 0
+        self._is_right_drag = False
 
         # Bind events to the canvas
         self.canvas.bind('<ButtonRelease-1>', self._on_click_release)
@@ -901,7 +902,8 @@ class FGTCanvas(ScrollableImageCanvas):
 
         super()._wheel(event)
 
-        self._main_window.log_zoom_event(self.imscale)
+        if self._cursor != "brush":
+            self._main_window.log_zoom_event(self.imscale)
 
     def _set_cursor(self, event):
         """
@@ -985,6 +987,8 @@ class FGTCanvas(ScrollableImageCanvas):
         log_pos = self._get_container_relative_coords(event.x, event.y)
         self._main_window.log_mouse_event(log_pos, "click", "left_mouse")
 
+        self._drag_start = event.x, event.y
+
     def _right_click(self, event):
         """
         For dragging with right mouse button.
@@ -998,7 +1002,6 @@ class FGTCanvas(ScrollableImageCanvas):
         self.canvas.scan_mark(event.x, event.y)
 
         log_pos = self._get_container_relative_coords(event.x, event.y)
-        print(log_pos)
 
         self._main_window.log_mouse_event(log_pos, "click", "right_mouse")
 
@@ -1053,19 +1056,20 @@ class FGTCanvas(ScrollableImageCanvas):
             The canvas is moved to the event position.
         """
         self._dragged = True
+
+        if self._drag_id == '':
+            self._logger.debug("Drag start")
+        else:
+            self._main_window._master.after_cancel(self._drag_id)
+
+        self._drag_id = self._main_window._master.\
+            after(300, self._stop_dragging)
+
         if self._cursor != "brush":
 
             self.canvas.scan_dragto(event.x, event.y, gain=1)
 
         if self._cursor == "brush":
-
-            if self._drag_id == '':
-                self._logger.debug("Drag start")
-            else:
-                self._main_window._master.after_cancel(self._drag_id)
-
-            self._drag_id = self._main_window._master.\
-                after(300, self._stop_dragging)
 
             pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
             self._previous_position = pos
@@ -1080,14 +1084,26 @@ class FGTCanvas(ScrollableImageCanvas):
 
             self.draw_brush(brush_pos)
 
-        log_pos = self._get_container_relative_coords(event.x, event.y)
-        self._main_window.log_mouse_event(log_pos, "drag", "left_mouse")
-
         self._show_image()  # zoom tile and show it on the canvas
+        self._drag_end = event.x, event.y
 
     def _stop_dragging(self):
         self._drag_id = ''
         self._unique_drag_id += 1
+
+        start_pos = self._get_container_relative_coords(self._drag_start[0],
+                                                        self._drag_start[1])
+
+        end_pos = self._get_container_relative_coords(self._drag_end[0],
+                                                      self._drag_end[1])
+
+        if self._is_right_drag or self._cursor != 'brush':
+
+            self._main_window.log_drag_event("pan", start_pos, end_pos)
+        else:
+            self._main_window.log_drag_event("brush", start_pos, end_pos)
+
+        self._id_right_drag = False
 
     def _right_drag(self, event):
         """
@@ -1099,6 +1115,16 @@ class FGTCanvas(ScrollableImageCanvas):
         Returns:
             None
         """
+        if self._drag_id == '':
+            self._logger.debug("Drag start")
+        else:
+            self._main_window._master.after_cancel(self._drag_id)
+
+        self._drag_id = self._main_window._master.\
+            after(300, self._stop_dragging)
+
         self.canvas.scan_dragto(event.x, event.y, gain=1)
 
         self._show_image()
+        self._is_right_drag = True
+

@@ -45,8 +45,8 @@ if debug:
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 
-fh = logging.FileHandler('events.log')
-fh.setLevel(logging.INFO)
+# fh = logging.FileHandler('events.log')
+# fh.setLevel(logging.INFO)
 
 # create formatter and add it to the handlers
 log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -55,11 +55,11 @@ ch.setFormatter(formatter)
 
 event_format = '%(message)s'
 event_formatter = logging.Formatter(event_format)
-fh.setFormatter(event_formatter)
+# fh.setFormatter(event_formatter)
 
 # add the handlers to the logger
 logger.addHandler(ch)
-event_logger.addHandler(fh)
+# event_logger.addHandler(fh)
 
 
 if show_events:

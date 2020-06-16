@@ -35,6 +35,9 @@ class EventLogger():
 
         self._active_tool = tool_id
 
+    def add_handler(self, handler):
+        self._event_logger.addHandler(handler)
+
     def log_load_image(self, image_filename, image_width, image_height,
                        patch_grid_width, patch_grid_height):
 
