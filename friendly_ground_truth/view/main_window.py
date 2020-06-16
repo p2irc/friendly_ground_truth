@@ -443,6 +443,12 @@ class MainWindow(ttk.Frame):
         """
         self._image_indicator.config(text=text)
 
+    def log_mouse_event(self, pos, event, button):
+        self._controller.log_mouse_event(pos, event, button)
+
+    def log_zoom_event(self, zoom_factor):
+        self._controller.log_zoom_event(zoom_factor)
+
     # ==========================================================
     # PRIVATE FUNCTIONS
     # ==========================================================

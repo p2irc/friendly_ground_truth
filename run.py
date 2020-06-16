@@ -23,14 +23,16 @@ from friendly_ground_truth.controller.controller import Controller
 from friendly_ground_truth.view.icons.icon_strings import fgt_favicon
 
 debug = False
+show_events = False
 
 if len(sys.argv) > 1:
 
-    arg = sys.argv[1]
+    for arg in sys.argv:
+        if arg == '-debug':
+            debug = True
 
-    if arg == '-debug':
-        debug = True
-
+        if arg == '-events':
+            show_events = True
 
 logger = logging.getLogger('friendly_gt')
 
@@ -51,13 +53,21 @@ log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 formatter = logging.Formatter(log_format)
 ch.setFormatter(formatter)
 
-event_format = '%(asctime)s - %(message)s'
+event_format = '%(message)s'
 event_formatter = logging.Formatter(event_format)
 fh.setFormatter(event_formatter)
 
 # add the handlers to the logger
 logger.addHandler(ch)
 event_logger.addHandler(fh)
+
+
+if show_events:
+    event_logger_handler = logging.StreamHandler()
+    event_logger_handler.setLevel(logging.INFO)
+    event_logger_handler.setFormatter(event_formatter)
+    event_logger.addHandler(event_logger_handler)
+
 
 if __name__ == '__main__':
 

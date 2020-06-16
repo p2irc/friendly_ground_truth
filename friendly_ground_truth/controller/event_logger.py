@@ -22,6 +22,19 @@ class EventLogger():
     def __init__(self):
         self._event_logger = logging.getLogger('event_logger')
 
+        self._active_tool = "None"
+
+    @property
+    def active_tool(self):
+        return self._active_tool
+
+    @active_tool.setter
+    def active_tool(self, value):
+        tool_id = value.lower()
+        tool_id = tool_id.replace(" ", "_")
+
+        self._active_tool = tool_id
+
     def log_load_image(self, image_filename, image_width, image_height,
                        patch_grid_width, patch_grid_height):
 
@@ -39,11 +52,19 @@ class EventLogger():
 
         self._event_logger.info(event_data)
 
-    def log_event(self, event_type_id, patch_grid_coord, active_tool_id,
+    def log_event(self, event_type_id, patch_grid_coord, active_tool_id=None,
                   **kwargs):
 
         ts = time.time()
         st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+
+        if active_tool_id is None:
+            active_tool_id = self._active_tool
+
+        elif active_tool_id == "?":
+            active_tool_id = self._active_tool
+        else:
+            self.active_tool = active_tool_id
 
         event_data = {}
         event_data['event_type_id'] = event_type_id

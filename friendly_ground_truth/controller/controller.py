@@ -42,8 +42,6 @@ import numpy as np
 import logging
 module_logger = logging.getLogger('friendly_gt.controller.controller')
 
-import time
-import datetime
 
 class Controller():
     """
@@ -168,6 +166,7 @@ class Controller():
 
         self._context_img = None
         self._grid_img = None
+        self._event_logger.active_tool = "None"
 
         filetypes = [("TIF Files", "*.tif"), ("TIFF Files", "*.tiff"),
                      ("PNG Files", "*.png"), ("JPEG Files", "*.jpg")]
@@ -322,6 +321,8 @@ class Controller():
 
         if not tool.persistant:
             old_tool = self._current_tool
+        else:
+            self._event_logger.active_tool = tool.name
 
         self._current_tool = tool
 
@@ -424,9 +425,76 @@ class Controller():
 
         self._next_patch_callback(patch, patch_index)
 
+    def log_mouse_event(self, pos, event, button):
+
+        patch_pos = self._convert_canvas_to_patch_pos(pos)
+
+        patch_shape = self.\
+            _image.patches[self._current_patch_index].patch.shape
+
+        if patch_pos[0] < 0 or patch_pos[0] > patch_shape[0]:
+            return
+
+        if patch_pos[1] < 0 or patch_pos[1] > patch_shape[1]:
+            return
+
+        image_pos = self._convert_patch_to_image_pos(patch_pos)
+
+        patch_grid_coord = self.\
+            _image.patches[self._current_patch_index].patch_index
+
+        if event == "release":
+
+            self._event_logger.log_event("mouse_up", patch_grid_coord,
+                                         patch_coord=patch_pos,
+                                         image_coord=image_pos,
+                                         mouse_button=button)
+        elif event == "click":
+            self._event_logger.log_event("mouse_down", patch_grid_coord,
+                                         patch_coord=patch_pos,
+                                         image_coord=image_pos,
+                                         mouse_button=button)
+
+        elif event == "drag":
+            self._event_logger.log_event("mouse_drag", patch_grid_coord,
+                                         patch_coord=patch_pos,
+                                         image_coord=image_pos,
+                                         mouse_button=button)
+
+    def log_zoom_event(self, zoom_factor):
+
+        patch_grid_coord = self.\
+            _image.patches[self._current_patch_index].patch_index
+
+        self._event_logger.log_event("zoom_factor_change", patch_grid_coord,
+                                     new_zoom_factor=zoom_factor)
     # ===================================================
     # Private Functions
     # ===================================================
+
+    def _convert_canvas_to_patch_pos(self, pos):
+
+        # Correct for offset in context image
+        pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
+
+        # Need to invert the position, because tkinter coords are backward from
+        # skimage
+        pos = round(pos[1]-1), round(pos[0]-1)
+
+        return pos
+
+    def _convert_patch_to_image_pos(self, pos):
+
+        # TODO: Fix private variable
+        block_size = self._image._block_size
+
+        patch_grid_coord = self.\
+            _image.patches[self._current_patch_index].patch_index
+
+        image_x = block_size[1] * (patch_grid_coord[1]) + pos[1]
+        image_y = block_size[0] * (patch_grid_coord[0]) + pos[0]
+
+        return image_y, image_x
 
     def _init_tools(self):
         """
@@ -442,42 +510,62 @@ class Controller():
 
         image_tools = {}
 
-        thresh_tool = ThresholdTool(self._undo_manager)
+        thresh_tool = ThresholdTool(self._undo_manager,
+                                    event_logger=self._event_logger)
         image_tools[thresh_tool.id] = thresh_tool
 
-        add_reg_tool = AddRegionTool(self._undo_manager)
+        add_reg_tool = AddRegionTool(self._undo_manager,
+                                     event_logger=self._event_logger)
+
         add_reg_tool.bind_brush(self._brush_size_callback)
+
         image_tools[add_reg_tool.id] = add_reg_tool
 
-        rem_reg_tool = RemoveRegionTool(self._undo_manager)
+        rem_reg_tool = RemoveRegionTool(self._undo_manager,
+                                        event_logger=self._event_logger)
+
         rem_reg_tool.bind_brush(self._brush_size_callback)
         image_tools[rem_reg_tool.id] = rem_reg_tool
 
-        flood_add_tool = FloodAddTool(self._undo_manager)
+        flood_add_tool = FloodAddTool(self._undo_manager,
+                                      event_logger=self._event_logger)
+
         image_tools[flood_add_tool.id] = flood_add_tool
 
-        flood_rem_tool = FloodRemoveTool(self._undo_manager)
+        flood_rem_tool = FloodRemoveTool(self._undo_manager,
+                                         event_logger=self._event_logger)
+
         image_tools[flood_rem_tool.id] = flood_rem_tool
 
         no_root_tool = NoRootTool(self._undo_manager,
-                                  self._next_patch_callback)
+                                  self._next_patch_callback,
+                                  event_logger=self._event_logger)
+
         image_tools[no_root_tool.id] = no_root_tool
 
         prev_patch_tool = PreviousPatchTool(self._undo_manager,
-                                            self._prev_patch_callback)
+                                            self._prev_patch_callback,
+                                            event_logger=self._event_logger)
+
         image_tools[prev_patch_tool.id] = prev_patch_tool
 
         next_patch_tool = NextPatchTool(self._undo_manager,
-                                        self._next_patch_callback)
+                                        self._next_patch_callback,
+                                        event_logger=self._event_logger)
+
         image_tools[next_patch_tool.id] = next_patch_tool
 
         undo_tool = UndoTool(self._undo_manager,
-                             self._undo_callback)
+                             self._undo_callback,
+                             event_logger=self._event_logger)
+
         image_tools[undo_tool.id] = undo_tool
         self._undo_id = undo_tool.id
 
         redo_tool = RedoTool(self._undo_manager,
-                             self._redo_callback)
+                             self._redo_callback,
+                             event_logger=self._event_logger)
+
         image_tools[redo_tool.id] = redo_tool
         self._redo_id = redo_tool.id
 
@@ -890,5 +978,3 @@ class Controller():
         basename = os.path.basename(path)
 
         return os.path.splitext(basename)[0] + '_mask.png'
-
-

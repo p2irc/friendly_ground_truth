@@ -897,6 +897,12 @@ class FGTCanvas(ScrollableImageCanvas):
 
         self._previous_position = pos
 
+    def _wheel(self, event):
+
+        super()._wheel(event)
+
+        self._main_window.log_zoom_event(self.imscale)
+
     def _set_cursor(self, event):
         """
         Set the cursor to the current specified icon.
@@ -976,6 +982,9 @@ class FGTCanvas(ScrollableImageCanvas):
         if self._cursor != "brush":
             self.canvas.scan_mark(event.x, event.y)
 
+        log_pos = self._get_container_relative_coords(event.x, event.y)
+        self._main_window.log_mouse_event(log_pos, "click", "left_mouse")
+
     def _right_click(self, event):
         """
         For dragging with right mouse button.
@@ -987,6 +996,11 @@ class FGTCanvas(ScrollableImageCanvas):
             None
         """
         self.canvas.scan_mark(event.x, event.y)
+
+        log_pos = self._get_container_relative_coords(event.x, event.y)
+        print(log_pos)
+
+        self._main_window.log_mouse_event(log_pos, "click", "right_mouse")
 
     def _on_click_release(self, event):
         """
@@ -1003,13 +1017,27 @@ class FGTCanvas(ScrollableImageCanvas):
             self._dragged = False
             return
 
-        pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+        pos = self._get_container_relative_coords(event.x, event.y)
+        # pos = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+
+        # container_coords = self.canvas.coords(self.container)
+        # pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
+
+        # pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
+        self._main_window.on_canvas_click(pos)
+
+        self._main_window.log_mouse_event(pos, "release", "left_mouse")
+
+    def _get_container_relative_coords(self, x, y):
+
+        pos = self.canvas.canvasx(x), self.canvas.canvasy(y)
 
         container_coords = self.canvas.coords(self.container)
         pos = pos[0] - container_coords[0], pos[1] - container_coords[1]
 
         pos = pos[0] / self._coord_scale, pos[1] / self._coord_scale
-        self._main_window.on_canvas_click(pos)
+
+        return pos
 
     def _move_to(self, event):
         """
@@ -1051,6 +1079,9 @@ class FGTCanvas(ScrollableImageCanvas):
                          self.canvas.canvasy(event.y))
 
             self.draw_brush(brush_pos)
+
+        log_pos = self._get_container_relative_coords(event.x, event.y)
+        self._main_window.log_mouse_event(log_pos, "drag", "left_mouse")
 
         self._show_image()  # zoom tile and show it on the canvas
 
