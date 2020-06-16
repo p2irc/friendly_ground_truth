@@ -473,6 +473,15 @@ class MainWindow(ttk.Frame):
         &#34;&#34;&#34;
         self._image_indicator.config(text=text)
 
+    def log_mouse_event(self, pos, event, button):
+        self._controller.log_mouse_event(pos, event, button)
+
+    def log_drag_event(self, drag_type, start_pos, end_pos):
+        self._controller.log_drag_event(drag_type, start_pos, end_pos)
+
+    def log_zoom_event(self, zoom_factor):
+        self._controller.log_zoom_event(zoom_factor)
+
     # ==========================================================
     # PRIVATE FUNCTIONS
     # ==========================================================
@@ -1703,6 +1712,15 @@ Initialize the main window.</p>
         &#34;&#34;&#34;
         self._image_indicator.config(text=text)
 
+    def log_mouse_event(self, pos, event, button):
+        self._controller.log_mouse_event(pos, event, button)
+
+    def log_drag_event(self, drag_type, start_pos, end_pos):
+        self._controller.log_drag_event(drag_type, start_pos, end_pos)
+
+    def log_zoom_event(self, zoom_factor):
+        self._controller.log_zoom_event(zoom_factor)
+
     # ==========================================================
     # PRIVATE FUNCTIONS
     # ==========================================================
@@ -2402,6 +2420,45 @@ Initialize the main window.</p>
     self._toolbar_buttons[id].config(state=&#39;normal&#39;)</code></pre>
 </details>
 </dd>
+<dt id="friendly_ground_truth.view.main_window.MainWindow.log_drag_event"><code class="name flex">
+<span>def <span class="ident">log_drag_event</span></span>(<span>self, drag_type, start_pos, end_pos)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def log_drag_event(self, drag_type, start_pos, end_pos):
+    self._controller.log_drag_event(drag_type, start_pos, end_pos)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.view.main_window.MainWindow.log_mouse_event"><code class="name flex">
+<span>def <span class="ident">log_mouse_event</span></span>(<span>self, pos, event, button)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def log_mouse_event(self, pos, event, button):
+    self._controller.log_mouse_event(pos, event, button)</code></pre>
+</details>
+</dd>
+<dt id="friendly_ground_truth.view.main_window.MainWindow.log_zoom_event"><code class="name flex">
+<span>def <span class="ident">log_zoom_event</span></span>(<span>self, zoom_factor)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def log_zoom_event(self, zoom_factor):
+    self._controller.log_zoom_event(zoom_factor)</code></pre>
+</details>
+</dd>
 <dt id="friendly_ground_truth.view.main_window.MainWindow.on_canvas_click"><code class="name flex">
 <span>def <span class="ident">on_canvas_click</span></span>(<span>self, pos)</span>
 </code></dt>
@@ -2903,6 +2960,9 @@ Initialize the main window.</p>
 <li><code><a title="friendly_ground_truth.view.main_window.MainWindow.create_canvas" href="#friendly_ground_truth.view.main_window.MainWindow.create_canvas">create_canvas</a></code></li>
 <li><code><a title="friendly_ground_truth.view.main_window.MainWindow.disable_button" href="#friendly_ground_truth.view.main_window.MainWindow.disable_button">disable_button</a></code></li>
 <li><code><a title="friendly_ground_truth.view.main_window.MainWindow.enable_button" href="#friendly_ground_truth.view.main_window.MainWindow.enable_button">enable_button</a></code></li>
+<li><code><a title="friendly_ground_truth.view.main_window.MainWindow.log_drag_event" href="#friendly_ground_truth.view.main_window.MainWindow.log_drag_event">log_drag_event</a></code></li>
+<li><code><a title="friendly_ground_truth.view.main_window.MainWindow.log_mouse_event" href="#friendly_ground_truth.view.main_window.MainWindow.log_mouse_event">log_mouse_event</a></code></li>
+<li><code><a title="friendly_ground_truth.view.main_window.MainWindow.log_zoom_event" href="#friendly_ground_truth.view.main_window.MainWindow.log_zoom_event">log_zoom_event</a></code></li>
 <li><code><a title="friendly_ground_truth.view.main_window.MainWindow.on_canvas_click" href="#friendly_ground_truth.view.main_window.MainWindow.on_canvas_click">on_canvas_click</a></code></li>
 <li><code><a title="friendly_ground_truth.view.main_window.MainWindow.on_canvas_drag" href="#friendly_ground_truth.view.main_window.MainWindow.on_canvas_drag">on_canvas_drag</a></code></li>
 <li><code><a title="friendly_ground_truth.view.main_window.MainWindow.set_canvas_brush_size" href="#friendly_ground_truth.view.main_window.MainWindow.set_canvas_brush_size">set_canvas_brush_size</a></code></li>

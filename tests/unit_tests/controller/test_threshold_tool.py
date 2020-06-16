@@ -37,7 +37,7 @@ class TestThresholdTool():
             The threshold value for the patch is set to the same value
         """
 
-        thresh_tool = ThresholdTool(MagicMock())
+        thresh_tool = ThresholdTool(MagicMock(), event_logger=MagicMock())
 
         mock_patch = MagicMock()
         mock_patch.threshold = -1
@@ -66,7 +66,7 @@ class TestThresholdTool():
             The patch threshold is still 0
         """
 
-        thresh_tool = ThresholdTool(MagicMock())
+        thresh_tool = ThresholdTool(MagicMock(), event_logger=MagicMock())
 
         patch_mock = MagicMock()
         patch_mock.threshold = 0
@@ -92,7 +92,7 @@ class TestThresholdTool():
             The increment is set.
         """
 
-        thresh_tool = ThresholdTool(MagicMock())
+        thresh_tool = ThresholdTool(MagicMock(), event_logger=MagicMock())
 
         thresh_tool.increment = 76
 
@@ -108,7 +108,7 @@ class TestThresholdTool():
             The threshold is set to the patches threshold
         """
 
-        thresh_tool = ThresholdTool(MagicMock())
+        thresh_tool = ThresholdTool(MagicMock(), event_logger=MagicMock())
 
         mock_patch = MagicMock()
         mock_patch.threshold = 0.5
@@ -127,7 +127,7 @@ class TestThresholdTool():
             The threshold is decremented by the increment value.
         """
 
-        thresh_tool = ThresholdTool(MagicMock())
+        thresh_tool = ThresholdTool(MagicMock(), event_logger=MagicMock())
         thresh_tool._patch = MagicMock()
         thresh_tool._patch.mock_patch.threshold.return_value = 0.5
 
@@ -148,7 +148,7 @@ class TestThresholdTool():
             The threshold is incremented by the increment value.
         """
 
-        thresh_tool = ThresholdTool(MagicMock())
+        thresh_tool = ThresholdTool(MagicMock(), event_logger=MagicMock())
         thresh_tool._patch = MagicMock()
         thresh_tool._patch.mock_patch.threshold.return_value = 0.5
 

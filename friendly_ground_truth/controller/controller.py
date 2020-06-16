@@ -23,6 +23,7 @@ from friendly_ground_truth.controller.tools import (ThresholdTool,
 
 from friendly_ground_truth.controller.undo_manager import UndoManager
 from friendly_ground_truth.model.model import Image
+from friendly_ground_truth.controller.event_logger import EventLogger
 
 # from skimage import segmentation, img_as_ubyte
 from skimage.draw import rectangle_perimeter
@@ -32,6 +33,8 @@ from sys import platform
 import os
 import copy
 import json
+import re
+import threading
 
 import tkinter.filedialog
 import tkinter.messagebox
@@ -78,10 +81,15 @@ class Controller():
         # For logging
         self._logger = logging.getLogger('friendly_gt.controller.'
                                          'controller.Controller')
+
+        self._event_logger = EventLogger()
+
         # The last directory used to load an image
         self._last_load_dir = None
         # The last directory used to save an image
         self._last_save_dir = None
+
+        self._autosave_dir = None
 
         # Image containing neighbouring patches
         self._context_img = None
@@ -119,6 +127,8 @@ class Controller():
         # Disable the redo button for now
         self._main_window.disable_button(self._redo_id)
         self._main_window.disable_button(self._undo_id)
+
+        self._ask_save_dir()
 
     @property
     def image_tools(self):
@@ -162,6 +172,7 @@ class Controller():
 
         self._context_img = None
         self._grid_img = None
+        self._event_logger.active_tool = "None"
 
         filetypes = [("TIF Files", "*.tif"), ("TIFF Files", "*.tiff"),
                      ("PNG Files", "*.png"), ("JPEG Files", "*.jpg")]
@@ -190,6 +201,14 @@ class Controller():
         except FileNotFoundError:
             self._logger.exception("There was a problem loading the image.")
             return
+
+        image_filename = os.path.split(file_name)[-1]
+        image_shape = self._image.image.shape
+        patch_grid_shape = self._image.patches[0].patch.shape
+
+        self._event_logger.log_load_image(image_filename, image_shape[1],
+                                          image_shape[0], patch_grid_shape[1],
+                                          patch_grid_shape[0])
 
         self._current_patch_index = 0
 
@@ -308,6 +327,8 @@ class Controller():
 
         if not tool.persistant:
             old_tool = self._current_tool
+        else:
+            self._event_logger.active_tool = tool.name
 
         self._current_tool = tool
 
@@ -410,9 +431,132 @@ class Controller():
 
         self._next_patch_callback(patch, patch_index)
 
+    def log_mouse_event(self, pos, event, button):
+
+        patch_pos = self._convert_canvas_to_patch_pos(pos)
+
+        patch_shape = self.\
+            _image.patches[self._current_patch_index].patch.shape
+
+        if patch_pos[0] < 0 or patch_pos[0] > patch_shape[0]:
+            return
+
+        if patch_pos[1] < 0 or patch_pos[1] > patch_shape[1]:
+            return
+
+        image_pos = self._convert_patch_to_image_pos(patch_pos)
+
+        patch_grid_coord = self.\
+            _image.patches[self._current_patch_index].patch_index
+
+        if event == "release":
+
+            self._event_logger.log_event("mouse_up", patch_grid_coord,
+                                         patch_coord=patch_pos,
+                                         image_coord=image_pos,
+                                         mouse_button=button)
+        elif event == "click":
+            self._event_logger.log_event("mouse_down", patch_grid_coord,
+                                         patch_coord=patch_pos,
+                                         image_coord=image_pos,
+                                         mouse_button=button)
+
+    def log_zoom_event(self, zoom_factor):
+
+        patch_grid_coord = self.\
+            _image.patches[self._current_patch_index].patch_index
+
+        self._event_logger.log_event("zoom_factor_change", patch_grid_coord,
+                                     new_zoom_factor=zoom_factor)
+
+    def log_drag_event(self, drag_type, start, end):
+
+        patch_grid_coord = self.\
+            _image.patches[self._current_patch_index].patch_index
+
+        start = self._convert_canvas_to_patch_pos(start)
+        end = self._convert_canvas_to_patch_pos(end)
+
+        image_start = self._convert_patch_to_image_pos(start)
+        image_end = self._convert_patch_to_image_pos(end)
+
+        self._event_logger.log_event("drag", patch_grid_coord,
+                                     patch_start=start, patch_end=end,
+                                     image_start=image_start,
+                                     image_end=image_end,
+                                     drag_type=drag_type)
+
     # ===================================================
     # Private Functions
     # ===================================================
+
+    def _ask_save_dir(self):
+
+        # Get the chosen directory
+        if self._last_save_dir is None:
+            initial_dir = os.path.expanduser("~")
+        else:
+            initial_dir = self._last_save_dir
+
+        dir_path = tkinter.filedialog.askdirectory(initialdir=initial_dir,
+                                                   title="Choose Output"
+                                                   " Directory")
+        if dir_path is None:
+            self._ask_save_dir()
+
+        self._last_save_dir = dir_path
+
+        self._autosave_dir = dir_path
+
+        # Get annotation group id
+
+        # For our purposes, the folder structure is:
+        # annoations-xxx-xx/annoations
+        folder = os.path.split(dir_path)[0]
+        folder = os.path.split(folder)[-1]
+
+        pattern = re.compile("^annotations-[0-9][0-9][0-9]-[0-9]+")
+
+        if pattern.match(folder):
+            log_name = folder + ".log"
+
+        else:
+            log_name = 'events.log'
+
+        log_name = os.path.join(self._autosave_dir, log_name)
+
+        fh = logging.FileHandler(log_name)
+        fh.setLevel(logging.INFO)
+
+        event_format = '%(message)s'
+        event_formatter = logging.Formatter(event_format)
+        fh.setFormatter(event_formatter)
+
+        self._event_logger.add_handler(fh)
+
+    def _convert_canvas_to_patch_pos(self, pos):
+
+        # Correct for offset in context image
+        pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
+
+        # Need to invert the position, because tkinter coords are backward from
+        # skimage
+        pos = round(pos[1]-1), round(pos[0]-1)
+
+        return pos
+
+    def _convert_patch_to_image_pos(self, pos):
+
+        # TODO: Fix private variable
+        block_size = self._image._block_size
+
+        patch_grid_coord = self.\
+            _image.patches[self._current_patch_index].patch_index
+
+        image_x = block_size[1] * (patch_grid_coord[1]) + pos[1]
+        image_y = block_size[0] * (patch_grid_coord[0]) + pos[0]
+
+        return image_y, image_x
 
     def _init_tools(self):
         """
@@ -428,42 +572,62 @@ class Controller():
 
         image_tools = {}
 
-        thresh_tool = ThresholdTool(self._undo_manager)
+        thresh_tool = ThresholdTool(self._undo_manager,
+                                    event_logger=self._event_logger)
         image_tools[thresh_tool.id] = thresh_tool
 
-        add_reg_tool = AddRegionTool(self._undo_manager)
+        add_reg_tool = AddRegionTool(self._undo_manager,
+                                     event_logger=self._event_logger)
+
         add_reg_tool.bind_brush(self._brush_size_callback)
+
         image_tools[add_reg_tool.id] = add_reg_tool
 
-        rem_reg_tool = RemoveRegionTool(self._undo_manager)
+        rem_reg_tool = RemoveRegionTool(self._undo_manager,
+                                        event_logger=self._event_logger)
+
         rem_reg_tool.bind_brush(self._brush_size_callback)
         image_tools[rem_reg_tool.id] = rem_reg_tool
 
-        flood_add_tool = FloodAddTool(self._undo_manager)
+        flood_add_tool = FloodAddTool(self._undo_manager,
+                                      event_logger=self._event_logger)
+
         image_tools[flood_add_tool.id] = flood_add_tool
 
-        flood_rem_tool = FloodRemoveTool(self._undo_manager)
+        flood_rem_tool = FloodRemoveTool(self._undo_manager,
+                                         event_logger=self._event_logger)
+
         image_tools[flood_rem_tool.id] = flood_rem_tool
 
         no_root_tool = NoRootTool(self._undo_manager,
-                                  self._next_patch_callback)
+                                  self._next_patch_callback,
+                                  event_logger=self._event_logger)
+
         image_tools[no_root_tool.id] = no_root_tool
 
         prev_patch_tool = PreviousPatchTool(self._undo_manager,
-                                            self._prev_patch_callback)
+                                            self._prev_patch_callback,
+                                            event_logger=self._event_logger)
+
         image_tools[prev_patch_tool.id] = prev_patch_tool
 
         next_patch_tool = NextPatchTool(self._undo_manager,
-                                        self._next_patch_callback)
+                                        self._next_patch_callback,
+                                        event_logger=self._event_logger)
+
         image_tools[next_patch_tool.id] = next_patch_tool
 
         undo_tool = UndoTool(self._undo_manager,
-                             self._undo_callback)
+                             self._undo_callback,
+                             event_logger=self._event_logger)
+
         image_tools[undo_tool.id] = undo_tool
         self._undo_id = undo_tool.id
 
         redo_tool = RedoTool(self._undo_manager,
-                             self._redo_callback)
+                             self._redo_callback,
+                             event_logger=self._event_logger)
+
         image_tools[redo_tool.id] = redo_tool
         self._redo_id = redo_tool.id
 

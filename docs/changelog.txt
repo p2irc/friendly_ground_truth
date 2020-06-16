@@ -5,6 +5,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased - <>
 
+## [v0.11.0] - 2020-06-16
+- Event logging for all interactions with the canvas
+
 ## [v0.10.0] - 2020-06-10
 ### Changed
 - Removed saving dialog at the end of the image patches.
