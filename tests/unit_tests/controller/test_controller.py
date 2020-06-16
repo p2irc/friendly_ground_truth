@@ -38,6 +38,8 @@ class TestController():
         mocker.patch('tkinter.ttk')
         mocker.patch('tkinter.ttk.Style')
         mocker.patch('os.mkdir')
+        mocker.patch('friendly_ground_truth.controller.controller.Controller'
+                     '._ask_save_dir')
 
     @pytest.fixture
     def dcp_mock(self, mocker):
