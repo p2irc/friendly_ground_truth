@@ -34,7 +34,6 @@ import os
 import copy
 import json
 import re
-import threading
 
 import tkinter.filedialog
 import tkinter.messagebox
@@ -214,6 +213,9 @@ class Controller():
 
         self._display_current_patch(new=True)
         self._main_window.update_image_indicator(self._image_path)
+
+        self.activate_tool(self._default_tool)
+        self._main_window.set_default_tool(self._default_tool)
 
     def save_mask(self):
         """
@@ -575,6 +577,8 @@ class Controller():
         thresh_tool = ThresholdTool(self._undo_manager,
                                     event_logger=self._event_logger)
         image_tools[thresh_tool.id] = thresh_tool
+
+        self._default_tool = thresh_tool.id
 
         add_reg_tool = AddRegionTool(self._undo_manager,
                                      event_logger=self._event_logger)

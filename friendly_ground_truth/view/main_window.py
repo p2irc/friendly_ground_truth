@@ -452,6 +452,9 @@ class MainWindow(ttk.Frame):
     def log_zoom_event(self, zoom_factor):
         self._controller.log_zoom_event(zoom_factor)
 
+    def set_default_tool(self, id):
+        self._update_toolbar_state(id)
+
     # ==========================================================
     # PRIVATE FUNCTIONS
     # ==========================================================
