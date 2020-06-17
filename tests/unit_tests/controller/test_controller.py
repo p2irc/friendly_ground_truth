@@ -14,7 +14,7 @@ import os
 
 from friendly_ground_truth.controller.controller import Controller
 
-from mock import MagicMock
+from mock import MagicMock, PropertyMock
 
 
 class TestController():
@@ -420,7 +420,62 @@ class TestInteractions(TestController):
 
     """
 
-    pass
+    def test_activate_tool_none_image(self, setup, controller):
+        """
+        Test activating a tool when there is not image loaded.
+
+        Args:
+            setup: Setup for the tests.
+            controller: The controller for testing.
+
+        Test Condition:
+            The controller's current tool is not changed.
+        """
+
+        mock_tool = MagicMock()
+        mock_tool.id.return_value = 0
+
+        controller._current_tool = mock_tool
+
+        controller._image = None
+
+        old_tool = controller._current_tool
+
+        controller.activate_tool(1)
+
+        assert controller._current_tool.id == old_tool.id
+
+    def test_activate_tool_not_persistant(self, setup, controller):
+        """
+        Test activating a non-persistant tool.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller to test.
+
+        Test Condition:
+            The controller's current tool is not changed.
+        """
+        controller._image = MagicMock()
+
+        mock_tool_1 = MagicMock()
+        mock_tool_1.id = 0
+
+        controller._current_tool = mock_tool_1
+
+        mock_tool_2 = MagicMock()
+        mock_tool_2.id = 1
+        mock_tool_2.persistant = False
+
+        old_tool = controller._current_tool
+
+        tools = {0: mock_tool_1, 1: mock_tool_2}
+
+        controller._image_tools = tools
+
+        controller.activate_tool(1)
+
+        assert controller._current_tool.id == old_tool.id
 
 
 class TestSettings(TestController):
