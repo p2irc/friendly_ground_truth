@@ -349,8 +349,6 @@ class Controller():
         self._main_window.set_canvas_cursor(tool.cursor)
         tool.unlock_undos()
 
-        print(self._undo_manager.undo_empty)
-
         if not self._undo_manager.undo_empty:
             self._main_window.enable_button(self._undo_id)
 
@@ -730,11 +728,13 @@ class Controller():
             self._display_current_patch()
 
             tkinter.messagebox.showinfo("No More Patches",
-                                        "There are no patches left in the"
+                                        "There are no patches left in the "
                                         "image.  You can save the mask using "
                                         "the file menu, or use the "
                                         "preview window to review "
                                         "your mask.")
+
+            self._display_current_patch()
             return
 
         cur_patch = self._image.patches[self._current_patch_index]
