@@ -349,6 +349,8 @@ class Controller():
         self._main_window.set_canvas_cursor(tool.cursor)
         tool.unlock_undos()
 
+        print(self._undo_manager.undo_empty)
+
         if not self._undo_manager.undo_empty:
             self._main_window.enable_button(self._undo_id)
 
@@ -361,6 +363,9 @@ class Controller():
 
         Returns:
             None
+
+        Postconditions:
+            The current tool's adjust tool function is called.
         """
         self._current_tool.on_adjust(direction)
         # self._display_current_patch()
@@ -377,6 +382,9 @@ class Controller():
 
         Returns:
             None
+
+        Postconditions:
+            The current tool's on_click() function is called.
         """
         # Correct for offset in context image
         pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
@@ -395,7 +403,7 @@ class Controller():
 
     def drag_event(self, pos, drag_id=None):
         """
-        A click event in the main window has occured/
+        A click event in the main window has occured.
 
         Args:
             pos: The position of the event.
@@ -403,6 +411,9 @@ class Controller():
 
         Returns:
             None
+
+        Postconditions:
+            The current tool's on_drag() function is called.
         """
         # Correct for offset in context image
         pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
