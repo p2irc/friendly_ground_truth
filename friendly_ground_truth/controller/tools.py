@@ -908,9 +908,16 @@ class NoRootTool(FGTTool):
         self._no_root()
         patch, index = self._next_patch(current_patch_num)
 
-        self._event_logger.log_event("no_root",
-                                     self._patch.patch_index,
-                                     new_patch_coordinate=patch.patch_index)
+        if patch is not None:
+
+            self._event_logger.log_event("no_root",
+                                         self._patch.patch_index,
+                                         new_patch_coordinate=patch
+                                         .patch_index)
+        else:
+            self._event_logger.log_event("no_root",
+                                         self._patch.patch_index,
+                                         new_patch_coordinate="None")
 
         self._activation_callback(patch, index)
 
