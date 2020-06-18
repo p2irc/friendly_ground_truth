@@ -482,6 +482,9 @@ class MainWindow(ttk.Frame):
     def log_zoom_event(self, zoom_factor):
         self._controller.log_zoom_event(zoom_factor)
 
+    def set_default_tool(self, id):
+        self._update_toolbar_state(id)
+
     # ==========================================================
     # PRIVATE FUNCTIONS
     # ==========================================================
@@ -1721,6 +1724,9 @@ Initialize the main window.</p>
     def log_zoom_event(self, zoom_factor):
         self._controller.log_zoom_event(zoom_factor)
 
+    def set_default_tool(self, id):
+        self._update_toolbar_state(id)
+
     # ==========================================================
     # PRIVATE FUNCTIONS
     # ==========================================================
@@ -2600,6 +2606,19 @@ Initialize the main window.</p>
     self._canvas.cursor = cursor</code></pre>
 </details>
 </dd>
+<dt id="friendly_ground_truth.view.main_window.MainWindow.set_default_tool"><code class="name flex">
+<span>def <span class="ident">set_default_tool</span></span>(<span>self, id)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_default_tool(self, id):
+    self._update_toolbar_state(id)</code></pre>
+</details>
+</dd>
 <dt id="friendly_ground_truth.view.main_window.MainWindow.set_theme"><code class="name flex">
 <span>def <span class="ident">set_theme</span></span>(<span>self, theme)</span>
 </code></dt>
@@ -2967,6 +2986,7 @@ Initialize the main window.</p>
 <li><code><a title="friendly_ground_truth.view.main_window.MainWindow.on_canvas_drag" href="#friendly_ground_truth.view.main_window.MainWindow.on_canvas_drag">on_canvas_drag</a></code></li>
 <li><code><a title="friendly_ground_truth.view.main_window.MainWindow.set_canvas_brush_size" href="#friendly_ground_truth.view.main_window.MainWindow.set_canvas_brush_size">set_canvas_brush_size</a></code></li>
 <li><code><a title="friendly_ground_truth.view.main_window.MainWindow.set_canvas_cursor" href="#friendly_ground_truth.view.main_window.MainWindow.set_canvas_cursor">set_canvas_cursor</a></code></li>
+<li><code><a title="friendly_ground_truth.view.main_window.MainWindow.set_default_tool" href="#friendly_ground_truth.view.main_window.MainWindow.set_default_tool">set_default_tool</a></code></li>
 <li><code><a title="friendly_ground_truth.view.main_window.MainWindow.set_theme" href="#friendly_ground_truth.view.main_window.MainWindow.set_theme">set_theme</a></code></li>
 <li><code><a title="friendly_ground_truth.view.main_window.MainWindow.show_image" href="#friendly_ground_truth.view.main_window.MainWindow.show_image">show_image</a></code></li>
 <li><code><a title="friendly_ground_truth.view.main_window.MainWindow.start_progressbar" href="#friendly_ground_truth.view.main_window.MainWindow.start_progressbar">start_progressbar</a></code></li>
