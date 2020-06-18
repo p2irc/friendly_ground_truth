@@ -34,7 +34,6 @@ import os
 import copy
 import json
 import re
-import threading
 
 import tkinter.filedialog
 import tkinter.messagebox
@@ -132,6 +131,9 @@ class Controller():
 
     @property
     def image_tools(self):
+        """
+        A dictionary of available tools for annotating the image with.
+        """
         return self._image_tools
 
     # ===================================================
@@ -214,6 +216,9 @@ class Controller():
 
         self._display_current_patch(new=True)
         self._main_window.update_image_indicator(self._image_path)
+
+        self.activate_tool(self._default_tool)
+        self._main_window.set_default_tool(self._default_tool)
 
     def save_mask(self):
         """
@@ -344,6 +349,8 @@ class Controller():
         self._main_window.set_canvas_cursor(tool.cursor)
         tool.unlock_undos()
 
+        print(self._undo_manager.undo_empty)
+
         if not self._undo_manager.undo_empty:
             self._main_window.enable_button(self._undo_id)
 
@@ -356,6 +363,9 @@ class Controller():
 
         Returns:
             None
+
+        Postconditions:
+            The current tool's adjust tool function is called.
         """
         self._current_tool.on_adjust(direction)
         # self._display_current_patch()
@@ -372,6 +382,9 @@ class Controller():
 
         Returns:
             None
+
+        Postconditions:
+            The current tool's on_click() function is called.
         """
         # Correct for offset in context image
         pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
@@ -390,7 +403,7 @@ class Controller():
 
     def drag_event(self, pos, drag_id=None):
         """
-        A click event in the main window has occured/
+        A click event in the main window has occured.
 
         Args:
             pos: The position of the event.
@@ -398,6 +411,9 @@ class Controller():
 
         Returns:
             None
+
+        Postconditions:
+            The current tool's on_drag() function is called.
         """
         # Correct for offset in context image
         pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
@@ -432,6 +448,17 @@ class Controller():
         self._next_patch_callback(patch, patch_index)
 
     def log_mouse_event(self, pos, event, button):
+        """
+        Add a mouse event to the event log.
+
+        Args:
+            pos: The position of the mouse event.
+            event: The type of event: 'click', 'release'
+            button: The mouse button used for the event.
+
+        Returns:
+            None
+        """
 
         patch_pos = self._convert_canvas_to_patch_pos(pos)
 
@@ -462,6 +489,15 @@ class Controller():
                                          mouse_button=button)
 
     def log_zoom_event(self, zoom_factor):
+        """
+        Add a zoom event to the event log.
+
+        Args:
+            zoom_factor: The new zoom factor.
+
+        Returns:
+            None
+        """
 
         patch_grid_coord = self.\
             _image.patches[self._current_patch_index].patch_index
@@ -470,6 +506,17 @@ class Controller():
                                      new_zoom_factor=zoom_factor)
 
     def log_drag_event(self, drag_type, start, end):
+        """
+        Add a mouse drag event to the event log.
+
+        Args:
+            drag_type: The type of drag: 'brush', 'pan'.
+            start: The starting position of the drag.
+            end: The end position of the drag.
+
+        Returns:
+            None
+        """
 
         patch_grid_coord = self.\
             _image.patches[self._current_patch_index].patch_index
@@ -491,6 +538,16 @@ class Controller():
     # ===================================================
 
     def _ask_save_dir(self):
+        """
+        Ask the user for a directory to save files in.
+
+
+        Returns:
+            None
+
+        Postconditions:
+            A file selection dialog will be presented.
+        """
 
         # Get the chosen directory
         if self._last_save_dir is None:
@@ -535,6 +592,15 @@ class Controller():
         self._event_logger.add_handler(fh)
 
     def _convert_canvas_to_patch_pos(self, pos):
+        """
+        Convert the givent canvas coordinate to a patch-relative coordinate.
+
+        Args:
+            pos: The position to convert.
+
+        Returns:
+            The coordinate converted to a patch-releative coordinate.
+        """
 
         # Correct for offset in context image
         pos = pos[0] - self._patch_offset[1], pos[1] - self._patch_offset[0]
@@ -546,6 +612,15 @@ class Controller():
         return pos
 
     def _convert_patch_to_image_pos(self, pos):
+        """
+        Convert a patch coordinate to an image-relative coordinate.
+
+        Args:
+            pos: The patch position to convert.
+
+        Returns:
+            The coordinate relative to the whole image.
+        """
 
         # TODO: Fix private variable
         block_size = self._image._block_size
@@ -575,6 +650,8 @@ class Controller():
         thresh_tool = ThresholdTool(self._undo_manager,
                                     event_logger=self._event_logger)
         image_tools[thresh_tool.id] = thresh_tool
+
+        self._default_tool = thresh_tool.id
 
         add_reg_tool = AddRegionTool(self._undo_manager,
                                      event_logger=self._event_logger)
@@ -962,6 +1039,13 @@ class Controller():
         PreviewWindow(overlay, self, self._main_window.style)
 
     def get_image_preview(self):
+        """
+        Get a preview of the image mask.
+
+
+        Returns:
+            An image representing the preview of the mask.
+        """
 
         img = self._image.create_overlay_img()
 
