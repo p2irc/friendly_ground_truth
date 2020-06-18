@@ -14,7 +14,7 @@ import os
 
 from friendly_ground_truth.controller.controller import Controller
 
-from mock import MagicMock
+from mock import MagicMock, PropertyMock
 
 
 class TestController():
@@ -420,7 +420,265 @@ class TestInteractions(TestController):
 
     """
 
-    pass
+    def test_activate_tool_none_image(self, setup, controller):
+        """
+        Test activating a tool when there is not image loaded.
+
+        Args:
+            setup: Setup for the tests.
+            controller: The controller for testing.
+
+        Test Condition:
+            The controller's current tool is not changed.
+        """
+
+        mock_tool = MagicMock()
+        mock_tool.id.return_value = 0
+
+        controller._current_tool = mock_tool
+
+        controller._image = None
+
+        old_tool = controller._current_tool
+
+        controller.activate_tool(1)
+
+        assert controller._current_tool.id == old_tool.id
+
+    def test_activate_tool_not_persistant(self, setup, controller):
+        """
+        Test activating a non-persistant tool.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller to test.
+
+        Test Condition:
+            The controller's current tool is not changed.
+        """
+        controller._image = MagicMock()
+
+        mock_tool_1 = MagicMock()
+        mock_tool_1.id = 0
+
+        controller._current_tool = mock_tool_1
+
+        mock_tool_2 = MagicMock()
+        mock_tool_2.id = 1
+        mock_tool_2.persistant = False
+
+        old_tool = controller._current_tool
+
+        tools = {0: mock_tool_1, 1: mock_tool_2}
+
+        controller._image_tools = tools
+
+        controller.activate_tool(1)
+
+        assert controller._current_tool.id == old_tool.id
+
+    def test_activate_tool_undo_not_empty(self, setup, controller):
+        """
+        Test activating the tool when the undo stack is empty.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller to test.
+
+        Test Condition:
+            The main_window.enable_button function is called with the id of the
+                undo button.
+        """
+
+        controller._image = MagicMock()
+
+        mock_tool_1 = MagicMock()
+        mock_tool_1.id = 0
+
+        controller._current_tool = mock_tool_1
+
+        mock_tool_2 = MagicMock()
+        mock_tool_2.id = 1
+        mock_tool_2.persistant = False
+
+        tools = {0: mock_tool_1, 1: mock_tool_2}
+
+        controller._image_tools = tools
+
+        mock_undo = MagicMock()
+        mock_undo.undo_empty = False
+
+        controller._undo_manager = mock_undo
+
+        controller.activate_tool(1)
+
+        controller._main_window.enable_button\
+            .assert_called_with(controller._undo_id)
+
+
+    def test_adjust_tool(self, setup, controller):
+        """
+        Test adjusting the current tool.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller to test with.
+
+        Test Condition:
+            The current tool's on_adjust() function is called with the given
+                direction.
+        """
+
+        mock_tool = MagicMock()
+        controller._current_tool = mock_tool
+
+        direction = 1
+
+        controller.adjust_tool(direction)
+
+        mock_tool.on_adjust.assert_called_with(direction)
+
+        direction = -1
+
+        controller.adjust_tool(direction)
+
+        mock_tool.on_adjust.assert_called_with(direction)
+
+    def test_adjust_tool_undo_not_empty(self, setup, controller):
+        """
+        Test adjusting the current tool when the undo stack is not empty.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller to test.
+
+        Test Condition:
+            The _main_window's enable_button function is called with the id of
+                the undo button.
+        """
+
+        mock_tool = MagicMock()
+        controller._current_tool = mock_tool
+
+        direction = 1
+
+        mock_undo = MagicMock()
+        mock_undo.undo_empty = False
+
+        controller._undo_manager = mock_undo
+
+        controller.adjust_tool(direction)
+
+        controller._main_window.enable_button\
+            .assert_called_with(controller._undo_id)
+
+    def test_click_event(self, setup, controller):
+        """
+        Test when a click event happens.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller to test.
+
+        Test Condition:
+            The current tool's on_click is called.
+        """
+
+        mock_tool = MagicMock()
+
+        controller._current_tool = mock_tool
+
+        controller.click_event((5, 5))
+
+        mock_tool.on_click.assert_called()
+
+    def test_click_event_undo(self, setup, controller):
+        """
+        Test when a click event happens and the undo stack is not empty.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller to test.
+
+        Test Condition:
+            _main_window.enable_button is called with the _undo_id
+        """
+
+        mock_undo = MagicMock()
+        mock_undo.undo_empty = False
+
+        controller._undo_manager = mock_undo
+
+        controller.click_event((5, 5))
+
+        controller._main_window.enable_button\
+            .assert_called_with(controller._undo_id)
+
+    def test_drag_event(self, setup, controller):
+        """
+        Test when a drag event occurs.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller to test.
+
+        Test Condition:
+           The current tool's on_drag function is called.
+        """
+
+        mock_tool = MagicMock()
+
+        controller._current_tool = mock_tool
+
+        controller.drag_event((5, 5))
+
+        mock_tool.on_drag.assert_called()
+
+    def test_drag_undo(self, setup, controller):
+        """
+        Test a drag event when the undo stack is not empty.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller for tests.
+
+        Test Condition:
+            _main_window.enable_button is called with the undo button's ID.
+        """
+
+        mock_undo = MagicMock()
+        mock_undo.undo_empty = False
+
+        mock_tool = MagicMock()
+
+        controller._current_tool = mock_tool
+
+        controller._undo_manager = mock_undo
+
+        controller.drag_event((5, 5))
+
+        controller._main_window.enable_button\
+            .assert_called_with(controller._undo_id)
+
+    def test_navigate_to_patch(self, setup, controller, mocker):
+        """
+        Test navigating to a patch.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller to test.
+
+        Test Condition:
+            The controller's next_patch_callback is called.
+        """
+
+        controller._image = MagicMock()
+
+        spy = mocker.spy(controller, '_next_patch_callback')
+
+        controller.navigate_to_patch((5, 5))
+
+        spy.assert_called()
 
 
 class TestSettings(TestController):
