@@ -11,7 +11,7 @@ Description: Model Classes
 import logging
 import numpy as np
 
-from skimage import io, img_as_float, img_as_uint, img_as_ubyte
+from skimage import io, img_as_float, img_as_uint, img_as_ubyte, img_as_bool
 from skimage.util.shape import view_as_blocks
 from skimage.filters import threshold_otsu
 from skimage import color
@@ -138,6 +138,49 @@ class Image():
 
         self._image = img
         self._mask = np.zeros(self._image.shape, dtype=bool)
+
+    def load_mask(self, path):
+        """
+        Load a saved mask for the current image.
+
+        Args:
+            path: The path to the mask file.
+
+        Returns:
+            None
+        """
+        # Load the mask
+        mask = io.imread(path)
+        mask = img_as_bool(mask)
+
+        self._mask = mask
+
+        # Figure out padding
+        pad_x = (0, 0)
+        pad_y = (0, 0)
+
+        if mask.shape[0] % self.num_patches != 0:
+            pad_x = (0, (self.num_patches - (mask.shape[0] %
+                     self.num_patches)))
+
+        if mask.shape[1] % self.num_patches != 0:
+            pad_y = (0, (self.num_patches - (mask.shape[1] %
+                     self.num_patches)))
+        mask = np.pad(mask, (pad_x, pad_y), 'constant',
+                      constant_values=(0, 0))
+
+        # Split into blocks
+        blocks = view_as_blocks(mask, block_shape=self._block_size)
+
+        for i in range(self.num_patches):
+            for j in range(self.num_patches):
+                patch_data = blocks[i, j]
+
+                self._patches[(i * self.num_patches) + j].mask = patch_data
+                self._patches[(i * self.num_patches) + j]._overlay_mask()
+
+                if self._progress_update_func is not None:
+                    self._progress_update_func()
 
     def _create_patches(self):
         """

@@ -163,6 +163,80 @@ class Controller():
 
         return preferences_path
 
+    def load_existing_mask(self):
+        """
+        Load in an existing annotation mask.
+
+
+        Returns:
+            None
+        """
+        if self._image is None:
+            tkinter.messagebox.showinfo("No Image Loaded",
+                                        "You must load an image before "
+                                        " loading an existing mask!")
+
+            return
+
+
+
+        self._context_img = None
+        self._grid_img = None
+
+        filetypes = [("PNG Files", "*.png"), ("JPEG Files", "*.jpg")]
+
+        if self._last_load_dir is None:
+            initial_dir = os.path.expanduser("~")
+        else:
+            initial_dir = self._last_load_dir
+
+        file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
+                                                       initialdir=initial_dir)
+
+        self._logger.debug("Selected mask: {}".format(file_name)
+                )
+        # Make sure the names are similar
+        mask_filename = os.path.split(file_name)[-1]
+
+        image_filename = \
+            os.path.splitext(os.path.split(self._image_path)[-1])[0]
+
+        if image_filename not in mask_filename:
+            tkinter.messagebox.showinfo("Invalid Mask",
+                                        "The name of the mask you have chosen"
+                                        " does not match the name of the "
+                                        "loaded image.")
+
+            return
+
+        if file_name is None or file_name == ():
+            return
+
+        try:
+            self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
+
+
+            self._image.load_mask(file_name)
+
+        except FileNotFoundError:
+            self._logger.exception("There was a problem loading the image.")
+            return
+
+        image_shape = self._image.image.shape
+        patch_grid_shape = self._image.patches[0].patch.shape
+
+        self._event_logger.log_load_mask(image_filename, image_shape[1],
+                                         image_shape[0], patch_grid_shape[1],
+                                         patch_grid_shape[0])
+
+        self._current_patch_index = 0
+
+        self._logger.debug("Displaying patch.")
+        self._display_current_patch(new=True)
+
+        self.activate_tool(self._default_tool)
+        self._main_window.set_default_tool(self._default_tool)
+
     def load_new_image(self):
         """
         Load a new image with a file dialog.
@@ -875,6 +949,7 @@ class Controller():
             The main window's canvas will display the given image.
         """
         if self._image is None:
+            self._logger.debug("No Image to Display!")
             return
 
         patch = self._image.patches[self._current_patch_index]

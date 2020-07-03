@@ -55,6 +55,23 @@ class EventLogger():
 
         self._event_logger.info(event_data)
 
+    def log_load_mask(self, image_filename, image_width, image_height,
+                      patch_grid_width, patch_grid_height):
+
+        ts = time.time()
+        st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+
+        event_data = {}
+        event_data['event_type_id'] = "load_mask"
+        event_data['timestamp'] = st
+        event_data['image_filename'] = image_filename
+        event_data['image_width'] = image_width
+        event_data['image_height'] = image_height
+        event_data['patch_grid_width'] = patch_grid_width
+        event_data['patch_grid_height'] = patch_grid_height
+
+        self._event_logger.info(event_data)
+
     def log_event(self, event_type_id, patch_grid_coord, active_tool_id=None,
                   **kwargs):
 
