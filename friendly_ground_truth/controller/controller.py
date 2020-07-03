@@ -171,6 +171,15 @@ class Controller():
         Returns:
             None
         """
+        if self._image is None:
+            tkinter.messagebox.showinfo("No Image Loaded",
+                                        "You must load an image before "
+                                        " loading an existing mask!")
+
+            return
+
+
+
         self._context_img = None
         self._grid_img = None
 
