@@ -85,6 +85,23 @@ class EventLogger():
 
         self._event_logger.info(event_data)
 
+    def log_load_mask(self, image_filename, image_width, image_height,
+                      patch_grid_width, patch_grid_height):
+
+        ts = time.time()
+        st = datetime.datetime.fromtimestamp(ts).strftime(&#39;%Y-%m-%d %H:%M:%S&#39;)
+
+        event_data = {}
+        event_data[&#39;event_type_id&#39;] = &#34;load_mask&#34;
+        event_data[&#39;timestamp&#39;] = st
+        event_data[&#39;image_filename&#39;] = image_filename
+        event_data[&#39;image_width&#39;] = image_width
+        event_data[&#39;image_height&#39;] = image_height
+        event_data[&#39;patch_grid_width&#39;] = patch_grid_width
+        event_data[&#39;patch_grid_height&#39;] = patch_grid_height
+
+        self._event_logger.info(event_data)
+
     def log_event(self, event_type_id, patch_grid_coord, active_tool_id=None,
                   **kwargs):
 
@@ -162,6 +179,23 @@ class EventLogger():
 
         event_data = {}
         event_data[&#39;event_type_id&#39;] = &#34;load_image&#34;
+        event_data[&#39;timestamp&#39;] = st
+        event_data[&#39;image_filename&#39;] = image_filename
+        event_data[&#39;image_width&#39;] = image_width
+        event_data[&#39;image_height&#39;] = image_height
+        event_data[&#39;patch_grid_width&#39;] = patch_grid_width
+        event_data[&#39;patch_grid_height&#39;] = patch_grid_height
+
+        self._event_logger.info(event_data)
+
+    def log_load_mask(self, image_filename, image_width, image_height,
+                      patch_grid_width, patch_grid_height):
+
+        ts = time.time()
+        st = datetime.datetime.fromtimestamp(ts).strftime(&#39;%Y-%m-%d %H:%M:%S&#39;)
+
+        event_data = {}
+        event_data[&#39;event_type_id&#39;] = &#34;load_mask&#34;
         event_data[&#39;timestamp&#39;] = st
         event_data[&#39;image_filename&#39;] = image_filename
         event_data[&#39;image_width&#39;] = image_width
@@ -288,6 +322,33 @@ def active_tool(self):
     self._event_logger.info(event_data)</code></pre>
 </details>
 </dd>
+<dt id="friendly_ground_truth.controller.event_logger.EventLogger.log_load_mask"><code class="name flex">
+<span>def <span class="ident">log_load_mask</span></span>(<span>self, image_filename, image_width, image_height, patch_grid_width, patch_grid_height)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def log_load_mask(self, image_filename, image_width, image_height,
+                  patch_grid_width, patch_grid_height):
+
+    ts = time.time()
+    st = datetime.datetime.fromtimestamp(ts).strftime(&#39;%Y-%m-%d %H:%M:%S&#39;)
+
+    event_data = {}
+    event_data[&#39;event_type_id&#39;] = &#34;load_mask&#34;
+    event_data[&#39;timestamp&#39;] = st
+    event_data[&#39;image_filename&#39;] = image_filename
+    event_data[&#39;image_width&#39;] = image_width
+    event_data[&#39;image_height&#39;] = image_height
+    event_data[&#39;patch_grid_width&#39;] = patch_grid_width
+    event_data[&#39;patch_grid_height&#39;] = patch_grid_height
+
+    self._event_logger.info(event_data)</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -313,6 +374,7 @@ def active_tool(self):
 <li><code><a title="friendly_ground_truth.controller.event_logger.EventLogger.add_handler" href="#friendly_ground_truth.controller.event_logger.EventLogger.add_handler">add_handler</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.event_logger.EventLogger.log_event" href="#friendly_ground_truth.controller.event_logger.EventLogger.log_event">log_event</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.event_logger.EventLogger.log_load_image" href="#friendly_ground_truth.controller.event_logger.EventLogger.log_load_image">log_load_image</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.event_logger.EventLogger.log_load_mask" href="#friendly_ground_truth.controller.event_logger.EventLogger.log_load_mask">log_load_mask</a></code></li>
 </ul>
 </li>
 </ul>

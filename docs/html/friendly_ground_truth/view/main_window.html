@@ -538,6 +538,11 @@ class MainWindow(ttk.Frame):
                                    command=self._on_save_mask)
 
         self._filemenu.add_separator()
+
+        self._filemenu.add_command(label=&#34;Load Existing Mask&#34;,
+                                   command=self._on_load_mask)
+
+        self._filemenu.add_separator()
         self._filemenu.add_command(label=&#34;Preferences&#34;,
                                    command=self._on_preferences)
 
@@ -852,6 +857,17 @@ class MainWindow(ttk.Frame):
         &#34;&#34;&#34;
         self._controller.load_new_image()
         self._old_img = None
+
+    def _on_load_mask(self):
+        &#34;&#34;&#34;
+        Called when the load existing mask button is chosen.
+
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        self._controller.load_existing_mask()
 
     def _on_save_mask(self):
         &#34;&#34;&#34;
@@ -1780,6 +1796,11 @@ Initialize the main window.</p>
                                    command=self._on_save_mask)
 
         self._filemenu.add_separator()
+
+        self._filemenu.add_command(label=&#34;Load Existing Mask&#34;,
+                                   command=self._on_load_mask)
+
+        self._filemenu.add_separator()
         self._filemenu.add_command(label=&#34;Preferences&#34;,
                                    command=self._on_preferences)
 
@@ -2094,6 +2115,17 @@ Initialize the main window.</p>
         &#34;&#34;&#34;
         self._controller.load_new_image()
         self._old_img = None
+
+    def _on_load_mask(self):
+        &#34;&#34;&#34;
+        Called when the load existing mask button is chosen.
+
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+
+        self._controller.load_existing_mask()
 
     def _on_save_mask(self):
         &#34;&#34;&#34;
