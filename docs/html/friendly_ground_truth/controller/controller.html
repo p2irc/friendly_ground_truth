@@ -193,6 +193,80 @@ class Controller():
 
         return preferences_path
 
+    def load_existing_mask(self):
+        &#34;&#34;&#34;
+        Load in an existing annotation mask.
+
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        if self._image is None:
+            tkinter.messagebox.showinfo(&#34;No Image Loaded&#34;,
+                                        &#34;You must load an image before &#34;
+                                        &#34; loading an existing mask!&#34;)
+
+            return
+
+
+
+        self._context_img = None
+        self._grid_img = None
+
+        filetypes = [(&#34;PNG Files&#34;, &#34;*.png&#34;), (&#34;JPEG Files&#34;, &#34;*.jpg&#34;)]
+
+        if self._last_load_dir is None:
+            initial_dir = os.path.expanduser(&#34;~&#34;)
+        else:
+            initial_dir = self._last_load_dir
+
+        file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
+                                                       initialdir=initial_dir)
+
+        self._logger.debug(&#34;Selected mask: {}&#34;.format(file_name)
+                )
+        # Make sure the names are similar
+        mask_filename = os.path.split(file_name)[-1]
+
+        image_filename = \
+            os.path.splitext(os.path.split(self._image_path)[-1])[0]
+
+        if image_filename not in mask_filename:
+            tkinter.messagebox.showinfo(&#34;Invalid Mask&#34;,
+                                        &#34;The name of the mask you have chosen&#34;
+                                        &#34; does not match the name of the &#34;
+                                        &#34;loaded image.&#34;)
+
+            return
+
+        if file_name is None or file_name == ():
+            return
+
+        try:
+            self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
+
+
+            self._image.load_mask(file_name)
+
+        except FileNotFoundError:
+            self._logger.exception(&#34;There was a problem loading the image.&#34;)
+            return
+
+        image_shape = self._image.image.shape
+        patch_grid_shape = self._image.patches[0].patch.shape
+
+        self._event_logger.log_load_mask(image_filename, image_shape[1],
+                                         image_shape[0], patch_grid_shape[1],
+                                         patch_grid_shape[0])
+
+        self._current_patch_index = 0
+
+        self._logger.debug(&#34;Displaying patch.&#34;)
+        self._display_current_patch(new=True)
+
+        self.activate_tool(self._default_tool)
+        self._main_window.set_default_tool(self._default_tool)
+
     def load_new_image(self):
         &#34;&#34;&#34;
         Load a new image with a file dialog.
@@ -905,6 +979,7 @@ class Controller():
             The main window&#39;s canvas will display the given image.
         &#34;&#34;&#34;
         if self._image is None:
+            self._logger.debug(&#34;No Image to Display!&#34;)
             return
 
         patch = self._image.patches[self._current_patch_index]
@@ -1312,6 +1387,80 @@ class Controller():
 
         return preferences_path
 
+    def load_existing_mask(self):
+        &#34;&#34;&#34;
+        Load in an existing annotation mask.
+
+
+        Returns:
+            None
+        &#34;&#34;&#34;
+        if self._image is None:
+            tkinter.messagebox.showinfo(&#34;No Image Loaded&#34;,
+                                        &#34;You must load an image before &#34;
+                                        &#34; loading an existing mask!&#34;)
+
+            return
+
+
+
+        self._context_img = None
+        self._grid_img = None
+
+        filetypes = [(&#34;PNG Files&#34;, &#34;*.png&#34;), (&#34;JPEG Files&#34;, &#34;*.jpg&#34;)]
+
+        if self._last_load_dir is None:
+            initial_dir = os.path.expanduser(&#34;~&#34;)
+        else:
+            initial_dir = self._last_load_dir
+
+        file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
+                                                       initialdir=initial_dir)
+
+        self._logger.debug(&#34;Selected mask: {}&#34;.format(file_name)
+                )
+        # Make sure the names are similar
+        mask_filename = os.path.split(file_name)[-1]
+
+        image_filename = \
+            os.path.splitext(os.path.split(self._image_path)[-1])[0]
+
+        if image_filename not in mask_filename:
+            tkinter.messagebox.showinfo(&#34;Invalid Mask&#34;,
+                                        &#34;The name of the mask you have chosen&#34;
+                                        &#34; does not match the name of the &#34;
+                                        &#34;loaded image.&#34;)
+
+            return
+
+        if file_name is None or file_name == ():
+            return
+
+        try:
+            self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
+
+
+            self._image.load_mask(file_name)
+
+        except FileNotFoundError:
+            self._logger.exception(&#34;There was a problem loading the image.&#34;)
+            return
+
+        image_shape = self._image.image.shape
+        patch_grid_shape = self._image.patches[0].patch.shape
+
+        self._event_logger.log_load_mask(image_filename, image_shape[1],
+                                         image_shape[0], patch_grid_shape[1],
+                                         patch_grid_shape[0])
+
+        self._current_patch_index = 0
+
+        self._logger.debug(&#34;Displaying patch.&#34;)
+        self._display_current_patch(new=True)
+
+        self.activate_tool(self._default_tool)
+        self._main_window.set_default_tool(self._default_tool)
+
     def load_new_image(self):
         &#34;&#34;&#34;
         Load a new image with a file dialog.
@@ -2024,6 +2173,7 @@ class Controller():
             The main window&#39;s canvas will display the given image.
         &#34;&#34;&#34;
         if self._image is None:
+            self._logger.debug(&#34;No Image to Display!&#34;)
             return
 
         patch = self._image.patches[self._current_patch_index]
@@ -2636,6 +2786,95 @@ Any activation functionality of the tool is performed.</p></div>
     return preferences_path</code></pre>
 </details>
 </dd>
+<dt id="friendly_ground_truth.controller.controller.Controller.load_existing_mask"><code class="name flex">
+<span>def <span class="ident">load_existing_mask</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load in an existing annotation mask.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_existing_mask(self):
+    &#34;&#34;&#34;
+    Load in an existing annotation mask.
+
+
+    Returns:
+        None
+    &#34;&#34;&#34;
+    if self._image is None:
+        tkinter.messagebox.showinfo(&#34;No Image Loaded&#34;,
+                                    &#34;You must load an image before &#34;
+                                    &#34; loading an existing mask!&#34;)
+
+        return
+
+
+
+    self._context_img = None
+    self._grid_img = None
+
+    filetypes = [(&#34;PNG Files&#34;, &#34;*.png&#34;), (&#34;JPEG Files&#34;, &#34;*.jpg&#34;)]
+
+    if self._last_load_dir is None:
+        initial_dir = os.path.expanduser(&#34;~&#34;)
+    else:
+        initial_dir = self._last_load_dir
+
+    file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
+                                                   initialdir=initial_dir)
+
+    self._logger.debug(&#34;Selected mask: {}&#34;.format(file_name)
+            )
+    # Make sure the names are similar
+    mask_filename = os.path.split(file_name)[-1]
+
+    image_filename = \
+        os.path.splitext(os.path.split(self._image_path)[-1])[0]
+
+    if image_filename not in mask_filename:
+        tkinter.messagebox.showinfo(&#34;Invalid Mask&#34;,
+                                    &#34;The name of the mask you have chosen&#34;
+                                    &#34; does not match the name of the &#34;
+                                    &#34;loaded image.&#34;)
+
+        return
+
+    if file_name is None or file_name == ():
+        return
+
+    try:
+        self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
+
+
+        self._image.load_mask(file_name)
+
+    except FileNotFoundError:
+        self._logger.exception(&#34;There was a problem loading the image.&#34;)
+        return
+
+    image_shape = self._image.image.shape
+    patch_grid_shape = self._image.patches[0].patch.shape
+
+    self._event_logger.log_load_mask(image_filename, image_shape[1],
+                                     image_shape[0], patch_grid_shape[1],
+                                     patch_grid_shape[0])
+
+    self._current_patch_index = 0
+
+    self._logger.debug(&#34;Displaying patch.&#34;)
+    self._display_current_patch(new=True)
+
+    self.activate_tool(self._default_tool)
+    self._main_window.set_default_tool(self._default_tool)</code></pre>
+</details>
+</dd>
 <dt id="friendly_ground_truth.controller.controller.Controller.load_new_image"><code class="name flex">
 <span>def <span class="ident">load_new_image</span></span>(<span>self)</span>
 </code></dt>
@@ -3121,6 +3360,7 @@ image.</p>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.get_image_preview" href="#friendly_ground_truth.controller.controller.Controller.get_image_preview">get_image_preview</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.get_preferences_path" href="#friendly_ground_truth.controller.controller.Controller.get_preferences_path">get_preferences_path</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.image_tools" href="#friendly_ground_truth.controller.controller.Controller.image_tools">image_tools</a></code></li>
+<li><code><a title="friendly_ground_truth.controller.controller.Controller.load_existing_mask" href="#friendly_ground_truth.controller.controller.Controller.load_existing_mask">load_existing_mask</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.load_new_image" href="#friendly_ground_truth.controller.controller.Controller.load_new_image">load_new_image</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.load_preferences" href="#friendly_ground_truth.controller.controller.Controller.load_preferences">load_preferences</a></code></li>
 <li><code><a title="friendly_ground_truth.controller.controller.Controller.log_drag_event" href="#friendly_ground_truth.controller.controller.Controller.log_drag_event">log_drag_event</a></code></li>
