@@ -413,6 +413,93 @@ class TestIo(TestController):
 
         assert controller._previewed is False
 
+    def test_load_exsisting_mask_no_img(self, setup, controller, mocker,
+                                        valid_rgb_image_path):
+        """
+        Test loading an image mask when there is no image currently loaded.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller to test.
+            mocker: Mocker interface
+            valid_rgb_image_path: A path to a usable rgb image.
+
+        Test Condition:
+            The function returns false.
+        """
+
+        controller._image = None
+
+        res = controller.load_existing_mask()
+
+        assert res is False
+
+    def test_load_existing_mask_none_last_load(self, setup, controller, mocker,
+                                               valid_rgb_image_path):
+        """
+        Test loading an existing mask when _last_load_dir is None
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller instance to test.
+            mocker: Mocker interface.
+            valid_rgb_image_path: A path to a valid RGB image.
+
+        Test Condition:
+            filedialog.askopenfilename is called with initial_dir="~"
+
+        """
+        mock_dialog = mocker.patch('tkinter.filedialog.askopenfilename')
+        mock_dialog.return_value = valid_rgb_image_path
+
+        mock_image = MagicMock()
+
+        controller._image = mock_image
+        controller._image_path = valid_rgb_image_path
+
+        controller._last_load_dir = None
+
+        controller.load_existing_mask()
+
+        home_dir = os.path.expanduser('~')
+
+        mock_dialog.assert_called_with(filetypes=[("PNG Files", "*.png"),
+                                                  ("JPEG Files", "*.jpg")],
+                                       initialdir=home_dir)
+
+    def test_load_existing_mask_last_load_dir(self, setup, controller, mocker,
+                                              valid_rgb_image_path):
+        """
+        Test loading an existing mask when _last_load_dir is set.
+
+        Args:
+            setup: Setup for tests.
+            controller: The controller instance to test.
+            mocker: Mocker interface.
+            valid_rgb_image_path: A path to a valid RGB image.
+
+        Test Condition:
+            filedialog.askopenfilename is called with
+                initial_dir=last_load_dir
+        """
+        mock_dialog = mocker.patch('tkinter.filedialog.askopenfilename')
+        mock_dialog.return_value = valid_rgb_image_path
+
+        mock_image = MagicMock()
+
+        controller._image = mock_image
+        controller._image_path = valid_rgb_image_path
+
+        controller._last_load_dir = '~/Desktop'
+
+        controller.load_existing_mask()
+
+        expect_dir = "~/Desktop"
+
+        mock_dialog.assert_called_with(filetypes=[("PNG Files", "*.png"),
+                                                  ("JPEG Files", "*.jpg")],
+                                       initialdir=expect_dir)
+
 
 class TestInteractions(TestController):
     """
@@ -514,7 +601,6 @@ class TestInteractions(TestController):
 
         controller._main_window.enable_button\
             .assert_called_with(controller._undo_id)
-
 
     def test_adjust_tool(self, setup, controller):
         """
