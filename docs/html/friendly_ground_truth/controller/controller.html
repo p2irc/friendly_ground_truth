@@ -199,16 +199,14 @@ class Controller():
 
 
         Returns:
-            None
+            False if the the mask cannot be loaded.
         &#34;&#34;&#34;
         if self._image is None:
             tkinter.messagebox.showinfo(&#34;No Image Loaded&#34;,
                                         &#34;You must load an image before &#34;
                                         &#34; loading an existing mask!&#34;)
 
-            return
-
-
+            return False
 
         self._context_img = None
         self._grid_img = None
@@ -223,8 +221,7 @@ class Controller():
         file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
                                                        initialdir=initial_dir)
 
-        self._logger.debug(&#34;Selected mask: {}&#34;.format(file_name)
-                )
+        self._logger.debug(&#34;Selected mask: {}&#34;.format(file_name))
         # Make sure the names are similar
         mask_filename = os.path.split(file_name)[-1]
 
@@ -237,10 +234,10 @@ class Controller():
                                         &#34; does not match the name of the &#34;
                                         &#34;loaded image.&#34;)
 
-            return
+            return False
 
         if file_name is None or file_name == ():
-            return
+            return False
 
         try:
             self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
@@ -250,7 +247,7 @@ class Controller():
 
         except FileNotFoundError:
             self._logger.exception(&#34;There was a problem loading the image.&#34;)
-            return
+            return False
 
         image_shape = self._image.image.shape
         patch_grid_shape = self._image.patches[0].patch.shape
@@ -1393,16 +1390,14 @@ class Controller():
 
 
         Returns:
-            None
+            False if the the mask cannot be loaded.
         &#34;&#34;&#34;
         if self._image is None:
             tkinter.messagebox.showinfo(&#34;No Image Loaded&#34;,
                                         &#34;You must load an image before &#34;
                                         &#34; loading an existing mask!&#34;)
 
-            return
-
-
+            return False
 
         self._context_img = None
         self._grid_img = None
@@ -1417,8 +1412,7 @@ class Controller():
         file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
                                                        initialdir=initial_dir)
 
-        self._logger.debug(&#34;Selected mask: {}&#34;.format(file_name)
-                )
+        self._logger.debug(&#34;Selected mask: {}&#34;.format(file_name))
         # Make sure the names are similar
         mask_filename = os.path.split(file_name)[-1]
 
@@ -1431,10 +1425,10 @@ class Controller():
                                         &#34; does not match the name of the &#34;
                                         &#34;loaded image.&#34;)
 
-            return
+            return False
 
         if file_name is None or file_name == ():
-            return
+            return False
 
         try:
             self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
@@ -1444,7 +1438,7 @@ class Controller():
 
         except FileNotFoundError:
             self._logger.exception(&#34;There was a problem loading the image.&#34;)
-            return
+            return False
 
         image_shape = self._image.image.shape
         patch_grid_shape = self._image.patches[0].patch.shape
@@ -2792,10 +2786,7 @@ Any activation functionality of the tool is performed.</p></div>
 <dd>
 <div class="desc"><p>Load in an existing annotation mask.</p>
 <h2 id="returns">Returns</h2>
-<dl>
-<dt><code>None</code></dt>
-<dd>&nbsp;</dd>
-</dl></div>
+<p>False if the the mask cannot be loaded.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -2806,16 +2797,14 @@ Any activation functionality of the tool is performed.</p></div>
 
 
     Returns:
-        None
+        False if the the mask cannot be loaded.
     &#34;&#34;&#34;
     if self._image is None:
         tkinter.messagebox.showinfo(&#34;No Image Loaded&#34;,
                                     &#34;You must load an image before &#34;
                                     &#34; loading an existing mask!&#34;)
 
-        return
-
-
+        return False
 
     self._context_img = None
     self._grid_img = None
@@ -2830,8 +2819,7 @@ Any activation functionality of the tool is performed.</p></div>
     file_name = tkinter.filedialog.askopenfilename(filetypes=filetypes,
                                                    initialdir=initial_dir)
 
-    self._logger.debug(&#34;Selected mask: {}&#34;.format(file_name)
-            )
+    self._logger.debug(&#34;Selected mask: {}&#34;.format(file_name))
     # Make sure the names are similar
     mask_filename = os.path.split(file_name)[-1]
 
@@ -2844,10 +2832,10 @@ Any activation functionality of the tool is performed.</p></div>
                                     &#34; does not match the name of the &#34;
                                     &#34;loaded image.&#34;)
 
-        return
+        return False
 
     if file_name is None or file_name == ():
-        return
+        return False
 
     try:
         self._main_window.start_progressbar(self.NUM_PATCHES ** 2)
@@ -2857,7 +2845,7 @@ Any activation functionality of the tool is performed.</p></div>
 
     except FileNotFoundError:
         self._logger.exception(&#34;There was a problem loading the image.&#34;)
-        return
+        return False
 
     image_shape = self._image.image.shape
     patch_grid_shape = self._image.patches[0].patch.shape
