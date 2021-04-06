@@ -4,8 +4,13 @@ This file keeps a record of important changes to the project.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased - <>
+## [v0.13.0] - 2021-04-06
+
 ### Added
 - Ability to load in existing masks
+
+### Changed
+- Pillow from v7.1.1 to 8.1.1
 
 ## [v0.11.2] - 2020-06-18
 - Fix issues with the end of the image
