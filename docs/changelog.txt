@@ -4,6 +4,12 @@ This file keeps a record of important changes to the project.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased - <>
+
+## [v0.13.2] - 2021-05-18
+
+### Changed
+- Py from v1.8.1 to 1.10.0
+
 ## [v0.13.1] - 2021-04-06
 
 ### Fixed

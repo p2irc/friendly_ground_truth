@@ -30,7 +30,7 @@ class VersionInfo():
     def __init__(self):
         self.VERSION_MAJOR = 0
         self.VERSION_MINOR = 13
-        self.VERSION_PATCH = 1
+        self.VERSION_PATCH = 2
 
     def get_version_string(self):
         """
