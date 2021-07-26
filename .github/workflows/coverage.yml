@@ -28,7 +28,7 @@ jobs:
         pip install pytest
         pytest --cov=friendly_ground_truth ./tests --cov-branch --cov-report=xml
     - name: Upload coverage to Codecov  
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v2.0.2
       with:
         file: ./coverage.xml
         fail_ci_if_error: true
