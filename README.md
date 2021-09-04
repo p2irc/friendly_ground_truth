@@ -31,7 +31,7 @@ The zip file contains an executable binary file, an image, and a bash script tha
 ### Copy-pasta:
 #### Install
 ```
-wget https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt-ubuntu.zip
+wget https://github.com/p2irc/friendly_ground_truth/releases/latest/download/friendly_gt-ubuntu.zip
 unzip friendly_gt-ubuntu.zip
 cd friendly_gt_ubuntu
 bash install_friendly_gt.sh
@@ -47,35 +47,35 @@ Specify bash profile file (blank uses ~/.bashrc): ~/.bash_profile # This can be 
 
 #### Don't Install
 ```
-wget https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt-ubuntu.zip
+wget https://github.com/p2irc/friendly_ground_truth/releases/latest/download/friendly_gt-ubuntu.zip
 unzip friendly_gt-ubuntu.zip
 cd friendly_gt_ubuntu
 chmod u+x friendly_gt_ubuntu-latest
 ./friendly_gt_ubuntu-latest
 ```
 ## MacOs
-A MacOs binary can be downloaded [here](https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt_macos-latest). 
+A MacOs binary can be downloaded [here](https://github.com/p2irc/friendly_ground_truth/releases/latest/download/friendly_gt_macos-latest). 
 
 You will need to change the permissions of the binary file to be executable, and then you can run it by double clicking it in the file browser, or by navigating to it in the terminal and typing `./friendly_gt_macos-latest`.
 
 Copy-pasta:
 ```
-wget https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt_macos-latest
+wget https://github.com/p2irc/friendly_ground_truth/releases/latest/download/friendly_gt_macos-latest
 chmod u+x friendly_gt_macos-latest
 ./friendly_gt_macos-latest
 ```
-An experimental MacOs application bundle can be downloaded [here](https://github.com/KyleS22/friendly_ground_truth/releases/latest/download/friendly_gt_macos-app.zip).  This bundle has not been fully tested, and may not work at all.  It should be runnable just like any other mac app bundle once you have unzipped it.  If you encounter problems with this bundle, please leave a [Bug Report](https://github.com/KyleS22/friendly_ground_truth/issues).
+An experimental MacOs application bundle can be downloaded [here](https://github.com/p2irc/friendly_ground_truth/releases/latest/download/friendly_gt_macos-app.zip).  This bundle has not been fully tested, and may not work at all.  It should be runnable just like any other mac app bundle once you have unzipped it.  If you encounter problems with this bundle, please leave a [Bug Report](https://github.com/p2irc/friendly_ground_truth/issues).
 
 # User Manual
-A user manual can be found [in the wiki](https://github.com/KyleS22/friendly_ground_truth/wiki/User-Manual)
+A user manual can be found [in the wiki](https://github.com/p2irc/friendly_ground_truth/wiki/User-Manual)
 
 # Bug Reports
-Please report any software bugs on the [issues page](https://github.com/KyleS22/friendly_ground_truth/issues).
+Please report any software bugs on the [issues page](https://github.com/p2irc/friendly_ground_truth/issues).
 
 Thanks in advance for helping out!
 
 # Development
-Detailed information about development for this application can be found on the [Wiki](https://github.com/KyleS22/friendly_ground_truth/wiki)
+Detailed information about development for this application can be found on the [Wiki](https://github.com/p2irc/friendly_ground_truth/wiki)
 
 ## Basic Setup
 This application is developed using python3 and virtualenv.  Dependencies are found in `requirements.txt`.  To get started:
@@ -98,7 +98,7 @@ pytest --cov=friendly_ground_truth ./tests --cov-branch --cov-report=term-missin
 
 This will run all tests and print a coverage report specifying any missed lines.  A coverage check is run as part of all pull-requests.
 
-Please refer to the [Wiki](https://github.com/KyleS22/friendly_ground_truth/wiki) for more details about the development process.
+Please refer to the [Wiki](https://github.com/p2irc/friendly_ground_truth/wiki) for more details about the development process.
 
 ## Documentation
 Documentation can be generated with pdoc.  Make sure to `pip install pdoc3`
