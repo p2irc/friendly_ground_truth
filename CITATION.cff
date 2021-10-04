@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Seidenthal"
+  given-names: "Kyle"
+  orcid: " https://orcid.org/0000-0001-7020-4314 "
+title: "Friendly Ground Truth"
+version: 0.13.2
+date-released: 2021-05-18
+url: "https://github.com/p2irc/friendly_ground_truth"
