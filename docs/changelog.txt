@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased - <>
 
+## [v0.13.3] - 2021-10-12
+
 ### Changed
 - Pillow to new stable version
 - urllib3 from v1.25.8 to v1.26.5
